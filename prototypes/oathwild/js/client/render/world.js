@@ -1,14 +1,19 @@
-// The world drawn from the same data the server walks (lessons rule 22): the ground mesh is js/world/terrain.js's own
-// height grid cut with its meshIndex rule, water from its water grid, roads from its road lines (draped on the ground),
-// bridge decks at their deck height, props from data/placements.json, trees and decor from js/world/scatter.js.
+// The world drawn from the same data the server walks (lessons rule 22): the ground, water, worn roads, town paving and
+// fields come from ground.js (grass tufts: grass.js), bridge decks at their deck height, props from data/placements.json, trees and decor from js/world/scatter.js.
 // Everything is cut into 128 m tiles so the camera only draws what is near (fog hides the edge).
 //
-// Art: data/art.json. A "ready" scenery piece loads its GLB (avatar-3d/fal models); a "placeholder" is drawn as the
-// shape art.json gives (box / cylinder / cone / house / rock / tree) at its real size and colour.
+// Art: data/art.json. A "ready" scenery piece loads its GLB (avatar-3d/fal models); a "kit" piece is built from unit
+// shapes by kit-props.js (the playground's set-piece + building kits, and Oathwild's own pieces in the same style) and
+// instanced by kit-draw.js (placed things: one InstancedMesh per shape per tile; trees / rocks / bushes: one baked mesh
+// per kind). Only an id with neither falls back to the plain shape below.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { BIOMES } from '../../world/terrain.js';
+import { createGround, GROUND_CFG } from './ground.js';
+import { createGrass } from './grass.js';
+import { kitModel } from './kit-props.js';
+import { createKitDraw } from './kit-draw.js';
+import { createTrees } from './trees.js';
 
 const TILE = 128;
 const ROOT = new URL('../../../../../', import.meta.url);     // the playground folder
@@ -16,12 +21,6 @@ const loader = new GLTFLoader();
 const glbCache = new Map();
 const glb = file => { if (!glbCache.has(file)) glbCache.set(file, loader.loadAsync(new URL(file, ROOT).href)); return glbCache.get(file); };
 
-// painted ground palette (warmer and softer than the preview map's)
-const GROUND = {
-  meadow: '#7fae55', wildgrass: '#6a9a4c', forest: '#4f7d3c', field: '#cdb06a', village: '#a99474', road: '#b79a70', trail: '#a68c64',
-  boardwalk: '#8a6a46', water: '#5e8a7a', shore: '#c2b48a', marsh: '#64805a', rock: '#8e877a',
-};
-const GROUND_RGB = Object.fromEntries(Object.entries(GROUND).map(([k, v]) => [k, new THREE.Color(v)]));
 const hash = (x, z) => { const s = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return s - Math.floor(s); };
 
 export function createWorldView(view, { T, placements, art, scattered, book, quality = 'medium' }) {
@@ -36,107 +35,9 @@ export function createWorldView(view, { T, placements, art, scattered, book, qua
   }
   const artById = new Map((art.scenery || []).map(a => [a.id, a]));
 
-  // ---------------------------------------------------------------- ground
-  const G = T.grid, BG = T.biomeGrid;
-  const groundMat = new THREE.MeshLambertMaterial({ vertexColors: true });
-  const biomeAtVertex = (x, z) => {
-    const i = Math.min(BG.nx - 1, Math.max(0, Math.floor((x - BG.minX) / BG.cell))), k = Math.min(BG.nz - 1, Math.max(0, Math.floor((z - BG.minZ) / BG.cell)));
-    return BIOMES[BG.ids[k * BG.nx + i]];
-  };
-  const tmp = new THREE.Color(), rockC = GROUND_RGB.rock;
-  const stepCells = TILE / G.cell;
-  for (let k0 = 0; k0 < G.nz - 1; k0 += stepCells) for (let i0 = 0; i0 < G.nx - 1; i0 += stepCells) {
-    const i1 = Math.min(G.nx - 1, i0 + stepCells), k1 = Math.min(G.nz - 1, k0 + stepCells);
-    const w = i1 - i0 + 1, h = k1 - k0 + 1;
-    const pos = new Float32Array(w * h * 3), col = new Float32Array(w * h * 3);
-    for (let k = k0; k <= k1; k++) for (let i = i0; i <= i1; i++) {
-      const o = ((k - k0) * w + (i - i0)) * 3;
-      const x = G.minX + i * G.cell, z = G.minZ + k * G.cell;
-      pos[o] = x; pos[o + 1] = G.heights[k * G.nx + i]; pos[o + 2] = z;
-      const b = biomeAtVertex(x, z);
-      tmp.copy(GROUND_RGB[b] || GROUND_RGB.meadow);
-      const slope = T.slopeAt(x, z);
-      if (slope > 24 && b !== 'road' && b !== 'trail') tmp.lerp(rockC, Math.min(1, (slope - 24) / 14));
-      const n = hash(Math.floor(x / 6), Math.floor(z / 6)) * 0.12 + hash(x, z) * 0.06 - 0.09;
-      tmp.offsetHSL(0, 0, n);
-      col[o] = tmp.r; col[o + 1] = tmp.g; col[o + 2] = tmp.b;
-    }
-    // the triangle cut of js/world/terrain.js meshIndex (GRID SPLIT): (i,k)(i,k+1)(i+1,k) and (i+1,k)(i,k+1)(i+1,k+1)
-    const idx = new Uint32Array((w - 1) * (h - 1) * 6);
-    let o = 0;
-    for (let k = 0; k < h - 1; k++) for (let i = 0; i < w - 1; i++) {
-      const a = k * w + i, b = a + 1, c = a + w, d = c + 1;
-      idx[o++] = a; idx[o++] = c; idx[o++] = b; idx[o++] = b; idx[o++] = c; idx[o++] = d;
-    }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    geo.setIndex(new THREE.BufferAttribute(idx, 1));
-    geo.computeVertexNormals(); geo.computeBoundingSphere();
-    const mesh = new THREE.Mesh(geo, groundMat);
-    mesh.receiveShadow = true; mesh.name = 'ground';
-    tileGroup(G.minX + (i0 + stepCells / 2) * G.cell, G.minZ + (k0 + stepCells / 2) * G.cell).add(mesh);
-  }
-
-  // ---------------------------------------------------------------- water (the terrain's own water surface grid)
-  const waterTex = (() => {
-    const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d');
-    x.fillStyle = '#ffffff'; x.fillRect(0, 0, 128, 128);
-    for (let n = 0; n < 220; n++) { x.fillStyle = `rgba(160,200,230,${0.08 + hash(n, 3) * 0.2})`; const px = hash(n, 1) * 128, py = hash(n, 2) * 128; x.fillRect(px, py, 6 + hash(n, 4) * 18, 1.5); }
-    const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; return t;
-  })();
-  const waterMat = new THREE.MeshLambertMaterial({ color: '#4f93b8', map: waterTex, transparent: true, opacity: 0.82, depthWrite: false, emissive: '#16384a' });
-  const marshMat = new THREE.MeshLambertMaterial({ color: '#5d7f62', map: waterTex, transparent: true, opacity: 0.8, depthWrite: false, emissive: '#1a2a1a' });
-  for (let k0 = 0; k0 < G.nz - 1; k0 += stepCells) for (let i0 = 0; i0 < G.nx - 1; i0 += stepCells) {
-    const verts = [], uvs = [], vertsM = [], uvsM = [];
-    const i1 = Math.min(G.nx - 1, i0 + stepCells), k1 = Math.min(G.nz - 1, k0 + stepCells);
-    for (let k = k0; k < k1; k++) for (let i = i0; i < i1; i++) {
-      const ids = [k * G.nx + i, k * G.nx + i + 1, (k + 1) * G.nx + i, (k + 1) * G.nx + i + 1];
-      const ws = ids.map(j => G.water[j]);
-      const have = ws.filter(v => !Number.isNaN(v));
-      if (!have.length) continue;
-      const fill = Math.max(...have);
-      const y = ws.map(v => (Number.isNaN(v) ? fill : v));
-      const x0 = G.minX + i * G.cell, z0 = G.minZ + k * G.cell, x1 = x0 + G.cell, z1 = z0 + G.cell;
-      const marsh = T.biomeAt(x0 + 1, z0 + 1) === 'marsh';
-      const V = marsh ? vertsM : verts, U = marsh ? uvsM : uvs;
-      V.push(x0, y[0], z0, x0, y[2], z1, x1, y[1], z0, x1, y[1], z0, x0, y[2], z1, x1, y[3], z1);
-      U.push(x0 / 16, z0 / 16, x0 / 16, z1 / 16, x1 / 16, z0 / 16, x1 / 16, z0 / 16, x0 / 16, z1 / 16, x1 / 16, z1 / 16);
-    }
-    for (const [V, U, mat] of [[verts, uvs, waterMat], [vertsM, uvsM, marshMat]]) {
-      if (!V.length) continue;
-      const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.Float32BufferAttribute(V, 3));
-      geo.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
-      geo.computeVertexNormals();
-      const m = new THREE.Mesh(geo, mat); m.renderOrder = 2; m.name = 'water';
-      tileGroup(G.minX + (i0 + stepCells / 2) * G.cell, G.minZ + (k0 + stepCells / 2) * G.cell).add(m);
-    }
-  }
-
-  // ---------------------------------------------------------------- roads: ribbons draped on the ground
-  const roadMat = new THREE.MeshLambertMaterial({ vertexColors: true, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
-  const ROADC = { road: new THREE.Color('#c2a578'), trail: new THREE.Color('#ab9068'), boardwalk: new THREE.Color('#8f6d48') };
-  for (const r of T.roads) {
-    const pts = r.pts;
-    if (pts.length < 2) continue;
-    const half = (r.width || 4) / 2;
-    const c = ROADC[r.class] || ROADC.trail;
-    // one ribbon per tile run so tiles cull properly
-    let V = [], C = [], tileK = null;
-    const flush = () => { if (V.length >= 18) { const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(V, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(C, 3)); geo.computeVertexNormals(); const m = new THREE.Mesh(geo, roadMat); m.receiveShadow = true; m.name = 'road'; const [i, j] = tileK.split(',').map(Number); tileGroup((i + 0.5) * TILE, (j + 0.5) * TILE).add(m); } V = []; C = []; };
-    for (let n = 0; n < pts.length - 1; n++) {
-      const a = pts[n], b = pts[n + 1];
-      const k = tileOf(a.x, a.z);
-      if (k !== tileK) { flush(); tileK = k; }
-      const dx = b.x - a.x, dz = b.z - a.z, L = Math.hypot(dx, dz) || 1;
-      const nx = -dz / L * half, nz = dx / L * half;
-      const P = [[a.x + nx, a.z + nz], [a.x - nx, a.z - nz], [b.x + nx, b.z + nz], [b.x - nx, b.z - nz]].map(([x, z]) => [x, (T.deckAt(x, z) ? T.walkHeightAt(x, z).y : T.heightAt(x, z)) + 0.04, z]);
-      const shade = 0.94 + hash(a.x, a.z) * 0.1;
-      for (const q of [P[0], P[2], P[1], P[1], P[2], P[3]]) { V.push(...q); C.push(c.r * shade, c.g * shade, c.b * shade); }
-    }
-    flush();
-  }
+  // ---------------------------------------------------------------- ground, roads (worn into it), water, fields, grass: ground.js
+  const ground = createGround(view, { T, placements, art, cfg: GROUND_CFG, quality, tileGroup });
+  const grass = createGrass(view, ground, GROUND_CFG.grass[quality] || GROUND_CFG.grass.medium, { quality });
 
   // ---------------------------------------------------------------- bridges (decks at their deck height)
   const deckMat = new THREE.MeshLambertMaterial({ color: '#8e6440' }), stoneMat = new THREE.MeshLambertMaterial({ color: '#8a8478' });
@@ -191,22 +92,30 @@ export function createWorldView(view, { T, placements, art, scattered, book, qua
     return m;
   }
   const pending = [];
+  const kit = createKitDraw({ root, tileGroup, tileKey: tileOf });
+  const seedAt = (x, z) => ((Math.floor(x * 7.31) * 73856093) ^ (Math.floor(z * 5.17) * 19349663)) >>> 0;
+  /** A kit model for an art row (null when the row has a GLB or no kit). Same spot, same seed, same model. */
+  const kitFor = (a, seed) => (a && a.status !== 'ready' ? kitModel(a.id, { seed, size: a.size || a.placeholder?.size }) : null);
   function place(id, x, z, y, facing = 0, { scale = 1, name = '' } = {}) {
     const a = artById.get(id);
     const holder = new THREE.Group();
-    holder.position.set(x, y ?? T.heightAt(x, z), z);
+    const gy = y ?? T.heightAt(x, z);
+    holder.position.set(x, gy, z);
     holder.rotation.y = facing || 0;
     holder.name = name || id;
     tileGroup(x, z).add(holder);
-    if (!a) { holder.add(placeholderMesh({ placeholder: { shape: 'box', size: [1, 1, 1], colour: '#8a7a64' } })); return holder; }
-    if (a.status === 'ready' && a.file) {
+    if (a?.status === 'ready' && a.file) {
       pending.push(glb(a.file).then(g => {
         const m = g.scene.clone(true);
         m.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; if (o.material?.map) o.material.map.colorSpace = THREE.SRGBColorSpace; } });
         m.scale.setScalar(scale);
         holder.add(m);
       }).catch(() => holder.add(placeholderMesh({ ...a, placeholder: { shape: 'box', size: a.size || [2, 2, 2], colour: '#8a7a64' } }))));
-    } else holder.add(placeholderMesh(a));
+      return holder;
+    }
+    const km = kitFor(a, seedAt(x, z) % 997 + 1);
+    if (km) { kit.place(km, x, gy, z, facing || 0); holder.userData.kit = a.id; return holder; }   // the holder stays as the named spot
+    holder.add(placeholderMesh(a || { placeholder: { shape: 'box', size: [1, 1, 1], colour: '#8a7a64' } }));
     if (scale !== 1 && holder.children[0]) holder.children[0].scale.multiplyScalar(scale);
     return holder;
   }
@@ -221,6 +130,7 @@ export function createWorldView(view, { T, placements, art, scattered, book, qua
     const h = o.art ? place(o.art, o.at[0], o.at[1], o.y, o.facing || 0, { name: o.name }) : (() => { const g = new THREE.Group(); g.position.set(o.at[0], o.y ?? T.heightAt(o.at[0], o.at[1]), o.at[1]); g.add(placeholderMesh({ placeholder: { ...(o.fallback || { shape: 'box', size: [1, 1, 1], colour: '#b08d3c' }) } })); tileGroup(o.at[0], o.at[1]).add(g); return g; })();
     objectMeshes.set(o.id, h);
   }
+  kit.build();
 
   // ---------------------------------------------------------------- trees and decor (instanced per art id and tile)
   const Q = { low: [0.55, 0.4], medium: [0.85, 0.75], high: [1, 1] }[quality] || [0.85, 0.75];
@@ -244,40 +154,49 @@ export function createWorldView(view, { T, placements, art, scattered, book, qua
   }
   const vcMat = new THREE.MeshLambertMaterial({ vertexColors: true });
   const geoCache = new Map();
-  function instGeo(id) {
-    if (geoCache.has(id)) return geoCache.get(id);
+  const VARIANTS = quality === 'low' ? 1 : 3;   // each rock / bush kind is baked three ways (lean, which stones), picked by spot; one on Low (fewer draw calls on phones)
+  function instGeo(id, v = 0) {
+    const key = id + '#' + v;
+    if (geoCache.has(key)) return geoCache.get(key);
     const a = artById.get(id) || { id, placeholder: { shape: 'rock', size: [1, 1, 1], colour: '#7a7a6a' } };
     let geo;
-    if (a.kind === 'tree' || a.placeholder?.shape === 'tree') geo = treeGeometry(a);
+    const km = kitFor(a, v + 1);
+    if (km) geo = kit.bake(km);
+    else if (a.kind === 'tree' || a.placeholder?.shape === 'tree') geo = treeGeometry(a);
     else { geo = shapeGeometry(a.placeholder || { shape: 'rock', size: a.size || [1, 1, 1], colour: '#7a7a6a' }); if (geo.index) geo = geo.toNonIndexed(); const c = new THREE.Color(a.placeholder?.colour || '#7a7a6a'); const n = geo.attributes.position.count; const cols = new Float32Array(n * 3); for (let i = 0; i < n; i++) { const t = c.clone().offsetHSL(0, 0, (hash(i, 7) - 0.5) * 0.08); cols.set([t.r, t.g, t.b], i * 3); } geo.setAttribute('color', new THREE.BufferAttribute(cols, 3)); }
-    geoCache.set(id, geo);
+    geoCache.set(key, geo);
     return geo;
   }
   function instance(list, keep) {
     const groups = new Map();
-    list.forEach((t, n) => { if (!keep(n)) return; const k = `${tileOf(t.x, t.z)}|${t.art}`; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(t); });
+    list.forEach((t, n) => { if (!keep(n)) return; const v = Math.floor(hash(t.x * 0.37, t.z * 0.41) * VARIANTS) % VARIANTS; const k = `${tileOf(t.x, t.z)}|${t.art}|${v}`; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(t); });
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
     for (const [k, items] of groups) {
-      const art = k.split('|')[1];
-      const mesh = new THREE.InstancedMesh(instGeo(art), vcMat, items.length);
+      const [tk, art, v] = k.split('|');
+      const mesh = new THREE.InstancedMesh(instGeo(art, Number(v)), vcMat, items.length);
       items.forEach((t, i) => { q.setFromAxisAngle(up, t.rot || 0); s.setScalar(t.scale || 1); p.set(t.x, (t.y ?? T.heightAt(t.x, t.z)) - 0.1, t.z); m4.compose(p, q, s); mesh.setMatrixAt(i, m4); });
       mesh.castShadow = artById.get(art)?.kind === 'tree'; mesh.receiveShadow = true;
       mesh.computeBoundingSphere();
       mesh.name = 'scatter ' + art;
-      const [i, j] = k.split('|')[0].split(',').map(Number);
+      const [i, j] = tk.split(',').map(Number);
       tileGroup((i + 0.5) * TILE, (j + 0.5) * TILE).add(mesh);
     }
   }
-  instance(scattered.trees || [], n => (n % 100) / 100 < Q[0]);
+  // trees: big storybook trees, sized by js/world/scatter.js (trees.js)
+  let treeView = null;
+  pending.push(createTrees({ trees: (scattered.trees || []).filter((t, n) => (n % 100) / 100 < Q[0]), tileGroup, cell: TILE * 2, quality }).then(v => { treeView = v; }));
   instance(scattered.decor || [], n => (n % 100) / 100 < Q[1]);
 
   // ---------------------------------------------------------------- per frame
   let wt = 0;
   return {
-    root, tiles, chestMeshes, objectMeshes, shrineMarks, ready: () => Promise.allSettled(pending),
+    root, tiles, chestMeshes, objectMeshes, shrineMarks, ground, grass, kitStats: kit.stats, get treeStats() { return treeView?.stats || null; }, ready: () => Promise.allSettled([...pending, ground.ready]),
     update(dt, at) {
       wt += dt;
-      waterTex.offset.set(wt * 0.012, wt * 0.02);
+      kit.update(dt, wt);
+      treeView?.update(wt);
+      ground.update(dt, at);
+      grass.update(view.camera.position);
       const far = (view.camera.far || 300) + TILE * 0.75;
       for (const g of tiles.values()) g.visible = Math.hypot(g.userData.cx - at.x, g.userData.cz - at.z) < far;
     },

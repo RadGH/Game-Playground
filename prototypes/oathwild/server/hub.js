@@ -68,7 +68,7 @@ export function createHub({ rules, W, ground, store, now = () => Date.now(), bui
     if (rooms.has(code)) return rooms.get(code);
     const rec = store.loadWorld(code);
     if (!rec) return null;
-    const R = createWorldRoom({ rules, W, ground, meta: rec.meta, state: rec.state, log, persist, seed: rec.state?.seed || hashStr(code) });
+    const R = createWorldRoom({ rules, W, ground, meta: rec.meta, state: rec.state, log, persist, seed: rec.state?.seed || hashStr(code), dev: build === 'dev' });
     rooms.set(code, R);
     log('world.open', { code });
     return R;
@@ -113,7 +113,7 @@ export function createHub({ rules, W, ground, store, now = () => Date.now(), bui
       if (msg.t === 'hello') { S.helloing = hello(msg).finally(() => { S.helloing = null; }); return S.helloing; }
       if (S.helloing) await S.helloing;            // only while a hello (an account ticket) is still being checked
       if (!S.key) return fail('hello', 'Say hello first.');
-      if (S.room && (msg.t === 'in' || msg.t === 'act')) return S.room.message(S.key, msg);
+      if (S.room && (msg.t === 'in' || msg.t === 'act' || msg.t === 'devTp' || msg.t === 'devGear' || msg.t === 'devDummy')) return S.room.message(S.key, msg);   // devTp / devGear: the room ignores them outside dev builds
       switch (msg.t) {
         case 'chars': return send({ t: 'chars', list: profile(S.key).chars.map(summary) });
         case 'charNew': {
@@ -146,7 +146,7 @@ export function createHub({ rules, W, ground, store, now = () => Date.now(), bui
           let code; do { code = newCode(rand); } while (rooms.has(code) || store.loadWorld(code));
           const name = cleanName(msg.name, 28) || 'A New Oath';
           const meta = { code, name, public: !!msg.public, owner: S.key, created: new Date(now()).toISOString(), players: [S.key] };
-          const R = createWorldRoom({ rules, W, ground, meta, state: null, log, persist, seed: hashStr(code) });
+          const R = createWorldRoom({ rules, W, ground, meta, state: null, log, persist, seed: hashStr(code), dev: build === 'dev' });
           rooms.set(code, R);
           R.save();
           p.worlds = [code, ...p.worlds.filter(c => c !== code)];

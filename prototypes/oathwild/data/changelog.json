@@ -1,6 +1,34 @@
 {
   "entries": [
     {
+      "id": "2026-11-24-world",
+      "date": "2026-11-24",
+      "title": "A world worth walking",
+      "items": [
+        "The trees are giants now: oaks, birches and pines tower 20 to 30 metres over you, and the old ancient oaks and great spruces deep in the woods reach past 40.",
+        "Every camp, shrine, ruin, grave, wall and chest is a real piece of the world: tents and banners, glowing shrines, carved standing stones, iron-banded chests that look as rich as what's inside.",
+        "Towns have cobbled squares and streets, worn dirt roads lead between them, and the fields are planted in strips of wheat, cabbage, pumpkins and more behind split-rail fences.",
+        "The ground has grass that sways, the sky has a sun and drifting clouds, and the light is warmer.",
+        "You can swim: wade into a river and swim across, then climb out on the far bank. (Your horse won't follow you in.)",
+        "Dodging is a quick dash the way you're moving, or toward your crosshair when you stand still, with no jump back.",
+        "The townsfolk are all properly dressed people now, and the camera stays in front of walls and trees.",
+        "Windows keep their place: the class tree, your bag and your talents no longer jump back to the start while open."
+      ]
+    },
+    {
+      "id": "2026-11-24-casters",
+      "date": "2026-11-24",
+      "title": "Wands with a will of their own",
+      "items": [
+        "Every wand now has its own attack: a straight bolt, a bursting one, a fan of three, a bolt that jumps between enemies, one that turns to follow, a slow heavy one, a cone, a beam, a ring around you, a lobbed blast, a forking bolt, a shielding bolt, or one that leaves the ground burning.",
+        "Tomes attack too, slower and harder: a Rune drawn on the ground, a Column of light, a Gale, or a Brand that scorches where it lands.",
+        "Staves cast their element's spell (a cone, a ring, a wave, a lobbed flask, a chain, or burning ground), or a Lance, or an Aegis Ring that shields you and your friends.",
+        "Sceptres swing in melee and hit with their element instead of steel.",
+        "An orb or focus in your off hand adds to a wand, tome or sceptre: an echo of every fourth attack, a burst round the enemy you hit, a shield, or mana back. A tome in the off hand echoes too.",
+        "Each item's card says exactly what its attack does, with your own damage numbers. Look out for the Wand of the Ninth Star and other named pieces from bosses, and the tome from The Lost Tome."
+      ]
+    },
+    {
       "id": "2026-11-23",
       "date": "2026-11-23",
       "title": "The first oath",

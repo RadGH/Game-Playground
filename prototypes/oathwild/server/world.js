@@ -9,7 +9,7 @@
 // `meta` = { code, name, public, owner, created } · `state` = world-state.js record (or null for a new world)
 // `persist({ world, chars })` is called with what to write (the hub writes files).
 import {
-  createWorld, addPlayer, removePlayer, refreshPlayer, step as simStep, respawnPlayer, castRefusal, spellPowerRange,
+  createWorld, addPlayer, removePlayer, refreshPlayer, step as simStep, respawnPlayer, castRefusal, spellPowerRange, spawnMonster,
 } from '../js/rules/combat.js';
 import { createWorldState, fromJSON, toJSON, flagsFor, discoverShrine, setHomeShrine, homeShrine, clearCamp, campsToRespawn, note } from '../js/rules/world-state.js';
 import { openFor, takeItem, takeGold, takeAll, chestOpenFor, chestDef, isEmptyFor, createContainer } from '../js/rules/loot.js';
@@ -21,6 +21,7 @@ import { sheetOf, attrTotals } from '../js/rules/sheet.js';
 import { profSources } from '../js/rules/proficiency.js';
 import { repairItem, repairPrice, enchant, disenchant, carriedWeight, mountDef } from '../js/rules/inventory.js';
 import { auraList } from '../js/rules/auras.js';
+import { finishCaster } from '../js/rules/casters.js';
 import { makeRng, hashStr } from '../js/rules/farhold.js';
 import { notify, escortTick, talkTo, choose, npcAt, npcPresent, servicesOf, liveObjects, escorts } from '../js/world/quests.js';
 import { spawnCampFor, spawnZone } from '../js/world/encounters.js';
@@ -32,7 +33,7 @@ const dist2 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const TALK_METRES = 7, LOOT_METRES = 6, USE_METRES = 5, SHRINE_METRES = 10, FIND_METRES = 30;
 const ZONE_RESPAWN_S = 90, CAMP_CLEAR_METRES = 45, SPAWN_SAFE_METRES = 35;
 
-export function createWorldRoom({ rules, W, ground, meta, state = null, log = () => {}, persist = () => {}, seed = 1 }) {
+export function createWorldRoom({ rules, W, ground, meta, state = null, log = () => {}, persist = () => {}, seed = 1, dev = false }) {
   const { book, terrain: T, data } = W;
   const placements = data.placements;
   const ws = state ? fromJSON(state) : createWorldState({ id: meta.code, name: meta.name, seed });
@@ -106,6 +107,8 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     if (old) { old.send = send; old.away = 0; sendEnter(old); return old; }
     if (players.size >= MAX_PLAYERS) return { error: 'This world is full (10 players).' };
     for (const P of players.values()) if (P.char.id === char.id) return { error: 'That character is already in this world.' };
+    // a magic item made before casters existed learns its element and style now (same item id = same answer)
+    for (const it of [...Object.values(char.gear || {}), ...(char.bag || [])]) finishCaster(rules, it);
     const at = startPoint(char);
     const shrine = shrinePos(homeShrine(ws, char.id)) || spawnAt;
     const u = addPlayer(world, char, { at: [at.x, at.z], shrine: [shrine.x, shrine.z] });
@@ -143,8 +146,39 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     const P = players.get(key);
     if (!P) return;
     if (msg.t === 'in') {
-      if (P.inputs.length > 6) P.inputs.splice(0, P.inputs.length - 3);   // a burst after a stall: keep the newest
+      if (P.inputs.length > 6) {                      // a burst after a stall: keep the newest three …
+        const dropped = P.inputs.splice(0, P.inputs.length - 3);
+        const once = dropped.reduce((b, x) => b | ((x.b || 0) & (32 | 64 | 128)), 0);   // … but never lose a dodge / mount / respawn press
+        if (once) P.inputs[0] = { ...P.inputs[0], b: (P.inputs[0].b || 0) | once };
+      }
       P.inputs.push(msg);
+      return;
+    }
+    // dev builds only (the LAN dev server; never `stable…`): jump somewhere for screenshots and look checks
+    if (msg.t === 'devTp' && dev) { const u = unitOf(P); if (u && Number.isFinite(msg.x) && Number.isFinite(msg.z)) { u.x = msg.x; u.z = msg.z; u.safeUntil = world.t + 600; P.teleport = true; } return; }
+    // dev builds only: hold a magic weapon of a given base / style / element (screenshots of every caster style)
+    if (msg.t === 'devGear' && dev) {
+      const it = rules.rpg.loot.generate(msg.base, 'magic', 'high', { rng: makeRng(hashStr(`${msg.base}:${msg.style}:${msg.el}`)), ilvl: P.char.level || 1, level: P.char.level || 1, raw: true });
+      if (!it) return;
+      if (msg.el) it.attune = msg.el;
+      if (msg.style && msg.base === 'staff') it.castStyle = msg.style.replace(/^staff:/, ''); else if (msg.style) it.castStyle = msg.style;
+      if (msg.base === 'staff' && msg.style && !['beam', 'ward'].includes(it.castStyle)) { it.staffSpell = it.castStyle; delete it.castStyle; }
+      finishCaster(rules, it);
+      const slot = msg.slot === 'offhand' ? 'offhand' : 'weapon';
+      P.char.gear[slot] = it;
+      if (slot === 'weapon' && it.twoHanded) delete P.char.gear.offhand;
+      changed(P);
+      return;
+    }
+    // dev builds only: still, unkillable targets in a fan ahead of the hero (screenshots of attacks)
+    if (msg.t === 'devDummy' && dev) {
+      const u = unitOf(P); if (!u) return;
+      const n = Math.max(1, Math.min(8, msg.n | 0 || 4)), f = u.facing || 0;
+      for (let i = 0; i < n; i++) {
+        const a = f + (i - (n - 1) / 2) * 0.28, r = 7 + (i % 3) * 2.5;
+        const m = spawnMonster(world, 'vale_wolf', 1, [u.x + Math.sin(a) * r, u.z + Math.cos(a) * r]);
+        if (m) { m.hp = m.maxHp = 1e7; m.speed = 0; m.attackEvery = 1e6; m.aggroRange = 0; m.home = { x: m.x, z: m.z }; }
+      }
       return;
     }
     if (msg.t === 'act') act(P, msg);
@@ -425,6 +459,8 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     const slot = Number.isInteger(m.c) ? m.c : -1;
     if (slot >= 0 && slot < 8) { input.cast = { slot, at: Array.isArray(m.at) ? m.at.map(Number) : null, held: !!m.h }; P.chSlot = slot; }
     else if (m.h && u.channel && P.chSlot >= 0) input.cast = { slot: P.chSlot, held: true };
+    // the crosshair's ground point with an attack: where a lobbed wand / tome / staff attack lands
+    if (slot < 0 && Array.isArray(m.at) && m.at.length === 3) input.attackAt = m.at.map(Number);
     if (b.interact && m.rv) input.revive = m.rv;
     return input;
   }
@@ -437,6 +473,11 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     const before = new Map();
     for (const u of world.units.values()) before.set(u.id, { x: u.x, z: u.z });
     for (const P of players.values()) { const u = unitOf(P); if (u) inputs[u.id] = inputFor(P, u); }
+    // deep water: everyone in it swims (slower, no sprint or dodge); a rider slips off the horse
+    for (const u of world.units.values()) {
+      u.swimming = ground.swimming(u.x, u.z);
+      if (u.swimming && u.mounted) { u.mounted = false; const P = byUnit(u.id); if (P) { P.meDirty = true; say(P, 'Your horse will not swim. You slide off.', 'info'); } }
+    }
     const events = simStep(world, STEP, inputs);
     // the sim moves on a flat plane: keep every body on ground it can stand on
     for (const u of world.units.values()) {
@@ -564,7 +605,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
         for (const x of list) { const a = auraList(rules, x); if (a.length || x === me) au[x.id] = a.map(r => ({ id: r.id, n: r.name, k: r.kind, r: R2(r.remaining), to: R2(r.total), s: r.stacks, src: r.source, e: auraRaw(x.statuses?.[r.id]) })); }
         if (au[me.id]) au.b = Math.round(me.barrier || 0);
         msg.au = au;
-        msg.pj = world.projectiles.filter(p => Math.hypot(p.x - me.x, p.z - me.z) < VIEW_METRES).map(p => [p.id, R2(p.x), R2(p.z), R2(p.dx), R2(p.dz), p.speed, p.ctx?.spell || null]);
+        msg.pj = world.projectiles.filter(p => Math.hypot(p.x - me.x, p.z - me.z) < VIEW_METRES).map(p => [p.id, R2(p.x), R2(p.z), R2(p.dx), R2(p.dz), p.speed, p.ctx?.spell || p.ctx?.vis || null]);
         msg.zn = world.zones.filter(z => Math.hypot(z.x - me.x, z.z - me.z) < VIEW_METRES).map(z => [z.id, R2(z.x), R2(z.z), z.radius, z.ctx?.spell || null, R2(z.until - world.t)]);
         const boxes = [];
         for (const c of [...world.containers.values(), ...extra.values()]) {

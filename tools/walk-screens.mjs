@@ -22,6 +22,9 @@
 //            fails when the input changed (almost) nothing on screen — the game ignores its own controls or froze.
 //     live: true                                 the screen moves by itself (a game running): fails when nothing at
 //            all changes in 1.5 s — a frozen screen.
+//     area: '.my-window'                         judge `input` inside this element only (a window over a live world:
+//            trees and grass swaying behind it would otherwise outweigh the click — Oathwild 2026-11-24).
+//            Without it the whole screen is compared.
 // A screen with no `open` checks whatever is showing. `close` should bring the game back to where the next screen
 // expects to start. Runs by tools/publish-stable.sh for every game that changed (tools/prepublish-check.sh).
 import { chromium } from 'playwright';
@@ -63,7 +66,10 @@ for (const v of VIEWS) {
   const bc = await browser.newContext({ viewport: { width: v.w, height: v.h }, isMobile: v.phone, hasTouch: v.phone, deviceScaleFactor: v.phone ? 2 : 1, ignoreHTTPSErrors: true });
   const page = await bc.newPage();
   const cmp = await bc.newPage();                       // compares screenshots for the input / live checks
-  const shot = async () => (await page.screenshot()).toString('base64');
+  // `clip` (optional): only this part of the screen — a step's `area` selector, so a control inside a window is judged
+  // against that window, not against a live world animating behind it
+  const shot = async (clip) => (await page.screenshot(clip ? { clip } : {})).toString('base64');
+  const areaOf = async sel => { if (!sel) return null; const r = await page.$eval(sel, el => { const b = el.getBoundingClientRect(); return { x: b.left, y: b.top, width: b.width, height: b.height }; }).catch(() => null); return r && r.width > 4 && r.height > 4 ? r : null; };
   const change = async (a, b) => cmp.evaluate(pixelChange, { a, b });
   const play = async (input) => {
     if (typeof input === 'function') return input(page, ctx);
@@ -109,11 +115,13 @@ for (const v of VIEWS) {
         }
         if (s.input && !(ctx.phone && s.input && s.inputPhone === false)) {
           const input = (ctx.phone && s.inputPhone) || s.input;
-          const t0 = Date.now(); const a = await shot(); await play(input); const took = Date.now() - t0; const b = await shot();
+          const clip = await areaOf(s.area);        // a window's control is judged inside that window (s.area)
+          const where = clip ? `of ${s.area}` : 'of the screen';
+          const t0 = Date.now(); const a = await shot(clip); await play(input); const took = Date.now() - t0; const b = await shot(clip);
           const active = await change(a, b);
-          await page.waitForTimeout(Math.min(took, 3000)); const idle = await change(b, await shot());
-          if (active < 0.002) soft.push(`controls do nothing: the input changed ${(active * 100).toFixed(2)}% of the screen`);
-          else if (idle > 0.002 && active < idle * 0.5) soft.push(`controls do little: the input changed ${(active * 100).toFixed(1)}% of the screen, waiting alone ${(idle * 100).toFixed(1)}%`);
+          await page.waitForTimeout(Math.min(took, 3000)); const idle = await change(b, await shot(clip));
+          if (active < 0.002) soft.push(`controls do nothing: the input changed ${(active * 100).toFixed(2)}% ${where}`);
+          else if (idle > 0.002 && active < idle * 0.5) soft.push(`controls do little: the input changed ${(active * 100).toFixed(1)}% ${where}, waiting alone ${(idle * 100).toFixed(1)}%`);
         }
       }
       if (TRY_STRICT) soft.forEach(t => notes.push(`${v.id} ${s.name}: ${t}`)); else problems.push(...soft);

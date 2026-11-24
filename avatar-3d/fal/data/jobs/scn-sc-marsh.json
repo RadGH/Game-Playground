@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-marsh",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-marsh.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c9b5/RZjVKx3AwGB8SjPNSAk9L_sheet-sc-marsh.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-marsh (trellis-2 1024): hag-hut boardwalk rowboat fish-rack",
+ "tag": "oathwild3-props",
+ "request_id": "01a20ef7-61e2-7501-addb-46407a703b2c",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef7-61e2-7501-addb-46407a703b2c/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef7-61e2-7501-addb-46407a703b2c",
+ "submitted": "2026-11-24T19:10:23.250Z",
+ "logged": true
+}

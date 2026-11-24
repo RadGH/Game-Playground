@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-farm",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-farm.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c9af/faijK0T68uFaGBsmp7lFu_sheet-sc-farm.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-farm (trellis-2 1024): wheelbarrow trough pumpkins scarecrow-post",
+ "tag": "oathwild3-props",
+ "request_id": "01a20ef6-9a3a-76a1-860d-a1e84857b6f8",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef6-9a3a-76a1-860d-a1e84857b6f8/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef6-9a3a-76a1-860d-a1e84857b6f8",
+ "submitted": "2026-11-24T19:09:32.136Z",
+ "logged": true
+}

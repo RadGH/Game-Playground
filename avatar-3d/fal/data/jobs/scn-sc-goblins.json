@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-goblins",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-goblins.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c9a8/-bUFrQsrAm3awYoYfTx2a_sheet-sc-goblins.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-goblins (trellis-2 1024): goblin-hut goblin-totem spike-barricade junk-pile",
+ "tag": "oathwild3-props",
+ "request_id": "01a20ef5-88be-7e93-b81b-ef5642f9ad26",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef5-88be-7e93-b81b-ef5642f9ad26/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef5-88be-7e93-b81b-ef5642f9ad26",
+ "submitted": "2026-11-24T19:08:22.119Z",
+ "logged": true
+}

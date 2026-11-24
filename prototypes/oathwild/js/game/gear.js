@@ -14,6 +14,7 @@ import { canWear } from '../rules/proficiency.js';
 import { priceMult } from '../rules/skills-use.js';
 import { sheetOf } from '../rules/sheet.js';
 import { makeRng } from '../rules/farhold.js';
+import { casterKind } from '../rules/casters.js';
 
 export const SLOTS = ['weapon', 'offhand', 'head', 'chest', 'legs', 'hands', 'feet', 'ring', 'ring2', 'necklace'];
 export const SLOT_NAME = { weapon: 'Main hand', offhand: 'Off hand', head: 'Head', chest: 'Chest', legs: 'Legs', hands: 'Hands', feet: 'Feet', ring: 'Ring', ring2: 'Ring', necklace: 'Neck' };
@@ -23,7 +24,7 @@ const isBowPair = (w, o) => w?.ranged && w?.subtype === 'bow' && o?.baseKey === 
 export function slotFor(item, char, want = null) {
   if (!item) return null;
   if (want && SLOTS.includes(want)) return want;
-  if (item.type === 'weapon') return 'weapon';
+  if (item.type === 'weapon') return casterKind(item) === 'orb' ? 'offhand' : 'weapon';     // an orb is an off-hand implement
   if (item.slot === 'ring') return !char.gear?.ring ? 'ring' : !char.gear?.ring2 ? 'ring2' : 'ring';
   return item.slot || null;
 }
@@ -34,6 +35,7 @@ export function equipRefusal(rules, char, item, slot) {
   const fits = item.type === 'weapon' ? (slot === 'weapon' || slot === 'offhand')
     : item.slot === 'ring' ? (slot === 'ring' || slot === 'ring2') : item.slot === slot;
   if (!fits) return `${item.name} does not go there.`;
+  if (slot === 'weapon' && casterKind(item) === 'orb') return `${item.name} is an off-hand implement — it has no attack of its own. Hold it in your off hand beside a wand, tome or sceptre.`;
   if ((char.level || 1) < (item.levelReq || 1)) return `${item.name} needs level ${item.levelReq}.`;
   const w = canWear(rules, char, item, { slot });
   if (!w.ok) return w.why;
@@ -128,7 +130,10 @@ const PIECE = {
   feet: { wanderer: 'shoes_wanderer', trail: 'boots_trail', ironlink: 'boots_ironlink', bulwark: 'sabatons_bulwark' },
   head: { wanderer: 'hood_wanderer', trail: 'cap_trail', ironlink: 'coif_ironlink', bulwark: 'helm_bulwark' },
 };
-const WEAPON = { sword: 'sword_arming', sword2h: 'sword_arming', dagger: 'sword_arming', axe: 'axe_halfmoon', axe2h: 'axe_halfmoon', hammer: 'mace_thornhead', mace: 'mace_thornhead', staff: 'staff_oak', polearm: 'staff_oak', spear: 'staff_oak', scepter: 'mace_thornhead', wand: 'staff_oak', bow: 'bow_horn', crossbow: 'bow_horn', javelin: 'staff_oak' };
+// fal.ai hero weapons (avatar-3d/fal round 3, 2026-11-24) are Tabard items 'fal:<id>'; the shortbow waits for the owner's
+// review (its string did not come through), so bows keep the horn bow
+const WEAPON = { sword: 'sword_arming', sword2h: 'sword_arming', dagger: 'sword_arming', axe: 'axe_halfmoon', axe2h: 'axe_halfmoon', hammer: 'fal:ow-warhammer', mace: 'mace_thornhead', staff: 'fal:ow-quarterstaff', polearm: 'fal:ow-halberd', spear: 'staff_oak', scepter: 'mace_thornhead', wand: 'staff_oak', bow: 'bow_horn', crossbow: 'bow_horn', javelin: 'staff_oak' };
+const CASTER = { wand: 'fal:ow-wand', sceptre: 'fal:ow-sceptre', tome: 'fal:ow-tome', staff: 'staff_oak', pole: 'staff_oak' };
 const SHIELD = { buckler: 'shield_oakring', shield: 'shield_heater', kite_shield: 'shield_bluefield', tower_shield: 'shield_bastion', aegis_shield: 'shield_bastion', rune_aegis: 'shield_bastion' };
 
 /** The armour tier of a worn piece (Emberveil base tier → cloth / leather / mail / plate). */
@@ -151,10 +156,12 @@ export function tabardItems(rules, char) {
     if (id) out.push(id);
   }
   const w = g.weapon;
+  const ck = casterKind(w);
   if (w && w.weaponCategory !== 'magic') out.push(WEAPON[w.subtype] || 'sword_arming');
-  else if (w) out.push('staff_oak');
+  else if (w) out.push(CASTER[ck] || 'staff_oak');
   const o = g.offhand;
   if (o?.isShield) out.push(SHIELD[o.baseKey] || 'shield_heater');
+  else if (casterKind(o) === 'orb' && ck !== 'tome') out.push('fal:ow-orb');   // a tome already fills the left hand
   if (g.chest && tierOf(rules, g.chest) === 'plate') out.push('pauldrons_bulwark');
   return out;
 }

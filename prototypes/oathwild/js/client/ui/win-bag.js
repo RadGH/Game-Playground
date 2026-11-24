@@ -52,7 +52,7 @@ export function open(app, opts = {}) {
     onClose: w => { off(); w._on = false; setCompareAlt(false); hideTip(); },
   });
   if (opts.shop) w.data.shop = opts.shop;
-  if (!w._on) { w._on = true; off = app.on('me', () => { if (w.open) w.render(); }); }
+  if (!w._on) { w._on = true; off = w.follow(app, 'me', () => JSON.stringify(app.me)); }   // only when my character changed
   return w;
 }
 

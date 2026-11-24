@@ -593,9 +593,9 @@
    "regions": [
     "brightwater"
    ],
-   "weapon": "orc-axe",
+   "weapon": "chief-axe",
    "offhand": "shield",
-   "note": "Rigged 2026-11-23 (Meshy, round 2). Holds existing roster weapons until his own chief-axe/chief-buckler (drawn) can be paid for."
+   "note": "Rigged 2026-11-23 (Meshy, round 2). Holds his own chief-axe (round 3) + the roster shield until his chief-buckler is made."
   },
   "field-scarecrow": {
    "name": "Field scarecrow",
@@ -633,9 +633,168 @@
    ],
    "mount": {
     "bone": "spine_2",
-    "seat": null
+    "seat": [
+     0,
+     1.38,
+     0.374
+    ],
+    "measured": "2026-11-24 on riding-horse.glb (0.83 tall as made): top of the saddle over the middle of spine_2 = 0.654 up, 0.178 forward of the origin; scaled to 1.75 m"
    },
-   "note": "Mount (owner 2026-11-23), listed with the creatures (enemy:true only puts it on the Enemies stage). Drawn; waits for fal credit."
+   "note": "Mount (owner 2026-11-23). Made 2026-11-24 (round 3): Tripo P1, rigged free by quad_rig.py --straighten.",
+   "round": "oathwild3"
+  },
+  "goblin-warchief": {
+   "name": "Goblin warchief",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "boss",
+   "group": "oathwild",
+   "height": 1.35,
+   "tris": 4500,
+   "jobs": [
+    "goblin-warchief-tripo",
+    "goblin-warchief-rig"
+   ],
+   "regions": [
+    "brightwater"
+   ],
+   "weapon": "warchief-cleaver",
+   "round": "oathwild3",
+   "note": "Made 2026-11-24 (round 3: Tripo P1 + Meshy rig, one attempt)."
+  },
+  "marsh-hag": {
+   "name": "Marsh hag",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "boss",
+   "group": "oathwild",
+   "height": 1.8,
+   "tris": 4500,
+   "jobs": [
+    "marsh-hag-tripo",
+    "marsh-hag-rig"
+   ],
+   "regions": [
+    "thornmere"
+   ],
+   "weapon": "hag-staff",
+   "round": "oathwild3",
+   "note": "Made 2026-11-24 (round 3: Tripo P1 + Meshy rig, one attempt)."
+  },
+  "barrow-king": {
+   "name": "Barrow king",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "boss",
+   "group": "oathwild",
+   "height": 2.1,
+   "tris": 4500,
+   "jobs": [
+    "barrow-king-tripo",
+    "barrow-king-rig"
+   ],
+   "regions": [
+    "thornmere"
+   ],
+   "weapon": "barrow-blade",
+   "round": "oathwild3",
+   "note": "Made 2026-11-24 (round 3: Tripo P1 + Meshy rig, one attempt)."
+  },
+  "hill-ogre": {
+   "name": "Hill ogre",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "brawler",
+   "group": "oathwild",
+   "height": 2.6,
+   "tris": 4500,
+   "jobs": [
+    "hill-ogre-tripo",
+    "hill-ogre-rig"
+   ],
+   "regions": [
+    "thornmere"
+   ],
+   "weapon": "bone-club",
+   "round": "oathwild3",
+   "note": "Made 2026-11-24 (round 3: Tripo P1 + Meshy rig, one attempt).",
+   "review": "problem",
+   "reviewNote": "His right arm was modelled against his belly: when the arm lifts it drags a long strip of side skin with it."
+  },
+  "shrine-cultist": {
+   "name": "Hooded cultist",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "caster",
+   "group": "oathwild",
+   "height": 1.8,
+   "tris": 4000,
+   "jobs": [
+    "shrine-cultist-tripo",
+    "shrine-cultist-rig"
+   ],
+   "regions": [
+    "brightwater"
+   ],
+   "weapon": "cutpurse-knife",
+   "round": "oathwild3",
+   "note": "Made 2026-11-24 (round 3: Tripo P1 + Meshy rig, one attempt)."
+  },
+  "bog-lurker": {
+   "name": "Bog lurker",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "brawler",
+   "group": "oathwild",
+   "height": 2.1,
+   "tris": 4000,
+   "jobs": [
+    "bog-lurker-tripo",
+    "bog-lurker-rig"
+   ],
+   "regions": [
+    "thornmere"
+   ],
+   "round": "oathwild3",
+   "note": "Made 2026-11-24 (round 3: Tripo P1 + Meshy rig, one attempt)."
+  },
+  "barrow-ghoul": {
+   "name": "Barrow ghoul",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "undead",
+   "group": "oathwild",
+   "height": 1.75,
+   "tris": 4000,
+   "jobs": [
+    "barrow-ghoul-tripo",
+    "barrow-ghoul-rig"
+   ],
+   "regions": [
+    "thornmere"
+   ],
+   "round": "oathwild3",
+   "note": "Made 2026-11-24 (round 3: Tripo P1 + Meshy rig, one attempt)."
+  },
+  "fen-harpy": {
+   "name": "Fen harpy",
+   "maker": "Tripo P1",
+   "enemy": true,
+   "role": "beast",
+   "group": "oathwild",
+   "height": 1.7,
+   "tris": 4000,
+   "jobs": [
+    "fen-harpy-tripo",
+    "fen-harpy-rig"
+   ],
+   "regions": [
+    "thornmere"
+   ],
+   "round": "oathwild3",
+   "note": "Made 2026-11-24 (round 3: Tripo P1 + Meshy rig, one attempt).",
+   "review": "problem",
+   "reviewNote": "The wings are joined to the arms (as feared): they hang from the arms and move with them, no wing motion of their own."
   }
  },
  "items": {
@@ -1099,7 +1258,7 @@
   },
   "rusty-pitchfork": {
    "kind": "held",
-   "job": "sheet-ow-weapons-a",
+   "job": "sheet-ow-weapons-c",
    "grip": "palm_r",
    "length": 1.7,
    "grip_at": 0.4,
@@ -1111,7 +1270,8 @@
    "grip": "palm_r",
    "length": 0.95,
    "grip_at": 0.18,
-   "tris": 500
+   "tris": 500,
+   "round": "oathwild3"
   },
   "warchief-cleaver": {
    "kind": "held",
@@ -1119,11 +1279,12 @@
    "grip": "palm_r",
    "length": 1.1,
    "grip_at": 0.13,
-   "tris": 500
+   "tris": 500,
+   "round": "oathwild3"
   },
   "cultist-knife": {
    "kind": "held",
-   "job": "sheet-ow-weapons-a",
+   "job": "sheet-ow-weapons-c",
    "grip": "palm_r",
    "length": 0.45,
    "grip_at": 0.15,
@@ -1131,19 +1292,21 @@
   },
   "hag-staff": {
    "kind": "held",
-   "job": "sheet-ow-weapons-b",
+   "job": "sheet-ow-weapons-a",
    "grip": "palm_r",
    "length": 1.7,
    "grip_at": 0.5,
-   "tris": 600
+   "tris": 600,
+   "round": "oathwild3"
   },
   "barrow-blade": {
    "kind": "held",
-   "job": "sheet-ow-weapons-b",
+   "job": "sheet-ow-weapons-a",
    "grip": "palm_r",
    "length": 1.5,
    "grip_at": 0.13,
-   "tris": 600
+   "tris": 600,
+   "round": "oathwild3"
   },
   "ogre-club": {
    "kind": "held",
@@ -1160,6 +1323,82 @@
    "length": 0.6,
    "grip_at": null,
    "tris": 600
+  },
+  "ow-wand": {
+   "kind": "held",
+   "job": "sheet-ow-hero-a",
+   "grip": "palm_r",
+   "length": 0.38,
+   "grip_at": 0.2,
+   "tris": 500,
+   "round": "oathwild3"
+  },
+  "ow-sceptre": {
+   "kind": "held",
+   "job": "sheet-ow-hero-a",
+   "grip": "palm_r",
+   "length": 0.62,
+   "grip_at": 0.22,
+   "tris": 500,
+   "round": "oathwild3"
+  },
+  "ow-orb": {
+   "kind": "held",
+   "job": "sheet-ow-hero-a",
+   "grip": "palm_l",
+   "length": 0.3,
+   "grip_at": 0.15,
+   "tris": 500,
+   "round": "oathwild3"
+  },
+  "ow-tome": {
+   "kind": "held",
+   "job": "sheet-ow-hero-a",
+   "grip": "palm_l",
+   "length": 0.32,
+   "grip_at": 0.5,
+   "tris": 500,
+   "round": "oathwild3",
+   "squeeze": false
+  },
+  "ow-warhammer": {
+   "kind": "held",
+   "job": "sheet-ow-hero-b",
+   "grip": "palm_r",
+   "length": 0.9,
+   "grip_at": 0.15,
+   "tris": 500,
+   "round": "oathwild3"
+  },
+  "ow-halberd": {
+   "kind": "held",
+   "job": "sheet-ow-hero-b",
+   "grip": "palm_r",
+   "length": 2.1,
+   "grip_at": 0.4,
+   "tris": 600,
+   "round": "oathwild3"
+  },
+  "ow-quarterstaff": {
+   "kind": "held",
+   "job": "sheet-ow-hero-b",
+   "grip": "palm_r",
+   "length": 1.8,
+   "grip_at": 0.45,
+   "tris": 600,
+   "round": "oathwild3"
+  },
+  "ow-shortbow": {
+   "kind": "held",
+   "job": "sheet-ow-hero-b",
+   "grip": "palm_l",
+   "length": 1.05,
+   "grip_at": 0.5,
+   "tris": 500,
+   "squeeze": false,
+   "round": "oathwild3",
+   "review": "problem",
+   "reviewNote": "The bowstring did not come through (thin strings vanish in Trellis); the wood is fine."
   }
  },
  "bodyFit": {

@@ -1,7 +1,7 @@
 // Scenery tab of the fal review page (Oathwild 2026-11-23): every static prop from data/catalog.json `scenery`, at its
 // real size in metres beside a 1.8 m man (the fal male body) for scale. One at a time, or a line-up of the filtered
 // props in rows by size. Table: name, kind, size (wide x deep x tall), triangles, texture px, file size, cost.
-//   ?tab=scenery  ?kind=building  ?region=brightwater|thornmere  ?prop=<id>  ?plineup=1
+//   ?tab=scenery  ?kind=building  ?region=brightwater|thornmere  ?prop=<id>  ?plineup=1  (+ page.js review: ?round=<tag> ?review=1)
 import * as THREE from 'three';
 import { glb, createFalCharacter } from './fal.js';
 
@@ -9,11 +9,12 @@ const KINDS = [['all', 'All'], ['building', 'Buildings'], ['wall', 'Walls'], ['p
   ['loot', 'Loot'], ['travel', 'Travel'], ['shrine', 'Shrines'], ['ruin', 'Ruins'], ['barrow', 'Barrow'], ['rock', 'Rocks'], ['tree', 'Trees'], ['plant', 'Plants']];
 const REGIONS = [['all', 'Both regions'], ['brightwater', 'Brightwater Vale'], ['thornmere', 'Thornmere Wilds']];
 
-export function createSceneryTab({ view, cat, $, chip, loading, q, money, num }) {
+export function createSceneryTab({ view, cat, $, chip, loading, q, money, num, review = null }) {
+  const inReview = review ? review.inReview : () => true;
   const group = new THREE.Group(); group.visible = false; view.scene.add(group);
   const pick = { kind: q.get('kind') || 'all', region: q.get('region') || 'all', id: q.get('prop') || null, lineup: q.get('plineup') === '1' };
   const all = cat.scenery || [];
-  const list = () => all.filter(p => (pick.kind === 'all' || p.kind === pick.kind) && (pick.region === 'all' || p.regions.includes(pick.region)));
+  const list = () => all.filter(p => (pick.kind === 'all' || p.kind === pick.kind) && (pick.region === 'all' || p.regions.includes(pick.region)) && inReview(p));
   const made = new Map();
   let man = null, token = 0;
   const shown = [];
@@ -68,9 +69,10 @@ export function createSceneryTab({ view, cat, $, chip, loading, q, money, num })
   }
 
   function render() {
+    if (review && $('p-review')) review.reviewChips($('p-review'), all, show);
     const k = $('p-kinds'); k.replaceChildren();
     for (const [id, label] of KINDS) {
-      const n = all.filter(p => (id === 'all' || p.kind === id) && (pick.region === 'all' || p.regions.includes(pick.region))).length;
+      const n = all.filter(p => (id === 'all' || p.kind === id) && (pick.region === 'all' || p.regions.includes(pick.region)) && inReview(p)).length;
       if (!n && id !== 'all') continue;
       k.append(chip(label, String(n), pick.kind === id, () => { pick.kind = id; show(); }));
     }
@@ -87,6 +89,8 @@ export function createSceneryTab({ view, cat, $, chip, loading, q, money, num })
       const tr = tb.insertRow(); tr.className = 'fl-pick' + (p.id === pick.id ? ' on' : ''); tr.tabIndex = 0;
       const n = tr.insertCell(); n.textContent = p.name;
       const s = document.createElement('small'); s.textContent = (KINDS.find(k => k[0] === p.kind)?.[1] || p.kind) + ' · ' + p.regions.map(id => REGIONS.find(r => r[0] === id)?.[1].split(' ')[0]).join(', '); n.append(s);
+      if (review && ((review.current() && p.round === review.current().tag) || p.review)) n.append(review.marks(p));
+      if (p.review === 'problem') tr.classList.add('fl-flagged');
       tr.insertCell().textContent = `${p.size[0].toFixed(1)} × ${p.size[2].toFixed(1)} × ${p.size[1].toFixed(1)}`;
       tr.insertCell().textContent = num(p.triangles);
       tr.insertCell().textContent = p.tex + ' px';

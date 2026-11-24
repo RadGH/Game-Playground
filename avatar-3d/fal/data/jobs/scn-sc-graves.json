@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-graves",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-graves.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c9a2/iGPNWtWXZo_6B4thvJYOe_sheet-sc-graves.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-graves (trellis-2 1024): gravestone-c grave-fence statue-broken rubble",
+ "tag": "oathwild3-props",
+ "request_id": "01a20ef4-9b32-7ce2-88bc-86295b3c6cef",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef4-9b32-7ce2-88bc-86295b3c6cef/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef4-9b32-7ce2-88bc-86295b3c6cef",
+ "submitted": "2026-11-24T19:07:21.311Z",
+ "logged": true
+}

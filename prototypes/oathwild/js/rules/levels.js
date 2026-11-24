@@ -21,6 +21,7 @@ import { ensureSkills, boostSkill } from './skills-use.js';
 import { refundTalents } from './talents.js';
 import { attrTotals } from './sheet.js';
 import { spendAttrPoint } from './attributes.js';
+import { finishCaster } from './casters.js';
 
 const L = rules => rules.data.levels;
 export const levelCap = rules => L(rules).cap;
@@ -90,8 +91,9 @@ export function createCharacter(rules, { id = 'hero', name = 'Hero', look = null
   for (const [k, v] of Object.entries(bgs[background].skills || {})) boostSkill(rules, char, k, v);
   takeClassLevel(rules, char, cls);
   for (const baseKey of def.starter || []) {
-    const item = rules.rpg.loot.generate(baseKey, 'normal', 'medium', { rng, ilvl: 1, level: 1 });
+    const item = rules.rpg.loot.generate(baseKey, 'normal', 'medium', { rng, ilvl: 1, level: 1, raw: true });
     if (!item) continue;
+    finishCaster(rules, item, { starter: true });     // a first wand / staff / tome has a known, readable style
     const slot = item.type === 'weapon' ? (char.gear.weapon ? 'offhand' : 'weapon') : item.slot;
     if (!char.gear[slot]) char.gear[slot] = item; else char.bag.push(item);
   }

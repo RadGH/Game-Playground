@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-loot",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-loot.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c978/q_hQTawMcMYIMFzH3Jlpl_sheet-sc-loot.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-loot (trellis-2 1024): chest-epic loot-sack crate-stack barrel-open",
+ "tag": "oathwild3-props",
+ "request_id": "01a20eee-2928-7652-a197-4d8f3a367c54",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20eee-2928-7652-a197-4d8f3a367c54/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20eee-2928-7652-a197-4d8f3a367c54",
+ "submitted": "2026-11-24T19:00:18.898Z",
+ "logged": true
+}

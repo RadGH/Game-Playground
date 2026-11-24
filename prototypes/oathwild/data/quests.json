@@ -296,7 +296,7 @@
         { "id": "tome", "kind": "collect", "objects": ["barrow_tome_case"], "item": "the barrow tome", "text": "Take the tome from the sarcophagus at the barrow.", "worldFlags": ["tome_found"] }
       ],
       "done": ["You read it, didn't you? Good. Mages who read it can learn the Necromancer's art from me."],
-      "rewards": { "xp": 228, "gold": 30, "flags": ["barrow_tome"], "flagsText": ["The barrow tome (opens the Necromancer class for Mages)"] }
+      "rewards": { "xp": 228, "gold": 30, "items": [{ "named": "barrow_lantern", "base": "tome", "label": "the Barrow-Lantern Tome (a shadow tome that casts a column)" }], "flags": ["barrow_tome"], "flagsText": ["The barrow tome (opens the Necromancer class for Mages)"] }
     },
     "the_drowned_ruins": {
       "title": "The Drowned Ruins", "kind": "side", "region": "thornmere_wilds", "level": 10,

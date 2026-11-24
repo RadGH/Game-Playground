@@ -8,27 +8,38 @@
 //   const P = createPredictor({ ground, combat })   P.reset(x, z)   P.step(dir{x,z}, opts) → { q, x, z }
 //   P.reconcile(ack, sx, sz, { snap })   P.drawn(alpha) → { x, z }   P.decay(dt, rate)
 export function createPredictor({ ground, combat }) {
+  const swimMult = combat.swimMult ?? 0.6;
   const S = combat.stamina;
-  const st = { q: 0, x: 0, z: 0, px: 0, pz: 0, ox: 0, oz: 0, hist: [], stamina: 0 };
+  const st = { q: 0, x: 0, z: 0, px: 0, pz: 0, ox: 0, oz: 0, hist: [], stamina: 0, dash: null };
+  const dashSteps = dt => Math.max(1, Math.round((S.dodgeSeconds ?? 0.25) / dt));   // = combat.js dashSteps
   return {
     state: st,
-    reset(x, z) { st.x = st.px = x; st.z = st.pz = z; st.ox = st.oz = 0; st.hist.length = 0; },
+    reset(x, z) { st.x = st.px = x; st.z = st.pz = z; st.ox = st.oz = 0; st.hist.length = 0; st.dash = null; },
     /** One 50 ms step. opts: speed (walk m/s), sprint, block, sneak, dodge, canMove, stamina, overloaded, mounted. */
     step(dir, o, dt) {
       st.q++;
       st.px = st.x; st.pz = st.z;
       let nx = st.x, nz = st.z;
-      if (o.canMove && (dir.x || dir.z)) {
+      const dashing = st.dash && st.dash.steps > 0;
+      if (o.canMove && !dashing && (dir.x || dir.z)) {
         let v = o.speed;
         if (o.sneak) v *= 0.55;
-        if (o.sprint && !o.mounted && !o.overloaded && o.stamina > 0) v *= S.sprintMult;
+        const swimming = ground.swimming?.(st.x, st.z);           // the server checks the same ground each step
+        if (swimming) v *= swimMult;
+        if (o.sprint && !o.mounted && !swimming && !o.overloaded && o.stamina > 0) v *= S.sprintMult;
         if (o.block) v *= 0.5;
         nx += dir.x * v * dt; nz += dir.z * v * dt;
       }
-      if (o.dodge && o.canMove && o.stamina >= S.dodge) {
+      // the dodge dash, step for step as the server runs it (js/rules/combat.js): the way you move, or the crosshair
+      if (o.dodge && o.canMove && !dashing && !ground.swimming?.(st.x, st.z) && o.stamina >= S.dodge) {
         const d = dir.x || dir.z ? dir : o.facingDir;
         const l = Math.hypot(d.x, d.z) || 1;
-        nx += d.x / l * S.dodgeMetres; nz += d.z / l * S.dodgeMetres;
+        st.dash = { x: d.x / l, z: d.z / l, steps: dashSteps(dt) };
+      }
+      if (st.dash && st.dash.steps > 0) {
+        const k = S.dodgeMetres / dashSteps(dt);
+        nx += st.dash.x * k; nz += st.dash.z * k;
+        if (--st.dash.steps <= 0) st.dash = null;
       }
       const p = ground.settle({ x: st.x, z: st.z }, { x: nx, z: nz });
       st.x = p.x; st.z = p.z;

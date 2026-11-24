@@ -1,0 +1,22 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "hill-ogre-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/hill-ogre-front.png",
+  "face_limit": 4500,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c96a/VBDdrIAzlnk-nuGLCYTtL_hill-ogre-front.png",
+  "face_limit": 4500,
+  "texture": true
+ },
+ "note": "hill-ogre: Tripo P1 textured, face_limit 4500",
+ "tag": "oathwild3-enemies",
+ "request_id": "01a20eec-8cae-77a1-95df-efc603cd09f5",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a20eec-8cae-77a1-95df-efc603cd09f5/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a20eec-8cae-77a1-95df-efc603cd09f5",
+ "submitted": "2026-11-24T18:58:33.306Z",
+ "logged": true
+}

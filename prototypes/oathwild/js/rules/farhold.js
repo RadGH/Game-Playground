@@ -11,7 +11,7 @@
 //   * never edit a Farhold / Emberveil / Thousandvale file (live games use them). Anything Oathwild
 //     needs that they lack is written in js/rules/, or laid over their data in memory at load.
 
-export { Rpg, displayName, itemScore, describeAffix } from '../../../farhold/js/rpg.js';
+export { Rpg, displayName, itemScore, describeAffix, attuneWeapon, elementOf, statusOf } from '../../../farhold/js/rpg.js';
 
 export {
   applyStatus, tickStatuses, slowOf, buffsOf, outgoingFrom, incomingFrom,
@@ -20,6 +20,7 @@ export {
 
 export {
   swingTiming, strikeAt, rangedPlan, isRangedWeapon, oneHanded, OFFHAND_DAMAGE, profileOf, RANGED, SHOT_REACH,
+  staffSpell, isStaff, isWand, WAND_BEHAVIOURS, STAFF_SPELLS,
 } from '../../../farhold/js/weapons.js';
 
 export { itemLevelFor, requirementFor, tierFor, AFFIX_TIERS, rollAffixValue } from '../../../farhold/js/affixes.js';
@@ -30,7 +31,11 @@ export {
   addThreat, threatFromHeal, pickTarget, taunt as tauntThreat, clearThreat, notice as noticeThreat, threatRows, forget as forgetThreat, THREAT,
 } from '../../../thousandvale/js/rules/threat.js';
 
-export { handOf, handText } from '../../../thousandvale/js/rules/hands.js';
+export { handOf, handText, handRefusal, isOrb, isTome } from '../../../thousandvale/js/rules/hands.js';
+
+// Thousandvale's caster forms (wand / tome / staff styles, off-hand riders): which style an item is. Oathwild's
+// js/rules/casters.js turns the style into its own attack plan and card (Oathwild's power and its world sim).
+export { buildCasterForms, wandStyle, staffStyle, riderOf, isHeldFocus } from '../../../thousandvale/js/rules/caster-forms.js';
 
 export { fmt, hp as fmtHp, pct as fmtPct, pctOf as fmtPctOf, sign as fmtSign, range as fmtRange, secs as fmtSecs, hasLongDecimal } from '../../../../shared/format.js';
 

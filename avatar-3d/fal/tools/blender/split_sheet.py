@@ -6,13 +6,17 @@ The pieces sit in the same grid as the picture (left to right, top to bottom). L
 empty gaps across X (columns) and Z (rows). Each item is saved as <out-dir>/<id>.glb with its texture (1024 px WebP),
 centred on X/Y with its lowest point at Z = 0, front still facing -Y. --flip: the result came back mirrored
 (left-right): the order AND each item are mirrored back (Test 3: sheet b; render with look.py and compare with the drawing). --tex N keeps the texture at up to N px (default 1024). Prints "SPLIT {...}" with triangles per item.
+--mid (2026-11-24, Oathwild round 3: three scenery sheets had no clean empty gap — a cart shaft reaching across, a mound
+touching its neighbour): cut the grid at the middle of the whole result instead of at the widest gaps, columns along X,
+and first slice the mesh along those middle lines so two touching objects come apart.
 """
 import bpy, bmesh, sys, json, os
 from mathutils import Vector
 
 argv = sys.argv[sys.argv.index('--') + 1:]
 flip = '--flip' in argv
-argv = [a for a in argv if a != '--flip']
+mid = '--mid' in argv
+argv = [a for a in argv if a not in ('--flip', '--mid')]
 TEX = 1024   # --tex N: keep the shared texture at up to N px (scenery keeps 2048: tools/blender/scenery.py bakes from it)
 if '--tex' in argv: i = argv.index('--tex'); TEX = int(argv[i + 1]); del argv[i:i + 2]
 src, cols, out_dir, ids = argv[0], int(argv[1]), argv[2], argv[3:]
@@ -33,6 +37,16 @@ for o in list(bpy.data.objects):
 for im in bpy.data.images:
     if im.size[0] > TEX: im.scale(TEX, TEX)
 
+if mid:   # slice along the middle lines (X and Z) so touching objects in neighbouring cells come apart
+    vs = [v.co for v in mesh.data.vertices]
+    MID = Vector(((min(v.x for v in vs) + max(v.x for v in vs)) / 2, 0, (min(v.z for v in vs) + max(v.z for v in vs)) / 2))
+    bm = bmesh.new(); bm.from_mesh(mesh.data)
+    for no in (Vector((1, 0, 0)), Vector((0, 0, 1))):
+        geom = bm.verts[:] + bm.edges[:] + bm.faces[:]
+        r = bmesh.ops.bisect_plane(bm, geom=geom, plane_co=MID, plane_no=no)
+        cut = [e for e in r['geom_cut'] if isinstance(e, bmesh.types.BMEdge)]
+        if cut: bmesh.ops.split_edges(bm, edges=cut)
+    bm.to_mesh(mesh.data); bm.free()
 bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT')
 bpy.ops.mesh.separate(type='LOOSE'); bpy.ops.object.mode_set(mode='OBJECT')
 parts = [o for o in bpy.data.objects if o.type == 'MESH']
@@ -54,8 +68,8 @@ def cuts(axis, n):
 
 # the maker sometimes lays a row out front-to-back: use whichever ground axis is wider for the columns
 span = lambda ax: max(info[o.name][1][ax] for o in big) - min(info[o.name][0][ax] for o in big)
-AX = 0 if span(0) >= span(1) else 1
-xc, zc = cuts(AX, cols), cuts(2, rows)
+AX = 0 if (mid or span(0) >= span(1)) else 1
+xc, zc = ([MID.x], [MID.z]) if mid else (cuts(AX, cols), cuts(2, rows))
 if len(xc) != cols - 1 or len(zc) != rows - 1:
     raise SystemExit(f'SPLIT could not find the grid: {len(xc)} column gaps, {len(zc)} row gaps')
 groups = {}

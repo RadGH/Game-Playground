@@ -8,12 +8,26 @@
 //   C.aim({ units, range, exclude, assistDeg }) → { point:{x,y,z}, unit|null, dir:{x,z}, dist }
 import * as THREE from 'three';
 
-export function createCamera(view, { heightAt, tuning = {}, settings }) {
+export function createCamera(view, { heightAt, tuning = {}, settings, solidsNear = null }) {
   const cam = view.camera;
   const T = k => tuning[k];
   const st = { yaw: Math.PI, pitch: 0.18, dist: settings.cameraDist || 4.6, wantDist: settings.cameraDist || 4.6, at: new THREE.Vector3(), ready: false };
   const ray = new THREE.Raycaster();
   const v = new THREE.Vector3(), w = new THREE.Vector3();
+  function clearDist(f, cp, sp) {
+    const want = st.wantDist, step = 0.25, margin = 0.35;
+    const near = solidsNear(st.at.x - f.x * cp * want / 2, st.at.z - f.z * cp * want / 2, want / 2 + 2);
+    if (!near.length) return want;
+    for (let t = 0.6; t <= want; t += step) {
+      const x = st.at.x - f.x * cp * t, z = st.at.z - f.z * cp * t, y = st.at.y + sp * t;
+      for (const o of near) {
+        if (y - heightAt(o.x, o.z) > (o.r > 2 ? 9 : 4.5)) continue;     // well above a roof / a trunk's top
+        if (Math.hypot(x - o.x, z - o.z) < o.r + margin) return Math.max(0.6, t - step);
+      }
+    }
+    return want;
+  }
+
   const C = {
     state: st,
     look(dx, dy, { pad = false } = {}) {
@@ -26,7 +40,7 @@ export function createCamera(view, { heightAt, tuning = {}, settings }) {
     forward() { return { x: Math.sin(st.yaw), z: Math.cos(st.yaw) }; },
     right() { return { x: -Math.cos(st.yaw), z: Math.sin(st.yaw) }; },
     update(dt, hero, { snap = false } = {}) {
-      st.dist += (st.wantDist - st.dist) * Math.min(1, dt * 8);
+      st.dist += (st.wantDist - st.dist) * Math.min(1, dt * (st.dist < st.wantDist - 0.05 && solidsNear ? 3 : 8));   // back out slowly after a wall
       const f = C.forward(), r = C.right();
       const side = (settings.hand === 'left' ? -1 : 1) * (T('cameraSide') ?? 0.75);
       // the point the camera looks past: above the hero's shoulder
@@ -35,6 +49,12 @@ export function createCamera(view, { heightAt, tuning = {}, settings }) {
       st.at.x += (tx - st.at.x) * k; st.at.y += (ty - st.at.y) * k; st.at.z += (tz - st.at.z) * k;
       st.ready = true;
       const cp = Math.cos(st.pitch), sp = Math.sin(st.pitch);
+      // a wall, a solid prop or a tree trunk between the shoulder and the camera: come in in front of it at once
+      // (never film the inside of a house), then ease back out as the view clears
+      if (solidsNear) {
+        const free = clearDist(f, cp, sp);
+        if (free < st.dist) st.dist = free;
+      }
       let px = st.at.x - f.x * cp * st.dist, py = st.at.y + sp * st.dist, pz = st.at.z - f.z * cp * st.dist;
       const g = heightAt(px, pz) + 0.45;
       if (py < g) py = g;                                   // never under the ground: rise instead
@@ -43,6 +63,8 @@ export function createCamera(view, { heightAt, tuning = {}, settings }) {
       cam.lookAt(w);
       if (settings.fov && Math.abs(cam.fov - settings.fov) > 0.5 && innerWidth >= innerHeight) { cam.fov = settings.fov; cam.updateProjectionMatrix(); }
     },
+    /** How far back the camera can sit before something solid is in the way (0.25 m steps, 0.35 m margin). */
+    clearDist,
     /** What the crosshair points at: the first unit or ground along the ray through the screen's middle. */
     aim({ units = [], range = 80, from = null, assistDeg = 0, screen = null } = {}) {
       ray.setFromCamera(screen || { x: 0, y: 0 }, cam);

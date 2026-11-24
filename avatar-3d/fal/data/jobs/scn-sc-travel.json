@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-travel",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-travel.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c987/-GrYA_mVSWY6ztyAyHdY8_sheet-sc-travel.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-travel (trellis-2 1024): bridge-wood bridge-stone road-marker waystone",
+ "tag": "oathwild3-props",
+ "request_id": "01a20ef0-6b4f-7e20-8fd6-651ab9fe65fe",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef0-6b4f-7e20-8fd6-651ab9fe65fe/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef0-6b4f-7e20-8fd6-651ab9fe65fe",
+ "submitted": "2026-11-24T19:02:46.907Z",
+ "logged": true
+}

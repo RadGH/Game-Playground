@@ -125,10 +125,25 @@ export function createHud(app, play) {
 
   // ---- log
   const logLines = [];
+  // The message log: newest at the bottom, each line fades after LOG_FADE_MS and leaves at LOG_GONE_MS; the panel
+  // hides when empty. A place that is also a shrine is announced once (the server says "Found: X" and "Shrine found: X").
+  const LOG_FADE_MS = 12000, LOG_GONE_MS = 14000;
+  function drawLog() {
+    const now = performance.now();
+    while (logLines.length && now - logLines[0].at > LOG_GONE_MS) logLines.shift();
+    el.log.innerHTML = logLines.map(l => `<p class="${l.kind}${now - l.at > LOG_FADE_MS ? ' old' : ''}">${esc(l.text)}</p>`).join('');
+    el.log.hidden = !logLines.length;
+  }
   function log(text, kind = 'info') {
-    logLines.push({ text, kind, at: performance.now() });
-    if (logLines.length > 7) logLines.shift();
-    el.log.innerHTML = logLines.map(l => `<p class="${kind === 'chat' ? 'chat' : l.kind}">${esc(l.text)}</p>`).join('');
+    const now = performance.now();
+    const named = t => (t.match(/^(?:Shrine found|Found): ([^.]+)/) || [])[1];
+    const name = named(text);
+    if (name && logLines.some(l => now - l.at < 4000 && named(l.text) === name && l.text.length >= text.length)) return;
+    if (name) for (let i = logLines.length - 1; i >= 0; i--) if (now - logLines[i].at < 4000 && named(logLines[i].text) === name) logLines.splice(i, 1);
+    logLines.push({ text, kind, at: now });
+    if (logLines.length > 6) logLines.shift();
+    drawLog();
+    setTimeout(drawLog, LOG_FADE_MS + 50); setTimeout(drawLog, LOG_GONE_MS + 50);
   }
 
   let slow = 0, lastTrack = '';

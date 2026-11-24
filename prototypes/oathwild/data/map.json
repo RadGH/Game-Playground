@@ -5,7 +5,7 @@
   "bounds": { "minX": -600, "maxX": 600, "minZ": -400, "maxZ": 400, "margin": 40 },
   "grid": { "cell": 2, "biomeCell": 4, "sampleStep": 2 },
   "spawn": { "at": [-252, -16], "shrine": "vale_village" },
-  "limits": { "_doc": "Walkable = inside bounds minus margin, ground slope under maxSlope degrees, water shallower than wadeDepth (or on a bridge deck).", "maxSlope": 38, "wadeDepth": 0.7, "roadMaxGrade": 0.14 },
+  "limits": { "_doc": "Walkable = inside bounds minus margin, ground slope under maxSlope degrees (bankSlope within bankBand metres of a waterline, so river banks can be climbed), water shallower than wadeDepth (or on a bridge deck). Deeper water is swum (terrain.swimmable).", "maxSlope": 38, "bankSlope": 50, "bankBand": 0.8, "wadeDepth": 0.7, "roadMaxGrade": 0.14 },
 
   "regions": {
     "brightwater_vale": { "name": "Brightwater Vale", "levels": [1, 5], "base": 8, "amp": 5, "ground": "meadow", "forest": 0.3 },

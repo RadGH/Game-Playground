@@ -9,6 +9,7 @@
 
 import { Rpg, makeRng } from './farhold.js';
 import { buildCatalog } from './spells.js';
+import { finishCaster } from './casters.js';
 
 const strip = o => Object.fromEntries(Object.entries(o || {}).filter(([k]) => !k.startsWith('_')));
 
@@ -27,5 +28,13 @@ export function createRules(data, { seed = 1 } = {}) {
 
   const rules = { data, rpg, balance, statuses, rng: makeRng(seed), seed };
   rules.spells = buildCatalog(rules);
+  // every item made anywhere (loot, shops, quest rewards, a starting kit) comes out of this one maker: a magic one
+  // leaves it with its element, its wand / tome / staff style or its off-hand rider (js/rules/casters.js).
+  // `raw: true` skips that (a named caster sets its element and style first).
+  const generate = rpg.loot.generate.bind(rpg.loot);
+  rpg.loot.generate = (baseKey, rarity, quality, opts = {}) => {
+    const it = generate(baseKey, rarity, quality, opts);
+    return it && !opts.raw ? finishCaster(rules, it) : it;
+  };
   return rules;
 }

@@ -17,6 +17,9 @@ const gear = existsSync(join(ROOT, 'data/gear.json')) ? J('data/gear.json') : { 
 const sockets = existsSync(join(ROOT, 'data/sockets.json')) ? J('data/sockets.json') : {};
 const price = id => spend.jobs.find(j => j.id === id)?.price ?? 0;
 const round = v => Math.round(v * 1000) / 1000;
+// review state (owner 2026-11-24: "NO REDOS … send them to me to review"): `round` = which paid round made it,
+// `review: 'problem'` + `reviewNote` = flagged for the owner (kept out of games by tools/oathwild-art.mjs)
+const rev = x => ({ ...(x.round ? { round: x.round } : {}), ...(x.review ? { review: x.review, reviewNote: x.reviewNote || '' } : {}) });
 
 export function glbTriangles(file) {
   const b = readFileSync(join(ROOT, file));
@@ -35,14 +38,14 @@ for (const [id, b] of Object.entries(gear.bodies)) {
   const file = `models/final/${id}.glb`;
   if (!existsSync(join(ROOT, file))) continue;
   const jobs = b.jobs.map(j => ({ id: j, price: price(j), endpoint: spend.jobs.find(x => x.id === j)?.endpoint }));
-  bodies.push({ id, name: b.name, note: b.note || null, ...(b.regions ? { regions: b.regions } : {}), ...(b.druidForm ? { druidForm: true } : {}), ...(b.mount ? { mount: b.mount } : {}), enemy: !!b.enemy, maker: b.maker || null, weapon: b.weapon || null, offhand: b.offhand || null, role: b.role || null, group: b.group || null, height: b.height ?? null, skeleton: b.skeleton || 'biped', stage: b.stage !== false, file, triangles: glbTriangles(file), kb: kb(file), cost: round(jobs.reduce((a, j) => a + j.price, 0)), jobs });
+  bodies.push({ id, name: b.name, note: b.note || null, ...(b.regions ? { regions: b.regions } : {}), ...(b.druidForm ? { druidForm: true } : {}), ...(b.mount ? { mount: b.mount } : {}), enemy: !!b.enemy, maker: b.maker || null, weapon: b.weapon || null, offhand: b.offhand || null, role: b.role || null, group: b.group || null, height: b.height ?? null, skeleton: b.skeleton || 'biped', stage: b.stage !== false, file, triangles: glbTriangles(file), kb: kb(file), cost: round(jobs.reduce((a, j) => a + j.price, 0)), jobs, ...rev(b) });
 }
 
 const items = [];
 for (const [id, g] of Object.entries(gear.items)) {
   const r = refs.items.find(x => x.id === id) || {};
   const share = g.job ? price(g.job) / (gear.items ? Object.values(gear.items).filter(x => x.job === g.job).length : 1) : 0;
-  const it = { id, name: r.name || id, slot: r.slot, set: r.set || null, chibi: r.chibi || null, kind: g.kind, job: g.job, endpoint: spend.jobs.find(x => x.id === g.job)?.endpoint || null, cost: round(share) };
+  const it = { id, name: r.name || id, slot: r.slot, set: r.set || null, chibi: r.chibi || null, kind: g.kind, job: g.job, endpoint: spend.jobs.find(x => x.id === g.job)?.endpoint || null, cost: round(share), ...rev(g) };
   if (g.kind === 'wear') {
     it.hides = {}; it.files = {}; it.triangles = {}; it.kb = {}; it.fit = {};
     for (const b of bodies) {
@@ -79,7 +82,7 @@ for (const sh of scen.sheets) for (const o of sh.objects) {
   if (!existsSync(join(ROOT, file)) || o.stage === false) continue;
   const job = o.job || 'scn-' + sh.id;
   const sharing = scen.sheets.flatMap(s => s.objects.map(x => ({ x, sid: s.id }))).filter(({ x, sid }) => (x.job || 'scn-' + sid) === job).length;
-  scenery.push({ id: o.id, name: o.name, kind: o.kind, regions: o.regions || [], file, triangles: glbTriangles(file), size: glbBox(file), tex: o.tex || 512, kb: kb(file), job, cost: round(price(job) / sharing) });
+  scenery.push({ id: o.id, name: o.name, kind: o.kind, regions: o.regions || [], file, triangles: glbTriangles(file), size: glbBox(file), tex: o.tex || 512, kb: kb(file), job, cost: round(price(job) / sharing), ...rev({ round: o.round || sh.round, review: o.review, reviewNote: o.reviewNote }) });
 }
 
 const out = {

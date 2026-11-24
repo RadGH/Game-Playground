@@ -17,6 +17,26 @@ const TREE_KINDS = {
   marsh: [['marsh-tree', 4], ['willow', 2], ['dead-tree', 1]],
   shore: [['willow', 1]],
 };
+// TREES ARE BIG (owner 2026-11-24: "Think Skyrim or WoW, trees 10-15 times taller than you. That's a tree. Trees aren't
+// just 3x taller than a person. Big trees better" — lessons rule on tree scale). A person is 1.8 m, so a grown tree is
+// 18-27 m and an old giant in the deep woods 35-45 m. `story` = the storybook tree drawn (js/client/render/story-trees.js,
+// Thousandvale's big-leaf builder: a few big leaf clumps, never hundreds of tiny leaves); `h` = its height in metres at
+// scale 1; `trunk` / `crown` = trunk radius at the ground and canopy radius at that height (collision + spacing).
+export const TREE_SPECIES = Object.freeze({
+  'oak-a':      { story: 'oak', h: 21, trunk: 0.95, crown: 8 },
+  'oak-b':      { story: 'oak', h: 24, trunk: 1.05, crown: 9 },
+  'birch':      { story: 'birch', h: 20, trunk: 0.6, crown: 4.6 },
+  'pine-a':     { story: 'pine', h: 26, trunk: 0.6, crown: 6.3 },
+  'pine-b':     { story: 'spruce', h: 27, trunk: 0.6, crown: 4.9 },
+  'willow':     { story: 'willow', h: 16, trunk: 0.95, crown: 8 },
+  'marsh-tree': { story: 'beech', h: 19, trunk: 0.65, crown: 4.7 },
+  'dead-tree':  { story: 'dead_pine', h: 18, trunk: 0.5, crown: 1.5 },
+  // giants: in the heart of a wood, one tree in eight becomes one of these
+  'ancient-oak':   { story: 'ancient_oak', h: 38, trunk: 3.4, crown: 19, giant: true },
+  'giant-spruce':  { story: 'spruce', h: 44, trunk: 1.3, crown: 8, giant: true },
+});
+const GIANT_OF = { brightwater_vale: 'ancient-oak', thornmere_wilds: 'giant-spruce' };
+const GIANT_WOOD = { brightwater_vale: 0.3, thornmere_wilds: 0.5 };   // how thick a wood must be for a giant (the vale's woods are thinner)
 const DECOR = {
   meadow: [['rock-small', 3], ['rock-medium', 1.2], ['bush-a', 3], ['bush-b', 2], ['boulder', 0.4]],
   wildgrass: [['rock-small', 2], ['rock-medium', 1.5], ['bush-a', 2], ['bush-c', 2], ['boulder-mossy', 0.7], ['stump-a', 1]],
@@ -48,7 +68,7 @@ export function keepOuts(T, placements, extra = []) {
   return out;
 }
 
-export function scatter(T, placements, { seed = T.seed, box = null, treeStep = 7, decorStep = 9, extra = [] } = {}) {
+export function scatter(T, placements, { seed = T.seed, box = null, treeStep = 11, decorStep = 9, extra = [] } = {}) {
   const B = box || T.bounds;
   const kos = keepOuts(T, placements, extra);
   const cellKO = new Map();          // bucket keep-outs by 32 m cells for speed
@@ -75,8 +95,17 @@ export function scatter(T, placements, { seed = T.seed, box = null, treeStep = 7
     if (!list || T.slopeAt(x, z) > 28) continue;
     const w = T.waterAt(x, z);
     if (w && w.depth > -0.2) continue;
-    if (blocked(x, z, 1) || !clearOfRoad(x, z, 1)) continue;
-    trees.push({ art: pick(list, rng), x: r2(x), z: r2(z), y: r2(T.heightAt(x, z)), rot: r2(rng() * 6.283), scale: r2(0.8 + rng() * 0.45), r: 0.5 });
+    let art = pick(list, rng);
+    // the heart of a wood (forest density high): now and then an old giant that stands over everything round it
+    const reg = T.regionAt(x, z);
+    if (GIANT_OF[reg] && biome !== 'marsh' && f > (GIANT_WOOD[reg] ?? 0.5) && rng() < 0.1) art = GIANT_OF[reg];
+    const sp = TREE_SPECIES[art] || TREE_SPECIES['oak-a'];
+    const scale = 0.85 + rng() * 0.3;
+    // the trunk keeps off roads and buildings; the canopy keeps clear of buildings and camps (a crown through a roof
+    // is the "world pieces clip" bug, rule 25), but may hang over a road
+    if (blocked(x, z, Math.max(1, sp.crown * scale * 0.55)) || !clearOfRoad(x, z, Math.max(1, sp.trunk * scale + 0.5))) continue;
+    if (sp.giant && trees.some(t => Math.hypot(t.x - x, t.z - z) < sp.crown * 0.7)) continue;
+    trees.push({ art, x: r2(x), z: r2(z), y: r2(T.heightAt(x, z)), rot: r2(rng() * 6.283), scale: r2(scale), r: r2(sp.trunk * scale), h: r2(sp.h * scale), crown: r2(sp.crown * scale) });
   }
   for (let gx = Math.ceil(B.minX / decorStep) * decorStep; gx < B.maxX; gx += decorStep) for (let gz = Math.ceil(B.minZ / decorStep) * decorStep; gz < B.maxZ; gz += decorStep) {
     const rng = makeRng(hashStr(`d${seed}:${gx}:${gz}`));

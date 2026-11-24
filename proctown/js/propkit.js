@@ -1121,5 +1121,14 @@ export function fenceLine(points, { kind = 'wooden', seed = 1 } = {}) {
 }
 
 export { MESHES };
+
+/**
+ * The builder context the models above are drawn with (on/at/box/block/beam/rod/cylX/cylZ/ball/group/spinner/fire/glow,
+ * j/pick/tone), for a game that builds its own set pieces in the same style and frame (Oathwild's kit-props.js).
+ * -> { parts, spin, fires, glows, ...builders }. Same seed, same model.
+ */
+export function propContext(seed = 1) { return context(makeRng((seed >>> 0) || 1)); }
+/** The kit's palette (stone, wood, thatch, cloth, iron…), so other builders match its colours. */
+export const PROP_COLOURS = Object.freeze({ ...C });
 /** Every unit shape a prop or crop part may name: the building kit's eight, plus `sheaf` (standing crops, propkit-three.js). */
 export const PROP_MESHES = Object.freeze([...MESHES, 'sheaf']);

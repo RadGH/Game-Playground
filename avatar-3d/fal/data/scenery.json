@@ -77,10 +77,11 @@
      "regions": [
       "brightwater"
      ],
-     "h": 8,
+     "h": 7.4,
      "tris": 3000,
      "tex": 1024,
-     "look": "village watermill: a tall stone-and-timber mill house with a thatched roof and a big wooden waterwheel with paddles fixed to one side wall, a small wooden sluice trough above the wheel"
+     "look": "village watermill: a tall stone-and-timber mill house with a thatched roof and a big wooden waterwheel with paddles fixed to one side wall, a small wooden sluice trough above the wheel",
+     "sizeNote": "h 8 → 7.4 (2026-11-24): the wheel makes it 9 m deep; at 8 m it passed its building ground"
     },
     {
      "id": "watchtower",
@@ -106,7 +107,8 @@
      "tex": 512,
      "look": "round village well: a ring of grey stones, two wooden posts holding a small pointed shingle roof, a winch handle and a rope with a wooden bucket"
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-palisade",
@@ -122,7 +124,9 @@
      "tris": 600,
      "tex": 512,
      "look": "one straight section of a wooden palisade wall: a row of seven sharpened upright logs of the same height, bound with two horizontal rope-tied cross beams, seen from the front-left",
-     "align": true
+     "align": true,
+     "review": "problem",
+     "reviewNote": "The stakes came back crumpled into sharp shards; the wall does not read as a row of logs."
     },
     {
      "id": "palisade-corner",
@@ -132,9 +136,13 @@
       "brightwater"
      ],
      "h": 4,
-     "tris": 600,
+     "tris": 1250,
      "tex": 512,
-     "look": "a palisade corner post: a thick round log tower post, taller than the wall, with a sharpened top and iron bands, and two short stubs of sharpened-log wall leaving it at a right angle"
+     "look": "a palisade corner post: a thick round log tower post, taller than the wall, with a sharpened top and iron bands, and two short stubs of sharpened-log wall leaving it at a right angle",
+     "review": "problem",
+     "reviewNote": "Crumpled like the wall piece: shards instead of round stakes.",
+     "trisWanted": 600,
+     "trisNote": "2026-11-24: the cut-down stopped here (closed shape keeps its corners); budget set to what came out"
     },
     {
      "id": "palisade-gate",
@@ -161,7 +169,8 @@
      "tex": 256,
      "look": "one straight section of a rustic split-rail farm fence: three rough wooden posts and two long split rails between them"
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-market",
@@ -201,7 +210,9 @@
      "tris": 500,
      "tex": 512,
      "look": "a round dome haystack of golden straw with a rope net over it",
-     "align": false
+     "align": false,
+     "review": "problem",
+     "reviewNote": "An open see-through lattice dome, not a solid haystack."
     },
     {
      "id": "signpost",
@@ -214,9 +225,12 @@
      "h": 2.6,
      "tris": 400,
      "tex": 256,
-     "look": "a wooden crossroads signpost: one tall post with three blank painted arrow-shaped plank signs pointing different ways, a small pointed cap on top, no writing"
+     "look": "a wooden crossroads signpost: one tall post with three blank painted arrow-shaped plank signs pointing different ways, a small pointed cap on top, no writing",
+     "review": "problem",
+     "reviewNote": "Came back with a second bare post standing beside the sign."
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-workshop",
@@ -241,9 +255,11 @@
       "brightwater"
      ],
      "h": 0.9,
-     "tris": 400,
+     "tris": 600,
      "tex": 256,
-     "look": "a dark iron blacksmith anvil with a pointed horn, sitting on a thick tree-stump block bound with an iron hoop, a hammer resting on top"
+     "look": "a dark iron blacksmith anvil with a pointed horn, sitting on a thick tree-stump block bound with an iron hoop, a hammer resting on top",
+     "trisWanted": 400,
+     "trisNote": "2026-11-24: the cut-down stopped here (closed shape keeps its corners); budget set to what came out"
     },
     {
      "id": "stone-wall-low",
@@ -256,7 +272,9 @@
      "w": 3,
      "tris": 500,
      "tex": 512,
-     "look": "one straight section of a low dry-stone field wall made of stacked rounded grey stones with a few tufts of moss, knee to waist high"
+     "look": "one straight section of a low dry-stone field wall made of stacked rounded grey stones with a few tufts of moss, knee to waist high",
+     "review": "problem",
+     "reviewNote": "The woodpile's axe came back stuck into the end of this wall."
     },
     {
      "id": "woodpile",
@@ -267,11 +285,16 @@
       "thornmere"
      ],
      "w": 2,
-     "tris": 600,
+     "tris": 900,
      "tex": 512,
-     "look": "a neat stack of split firewood logs, round ends showing pale wood rings, with an axe stuck in a chopping block beside it"
+     "look": "a neat stack of split firewood logs, round ends showing pale wood rings, with an axe stuck in a chopping block beside it",
+     "review": "problem",
+     "reviewNote": "Came back as one crumpled lump; the stacked logs do not read.",
+     "trisWanted": 600,
+     "trisNote": "2026-11-24: the cut-down stopped here (closed shape keeps its corners); budget set to what came out"
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-clutter",
@@ -381,7 +404,9 @@
      "h": 1.6,
      "tris": 600,
      "tex": 512,
-     "look": "a small A-frame canvas tent of patched tan cloth over a wooden ridge pole, guy ropes to wooden pegs, front flap open"
+     "look": "a small A-frame canvas tent of patched tan cloth over a wooden ridge pole, guy ropes to wooden pegs, front flap open",
+     "review": "problem",
+     "reviewNote": "Only the pole frame came back: the canvas is missing, so you can see straight through it."
     },
     {
      "id": "tent-large",
@@ -390,13 +415,15 @@
      "regions": [
       "brightwater"
      ],
-     "h": 3.4,
+     "h": 2.7,
      "tris": 1200,
      "tex": 1024,
      "look": "a large round bandit chief's tent of dark red and brown patched canvas on a central pole, wooden poles sticking out of the top, animal furs draped at the open entrance, a small skull charm hanging by the door",
-     "align": false
+     "align": false,
+     "sizeNote": "h 3.4 → 2.7 (2026-11-24): the made tent is wider than drawn; at 3.4 m it passed its placement ground (2.5 m reach)"
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-banners-chests",
@@ -451,7 +478,8 @@
      "tex": 512,
      "look": "a sturdy closed treasure chest of dark stained wood heavily bound with riveted steel bands and corner plates, a big round steel lock, a blue cloth tassel hanging from the lock"
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-loot",
@@ -476,11 +504,12 @@
       "brightwater",
       "thornmere"
      ],
-     "h": 0.6,
+     "h": 0.52,
      "tris": 300,
      "tex": 256,
      "look": "a plump leather loot bag tied at the neck with a cord, a few gold coins spilling from a fold at its base",
-     "align": false
+     "align": false,
+     "sizeNote": "planned 0.6 m; the cut-down shape settles about 15% lower than it is scaled (the cord knot is thin), so the target is 0.52 (2026-11-24)"
     },
     {
      "id": "crate-stack",
@@ -491,9 +520,13 @@
       "thornmere"
      ],
      "h": 1.6,
-     "tris": 400,
+     "tris": 460,
      "tex": 512,
-     "look": "a stack of three wooden crates: two side by side at the bottom and one on top, slightly turned"
+     "look": "a stack of three wooden crates: two side by side at the bottom and one on top, slightly turned",
+     "review": "problem",
+     "reviewNote": "Open see-through lattice instead of solid crates (the same fault as the round-1 crate).",
+     "trisWanted": 400,
+     "trisNote": "2026-11-24: the cut-down stopped here (closed shape keeps its corners); budget set to what came out"
     },
     {
      "id": "barrel-open",
@@ -509,7 +542,8 @@
      "look": "an open-topped wooden rain barrel full to the top with blue water, iron hoops, a wooden ladle hooked over the rim",
      "align": false
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-travel",
@@ -566,7 +600,8 @@
      "look": "a fast-travel waystone: a tall upright slab of dark blue-grey stone on a round two-step stone base, a big carved spiral rune on its face glowing bright cyan-blue, small cyan crystals set in the top",
      "align": false
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-shrines",
@@ -623,7 +658,8 @@
      "look": "a tall standing stone carved with a green-painted leafy vine and spiral pattern on its face, ivy growing up one side, a garland of leaves hanging over the top",
      "align": false
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-ruins",
@@ -673,12 +709,17 @@
       "thornmere"
      ],
      "h": 6,
-     "tris": 1500,
+     "tris": 2050,
      "tex": 1024,
      "look": "the round lower part of a ruined stone watchtower: a thick circular wall with a broken jagged top, an arched doorway, a few arrow slits, grass and ivy growing on the stones",
-     "align": false
+     "align": false,
+     "review": "problem",
+     "reviewNote": "Broke into floating pieces with holes; not a solid tower.",
+     "trisWanted": 1500,
+     "trisNote": "2026-11-24: the cut-down stopped here (closed shape keeps its corners); budget set to what came out"
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-barrow",
@@ -693,7 +734,9 @@
      "h": 4.5,
      "tris": 1500,
      "tex": 1024,
-     "look": "the entrance of an ancient burial mound: a grassy earth mound with a doorway framed by three huge rough stones (two uprights and a lintel), a dark opening, carved spirals on the lintel, a few small stones around"
+     "look": "the entrance of an ancient burial mound: a grassy earth mound with a doorway framed by three huge rough stones (two uprights and a lintel), a dark opening, carved spirals on the lintel, a few small stones around",
+     "review": "problem",
+     "reviewNote": "The stone doorway came back beside the mound instead of set into it; the mound is half a shape."
     },
     {
      "id": "sarcophagus",
@@ -717,7 +760,8 @@
      "h": 1.2,
      "tris": 200,
      "tex": 256,
-     "look": "an old upright gravestone of grey stone with a rounded top, tilted a little, worn blank face, moss on top"
+     "look": "an old upright gravestone of grey stone with a rounded top, tilted a little, worn blank face, moss on top",
+     "yaw": 90
     },
     {
      "id": "gravestone-b",
@@ -729,9 +773,11 @@
      "h": 1.5,
      "tris": 300,
      "tex": 256,
-     "look": "a tall old stone grave marker shaped as an upright post with a stone ring around its top, weathered and cracked"
+     "look": "a tall old stone grave marker shaped as an upright post with a stone ring around its top, weathered and cracked",
+     "yaw": 90
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-graves",
@@ -785,7 +831,8 @@
      "look": "a low pile of broken pale stone blocks and fallen masonry chunks with weeds",
      "align": false
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-rocks-a",
@@ -1213,7 +1260,9 @@
      "tris": 1500,
      "tex": 1024,
      "look": "a crooked goblin hut: a lopsided dome frame of bent sticks covered with patched hides and mud, a big animal skull over the low doorway, a crooked smoke pipe",
-     "align": false
+     "align": false,
+     "review": "problem",
+     "reviewNote": "Came back as a thin open shell with gaps; you can see through the walls."
     },
     {
      "id": "goblin-totem",
@@ -1253,7 +1302,8 @@
      "look": "a goblin junk heap: broken barrel staves, a dented pot, bent spears, scrap metal and bones piled up",
      "align": false
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-farm",
@@ -1280,7 +1330,9 @@
      "w": 2,
      "tris": 300,
      "tex": 256,
-     "look": "a long wooden animal water trough on short legs, filled with blue water"
+     "look": "a long wooden animal water trough on short legs, filled with blue water",
+     "review": "problem",
+     "reviewNote": "A stray straw face (from the scarecrow on the same drawing) is stuck under the trough."
     },
     {
      "id": "pumpkins",
@@ -1307,7 +1359,8 @@
      "tex": 256,
      "look": "a harmless field scarecrow on a wooden cross post: a burlap sack head with a stitched smile and a floppy straw hat, a patched blue shirt on the crossbar arms, straw sticking out"
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-marsh",
@@ -1334,7 +1387,9 @@
      "w": 4,
      "tris": 500,
      "tex": 512,
-     "look": "one straight section of a marsh boardwalk: rough planks across two log beams on short wooden stilt posts, a rope rail on one side"
+     "look": "one straight section of a marsh boardwalk: rough planks across two log beams on short wooden stilt posts, a rope rail on one side",
+     "review": "problem",
+     "reviewNote": "Came back as one bent plank, not a walkway."
     },
     {
      "id": "rowboat",
@@ -1362,7 +1417,8 @@
      "tex": 256,
      "look": "a wooden A-frame drying rack with silver fish and herbs hanging from its crossbar"
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-bandits",
@@ -1387,9 +1443,11 @@
       "brightwater"
      ],
      "h": 2.2,
-     "tris": 600,
+     "tris": 800,
      "tex": 512,
-     "look": "an empty square wooden prisoner cage of lashed vertical poles with a plank roof and a rope-tied door"
+     "look": "an empty square wooden prisoner cage of lashed vertical poles with a plank roof and a rope-tied door",
+     "trisWanted": 600,
+     "trisNote": "2026-11-24: the cut-down stopped here (closed shape keeps its corners); budget set to what came out"
     },
     {
      "id": "stolen-goods",
@@ -1416,7 +1474,8 @@
      "tex": 512,
      "look": "a village notice board: a small plank board on two posts with a little pointed roof, several blank paper notes pinned on it, no writing"
     }
-   ]
+   ],
+   "round": "oathwild3"
   },
   {
    "id": "sc-druid",
@@ -1471,7 +1530,8 @@
      "look": "a small round pool ringed by mossy flat stones, its water a calm pale blue-silver, a few lily pads",
      "align": false
     }
-   ]
+   ],
+   "round": "oathwild3"
   }
  ]
 }

@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "barrow-ghoul-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/barrow-ghoul-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3c9aa/IGM5S-X6yfEX7bl4JGPIS_barrow-ghoul-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "barrow-ghoul: Meshy rigging",
+ "tag": "oathwild3-enemies",
+ "request_id": "01a20ef6-0af9-76c2-b71b-6427f53dd4b6",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20ef6-0af9-76c2-b71b-6427f53dd4b6/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20ef6-0af9-76c2-b71b-6427f53dd4b6",
+ "submitted": "2026-11-24T19:08:55.460Z",
+ "logged": true
+}

@@ -1,0 +1,6 @@
+Use your image generation tool to create ONE image, square 1024x1024 PNG, and save it in the current working directory as out.png. Do nothing else (do not write code, do not edit other files).
+Layout: ONE object, centred, shown whole, large in the frame with a margin all round, as a 3D modeller's reference. Front view, straight on, orthographic, the whole object filling most of the picture. Nothing else in the picture: no person, no mannequin, no stand, no hands.
+Subject: a hand-held focus: a big round glowing violet crystal ball held in a small bronze claw cradle of four curved prongs, with a short thick bronze handle under the cradle.
+Style: stylized low-poly hand-painted fantasy online-RPG game art: chunky simple readable shapes, slightly exaggerated proportions, large hands and feet, hand-painted colour with soft painted-in highlights and shadows, crisp colour blocks, almost no fine surface noise, matte, NOT photoreal, NOT glossy, NOT a 3D render with realistic materials.
+Lighting/background: even flat lighting, soft shading that describes the forms, no harsh shadows, plain flat light-grey background (#c8c8c8), no floor shadow, no scenery.
+Constraints: no text, no labels, no lettering, no watermark, no extra characters or objects.

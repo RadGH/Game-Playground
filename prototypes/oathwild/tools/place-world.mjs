@@ -109,7 +109,7 @@ const PROPS = [
 
 // quest objects (data/quests.json steps name them). kind: container (a quest item in a loot window) | use
 const OBJECTS = [
-  { id: 'larkford_bell', name: 'the cracked shrine bell', kind: 'use', art: null, fallback: { shape: 'cylinder', size: [1.1, 1.3, 1.1], colour: '#b08d3c' }, at: [-257, -30] },
+  { id: 'larkford_bell', name: 'the cracked shrine bell', kind: 'use', art: 'shrine-bell', at: [-257, -30] },
   { id: 'torn_satchel', name: 'a torn satchel', kind: 'container', item: 'a Hollow Choir token', art: 'loot-sack', at: off('riverbank', 4, 6) },
   { id: 'bandit_ledger', name: "the chief's ledger", kind: 'container', item: "the chief's ledger", art: 'stolen-goods', at: off('bandit_camp', -12, 14) },
   { id: 'hill_shrine_flame', name: 'the Old Hill Shrine', kind: 'use', art: 'waystone', at: off('old_shrine_cult', 0, 6) },

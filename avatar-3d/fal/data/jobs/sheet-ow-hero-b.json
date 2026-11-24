@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "sheet-ow-hero-b",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-ow-hero-b.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c961/IIBkklCylhH9Z2R6uLEwc_sheet-ow-hero-b.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild hero weapons b: ow-warhammer ow-halberd ow-quarterstaff ow-shortbow",
+ "tag": "oathwild3-weapons",
+ "request_id": "01a20eea-8132-7530-8662-658e9e53ad66",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20eea-8132-7530-8662-658e9e53ad66/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20eea-8132-7530-8662-658e9e53ad66",
+ "submitted": "2026-11-24T18:56:19.287Z",
+ "logged": true
+}

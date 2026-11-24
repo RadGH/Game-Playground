@@ -1,4 +1,5 @@
 {
+  "swimMult": 0.6,
   "_doc": "Oathwild's own combat knobs (js/rules/combat.js is the one reader). Damage maths is Farhold's (rpg.strike); these are the world sim's timings, ranges, stamina costs and death rules.",
   "tickHz": 20,
   "projectile": {
@@ -17,6 +18,7 @@
     "sprintMult": 1.55,
     "dodge": 25,
     "dodgeMetres": 4,
+    "dodgeSeconds": 0.25,
     "dodgeSafeSeconds": 0.35,
     "powerAttack": 20,
     "powerHold": 0.6,
@@ -70,7 +72,7 @@
     "dmgPerLevel": 1.1
   },
   "magicWeapon": {
-    "_doc": "A magic weapon (wand, staff, sceptre, orb) shoots a bolt of spell power instead of swinging (as in Thousandvale).",
+    "_doc": "A magic weapon attacks with spell power in its own style (js/rules/casters.js, data/casters.json): `mult` is every style's base share (a style's own share multiplies it); `element` and `range` are the plain bolt of a quarterstaff or an orb left in the main hand.",
     "mult": 0.8,
     "element": "arcane",
     "range": 32

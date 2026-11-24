@@ -5,17 +5,26 @@
 //   monsters / mount: `fallback: { body, height, tint }` = an existing fal body drawn at that height with a colour tint
 //   props: `placeholder: { shape: box|cylinder|cone|house|rock|tree, size: [wide, tall, deep] m, colour }`
 //          (colour = the drawing's own mean colour; size from the planned height/length and the drawing's proportions)
+//   props the game builds itself (status "kit", 2026-11-24): `kit` = what prototypes/oathwild/js/client/render/kit-props.js
+//          draws it from (propkit / buildkit / Oathwild's own unit-shape pieces) and `size` = the planned [w, h, d] the
+//          world was laid out for (placement radii); no `placeholder`. A fal model, once made, wins (status "ready").
 //   node avatar-3d/fal/tools/oathwild-art.mjs        (run after build-catalog.mjs; ids never change)
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { KIT_SOURCE } from '../../../prototypes/oathwild/js/client/render/kit-props.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, '..', '..', 'prototypes', 'oathwild', 'data', 'art.json');
 const J = p => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
 const cat = J('data/catalog.json'), scen = J('data/scenery.json');
-const body = id => cat.bodies.find(b => b.id === id);
+// a model the owner has to review (catalog `review: 'problem'`, owner 2026-11-24 "NO REDOS … send them to me to review")
+// never goes into the game: its id keeps the fallback / kit / placeholder, and carries `review` so it is easy to find
+const flagged = x => x?.review === 'problem';
+const body = id => { const b = cat.bodies.find(b => b.id === id); return flagged(b) ? null : b; };
+const flaggedBody = id => cat.bodies.find(b => b.id === id && flagged(b));
+const heldOk = id => (id && !flagged(cat.items.find(i => i.id === id))) ? id : null;
 const hex = c => '#' + c.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
 
 // planned monsters not made yet → an existing body that reads close enough, at the planned height, tinted
@@ -34,10 +43,11 @@ const FALLBACK = {
 const ROLE = { 'riding-horse': 'mount', 'goblin-warchief': 'boss', 'marsh-hag': 'boss', 'barrow-king': 'boss', 'shrine-cultist': 'caster', 'bog-lurker': 'brawler', 'barrow-ghoul': 'undead', 'hill-ogre': 'brawler', 'fen-harpy': 'beast' };
 function enemy(id) {
   const b = body(id);
-  if (b) return { id, name: b.name, status: 'ready', role: b.role, height: b.height, skeleton: b.skeleton, triangles: b.triangles, weapon: b.weapon || null, offhand: b.offhand || null, ...(b.druidForm ? { druidForm: true } : {}) };
+  if (b) return { id, name: b.name, status: 'ready', role: b.role, height: b.height, skeleton: b.skeleton, triangles: b.triangles, weapon: heldOk(b.weapon), offhand: heldOk(b.offhand), ...(b.druidForm ? { druidForm: true } : {}) };
   const f = FALLBACK[id];
   if (!f || !body(f.body)) throw new Error('no model and no fallback for ' + id);
-  return { id, status: 'placeholder', role: ROLE[id], drawn: existsSync(join(ROOT, 'ref', id + '.webp')), fallback: f };
+  const fb = flaggedBody(id);
+  return { id, status: 'placeholder', role: ROLE[id], drawn: existsSync(join(ROOT, 'ref', id + '.webp')), fallback: f, ...(fb ? { review: 'problem', reviewNote: fb.reviewNote } : {}) };
 }
 
 // prop drawing proportions + colour from the cleaned sheet pictures (python: the bounding box of each quarter's object)
@@ -82,15 +92,21 @@ function placeholder(o) {
 
 const scenery = [];
 for (const s of scen.sheets) for (const o of s.objects) {
-  const c = (cat.scenery || []).find(x => x.id === o.id);
+  const c0 = (cat.scenery || []).find(x => x.id === o.id), c = flagged(c0) ? null : c0;
+  const rv = flagged(c0) ? { review: 'problem', reviewNote: c0.reviewNote } : {};
   scenery.push(c
     ? { id: o.id, name: o.name, kind: o.kind, regions: o.regions, status: 'ready', file: 'avatar-3d/fal/' + c.file, size: c.size, triangles: c.triangles }
-    : { id: o.id, name: o.name, kind: o.kind, regions: o.regions, status: 'placeholder', drawn: existsSync(join(ROOT, 'ref', s.id + '.webp')), placeholder: placeholder(o) });
+    : KIT_SOURCE[o.id]
+      ? { id: o.id, name: o.name, kind: o.kind, regions: o.regions, status: 'kit', kit: KIT_SOURCE[o.id], size: placeholder(o).size, drawn: existsSync(join(ROOT, 'ref', s.id + '.webp')), ...rv }
+      : { id: o.id, name: o.name, kind: o.kind, regions: o.regions, status: 'placeholder', drawn: existsSync(join(ROOT, 'ref', s.id + '.webp')), placeholder: placeholder(o), ...rv });
 }
+// pieces only the game's kit makes (no drawing sheet)
+const KIT_ONLY = [{ id: 'shrine-bell', name: 'Shrine bell', kind: 'shrine', regions: ['brightwater'], size: [1.53, 2.65, 0.87] }];
+for (const o of KIT_ONLY) if (!scenery.some(x => x.id === o.id)) scenery.push({ ...o, status: 'kit', kit: KIT_SOURCE[o.id] });
 
 const list = ids => ids.map(enemy);
 const art = {
-  _doc: 'Oathwild art manifest — GENERATED by avatar-3d/fal/tools/oathwild-art.mjs (do not edit by hand; ids never change). Bodies: createFalCharacter(id) from avatar-3d/fal/js/fal.js; `height` = real metres (scale the group by it). status "ready" = the model exists; status "placeholder" = not paid for yet (fal budget, owner 2026-11-23): monsters/mount carry `fallback: { body, height, tint }` = draw that existing fal body at that height, tinted; props carry `placeholder: { shape: box|cylinder|cone|house|rock|tree, size: [wide, tall, deep] m, colour }`. Ready props: GLB at `file` (repo-relative), origin = middle of the footprint on the ground, front faces -Z, +Y up, size = [wide x, tall y, deep z] m. `drawn` = its reference picture is ready, so making it later is one paid step (avatar-3d/fal/tools/oathwild-resume.sh).',
+  _doc: 'Oathwild art manifest — GENERATED by avatar-3d/fal/tools/oathwild-art.mjs (do not edit by hand; ids never change). Bodies: createFalCharacter(id) from avatar-3d/fal/js/fal.js; `height` = real metres (scale the group by it). status "ready" = the model exists; status "placeholder" = not paid for yet (fal budget, owner 2026-11-23): monsters/mount carry `fallback: { body, height, tint }` = draw that existing fal body at that height, tinted; props carry `placeholder: { shape: box|cylinder|cone|house|rock|tree, size: [wide, tall, deep] m, colour }`. status "kit" = a prop the game builds itself from unit shapes (js/client/render/kit-props.js; `kit` names the source: propkit / buildkit / oathwild), `size` = the planned [wide, tall, deep] m the world was laid out for. Ready props: GLB at `file` (repo-relative), origin = middle of the footprint on the ground, front faces -Z, +Y up, size = [wide x, tall y, deep z] m. `drawn` = its reference picture is ready, so making it later is one paid step (avatar-3d/fal/tools/oathwild-resume.sh).',
   regions: {
     brightwater: { name: 'Brightwater Vale', levels: [1, 5], enemies: {
       ready: list(['bristleback', 'bandit-chief', 'field-scarecrow', 'wolf', 'thug', 'knifer', 'crossbowman', 'bounty-hunter', 'gobw-tripo', 'gobr-tripo', 'gobm-tripo']),
@@ -113,4 +129,4 @@ const art = {
 };
 writeFileSync(OUT, JSON.stringify(art, null, 1) + '\n');
 const n = k => scenery.filter(s => s.status === k).length;
-console.log(`art.json: ${n('ready')} props ready, ${n('placeholder')} placeholders; monsters waiting: ${[...art.regions.brightwater.enemies.waiting, ...art.regions.thornmere.enemies.waiting].length}; horse ${art.mounts[0].status}`);
+console.log(`art.json: ${n('ready')} props ready, ${n('kit')} built by the game's kit, ${n('placeholder')} placeholders; monsters still on stand-ins: ${[...art.regions.brightwater.enemies.waiting, ...art.regions.thornmere.enemies.waiting].filter(e => e.status !== 'ready').length}; horse ${art.mounts[0].status}`);

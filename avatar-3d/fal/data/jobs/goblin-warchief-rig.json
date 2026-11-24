@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "goblin-warchief-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/goblin-warchief-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3c955/WmFUwNnFBkcgxZb6ppAmF_goblin-warchief-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "goblin-warchief: Meshy rigging",
+ "tag": "oathwild3-enemies",
+ "request_id": "01a20ee9-006f-71e2-adb5-bde060df52fd",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20ee9-006f-71e2-adb5-bde060df52fd/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20ee9-006f-71e2-adb5-bde060df52fd",
+ "submitted": "2026-11-24T18:54:40.793Z",
+ "logged": true
+}

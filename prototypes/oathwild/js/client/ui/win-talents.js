@@ -13,7 +13,7 @@ import { fmt } from '../../../../../shared/format.js';
 
 export function open(app) {
   const w = openWin({ id: 'talents', title: 'Talents', size: 'wide', cls: 'win-talents', render: (body) => render(app, body), foot: (el, w) => wire(app, el, w) });
-  if (!w._on) { w._on = true; const off = app.on('me', () => { if (w.open) w.render(); else off(); }); }
+  if (!w._on) { w._on = true; w.follow(app, 'me', () => JSON.stringify(app.me)); }   // only when my character changed (the server refreshes every 2 s)
   return w;
 }
 

@@ -946,6 +946,86 @@
    "kind": "beast",
    "name": "Riding horse",
    "look": "a real sturdy riding horse (a natural animal) in warm colourful high-fantasy game style, calm and noble: glossy chestnut-brown coat, a long flowing cream-blond mane and tail, white socks on the lower legs, a white blaze down the face, dark hooves; a brown leather saddle with a raised front and back on a red-and-gold patterned saddle blanket, stirrups hanging at the sides, a simple leather bridle with reins resting on the neck; mouth closed"
+  },
+  {
+   "id": "ow-wand",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Oak wand",
+   "view": "Flat side view of the whole wand standing upright, tip up, orthographic, filling the height of the picture.",
+   "look": "a slim wizard wand of pale carved oak with a spiral groove, a small glowing blue crystal set in the tip and a leather-wrapped handle with a brass end cap",
+   "length": 0.38,
+   "grip_at": 0.2
+  },
+  {
+   "id": "ow-sceptre",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Gilded sceptre",
+   "view": "Flat front view of the whole sceptre standing upright, head up, orthographic, filling the height of the picture.",
+   "look": "a priestly sceptre: a short straight gold-banded white rod with a leather grip at the bottom and at the top a chunky round gold head with a sun-disc shape and a red gem in its middle",
+   "length": 0.62,
+   "grip_at": 0.22
+  },
+  {
+   "id": "ow-orb",
+   "kind": "item",
+   "slot": "offhand",
+   "name": "Seer's orb",
+   "view": "Front view, straight on, orthographic, the whole object filling most of the picture.",
+   "look": "a hand-held focus: a big round glowing violet crystal ball held in a small bronze claw cradle of four curved prongs, with a short thick bronze handle under the cradle",
+   "length": 0.3,
+   "grip_at": 0.15
+  },
+  {
+   "id": "ow-tome",
+   "kind": "item",
+   "slot": "offhand",
+   "name": "Bound tome",
+   "view": "Front three-quarter view of the CLOSED book standing upright on its bottom edge, cover facing the viewer, orthographic.",
+   "look": "a thick closed spell book: dark red leather cover with brass corner guards, a brass clasp on the front edge and a simple painted golden rune circle on the cover, cream page edges visible",
+   "length": 0.32,
+   "grip_at": 0.5
+  },
+  {
+   "id": "ow-warhammer",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Iron warhammer",
+   "view": "Flat side view of the whole weapon standing upright, head up, orthographic, filling the height of the picture.",
+   "look": "a one-handed war hammer: a heavy square iron hammer head with a flat face on one side and a short curved spike on the other, a dark wooden haft with iron bands and a brown leather grip near the bottom",
+   "length": 0.9,
+   "grip_at": 0.15
+  },
+  {
+   "id": "ow-halberd",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Watchman halberd",
+   "view": "Flat side view of the whole weapon standing upright, head up, orthographic, filling the height of the picture.",
+   "look": "a long halberd polearm: a broad iron axe blade with a hooked back spike and a straight spear point on top, a long straight dark wooden shaft with iron rings and a red cloth tassel under the head",
+   "length": 2.1,
+   "grip_at": 0.4
+  },
+  {
+   "id": "ow-quarterstaff",
+   "kind": "item",
+   "slot": "weapon",
+   "name": "Ash quarterstaff",
+   "view": "Flat side view of the whole staff standing upright, orthographic, filling the height of the picture.",
+   "look": "a plain straight fighting quarterstaff of pale ash wood, both ends capped with dark iron bands, two leather-wrapped grips a third of the way from each end",
+   "length": 1.8,
+   "grip_at": 0.45
+  },
+  {
+   "id": "ow-shortbow",
+   "kind": "item",
+   "slot": "offhand",
+   "name": "Hunter shortbow",
+   "view": "Flat side view of the whole bow standing upright, string on the right, orthographic.",
+   "look": "a simple short hunting bow of yellow-brown yew wood with a gentle curve, a leather-wrapped grip in the middle and a thin taut string",
+   "length": 1.05,
+   "grip_at": 0.5
   }
  ]
 }

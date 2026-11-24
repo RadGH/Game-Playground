@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/meshy/rigging",
+ "name": "barrow-king-rig",
+ "price": 0.2,
+ "input": {
+  "model_url": "@models/upright/barrow-king-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "resolved": {
+  "model_url": "https://v3b.fal.media/files/b/0ab3c977/D8BgV1t1AoVcKVnI2LV75_barrow-king-tripo.glb",
+  "height_meters": 1,
+  "skeleton_template": "ue5_mannequin",
+  "include_fingers": false
+ },
+ "note": "barrow-king: Meshy rigging",
+ "tag": "oathwild3-enemies",
+ "request_id": "01a20eee-38b7-78a3-a848-6f2421dbc083",
+ "status_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20eee-38b7-78a3-a848-6f2421dbc083/status",
+ "response_url": "https://queue.fal.run/fal-ai/meshy/requests/01a20eee-38b7-78a3-a848-6f2421dbc083",
+ "submitted": "2026-11-24T19:00:22.890Z",
+ "logged": true
+}

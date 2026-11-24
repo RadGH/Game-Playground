@@ -170,6 +170,9 @@ that stands AROUND the buildings in such a place. It works exactly like the buil
 Three.js, no DOM), every model is a list of the eight unit shapes in `MESHES`, so a game instances a whole
 zone's props in at most eight draw calls (plus one small group per turning part). Gallery: `propkit.html`
 (group picker, seed, night toggle; `?group=farm`, `?night=1`, `?lite=1` for smaller shadows).
+A game that builds its own pieces in the same style can draw them with the kit's builder: `propContext(seed)` returns
+the same context the models use (`on`/`at`/`block`/`rod`/`cylX`/`ball`/`group`/`spinner`/`fire`/`glow`, `j`/`pick`/`tone`),
+and `PROP_COLOURS` is the palette (Oathwild's `js/client/render/kit-props.js` does this, 2026-11-24).
 
 ```js
 import { propModel, cropField, fenceLine, PROP_MODEL_IDS, PROP_MODEL_INFO, PROP_GROUPS, CROPS, CROP_IDS, FENCE_LINE_KINDS } from './js/propkit.js';

@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-workshop",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-workshop.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c963/NNLlhQS2Mbdt3HKUQ-352_sheet-sc-workshop.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-workshop (trellis-2 1024): lamp-post anvil stone-wall-low woodpile",
+ "tag": "oathwild3-props",
+ "request_id": "01a20eea-e7d7-7002-856c-dad9406601cd",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20eea-e7d7-7002-856c-dad9406601cd/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20eea-e7d7-7002-856c-dad9406601cd",
+ "submitted": "2026-11-24T18:56:45.575Z",
+ "logged": true
+}

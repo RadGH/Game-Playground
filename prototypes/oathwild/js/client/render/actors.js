@@ -73,6 +73,7 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
   const scene = view.scene;
   const actors = new Map();
   const falCache = new Map();         // body -> native height (measured once)
+  const statics = [];                 // standing animals (quest objects): drawn and animated, not units
   let tabardsLive = 0, loading = 0;
   const queue = [];
   const pump = () => { while (loading < 3 && queue.length) { const job = queue.shift(); loading++; job().finally(() => { loading--; pump(); }); } };
@@ -94,7 +95,7 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
     return c;
   }
 
-  function makeActor(id, info, { npc = null } = {}) {
+  function makeActor(id, info, { npc = null, me = false } = {}) {
     const root = new THREE.Group(); root.name = 'actor ' + id;
     scene.add(root);
     const a = {
@@ -112,10 +113,13 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
         b.play(clip, 0.12); a.clip = clip; a.once = clip; a.onceUntil = performance.now() + (kind === 'hit' ? 350 : 650);
       },
       revive() { a.dead = false; a.once = null; a.clip = null; },
-      dispose() { scene.remove(root); if (a.body?.isTabard) tabardsLive--; },
+      dispose() { scene.remove(root); if (a.body?.isTabard) { tabardsLive--; a.body.dispose?.(); } },
     };
-    a.standin = standin(info.k === 'monster' ? 1.6 : 1.8, info.k === 'monster' ? '#7a5a4a' : '#7a8a9a');
-    root.add(a.standin);
+    a.isMe = me; a.bornAt = performance.now();
+    // a person (hero or townsfolk) is never a grey stand-in: they are simply not drawn until their own body is ready,
+    // and the nearest ones get bodies first (budget). A monster gets a stand-in only if its model is slow (> 2 s), so
+    // nothing you fight is ever invisible.
+    if (!(info.k === 'player' || npc)) { a.standin = standin(info.k === 'monster' ? 1.6 : 1.8, '#7a5a4a'); a.standin.visible = false; root.add(a.standin); }
     actors.set(id, a);
     loadBody(a);
     return a;
@@ -124,23 +128,7 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
   function loadBody(a) {
     const info = a.info;
     if (info.k === 'player' || a.npc) {
-      if (tabardsLive >= maxTabards && !a.isMe) return;      // too many for this device: the stand-in figure stays
-      tabardsLive++;
-      const look = a.npc ? npcLook(a.npc) : (info.look || { body: 'male' });
-      const items = a.npc ? (OUTFIT[a.npc.body?.outfit] || OUTFIT.cloth) : tabardItems(rules, { gear: pseudoGear(info.gear) });
-      a.lookKey = JSON.stringify(look); a.gearKey = JSON.stringify(items);
-      later(async () => {
-        try {
-          const t = await createTabard({ body: look.body === 'female' ? 'female' : 'male', items, look, clip: 'idle' });
-          t.isTabard = true;
-          if (!actors.has(a.id)) return;
-          a.body = t; a.height = 1.8;
-          t.group.traverse(o => { if (o.isMesh) o.castShadow = true; });
-          if (a.standin) { a.root.remove(a.standin); a.standin = null; }
-          a.root.add(t.group);
-          if (a.formBody) t.group.visible = false;
-        } catch (e) { console.warn('tabard body', e); tabardsLive--; }
-      });
+      if (a.isMe) giveTabard(a);                             // everyone else waits for budget() — nearest first
       return;
     }
     const spec = bodyFor(art, info.art || info.def);
@@ -155,6 +143,50 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
         a.root.add(c.group);
         if (a.dead) c.play('death', 0);
       } catch (e) { console.warn('fal body', info.art, e); }
+    });
+  }
+
+  /** A person's Tabard body (looks + worn gear). Called for me at once, for everyone else by budget(). */
+  function giveTabard(a) {
+    if (a.body || a.tabardPending) return;
+    const info = a.info;
+    a.tabardPending = true;
+    const look = a.npc ? npcLook(a.npc) : (info.look || { body: 'male' });
+    const items = a.npc ? (OUTFIT[a.npc.body?.outfit] || OUTFIT.cloth) : tabardItems(rules, { gear: pseudoGear(info.gear) });
+    a.lookKey = JSON.stringify(look); a.gearKey = JSON.stringify(items);
+    later(async () => {
+      try {
+        const t = await createTabard({ body: look.body === 'female' ? 'female' : 'male', items, look, clip: 'idle' });
+        t.isTabard = true;
+        if (!actors.has(a.id) || !a.tabardPending) { t.dispose?.(); return; }   // gone, or handed back while it loaded
+        tabardsLive++;
+        a.body = t; a.height = 1.8; a.clip = null;
+        t.group.traverse(o => { if (o.isMesh) o.castShadow = true; });
+        a.root.add(t.group);
+        if (a.formBody) t.group.visible = false;
+        if (a.mounted && a.mountSeat) setMounted(a, true);
+      } catch (e) { console.warn('tabard body', e); }
+      finally { a.tabardPending = false; }
+    });
+  }
+  /** Hand a far townsperson's body back so a nearer one can have it. */
+  function takeTabard(a) {
+    a.tabardPending = false;
+    if (!a.body?.isTabard) return;
+    a.root.remove(a.body.group); a.body.dispose?.(); a.body = null; tabardsLive--;
+  }
+  /**
+   * Bodies by distance: the nearest `maxTabards` people (me always first) get a Tabard; a townsperson who falls well
+   * outside that list (4 places of slack, so walking about doesn't swap bodies back and forth) gives theirs back.
+   * Other heroes keep theirs once they have one (≤ 10 per world).
+   */
+  function budget(x, z) {
+    const people = [];
+    for (const a of actors.values()) if (a.info.k === 'player' || a.npc) people.push({ a, d: a.isMe ? -1 : Math.hypot(a.root.position.x - x, a.root.position.z - z) });
+    people.sort((p, q) => p.d - q.d);
+    people.forEach(({ a }, i) => {
+      if (i < maxTabards) giveTabard(a);
+      else if (i >= maxTabards + 4 && a.npc) takeTabard(a);
     });
   }
 
@@ -221,6 +253,7 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
       const h = a.mountBody; if (h) { const hw = speed < 0.35 ? 'idle' : speed < 5 ? 'walk' : 'run'; if (h.clip !== hw) h.play(hw, 0.2); }
     }
     if (want === 'sprint' && !b.isTabard) want = 'run';
+    if (a.swimming && b.isTabard && !a.formBody) want = speed < 0.35 ? 'Swim_Idle_Loop' : 'Swim_Fwd_Loop';   // the animation library's own swim clips
     if (a.clip !== want) { b.play(want, 0.22); a.clip = want; }
   }
 
@@ -229,7 +262,7 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
     get(id) { return actors.get(id) || null; },
     unit(id, info, opts = {}) {
       let a = actors.get(id);
-      if (!a) { a = makeActor(id, info, opts); if (opts.me) a.isMe = true; }
+      if (!a) a = makeActor(id, info, opts);
       else if (info !== a.info) refresh(a, info);
       return a;
     },
@@ -246,8 +279,30 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
     },
     setMounted,
     moveClip,
+    budget,
+    /**
+     * A standing animal for a quest object whose art is the horse (Chestnut the mare): the mount's own body — the
+     * real horse once its model is ready, until then the same stand-in the riders use — idling where it was placed.
+     */
+    async standingHorse(x, y, z, facing = 0) {
+      const m = (art.mounts || [])[0] || {};
+      const spec = m.status === 'ready' ? { body: m.id, height: m.height || 1.75 } : { body: m.fallback?.body || 'wolf', height: m.fallback?.height || 1.75, tint: m.fallback?.tint || '#8a4a22' };
+      const c = await falBody(spec);
+      c.group.position.set(x, y, z); c.group.rotation.y = facing;
+      c.group.traverse(o => { if (o.isMesh) o.castShadow = true; });
+      scene.add(c.group); c.play?.('idle', 0);
+      statics.push(c);
+      return c;
+    },
+    /** Has this actor a body on screen (a person waiting for theirs is not drawn, and neither is their name tag)? */
+    shown: id => { const a = actors.get(id); return !!(a && (a.body || a.formBody || a.standin?.visible)); },
     update(dt) {
-      for (const a of actors.values()) { (a.formBody || null)?.update(dt); a.body?.update(dt); if (a.mounted) a.mountBody?.update(dt); }
+      for (const c of statics) c.update?.(dt);
+      const now = performance.now();
+      for (const a of actors.values()) {
+        (a.formBody || null)?.update(dt); a.body?.update(dt); if (a.mounted) a.mountBody?.update(dt);
+        if (a.standin && !a.standin.visible && now - a.bornAt > 2000) a.standin.visible = true;   // a slow monster model
+      }
       for (let i = corpses.length - 1; i >= 0; i--) {
         const a = corpses[i];
         a.body?.update(dt);

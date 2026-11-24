@@ -1,0 +1,22 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "barrow-king-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/barrow-king-front.png",
+  "face_limit": 4500,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c95f/Ohh_tGcKKlxFTXVb59J1W_barrow-king-front.png",
+  "face_limit": 4500,
+  "texture": true
+ },
+ "note": "barrow-king: Tripo P1 textured, face_limit 4500",
+ "tag": "oathwild3-enemies",
+ "request_id": "01a20eea-aa54-76a1-97f8-a94484f6c0d3",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a20eea-aa54-76a1-97f8-a94484f6c0d3/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a20eea-aa54-76a1-97f8-a94484f6c0d3",
+ "submitted": "2026-11-24T18:56:29.824Z",
+ "logged": true
+}

@@ -25,6 +25,7 @@
 
 import { startQuest, setQuestStep, completeQuest, claimQuestReward, setFlag, hasFlag, flagsFor, note } from '../rules/world-state.js';
 import { addXp } from '../rules/levels.js';
+import { makeNamed } from '../rules/casters.js';
 
 export const STEP_KINDS = Object.freeze(['talk', 'kill', 'collect', 'reach', 'use', 'escort']);
 
@@ -460,7 +461,9 @@ export function claimReward(book, rules, ws, id, char, { pick = 0, rng = null } 
   const specs = [...(R.items || [])];
   if (R.pick?.length) specs.push(R.pick[Math.max(0, Math.min(R.pick.length - 1, pick))]);
   for (const sp of specs) {
-    const it = rules.rpg.loot.generate(sp.base, sp.rarity || 'magic', sp.quality || 'high', { rng: dice, ilvl: sp.ilvl || q.level, level: q.level });
+    // `named`: a named magic weapon from data/casters.json (its element and attack style are fixed)
+    const it = sp.named ? makeNamed(rules, sp.named, { rng: dice, ilvl: sp.ilvl || q.level, level: q.level })
+      : rules.rpg.loot.generate(sp.base, sp.rarity || 'magic', sp.quality || 'high', { rng: dice, ilvl: sp.ilvl || q.level, level: q.level });
     if (it) { char.bag = char.bag || []; char.bag.push(it); out.items.push(it); }
   }
   for (const f of R.flags || []) { setFlag(ws, f, { player: char.id }); out.flags.push(f); }

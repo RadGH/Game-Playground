@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-druid",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-druid.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c9c3/qJIAz9WTE1I9m61ZaRbux_sheet-sc-druid.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-druid (trellis-2 1024): druid-altar antler-totem wicker-effigy spirit-pool",
+ "tag": "oathwild3-props",
+ "request_id": "01a20ef9-9a1f-7a72-ba7a-5a62a01890b5",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef9-9a1f-7a72-ba7a-5a62a01890b5/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef9-9a1f-7a72-ba7a-5a62a01890b5",
+ "submitted": "2026-11-24T19:12:48.714Z",
+ "logged": true
+}

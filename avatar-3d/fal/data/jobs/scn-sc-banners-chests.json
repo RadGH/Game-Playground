@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-banners-chests",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-banners-chests.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c972/szYUHo5aqlviswD0ehlin_sheet-sc-banners-chests.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-banners-chests (trellis-2 1024): banner-bandit banner-village chest-common chest-rare",
+ "tag": "oathwild3-props",
+ "request_id": "01a20eed-277a-7652-b797-eee46944c810",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20eed-277a-7652-b797-eee46944c810/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20eed-277a-7652-b797-eee46944c810",
+ "submitted": "2026-11-24T18:59:12.931Z",
+ "logged": true
+}

@@ -8,6 +8,9 @@
 //   fx.indicator(shape, { at, dir, radius, length, width, angle, kind }) → { set(opts), stop() }
 //   fx.windup(object3d, spellId, element) → { stop() }    fx.impact([x,y,z], spellId, element)
 //   fx.ground([x,y,z], spellId, element, radius, seconds)  fx.bolts(list, dt) (server projectiles)  fx.update(dt)
+//   A magic weapon's bolt arrives as 'w:<element>:<style>' in place of a spell id: drawn with the element's bolt
+//   visual, sized by data/casters.json `look` (fx.looks, set by the play screen); js/client/render/caster-fx.js draws
+//   the other styles (cones, beams, rings, lobs, runes, chains).
 import * as THREE from 'three';
 
 export const ELEMENT_COLOUR = { physical: '#e8dcc0', fire: '#ff8a3a', ice: '#8fd8ff', lightning: '#b8b0ff', arcane: '#c58aff', shadow: '#8a5ab0', holy: '#ffe48a', nature: '#8fe07a', poison: '#a8e05a' };
@@ -54,7 +57,7 @@ export async function createFx(view, { heightAt, quality = 'medium', spells = nu
         if (o.at) st.at = { x: o.at.x ?? o.at[0], z: o.at.z ?? o.at[2] ?? o.at[1] };
         if (o.dir) { const l = Math.hypot(o.dir.x, o.dir.z) || 1; st.dir = { x: o.dir.x / l, z: o.dir.z / l }; }
         for (const k of ['radius', 'length', 'width', 'angle', 'kind']) if (o[k] != null) st[k] = o[k];
-        mat.color.set(KIND[st.kind] || KIND.valid);
+        mat.color.set(KIND[st.kind] || (String(st.kind).startsWith('#') ? st.kind : KIND.valid));
         const p = geo.attributes.position.array, u = geo.attributes.uv.array, n = SEG + 1;
         const rx = st.dir.z, rz = -st.dir.x;          // right of the aim
         for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
@@ -71,6 +74,7 @@ export async function createFx(view, { heightAt, quality = 'medium', spells = nu
         return h;
       },
       stop() { scene.remove(mesh); geo.dispose(); mat.dispose(); },
+      mat,
     };
     h.set(opts);
     return h;
@@ -99,18 +103,28 @@ export async function createFx(view, { heightAt, quality = 'medium', spells = nu
 
   // server projectiles: one glowing sprite each, moved between snapshots along their direction
   const bolts = new Map();
+  /** 'w:<element>:<style>' → { el, look } for a magic weapon's bolt (null for a spell id or an arrow). */
+  const wandVis = spell => {
+    if (typeof spell !== 'string' || !spell.startsWith('w:')) return null;
+    const [, el, ...rest] = spell.split(':');
+    const key = rest.join(':');
+    return { el, key, look: api.looks?.[key] || {} };
+  };
   function syncBolts(list, elementOf) {
     const seen = new Set();
     for (const [id, x, z, dx, dz, speed, spell] of list || []) {
       seen.add(id);
       let b = bolts.get(id);
       if (!b) {
-        const p = take(); p.busy = true; p.life = p.max = 99; p.grow = 0; p.base = spell ? 0.9 : 0.45;
-        const col = ELEMENT_COLOUR[elementOf(spell)] || '#ffe6b0';
+        const wv = wandVis(spell);
+        const p = take(); p.busy = true; p.life = p.max = 99; p.grow = 0; p.base = wv ? 0.6 * (wv.look.scale || 1) : spell ? 0.9 : 0.45;
+        const col = ELEMENT_COLOUR[wv ? wv.el : elementOf(spell)] || '#ffe6b0';
         p.s.material.color.set(col); p.s.scale.setScalar(p.base); p.s.visible = true;
         b = { p, x, z, dx, dz, speed, spell, col, kh: null };
-        // the Spell Kit draws a spell's missile (scaled up a little: small bolts read small from over the shoulder)
-        if (kit && spell) { try { b.kh = kit.missile([x, heightAt(x, z) + 1.3, z], null, spell, { dir: new THREE.Vector3(dx, 0, dz), range: 30, speed, scale: 1.4 }); b.kh?.catch?.(() => {}); p.s.visible = false; } catch { b.kh = null; } }
+        // the Spell Kit draws a spell's missile (scaled up a little: small bolts read small from over the shoulder);
+        // a wand's bolt is its element's bolt visual, sized by its style (a heavy bolt is big, a fan's three are small)
+        const visual = wv && kit ? kit.visualFor(null, { kind: 'bolt', element: wv.el }) : spell;
+        if (kit && spell) { try { b.kh = kit.missile([x, heightAt(x, z) + 1.3, z], null, visual, { dir: new THREE.Vector3(dx, 0, dz), range: 30, speed, scale: wv ? 1.4 * (wv.look.scale || 1) : 1.4, school: wv?.el }); b.kh?.catch?.(() => {}); p.s.visible = false; } catch { b.kh = null; } }
         bolts.set(id, b);
       }
       b.x = x; b.z = z; b.dx = dx; b.dz = dz; b.speed = speed;
@@ -119,8 +133,16 @@ export async function createFx(view, { heightAt, quality = 'medium', spells = nu
   }
 
   const windups = new Set();
-  return {
-    kit,
+  // a shape flashed on the ground in an element's colour, fading out (a wand's cone or beam: its true size at a glance)
+  const flashes = [];
+  function flash(shape, opts, colour, seconds = 0.35) {
+    const h = simpleIndicator(shape, { ...opts, kind: colour });
+    const o0 = h.mat.opacity;
+    flashes.push({ h, left: seconds, max: seconds, o0 });
+  }
+  const api = {
+    flash,
+    kit, looks: null, ELEMENT_COLOUR, burst, groundRing,
     indicator(shape, opts) { if (kit) { try { return kit.indicator(shape, opts); } catch { /* fall back */ } } return simpleIndicator(shape, opts); },
     windup(obj, spell, element, hands = null) {
       if (kit) { try { const w = kit.windup(obj, spell, { hands }); return { stop: () => w.release() }; } catch { /* simple */ } }
@@ -150,8 +172,10 @@ export async function createFx(view, { heightAt, quality = 'medium', spells = nu
         if (p.life <= 0) { p.busy = false; p.s.visible = false; p.s.material.opacity = 1; }
       }
       for (const b of bolts.values()) { b.x += b.dx * b.speed * dt; b.z += b.dz * b.speed * dt; b.p.s.position.set(b.x, heightAt(b.x, b.z) + 1.3, b.z); if (b.kh) b.p.s.visible = false; }
+      for (let i = flashes.length - 1; i >= 0; i--) { const f = flashes[i]; f.left -= dt; f.h.mat.opacity = f.o0 * Math.max(0, f.left / f.max) * 1.6; if (f.left <= 0) { f.h.stop(); flashes.splice(i, 1); } }
       for (const w of windups) { w.obj.getWorldPosition(w.p.s.position); w.p.s.position.y += 1.25; w.p.s.scale.setScalar(0.55 + Math.sin(performance.now() / 90) * 0.12); }
       for (let i = rings.length - 1; i >= 0; i--) { const r = rings[i]; r.left -= dt; r.m.material.opacity = 0.35 + 0.2 * Math.sin(performance.now() / 160); if (r.left <= 0) { r.stop(); rings.splice(i, 1); } }
     },
   };
+  return api;
 }

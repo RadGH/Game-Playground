@@ -31,6 +31,31 @@ function chip(label, sub, on, onClick) {
   b.addEventListener('click', onClick); return b;
 }
 
+// ---- review state (owner 2026-11-24: "NO REDOS … send them to me to review … add them to one of the asset pages").
+// Data, not HTML: catalog bodies / items / scenery carry `round` (the paid round that made them) and, when flagged,
+// `review: 'problem'` + `reviewNote`. The newest round is the last of spend.json `rounds`. ?round=<tag> shows only that
+// round, ?review=1 only the flagged ones (Enemies, Scenery, Weapons, Costs).
+const rpick = { round: q.get('round') || null, review: q.get('review') === '1' };
+let curRound = null;
+const inReview = x => (!rpick.round || x.round === rpick.round) && (!rpick.review || x.review === 'problem');
+function pill(text, cls) { const p = document.createElement('span'); p.className = 'fl-pill ' + cls; p.textContent = text; return p; }
+function marks(x, withNote = true) {
+  const s = document.createElement('span'); s.className = 'fl-marks';
+  if (curRound && x.round === curRound.tag) s.append(pill('New', 'new'));
+  if (x.review === 'problem') s.append(pill('Needs your review', 'warn'));
+  if (withNote && x.review === 'problem' && x.reviewNote) { const n = document.createElement('small'); n.className = 'fl-review-note'; n.textContent = x.reviewNote; s.append(n); }
+  return s;
+}
+function reviewChips(el, list, rerender) {
+  el.replaceChildren();
+  if (!curRound) return;
+  const nNew = list.filter(x => x.round === curRound.tag).length, nRev = list.filter(x => x.review === 'problem').length;
+  el.append(
+    chip('Everything', null, !rpick.round && !rpick.review, () => { rpick.round = null; rpick.review = false; rerender(); }),
+    chip('New this round', nNew + ' new', rpick.round === curRound.tag && !rpick.review, () => { rpick.round = curRound.tag; rpick.review = false; rerender(); }),
+    chip('Needs your review', nRev ? nRev + ' to look at' : 'none', rpick.review, () => { rpick.round = null; rpick.review = true; rerender(); }));
+}
+
 function loading(text) { const l = $('loading'); l.textContent = text || ''; l.classList.toggle('done', !text); }
 
 async function setBody(id) {
@@ -78,7 +103,12 @@ function renderDress() {
     const name = document.createElement('span'); name.textContent = label;
     const chips = document.createElement('div'); chips.className = 'fl-chips';
     chips.append(chip('None', null, !pick.worn[slot], () => wear(slot, null)));
-    for (const it of items) chips.append(chip(it.name, money(it.cost), pick.worn[slot] === it.id, () => wear(slot, it.id)));
+    for (const it of items) {
+      const c = chip(it.name, money(it.cost) + (it.review === 'problem' ? ' · needs your review' : curRound && it.round === curRound.tag ? ' · new' : ''), pick.worn[slot] === it.id, () => wear(slot, it.id));
+      if (it.review === 'problem') c.classList.add('warn'); else if (curRound && it.round === curRound.tag) c.classList.add('new');
+      if (it.reviewNote) c.setAttribute('aria-description', it.reviewNote);
+      chips.append(c);
+    }
     row.append(name, chips); slots.append(row);
   }
   const clips = $('d-clips'); clips.replaceChildren();
@@ -98,7 +128,9 @@ function renderStats() {
   ];
   const dl = $('d-stats'); dl.replaceChildren();
   for (const [k, v] of rows) { const dt = document.createElement('dt'); dt.textContent = k; const dd = document.createElement('dd'); dd.textContent = v; dl.append(dt, dd); }
-  const note = $('d-note'); note.textContent = char.def.note || ''; note.hidden = !char.def.note;
+  const flaggedWorn = worn.filter(i => i.review === 'problem').map(i => `${i.name}: ${i.reviewNote}`);
+  const text = [char.def.note, ...flaggedWorn.map(t => 'Needs your review — ' + t)].filter(Boolean).join(' ');
+  const note = $('d-note'); note.textContent = text; note.hidden = !text;
 }
 
 // ---- makers compared: the three raw results for the same man, side by side
@@ -139,10 +171,10 @@ async function showMakers(spend) {
 const enemies = state.enemies = [];          // characters on the stage now
 const loaded = new Map();                    // id -> Promise<character>, made once
 const GROUPS = [['all', 'All'], ['wyrmroad', 'Road foes'], ['oathwild', 'Oathwild'], ['boss', 'Bosses'], ['elemental', 'Elementals'], ['extra', 'Extras'], ['beast', 'Beasts'], ['goblin', 'Goblins']];
-const ROLE = { brawler: 'Brawler', rogue: 'Rogue', soldier: 'Soldier', archer: 'Archer', caster: 'Caster', undead: 'Undead', beast: 'Beast', construct: 'Construct', elemental: 'Elemental', boss: 'Boss' };
+const ROLE = { brawler: 'Brawler', rogue: 'Rogue', soldier: 'Soldier', archer: 'Archer', caster: 'Caster', undead: 'Undead', beast: 'Beast', construct: 'Construct', elemental: 'Elemental', boss: 'Boss', mount: 'Mount' };
 const epick = { group: q.get('group') || 'all', id: q.get('enemy') || null, lineup: q.get('lineup') === '1', clip: q.get('eclip') || 'idle' };
 const ORDER = GROUPS.map(g => g[0]);
-const stageList = () => cat.bodies.filter(b => b.enemy && b.stage !== false && (epick.group === 'all' || b.group === epick.group))
+const stageList = () => cat.bodies.filter(b => b.enemy && b.stage !== false && (epick.group === 'all' || b.group === epick.group) && inReview(b))
   .sort((a, b) => ORDER.indexOf(a.group) - ORDER.indexOf(b.group));
 const weaponsOf = b => [b.weapon, b.offhand].map(id => cat.items.find(i => i.id === id)).filter(Boolean);
 
@@ -185,6 +217,8 @@ function renderEnemyList() {
     if (!n) continue;
     g.append(chip(label, n + (n === 1 ? ' model' : ' models'), epick.group === id, () => { epick.group = id; showEnemies(); }));
   }
+  reviewChips($('e-review'), cat.bodies.filter(b => b.enemy && b.stage !== false), showEnemies);
+  renderWeapons();
   const v = $('e-view'); v.replaceChildren(
     chip('One at a time', null, !epick.lineup, () => { epick.lineup = false; showEnemies(); }),
     chip('Line-up, real sizes', null, epick.lineup, () => { epick.lineup = true; showEnemies(); }));
@@ -198,6 +232,8 @@ function renderEnemyList() {
     const tr = tb.insertRow(); tr.className = 'fl-pick' + (b.id === epick.id ? ' on' : ''); tr.tabIndex = 0;
     const name = tr.insertCell(); name.textContent = b.name;
     if (w.length) { const s = document.createElement('small'); s.textContent = w.map(i => i.name.toLowerCase()).join(', '); name.append(s); }
+    if ((curRound && b.round === curRound.tag) || b.review) name.append(marks(b));
+    if (b.review === 'problem') tr.classList.add('fl-flagged');
     tr.insertCell().textContent = ROLE[b.role] || '—';
     tr.insertCell().textContent = b.height ? b.height.toFixed(1) + ' m' : '—';
     const tris = b.triangles + w.reduce((a, i) => a + i.triangles, 0), cost = b.cost + w.reduce((a, i) => a + i.cost, 0);
@@ -247,16 +283,64 @@ function focusEnemy(id) {
 }
 addEventListener('resize', () => { if (tab === 'enemies') layoutEnemies(); });
 
+// weapons: every held item of the newest round (or flagged), each one opens in the man's hand in the Dressing room
+function renderWeapons() {
+  const t = $('w-table'); if (!t) return; t.replaceChildren();
+  const all = cat.items.filter(i => i.kind === 'held' && ((curRound && i.round === curRound.tag) || i.review));
+  const list = all.filter(inReview);
+  $('w-card').hidden = !all.length;
+  const head = t.createTHead().insertRow(); for (const h of ['Weapon', 'Hand', 'Triangles', 'Cost']) { const th = document.createElement('th'); th.textContent = h; head.append(th); }
+  const tb = t.createTBody();
+  for (const it of list) {
+    const tr = tb.insertRow(); tr.className = 'fl-pick' + (it.review === 'problem' ? ' fl-flagged' : ''); tr.tabIndex = 0;
+    const n = tr.insertCell(); n.textContent = it.name;
+    const holders = cat.bodies.filter(b => b.weapon === it.id || b.offhand === it.id).map(b => b.name.toLowerCase());
+    if (holders.length) { const s = document.createElement('small'); s.textContent = 'held by ' + holders.join(', '); n.append(s); }
+    n.append(marks(it));
+    tr.insertCell().textContent = it.slot === 'offhand' ? 'Off' : 'Main';
+    tr.insertCell().textContent = num(it.triangles);
+    tr.insertCell().textContent = money(it.cost);
+    const go = async () => { await setTab('dress', spendData); await wear(it.slot, it.id); };
+    tr.addEventListener('click', go);
+    tr.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  }
+  if (!list.length) { const tr = tb.insertRow(); const c = tr.insertCell(); c.colSpan = 4; c.textContent = rpick.review ? 'No weapon needs your review.' : 'None.'; }
+}
+
+// costs: every paid job; the newest round (spend.json `rounds`) gets its own line — spent, its cap, and what is left of
+// the money the owner added for it
 function renderCosts(spend) {
+  const tagOf = j => j.tag || '';
+  const r = curRound;
+  const roundJobs = r ? spend.jobs.filter(j => tagOf(j).startsWith(r.tag)) : [];
+  const roundSpent = roundJobs.reduce((a, j) => a + j.price, 0);
   $('c-total').textContent = `${spend.jobs.length} paid jobs, ${money(spend.total)} in all. A picture that held several items shares its price between them.`;
+  const rc = $('c-round');
+  if (r) {
+    rc.hidden = false; rc.replaceChildren();
+    const h = document.createElement('h2'); h.textContent = r.name;
+    const dl = document.createElement('dl'); dl.className = 'fl-stats';
+    const rows = [['Paid jobs this round', String(roundJobs.length)], ['Spent this round', money(roundSpent)], ['This round\'s cap', money(r.cap)],
+      ['Added to the fal account', money(r.added)], ['Left of the ' + money(r.added), money(r.added - roundSpent)], ['Flagged for your review', String([...cat.bodies, ...cat.items, ...(cat.scenery || [])].filter(x => x.review === 'problem').length)]];
+    for (const [k, v] of rows) { const dt = document.createElement('dt'); dt.textContent = k; const dd = document.createElement('dd'); dd.textContent = v; dl.append(dt, dd); }
+    const p = document.createElement('p'); p.className = 'fl-note'; p.textContent = r.rule || '';
+    rc.append(h, dl, p);
+  }
+  const chips = $('c-filter'); chips.replaceChildren();
+  if (r) chips.append(chip('Every job', null, rpick.round !== r.tag, () => { rpick.round = null; renderCosts(spend); }), chip('This round only', roundJobs.length + ' jobs', rpick.round === r.tag, () => { rpick.round = r.tag; renderCosts(spend); }));
   const t = $('c-table'); t.replaceChildren();
   const head = t.createTHead().insertRow(); for (const h of ['Job', 'Maker', 'Price']) { const th = document.createElement('th'); th.textContent = h; head.append(th); }
   const tb = t.createTBody();
-  for (const j of spend.jobs) { const tr = tb.insertRow(); tr.insertCell().textContent = j.note || j.id; tr.insertCell().textContent = j.endpoint.replace(/^fal-ai\//, ''); tr.insertCell().textContent = money(j.price); }
-  const f = t.createTFoot().insertRow(); f.insertCell().textContent = 'Total'; f.insertCell(); f.insertCell().textContent = money(spend.total);
+  const jobs = r && rpick.round === r.tag ? roundJobs : spend.jobs;
+  for (const j of jobs) {
+    const tr = tb.insertRow(); const n = tr.insertCell(); n.textContent = j.note || j.id;
+    if (r && tagOf(j).startsWith(r.tag)) n.append(marks({ round: r.tag }));
+    tr.insertCell().textContent = j.endpoint.replace(/^fal-ai\//, ''); tr.insertCell().textContent = money(j.price);
+  }
+  const f = t.createTFoot().insertRow(); f.insertCell().textContent = jobs === roundJobs ? 'This round' : 'Total'; f.insertCell(); f.insertCell().textContent = money(jobs === roundJobs ? roundSpent : spend.total);
 }
 
-let scenery = null;
+let scenery = null, spendData = null;
 async function setTab(t, spend) {
   if (tab === 'scenery' && t !== 'scenery') scenery?.leave();
   tab = t;
@@ -265,17 +349,19 @@ async function setTab(t, spend) {
   makersGroup.visible = t === 'makers'; enemyGroup.visible = t === 'enemies';
   if (char) char.group.visible = t !== 'makers' && t !== 'enemies' && t !== 'scenery';
   if (t === 'scenery') {
-    scenery ||= state.scenery = createSceneryTab({ view, cat, $, chip, loading, q, money, num });
+    scenery ||= state.scenery = createSceneryTab({ view, cat, $, chip, loading, q, money, num, review: { inReview, marks, reviewChips, current: () => curRound } });
     await scenery.enter();
   } else if (t === 'makers') await showMakers(spend);
   else if (t === 'enemies') await showEnemies();
+  else if (t === 'costs') renderCosts(spend);
   else if (char) { const h = char.def.id === 'goblin' ? 1.05 : 1.8; view.controls.target.set(0, h * 0.52, 0); view.camera.position.set(0, h * 0.72, h * 2.1); view.controls.update(); }
 }
 
 (async () => {
   try {
     cat = await loadCatalog();
-    const spend = await fetch(new URL('../data/spend.json', import.meta.url)).then(r => r.json());
+    const spend = spendData = await fetch(new URL('../data/spend.json', import.meta.url)).then(r => r.json());
+    curRound = (spend.rounds || []).at(-1) || null;
     for (const b of document.querySelectorAll('.fl-tabs button')) b.addEventListener('click', () => setTab(b.dataset.tab, spend));
     $('d-spin').addEventListener('change', e => view.setTurntable(e.target.checked ? 0.5 : 0));
     renderCosts(spend);

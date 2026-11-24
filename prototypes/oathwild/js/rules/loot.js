@@ -19,6 +19,7 @@
 import { makeRng, hashStr } from './farhold.js';
 import { addProfAffix } from './proficiency.js';
 import { lockpickChance, gainSkill, hasPerk } from './skills-use.js';
+import { namedDrop } from './casters.js';
 
 const LT = rules => rules.data.lootTables;
 const RARITY = ['normal', 'magic', 'rare', 'legendary'];
@@ -56,6 +57,9 @@ export function rollShare(rules, tableId, level, rng) {
       if (it) items.push(it);
     }
   }
+  // a boss's chance at a named caster ("Wand of the Ninth Star"; data/casters.json namedDrops)
+  const named = namedDrop(rules, tableId, rng, level);
+  if (named) { named.id = `n${Math.floor(rng() * 1e9).toString(36)}`; items.push(named); }
   return { gold, items };
 }
 

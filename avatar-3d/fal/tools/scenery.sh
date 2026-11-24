@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # One scenery sheet from its Codex drawing to four finished props (Oathwild 2026-11-23).
 #
-#   avatar-3d/fal/tools/scenery.sh <sheet-id> [--flip]      sheets live in data/scenery.json
+#   avatar-3d/fal/tools/scenery.sh <sheet-id> [--flip|--mid]   sheets live in data/scenery.json (--mid: split_sheet.py cuts at the middle lines)
 #
 #   1. ref/<sheet>.png        Codex 2×2 drawing (tools/refdraw.mjs <sheet-id>; free) — drawn first if missing
 #   2. ref/sheet-<sheet>.png  cleaned + centred (tools/scenery-sheet.py)

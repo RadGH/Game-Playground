@@ -3,11 +3,12 @@
 //
 //   const G = createGround(T, placements, scattered)   T = js/world/terrain.js, scattered = js/world/scatter.js result
 //   G.settle(prev, next)  → { x, z }   the step from prev to next, refused / slid along where the ground says no:
-//                                      off the walkable ground (deep water, cliffs, out of bounds), up or down a ledge
+//                                      off the walkable ground (cliffs, out of bounds — deep water is SWUM, see swimming()), up or down a ledge
 //                                      steeper than the walk limit, onto or off a bridge deck except at its ends, or
 //                                      into a building, rock or tree trunk (pushed out of its circle)
 //   G.y(x, z)            walked height (bridge decks win)
 //   G.solidsNear(x, z, r) the round colliders near a point (tests, debug drawing)
+//   G.swimming(x, z)     true in deep water (rivers, marsh pools): swim speed, no sprint / dodge / horse
 //
 // The combat sim (js/rules/combat.js) moves bodies on a flat plane; the server calls settle() for every unit that
 // moved after each step. Pure: no DOM, no three.js.
@@ -32,7 +33,7 @@ export function createGround(T, placements = null, scattered = null) {
     for (const p of placements.props || []) if (p.r && p.r >= 0.6 && !p.walk) add(p.at[0], p.at[1], p.r * 0.8);
   }
   if (scattered) {
-    for (const t of scattered.trees || []) add(t.x, t.z, Math.max(0.3, (t.r || 0.5) * 0.7));
+    for (const t of scattered.trees || []) add(t.x, t.z, Math.max(0.3, (t.r || 0.5) * 0.85));     // the trunk (scatter.js TREE_SPECIES)
     for (const d of scattered.decor || []) if (d.solid) add(d.x, d.z, (d.r || 1) * 0.8);
   }
   function solidsNear(x, z, r = 2) {
@@ -44,7 +45,7 @@ export function createGround(T, placements = null, scattered = null) {
   const y = (x, z) => T.walkHeightAt(x, z).y;
 
   function stepOk(ax, az, bx, bz) {
-    if (!T.walkable(bx, bz)) return false;
+    if (!T.walkable(bx, bz) && !T.swimmable(bx, bz)) return false;          // deep water is swum, not a wall
     const h0 = T.walkHeightAt(ax, az), h1 = T.walkHeightAt(bx, bz);
     const d = Math.hypot(bx - ax, bz - az);
     if (Math.abs(h1.y - h0.y) > Math.max(0.35, maxRise * d * 1.25)) return false;   // a ledge, not a slope
@@ -89,5 +90,7 @@ export function createGround(T, placements = null, scattered = null) {
     }
     return { x, z };
   }
-  return { settle, y, solidsNear, standAt, solids, stepOk };
+  /** Is a body at (x, z) swimming (deep water)? The server slows it and the browser's prediction does the same. */
+  const swimming = (x, z) => T.walkHeightAt(x, z).on === 'swim';
+  return { settle, y, solidsNear, standAt, solids, stepOk, swimming };
 }

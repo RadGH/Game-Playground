@@ -1,8 +1,8 @@
 # fal.ai characters — a paid picture-to-3D test
 
-**Status:** Oathwild art 2026-11-23 — **fal balance ran out twice**: round 1 after US$3.40 (of a planned US$25), round 2 after US$0.40 (of the owner's new US$8.80: only the two rigs went through, the horse was refused). Made: brown bear, bristleback boar, mountain lion (four legs, all six clips), bandit chief + field scarecrow (rigged), 7 scenery props, the scenery pipeline + Scenery tab. **Everything else is placeholder art** in `prototypes/oathwild/data/art.json` (`tools/oathwild-art.mjs`): monsters + the horse draw an existing fal body tinted (`fallback`), props draw a coloured shape (`placeholder`). All drawings are ready; `tools/oathwild-resume.sh` makes them in the owner's priority order when there is credit. Before that: test 3 creature roster (35 enemies, US$32.80).
-**Play:** `avatar-3d/fal/index.html` on the dev server (8401) or stable (8400): Enemies (group Oathwild), Scenery, Dressing room, Makers, Costs.
-**Next:** when fal has credit: `tools/oathwild-resume.sh --dry`, then without (horse, three bosses + their weapons, 12 scenery sheets, hill ogre ≈ US$7.60 under the US$8.50 cap); watch the clips of bandit chief + scarecrow on the page (checked only in Blender so far: the browser was busy); redraw the crate as a solid box. Older: imp wings, bell maul, bounty hunter knees.
+**Status:** Oathwild art round 3 done 2026-11-24 (owner added US$50: "NO REDOS … send them to me to review"): **US$12.10 spent of the US$13.00 cap, US$37.90 left of the US$50** for feedback. Made once each: the riding horse, 8 monsters, 4 boss weapons, 8 hero weapons, 17 scenery sheets (68 props). Problems are **flagged for the owner's review** (catalog `review: 'problem'` + `reviewNote`), never paid for again, and kept out of the game. All-time US$48.70.
+**Play:** `avatar-3d/fal/index.html` on the dev server (8401) or stable (8400): Enemies (group Oathwild + Weapons card), Scenery, Dressing room, Makers, Costs. Review: `?tab=enemies&round=oathwild3`, `?tab=scenery&review=1`, `?tab=costs`.
+**Next:** the owner reviews the flagged models (`?review=1`) and decides each one: keep, redraw + remake, or leave to the game's kit model. Older: imp wings, bell maul, bounty hunter knees.
 **Parked:** dragon (owner: not yet); goblin-shaped armour; capes; finger bones; the remaining Chibi 2.6 catalog.
 
 ## Who uses these files
@@ -273,6 +273,36 @@ hollowborn, hill-ogre → bruiser, fen-harpy → winged-imp; summons `imp` → w
 hollowborn dark, `turret` → a cylinder. Props (97): `placeholder: { shape: box|cylinder|cone|house|rock|tree, size:
 [wide, tall, deep] m, colour }`, colour = the drawing's mean colour, size from the planned height/length and the
 drawing's proportions. Every `art` id in `prototypes/oathwild/data/*.json` resolves to a model or a placeholder.
+
+### Round 3 (owner 2026-11-24: US$50 added; "NO REDOS. Send them to me to review instead if there are problems … Use only what's necessary and leave leftover for feedback")
+Caps: `FAL_CAP=49.60` (all-time; `fal-job.mjs` now checks it too) and `FAL_CAPS=oathwild3:13.00`, tags `oathwild3-enemies|weapons|props`.
+Every model was made **once**; nothing was paid for twice. **Spent US$12.10** (horse 0.50, 8 monsters 5.60, 3 weapon sheets 0.90,
+17 scenery sheets 5.10) → **US$37.90 left of the US$50**. The Costs tab shows the round (`spend.json` `rounds`).
+
+**Review state is data:** `round: 'oathwild3'` on gear.json bodies/items and scenery.json sheets; a problem gets
+`review: 'problem'` + `reviewNote` (one line, plain words). `build-catalog.mjs` copies them into the catalog; the page shows
+"New" and "Needs your review" pills and filters (`?round=oathwild3`, `?review=1`); `oathwild-art.mjs` keeps a flagged
+model OUT of `prototypes/oathwild/data/art.json` (its id stays on the fallback body / kit model, with `review` noted).
+
+| What | Result |
+|---|---|
+| riding-horse | ok — saddled horse, rigged free (`quad_rig.py --straighten`); seat measured on spine_2: `[0, 1.38, 0.374]` m at 1.75 m (gear.json `mount.seat`) |
+| goblin-warchief, marsh-hag, barrow-king, shrine-cultist, bog-lurker, barrow-ghoul | ok — Tripo P1 + Meshy rig; bosses hold their own weapons |
+| hill-ogre | **flagged**: his right arm was against his belly, so lifting it drags a long strip of side skin |
+| fen-harpy | **flagged**: the wings are joined to the arms (one attempt as planned) |
+| warchief-cleaver, hag-staff, barrow-blade, chief-axe | ok (sheet came back mirrored → `split_sheet.py --flip`, free); bandit chief now holds chief-axe |
+| ow-wand, ow-sceptre, ow-orb, ow-tome, ow-warhammer, ow-halberd, ow-quarterstaff | ok — Codex drawings (free) → 2 Trellis sheets; offered to Tabard as `fal:<id>`, mapped in Oathwild `js/game/gear.js` |
+| ow-shortbow | **flagged**: the string did not come through |
+| 17 scenery sheets | 55 props ok; **13 flagged**: palisade-wall, palisade-corner (crumpled shards), woodpile (lump), stone-wall-low (the woodpile's axe stuck in it), tent-small (frame only, see-through), crate-stack (lattice), ruin-tower (broke apart), goblin-hut (open shell), haystack (lattice), signpost (extra post), trough (stray straw face), boardwalk (one bent plank), barrow-entrance (door beside the mound) |
+
+Free fixes (no new paid job): 5 scenery sheets came back mirrored (`scenery.sh <sheet> --flip`); 3 sheets had no clean
+gap (`split_sheet.py --mid`, new: cut at the middle lines and slice touching objects apart): market, barrow, farm;
+gravestones turned 90° (`yaw`); tent-large and watermill made a little smaller so they fit the ground the world planned
+for them (`sizeNote`); the tome kept its thickness (`squeeze: false`).
+
+**Lessons:** Trellis mirrors about half the sheets → look at every split against the drawing before scenery.py; a sheet
+whose objects touch needs `--mid`; thin strings, lattices, open tent canvases and stake rows still fail → draw solid
+panels and leave strings to code.
 
 ### Four-legged animals (free rig)
 `quad_rig.py` as for the wolf, plus `--straighten`: a three-quarter drawing can come back turned (the lion ~20°, both

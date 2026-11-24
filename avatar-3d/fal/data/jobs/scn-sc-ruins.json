@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-ruins",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-ruins.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c995/d7GfY_SJuFFdSrzrrikWM_sheet-sc-ruins.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-ruins (trellis-2 1024): ruin-wall ruin-arch ruin-pillar ruin-tower",
+ "tag": "oathwild3-props",
+ "request_id": "01a20ef2-9c4c-7f03-86d5-a8712c507c9e",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef2-9c4c-7f03-86d5-a8712c507c9e/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef2-9c4c-7f03-86d5-a8712c507c9e",
+ "submitted": "2026-11-24T19:05:10.524Z",
+ "logged": true
+}

@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-bandits",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-bandits.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c9bb/1e9DcC-MJF5uFCKGs6f0F_sheet-sc-bandits.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-bandits (trellis-2 1024): lookout cage stolen-goods wanted-board",
+ "tag": "oathwild3-props",
+ "request_id": "01a20ef8-65f1-7f73-8ce3-e05da6b789ac",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef8-65f1-7f73-8ce3-e05da6b789ac/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef8-65f1-7f73-8ce3-e05da6b789ac",
+ "submitted": "2026-11-24T19:11:29.826Z",
+ "logged": true
+}

@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-barrow",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-barrow.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c99c/o7yGM3mxpmsmCn8Icr9qo_sheet-sc-barrow.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-barrow (trellis-2 1024): barrow-entrance sarcophagus gravestone-a gravestone-b",
+ "tag": "oathwild3-props",
+ "request_id": "01a20ef3-b0c6-7d10-a1e0-ea130282557c",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef3-b0c6-7d10-a1e0-ea130282557c/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef3-b0c6-7d10-a1e0-ea130282557c",
+ "submitted": "2026-11-24T19:06:21.295Z",
+ "logged": true
+}

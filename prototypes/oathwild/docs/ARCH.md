@@ -35,7 +35,8 @@ prototypes/oathwild/
   data/               Oathwild's own JSON (classes.json trees + ranks, attributes.json, skills-use.json,
                       talents.json, proficiency.json, regions.json, map.json, placements.json, quests.json, npcs.json, loot-tables.json,
                       spell-visuals.json, art.json (fal props + enemies per region — art helper writes it))
-  js/client/          three.js: terrain, props, actors (Tabard heroes, fal enemies), camera + aim, indicators,
+  js/client/          three.js: terrain (render/ground.js + ground-plan.js: painted layers, worn roads, town paving,
+                      fields; render/grass.js: GPU tufts; render/view.js: sky, sun, fog, shadows), props, actors (Tabard heroes, fal enemies), camera + aim, indicators,
                       spells (spellkit), HUD, windows (loot, character, class tree, talents, inventory, map)
   js/net/             client socket, snapshot apply, prediction (adapt T predict.js / snapshot.js, sized for 10)
   server/             Node + ws: one process hosts several worlds; 20 Hz sim; world saves (JSON on disk);
@@ -75,6 +76,12 @@ prototypes/oathwild/
 - **Spell targeting** (client → server `cast {slot, aim:{origin,dir}, at:[x,y,z]?, held}`): kinds `bolt` (aimed
   along the crosshair ray), `ground` (placed where the crosshair ray meets the ground, clamped to range; the client
   shows the zone indicator while held), `cone`, `line`, `self`, `beam`. Indicator shapes reuse T telegraph-shape.js.
+- **Magic weapons** (`js/rules/casters.js`, `caster-attack.js`, `data/casters.json`; RULES.md "Magic weapons"):
+  `sheet.caster` = the main hand's attack plan; `step` input `attackAt:[x,y,z]` (the client's `in.at` with no cast
+  slot) is where a lob / placed style lands. Events: `attack { who, look, el, shape, dir, at?, r?, len?, w?, arc?, ms?,
+  seconds?, echo? }`, `hop { who, from, to, el, look }`, `rider { who, rider, amt }`, `barrier { …, ward }`; a hit from
+  one carries `vis: 'w:<element>:<style>'`, and so does its projectile in the snapshot's `pj`. Client:
+  `js/client/render/caster-fx.js`.
 - **Tooltips**: one renderer (`js/client/ui/tip.js`) on top of `shared/tooltip.js`, fed only by `describe.js`. Every
   number via `shared/format.js`. Standard layout: title · kind/rank line · cost / cast / cooldown / range row · body
   lines with live numbers · auras explained · "How it's worked out" (formula with the hero's numbers) · compare

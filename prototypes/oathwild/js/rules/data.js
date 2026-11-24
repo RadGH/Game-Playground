@@ -13,6 +13,7 @@ export const RULES_DATA_FILES = {
   enemies: '../../../farhold/data/enemies.json',
   tvSkills: '../../../thousandvale/data/rules/skills-tv.json',
   tvClasses: '../../../thousandvale/data/rules/classes-tv.json',
+  casterForms: '../../../thousandvale/data/rules/caster-forms.json',
   // Oathwild's own
   attributes: '../../data/attributes.json',
   classes: '../../data/classes.json',
@@ -28,6 +29,7 @@ export const RULES_DATA_FILES = {
   inventory: '../../data/inventory.json',
   backgrounds: '../../data/backgrounds.json',
   combat: '../../data/combat.json',
+  casters: '../../data/casters.json',
 };
 
 /** URL of one data file, resolved against this module. */

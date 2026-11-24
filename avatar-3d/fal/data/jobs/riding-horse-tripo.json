@@ -1,0 +1,22 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "riding-horse-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/riding-horse-front.png",
+  "face_limit": 4000,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c93c/crkZZNe9ZKn9Z1aBQod_v_riding-horse-front.png",
+  "face_limit": 4000,
+  "texture": true
+ },
+ "note": "riding-horse: Tripo P1 textured, face_limit 4000",
+ "tag": "oathwild3-enemies",
+ "request_id": "01a20ee5-1c6b-7770-8535-58073721e6b5",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a20ee5-1c6b-7770-8535-58073721e6b5/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a20ee5-1c6b-7770-8535-58073721e6b5",
+ "submitted": "2026-11-24T18:50:25.824Z",
+ "logged": true
+}

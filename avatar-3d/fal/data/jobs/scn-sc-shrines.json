@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-shrines",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-shrines.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c98e/phA2m8Z7WNmSp0ydVFrwF_sheet-sc-shrines.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-shrines (trellis-2 1024): shrine-respawn standing-stone-a standing-stone-b druid-stone",
+ "tag": "oathwild3-props",
+ "request_id": "01a20ef1-834a-73f2-afa3-02c3bf91ae75",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef1-834a-73f2-afa3-02c3bf91ae75/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ef1-834a-73f2-afa3-02c3bf91ae75",
+ "submitted": "2026-11-24T19:03:58.583Z",
+ "logged": true
+}

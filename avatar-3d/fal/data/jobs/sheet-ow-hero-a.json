@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "sheet-ow-hero-a",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-ow-hero-a.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c961/t6M_VrbCg1vclPx1Xa22h_sheet-ow-hero-a.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild hero weapons a: ow-wand ow-sceptre ow-orb ow-tome",
+ "tag": "oathwild3-weapons",
+ "request_id": "01a20eea-9c06-73e1-bcbd-eb162252aa8f",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20eea-9c06-73e1-bcbd-eb162252aa8f/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20eea-9c06-73e1-bcbd-eb162252aa8f",
+ "submitted": "2026-11-24T18:56:26.157Z",
+ "logged": true
+}

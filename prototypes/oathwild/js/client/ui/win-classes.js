@@ -30,7 +30,7 @@ export function open(app, opts = {}) {
     foot: (el, w) => wire(app, el, w),
   });
   if (opts.cls && !owned.includes(opts.cls)) { w.tab = 'all'; w.data.view = opts.cls; w.render(); }
-  if (!w._on) { w._on = true; const off = app.on('me', () => { if (w.open) w.render(); else off(); }); }
+  if (!w._on) { w._on = true; w.follow(app, 'me', () => JSON.stringify(app.me)); }   // only when my character changed (the server refreshes every 2 s)
   return w;
 }
 

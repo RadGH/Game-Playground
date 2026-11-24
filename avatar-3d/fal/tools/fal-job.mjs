@@ -96,6 +96,17 @@ export function capCheck(price, caps, ROOTDIR = ROOT) {
 		if (used + price > cap + 1e-9) throw new Error(`BUDGET: ${prefix} has US$${used.toFixed(2)} spent or running; +${price} would pass US$${cap}`);
 	}
 }
+// FAL_CAP = the all-time cap (every row in spend.json + jobs submitted but not logged yet), 2026-11-24
+export function totalCapCheck(price, cap, ROOTDIR = ROOT) {
+	if (!(cap > 0)) return;
+	const spendFile = join(ROOTDIR, 'data', 'spend.json');
+	const spend = existsSync(spendFile) ? JSON.parse(readFileSync(spendFile, 'utf8')) : { jobs: [] };
+	const logged = new Set(spend.jobs.map(j => j.id));
+	const jobsDir = join(ROOTDIR, 'data', 'jobs');
+	const pending = existsSync(jobsDir) ? readdirSync(jobsDir).filter(f => f.endsWith('.json')).map(f => JSON.parse(readFileSync(join(jobsDir, f), 'utf8'))).filter(j => !j.logged && !logged.has(j.name)) : [];
+	const used = spend.jobs.reduce((a, j) => a + j.price, 0) + pending.reduce((a, j) => a + (j.price || 0), 0);
+	if (used + price > cap + 1e-9) throw new Error(`BUDGET: all-time US$${used.toFixed(2)} spent or running; +${price} would pass FAL_CAP US$${cap}`);
+}
 
 export async function runJob({ endpoint, name, price, input, note, tag, caps }) {
 	const key = falKey();
@@ -106,6 +117,7 @@ export async function runJob({ endpoint, name, price, input, note, tag, caps }) 
 	const t0 = Date.now();
 	if (!job) {
 		capCheck(price, caps);
+		totalCapCheck(price, parseFloat(process.env.FAL_CAP));
 		const resolved = await resolveInputs(input, key);
 		const r = await fetch('https://queue.fal.run/' + endpoint, { method: 'POST', headers: { ...auth, 'Content-Type': 'application/json' }, body: JSON.stringify(resolved) });
 		const text = await r.text();

@@ -17,6 +17,32 @@ export function onWindows(fn) { listeners.add(fn); return () => listeners.delete
 const changed = () => { for (const fn of listeners) { try { fn(stack.length); } catch (e) { console.error(e); } } };
 export const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+// ---- keep the view across a re-render: scroll positions of every scroller + the focused control, by a stable key
+function viewKey(node, root) {
+  if (node.dataset?.scrollKey) return 'k:' + node.dataset.scrollKey;
+  const parts = [];
+  for (let n = node; n && n !== root; n = n.parentElement) {
+    const cls = [...n.classList].filter(c => !/^(pad-focus|is-|ow-on)/.test(c)).sort().join('.');
+    const data = n.dataset ? Object.entries(n.dataset).filter(([k]) => !/^(scrollKey)$/.test(k)).map(([k, v]) => `${k}=${v}`).sort().join(',') : '';
+    const same = n.parentElement ? [...n.parentElement.children].filter(c => c.tagName === n.tagName && c.className === n.className) : [];
+    parts.push(`${n.tagName}.${cls}[${data}]#${same.indexOf(n)}`);
+  }
+  return parts.reverse().join('>');
+}
+function keepView(root) {
+  const scrolls = [];
+  for (const n of root.querySelectorAll('*')) if (n.scrollTop || n.scrollLeft) scrolls.push([viewKey(n, root), n.scrollTop, n.scrollLeft]);
+  const f = document.activeElement && root.contains(document.activeElement) ? viewKey(document.activeElement, root) : null;
+  return { scrolls, focus: f };
+}
+function restoreView(root, kept) {
+  if (!kept.scrolls.length && !kept.focus) return;
+  const byKey = new Map();
+  for (const n of root.querySelectorAll('*')) byKey.set(viewKey(n, root), n);
+  for (const [k, top, left] of kept.scrolls) { const n = byKey.get(k); if (n) { n.scrollTop = top; n.scrollLeft = left; } }
+  if (kept.focus) byKey.get(kept.focus)?.focus?.({ preventScroll: true });
+}
+
 export function openWin({ id, title: heading = '', sub = '', cls = '', size = '', tabs = null, tab = null, render, foot = null, onClose = null, clear = false, focus = true }) {
   const old = id && findWin(id);
   if (old) { if (tab) old.tab = tab; old.heading = heading; old.render(); return old; }
@@ -38,8 +64,10 @@ export function openWin({ id, title: heading = '', sub = '', cls = '', size = ''
   const w = {
     id, el, shade, tab: tab || tabs?.[0]?.id || null, tabs, heading, sub, body: null, footEl: null, data: {},
     render() {
-      const keep = w.body ? w.body.scrollTop : 0;
+      // a re-render keeps the player where they were (lessons rule: windows never jump back to the start): every
+      // scroller in the window — the body and any inner list or tree, up/down AND sideways — and the focused control
       const sameTab = w._lastTab === w.tab;
+      const kept = sameTab ? keepView(el) : null;
       el.innerHTML = `<header class="ow-win-head"><h2>${esc(w.heading)}</h2>${w.sub ? `<span class="ow-win-sub">${esc(w.sub)}</span>` : ''}<button type="button" class="ow-x" data-close aria-label="Close">${glyph('x', 22)}</button></header>`
         + (w.tabs ? `<nav class="ow-tabs" role="tablist">${w.tabs.map(t => `<button type="button" class="ow-tab" role="tab" data-tab="${esc(t.id)}" aria-selected="${t.id === w.tab}">${t.icon || ''}${esc(t.label)}${t.badge ? `<span class="ow-badge">${esc(t.badge)}</span>` : ''}</button>`).join('')}</nav>` : '')
         + '<div class="ow-win-body"></div>' + (foot ? '<footer class="ow-win-foot"></footer>' : '');
@@ -50,11 +78,13 @@ export function openWin({ id, title: heading = '', sub = '', cls = '', size = ''
       const html = render?.(w.body, w.tab, w);
       if (typeof html === 'string') w.body.innerHTML = html;
       if (foot && w.footEl) { const f = typeof foot === 'function' ? foot(w.footEl, w) : foot; if (typeof f === 'string') w.footEl.innerHTML = f; }
-      w.body.scrollTop = sameTab ? keep : 0;
+      if (kept) restoreView(el, kept); else w.body.scrollTop = 0;
       w._lastTab = w.tab;
       w.onRender?.(w);
     },
     setTab(t) { w.tab = t; w.render(); },
+    /** Re-render on an app event only when what the window shows changed (`sig` = a string of that state). */
+    follow(app, type, sig) { let last = sig(); const off = app.on(type, () => { if (!w.open) { off(); return; } const s = sig(); if (s !== last) { last = s; w.render(); } }); return off; },
     close() {
       const i = stack.indexOf(w);
       if (i < 0) return;

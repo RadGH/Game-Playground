@@ -14,7 +14,7 @@
 //     ok:      bool }                             can it be taken / worn right now
 //
 //   describeSpell(rules, char, spellId, { rank, cls })
-//   describeItem(rules, char, item, { slot })
+//   describeItem(rules, char, item, { slot })   (a wand / tome / staff / sceptre / focus: what its attack does, js/rules/casters.js)
 //   describeAura(rules, unit, statusId)
 //   describeTalent(rules, char, talentId)
 //   describeNode(rules, char, cls, nodeId)
@@ -33,6 +33,7 @@ import { auraNumbers, iconOf, dispelKind, isBeneficial } from './auras.js';
 import { skillValue, xpToNext } from './skills-use.js';
 import { spellPowerRange, spellMultiplier, monsterDef } from './combat.js';
 import { attrTotals } from './sheet.js';
+import { finishCaster, casterKind, attackCard, riderLine, casterForms } from './casters.js';
 
 export const ELEMENT_NAME = Object.freeze({ physical: 'Physical', fire: 'Fire', ice: 'Frost', lightning: 'Lightning', arcane: 'Arcane', shadow: 'Shadow', holy: 'Holy', nature: 'Nature', poison: 'Poison' });
 const KIND_TEXT = { bolt: 'Aimed bolt', ground: 'Placed on the ground', cone: 'In front of you', line: 'A line ahead', self: 'On yourself', beam: 'Held beam' };
@@ -278,7 +279,7 @@ const cap = s => String(s || '').replace(/^\w/, c => c.toUpperCase());
 function summedAffixLines(item) {
   const by = new Map();
   for (const a of item.affixes || []) {
-    if (a.stat === 'proficiency' || a.id === 'legendary_effect') continue;
+    if (a.stat === 'proficiency' || a.id === 'legendary_effect' || a.stat === 'castElement') continue;   // the element: casterLines says it with Oathwild's numbers
     const k = a.stat;
     const cur = by.get(k);
     if (cur) cur.value += a.value; else by.set(k, { ...a });
@@ -289,14 +290,20 @@ function summedAffixLines(item) {
 
 export function describeItem(rules, char, item, { slot = null } = {}) {
   if (!item) return blank({ title: 'Nothing', ok: false });
-  const into = slot || (item.type === 'weapon' ? 'weapon' : item.slot);
+  const ck = casterKind(item);
+  if (ck) finishCaster(rules, item);                 // an older item learns its element and style (same id = same answer)
+  const into = slot || (item.type === 'weapon' ? (ck === 'orb' ? 'offhand' : 'weapon') : item.slot);
   const need = itemNeeds(rules, item);
   const wear = canWear(rules, char, item, { slot: into });
   const rarity = item.setId ? 'set' : item.isUnique ? 'unique' : item.rarity || 'normal';
   const what = item.type === 'weapon' ? (SUBTYPE_NAME[item.subtype] || cap(item.subtype)) : item.type === 'accessory' ? cap(item.slot) : need?.label || cap(item.slot);
   const out = blank({ title: item.name, kind: `${RARITY_NAME[rarity] || 'Common'} ${what}`, icon: `item_${item.baseKey}`, ok: wear.ok });
-  if (item.type === 'weapon' || item.isShield || item.isMagicShield) { const h = handText(item); if (h) out.rows.push({ label: 'Held', value: h }); }
-  if (item.dmg) out.rows.push({ label: 'Damage', value: fmtRange(item.dmg[0], item.dmg[1]) });
+  if (item.type === 'weapon' || item.isShield || item.isMagicShield) { const h = ck === 'tome' ? 'One-hand (main hand: its own attack; off hand: Echo)' : handText(item); if (h) out.rows.push({ label: 'Held', value: h }); }
+  if (item.dmg && item.weaponCategory === 'magic') {
+    const k = rules.data.attributes.base.magicWeaponShare;
+    out.rows.push({ label: 'Spell power', value: `+${fmtRange(Math.round(item.dmg[0] * k), Math.round(item.dmg[1] * k))} (half its ${fmtRange(item.dmg[0], item.dmg[1])})` });
+  } else if (item.dmg) out.rows.push({ label: 'Damage', value: fmtRange(item.dmg[0], item.dmg[1]) });
+  if (item.castElement) out.rows.push({ label: 'Element', value: ELEMENT_NAME[item.castElement] || cap(item.castElement) });
   if (item.armor) {
     const extra = (item.affixes || []).filter(a => a.stat === 'armor').reduce((s, a) => s + a.value, 0);
     out.rows.push({ label: 'Armour', value: fmt(Math.round(item.armor + extra)) });
@@ -308,6 +315,7 @@ export function describeItem(rules, char, item, { slot = null } = {}) {
   if (need) out.rows.push({ label: 'Needs', value: `${need.label}${need.str ? `, ${fmt(need.str)} Strength` : ''}` });
   out.lines.push(...summedAffixLines(item).filter(l => !/^\+?[\d.]+ armou?r$/i.test(l)));
   for (const a of item.affixes || []) if (a.stat === 'proficiency') out.lines.push(`Grants ${rules.data.proficiency.names[a.grants]} training while worn (${a.name}).`);
+  if (ck && ck !== 'pole') casterLines(rules, char, item, ck, out);
   if (!wear.ok) out.needs.push(wear.why);
   // compare against what is worn there
   const worn = char.gear?.[into];
@@ -329,6 +337,40 @@ export function describeItem(rules, char, item, { slot = null } = {}) {
     if (worn) out.how.push(`Compared with ${worn.name} (${into === 'weapon' ? 'main hand' : into}).`);
   }
   return out;
+}
+
+/**
+ * What a magic item's attack (or rider) does for THIS hero, worked out on a trial sheet with the item in its hand —
+ * the same plan the world sim fights with (js/rules/casters.js attackPlan), so the card is never a promise the
+ * code does not keep.
+ */
+function casterLines(rules, char, item, ck, out) {
+  const gear = { ...char.gear };
+  const asMain = ck === 'wand' || ck === 'tome' || ck === 'staff' || ck === 'sceptre';
+  if (asMain) { gear.weapon = item; if (item.twoHanded) delete gear.offhand; if (gear.offhand === item) delete gear.offhand; }
+  else gear.offhand = item;
+  const trial = sheetOf(rules, { ...char, gear });
+  const plan = trial.caster;
+  if (asMain && plan) {
+    const card = attackCard(rules, plan, trial.spell.int, { sheet: trial });
+    out.rows.push(...card.rows);
+    out.lines.unshift(...card.lines);
+    out.how.push(...card.how);
+    if (card.status) {
+      const power = avgOf(trial.spell.int) * Math.max(plan.mult, 0.3) * STATUS_POWER_SHARE;
+      out.auras.push(statusSentence(rules, card.status, {}, { power }));
+    }
+  }
+  // what it adds held in the OFF hand (an orb, a focus, or a tome)
+  const { forms, cfg } = casterForms(rules);
+  const riderKey = ck === 'tome' ? cfg.offhandTome : (ck === 'orb' || ck === 'focus') ? item.focusRider : null;
+  const rider = riderKey ? { ...forms.riders[riderKey], key: riderKey } : null;
+  if (rider) {
+    const mainPlan = !asMain && plan ? plan : null;
+    let line = riderLine(rules, rider, mainPlan ? trial.spell.int : null, mainPlan, { lead: ck === 'tome' ? 'In the off hand, beside a wand, tome or sceptre:' : 'Held in the off hand with a wand, tome or sceptre:' });
+    if (!asMain && !plan) line += ' (You hold no wand, tome or sceptre right now.)';
+    out.lines.push(line);
+  }
 }
 
 // ---------------------------------------------------------------- auras

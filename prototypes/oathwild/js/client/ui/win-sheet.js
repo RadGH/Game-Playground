@@ -17,7 +17,7 @@ const SCHOOL = { fire: 'Fire', ice: 'Frost', lightning: 'Lightning', arcane: 'Ar
 
 export function open(app) {
   const w = openWin({ id: 'sheet', title: 'Character', size: 'wide', cls: 'win-sheet', render: (body, tab, w) => render(app, body, w), foot: (el, w) => foot(app, el, w) });
-  if (!w._on) { w._on = true; const off = app.on('me', () => { if (w.open) w.render(); else off(); }); }
+  if (!w._on) { w._on = true; w.follow(app, 'me', () => JSON.stringify(app.me)); }   // only when my character changed (the server refreshes every 2 s)
   return w;
 }
 

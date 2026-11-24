@@ -10,6 +10,9 @@
 </head>
 <body class="fl">
 <!-- fal.ai test review page. ?body=male|female|goblin  ?set=bare|cloth|leather|mail|plate  ?clip=walk  ?weapon=sword  ?tab=dress|enemies|scenery|makers|costs  ?kind=building ?region=brightwater ?prop=<id> ?plineup=1  ?eclip=attack  ?group=wyrmroad|oathwild|boss|elemental|extra|beast|goblin  ?enemy=<id>  ?lineup=1
+     Review (owner 2026-11-24): ?round=<tag> (e.g. oathwild3) = only what that paid round made; ?review=1 = only models flagged
+     "Needs your review" (catalog `review: 'problem'` + `reviewNote`, from data/gear.json / data/scenery.json). Works on the
+     Enemies, Scenery, Weapons (Enemies tab) and Costs tabs. The newest round + its budget = data/spend.json `rounds`.
      window.__fal = { ready, errors, character, stats() } for tests and screenshots (tools/shots.mjs). -->
 <header class="fl-top">
   <div class="fl-title">
@@ -61,7 +64,8 @@
       <section class="fl-card">
         <h2>Enemies</h2>
         <p class="fl-note">Each enemy is one model with its clothes made in, from one redrawn picture (Tripo P1, about 3,000 triangles; bosses and big ones about 4,500); only the weapon is separate. Pick a row to see it on the stage.</p>
-        <div class="fl-chips" id="e-groups"></div>
+        <div class="fl-chips" id="e-review"></div>
+        <div class="fl-chips fl-gap" id="e-groups"></div>
         <div class="fl-chips fl-gap" id="e-view"></div>
       </section>
       <section class="fl-card">
@@ -72,13 +76,19 @@
         <h2>Roster</h2>
         <div class="fl-table-wrap"><table class="fl-table fl-roster" id="e-table"></table></div>
       </section>
+      <section class="fl-card" id="w-card" hidden>
+        <h2>Weapons</h2>
+        <p class="fl-note">Weapons from the newest round, and any weapon waiting for your review. Pick one to see it in the man's hand in the Dressing room.</p>
+        <div class="fl-table-wrap"><table class="fl-table fl-roster" id="w-table"></table></div>
+      </section>
     </div>
 
     <div class="fl-pane" data-pane="scenery">
       <section class="fl-card">
         <h2>Scenery</h2>
         <p class="fl-note">Static props for Oathwild: four per redrawn picture (Trellis-2), rebuilt as one closed low-poly shape with its own painted texture, at real size in metres. The man is 1.8 m.</p>
-        <div class="fl-chips" id="p-kinds"></div>
+        <div class="fl-chips" id="p-review"></div>
+        <div class="fl-chips fl-gap" id="p-kinds"></div>
         <div class="fl-chips fl-gap" id="p-regions"></div>
         <div class="fl-chips fl-gap" id="p-view"></div>
       </section>
@@ -97,9 +107,11 @@
     </div>
 
     <div class="fl-pane" data-pane="costs">
+      <section class="fl-card fl-round" id="c-round" hidden></section>
       <section class="fl-card">
         <h2>Every paid job</h2>
         <p class="fl-note" id="c-total"></p>
+        <div class="fl-chips" id="c-filter"></div>
         <div class="fl-table-wrap"><table class="fl-table" id="c-table"></table></div>
       </section>
     </div>

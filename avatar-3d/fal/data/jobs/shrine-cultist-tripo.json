@@ -1,0 +1,22 @@
+{
+ "endpoint": "tripo3d/p1/image-to-3d",
+ "name": "shrine-cultist-tripo",
+ "price": 0.5,
+ "input": {
+  "image_url": "@ref/shrine-cultist-front.png",
+  "face_limit": 4000,
+  "texture": true
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c977/X67Vu7BAglQ-WMsaseNn9_shrine-cultist-front.png",
+  "face_limit": 4000,
+  "texture": true
+ },
+ "note": "shrine-cultist: Tripo P1 textured, face_limit 4000",
+ "tag": "oathwild3-enemies",
+ "request_id": "01a20eee-4eef-71f1-a10c-2eb3f7b6db45",
+ "status_url": "https://queue.fal.run/tripo3d/p1/requests/01a20eee-4eef-71f1-a10c-2eb3f7b6db45/status",
+ "response_url": "https://queue.fal.run/tripo3d/p1/requests/01a20eee-4eef-71f1-a10c-2eb3f7b6db45",
+ "submitted": "2026-11-24T19:00:28.566Z",
+ "logged": true
+}

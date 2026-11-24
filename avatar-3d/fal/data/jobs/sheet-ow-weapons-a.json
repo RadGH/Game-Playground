@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "sheet-ow-weapons-a",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-ow-weapons-a.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c942/T6lCBQ0AQ7CoxPq7fG2hX_sheet-ow-weapons-a.png",
+  "resolution": 1024,
+  "decimation_target": 12000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild boss weapons: warchief-cleaver hag-staff barrow-blade chief-axe",
+ "tag": "oathwild3-weapons",
+ "request_id": "01a20ee5-d89e-7270-aae0-35059f37bf45",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ee5-d89e-7270-aae0-35059f37bf45/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ee5-d89e-7270-aae0-35059f37bf45",
+ "submitted": "2026-11-24T18:51:14.003Z",
+ "logged": true
+}

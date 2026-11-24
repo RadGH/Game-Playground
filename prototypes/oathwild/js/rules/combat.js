@@ -33,6 +33,7 @@ import { killXp, addXp, pendingLevels } from './levels.js';
 import { noticeRange, gainSkill, hasPerk } from './skills-use.js';
 import { createContainer, monsterTable } from './loot.js';
 import { wearOnRespawn, mountRefusal } from './inventory.js';
+import { casterAttack, casterAfterHit, steerBolt } from './caster-attack.js';
 
 const CF = rules => rules.data.combat;
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
@@ -216,13 +217,15 @@ function stepPlayer(world, u, input, dt) {
   if (input.mount) toggleMount(world, u, input);
 
   // movement
-  if (ctl.move && input.move && (input.move.x || input.move.z)) {
+  const dashing = u.dash && u.dash.steps > 0;
+  if (ctl.move && !dashing && input.move && (input.move.x || input.move.z)) {
     const dir = norm2(input.move.x, input.move.z);
     const b = auraTotalsOf(u);
     let speed = s.moveSpeed * (1 - slowOf(u)) * (1 + (b.move || 0));
     if (u.sneaking) speed *= hasPerk(rules, u.char, 'soft_soles') ? 0.75 : 0.55;
     if (u.mounted) speed *= rules.data.inventory.mount.speedMult;
-    if (input.sprint && !u.mounted && !s.overloaded && u.stamina > 0) {
+    if (u.swimming) speed *= C.swimMult ?? 0.6;              // u.swimming: set by the host from the ground each step
+    if (input.sprint && !u.mounted && !u.swimming && !s.overloaded && u.stamina > 0) {
       speed *= C.stamina.sprintMult;
       spendStamina(world, u, C.stamina.sprintPerSecond * dt);
     }
@@ -230,12 +233,19 @@ function stepPlayer(world, u, input, dt) {
     u.x += dir.x * speed * dt; u.z += dir.z * speed * dt;
     if (u.channel) endChannel(world, u);
   }
-  if (input.dodge && ctl.move && u.stamina >= C.stamina.dodge) {
-    const d = input.move && (input.move.x || input.move.z) ? norm2(input.move.x, input.move.z) : { x: -Math.sin(u.facing), z: -Math.cos(u.facing) };
-    u.x += d.x * C.stamina.dodgeMetres; u.z += d.z * C.stamina.dodgeMetres;
+  // the dodge: a quick DASH over dodgeSeconds (not a 4 m jump in one step), the way you are moving, or toward the
+  // crosshair when standing still — js/client/play/predict.js does exactly the same, so the drawn hero never snaps back
+  if (input.dodge && ctl.move && !dashing && !u.swimming && u.stamina >= C.stamina.dodge) {
+    const d = input.move && (input.move.x || input.move.z) ? norm2(input.move.x, input.move.z) : { x: Math.sin(u.facing), z: Math.cos(u.facing) };
+    u.dash = { x: d.x, z: d.z, steps: dashSteps(C, dt) };
     u.safeUntil = world.t + C.stamina.dodgeSafeSeconds;
     spendStamina(world, u, C.stamina.dodge);
     emit(world, { t: 'dodge', who: u.id });
+  }
+  if (u.dash && u.dash.steps > 0) {
+    const step = C.stamina.dodgeMetres / dashSteps(C, dt);
+    u.x += u.dash.x * step; u.z += u.dash.z * step;
+    if (--u.dash.steps <= 0) u.dash = null;
   }
   // sneaking unseen near an enemy trains Sneak
   if (u.sneaking) {
@@ -311,12 +321,9 @@ function basicAttack(world, u, input) {
     return;
   }
   const weapon = s.weapon;
-  if (weapon?.weaponCategory === 'magic') {
-    const mw = C.magicWeapon;
-    const t = swingTiming(weapon, 0, haste);
-    u.swingAt = world.t + Math.max(0.45, t.every * 1.6);
-    const row = { mult: mw.mult * power, element: mw.element, range: mw.range, applies: [] };
-    fireBolt(world, u, row, dir, { powerRange: s.spell.int, speed: C.projectile.bolt, basic: true });
+  // a wand, tome, staff or sceptre: its own style (js/rules/casters.js plan, js/rules/caster-attack.js)
+  if (weapon?.weaponCategory === 'magic' && s.caster) {
+    casterAttack(world, u, { dir, at: input.attackAt || null, power, haste }, CASTER_OPS);
     return;
   }
   if (weapon?.ranged) {
@@ -469,14 +476,17 @@ function groundPoint(u, dir, at, range) {
   return { x: u.x + dir.x * Math.min(range, 12), z: u.z + dir.z * Math.min(range, 12) };
 }
 
-function schedule(world, delay, job) { world.pending.push({ at: world.t + delay, ...job }); }
+// the time a job is due is `due`: a job's own `at` is the ground point it lands on (with `at` for both, the point
+// overwrote the time and every placed spell and lobbed attack was silently dropped — found 2026-11-24)
+function schedule(world, delay, job) { world.pending.push({ ...job, due: world.t + delay }); }
 function stepPending(world) {
-  const due = world.pending.filter(j => j.at <= world.t);
-  world.pending = world.pending.filter(j => j.at > world.t);
+  const due = world.pending.filter(j => j.due <= world.t);
+  world.pending = world.pending.filter(j => j.due > world.t);
   for (const j of due) {
     const u = world.units.get(j.caster);
     if (!u || !u.alive) continue;
-    const ctx = { powerRange: j.powerRange, spell: j.spell, basic: j.basic };
+    const ctx = { powerRange: j.powerRange, spell: j.spell, basic: j.basic, vis: j.vis, cx: j.cx };
+    if (j.type === 'casterEcho') { if (u.sheet?.caster) casterAttack(world, u, { dir: j.dir, at: j.at, power: j.power, echo: { mult: j.mult } }, CASTER_OPS); continue; }
     if (j.type === 'area') {
       if (j.row.mult) aroundHit(world, u, j.row, j.at, ctx);
       if (j.first && (j.row.heal || j.row.healPower)) for (const a of alliesNear(world, { ...u, x: j.at.x, z: j.at.z }, j.row.allies || j.row.radius || 0)) if (isAlly(a, u)) healUnit(world, u, a, j.row, ctx);
@@ -540,6 +550,7 @@ function fireBolt(world, u, row, dir, ctx) {
     world.projectiles.push({
       id: newId(world, 'b'), owner: u.id, x: u.x, z: u.z, dx: Math.sin(a), dz: Math.cos(a), speed: ctx.speed || 32,
       left: row.range || 34, row, ctx, pierce: row.pierce || 0, hit: new Set(), bounces: row.ricochet?.bounces || 0, keep: 1,
+      ...(row.homing ? { homing: row.homing } : {}),
     });
   }
   emit(world, { t: 'projectile', who: u.id, spell: ctx.spell || null, n, dir: [dir.x, dir.z] });
@@ -552,6 +563,7 @@ function stepProjectiles(world, dt) {
     const owner = world.units.get(p.owner);
     if (!owner) continue;
     const stepLen = p.speed * dt;
+    if (p.homing) steerBolt(world, p, owner, dt, CASTER_OPS);
     let done = false;
     for (let k = 0; k < 2 && !done; k++) {
       p.x += p.dx * stepLen / 2; p.z += p.dz * stepLen / 2;
@@ -565,7 +577,7 @@ function stepProjectiles(world, dt) {
         if (p.row.splash) for (const o of foesNear(world, owner, t, p.row.splash)) if (o !== t) hit(world, owner, o, { ...row, mult: (row.mult || 1) * 0.5, applies: row.applies }, p.ctx);
         if (p.bounces > 0) {
           const next = foesNear(world, owner, t, p.row.ricochet.range || 8).filter(o => !p.hit.has(o.id)).sort((a, b) => dist(a, t) - dist(b, t))[0];
-          if (next) { const d = norm2(next.x - t.x, next.z - t.z); p.dx = d.x; p.dz = d.z; p.x = t.x; p.z = t.z; p.bounces--; p.keep *= p.row.ricochet.keep || 0.8; p.left = Math.max(p.left, dist(next, t) + 1); break; }
+          if (next) { if (p.ctx?.vis) emit(world, { t: 'hop', who: owner.id, from: [t.x, t.z], to: [next.x, next.z], el: p.row.element, look: p.ctx.cx?.plan?.look || null }); const d = norm2(next.x - t.x, next.z - t.z); p.dx = d.x; p.dz = d.z; p.x = t.x; p.z = t.z; p.bounces--; p.keep *= p.row.ricochet.keep || 0.8; p.left = Math.max(p.left, dist(next, t) + 1); break; }
         }
         if (p.pierce > 0) { p.pierce--; continue; }
         done = true; break;
@@ -576,6 +588,9 @@ function stepProjectiles(world, dt) {
   }
   world.projectiles = keep;
 }
+
+/** The world sim's shapes, lent to a magic weapon's attack (js/rules/caster-attack.js). */
+const CASTER_OPS = { fireBolt, coneHit, lineHit, aroundHit, schedule, emit: (w, e) => emit(w, e), hit: (...a) => hit(...a), foesNear };
 
 // ---------------------------------------------------------------- the hit
 
@@ -621,7 +636,7 @@ export function hit(world, u, t, row, ctx = {}) {
   u.lastFight = t.lastFight = world.t;
   if (t.kind === 'player') dismount(world, t);
   if (u.kind === 'player') dismount(world, u);
-  emit(world, { t: 'hit', from: u.id, to: t.id, amount: res.amount, crit: !!res.crit, element: res.element, spell: ctx.spell || null, blocked: res.blocked || 0, absorbed: res.absorbed || 0 });
+  emit(world, { t: 'hit', from: u.id, to: t.id, amount: res.amount, crit: !!res.crit, element: res.element, spell: ctx.spell || null, blocked: res.blocked || 0, absorbed: res.absorbed || 0, ...(ctx.vis ? { vis: ctx.vis } : {}) });
   if (opening) skillEvent(world, u, gainSkill(rules, u.char, 'sneak', 'sneakAttack'), 'sneak');
   // threat and credit
   if (t.threat !== undefined && (u.kind === 'player' || u.kind === 'pet')) {
@@ -647,6 +662,7 @@ export function hit(world, u, t, row, ctx = {}) {
   if (row.onHit?.heal && u.hp != null) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * row.onHit.heal);
   if (row.onHit?.healAllies && u.kind === 'player') for (const a of alliesNear(world, u, 12)) a.hp = Math.min(a.maxHp, a.hp + a.maxHp * row.onHit.healAllies);
   if (row.heal && row.shape === 'beam' && u.hp != null) u.hp = Math.min(u.maxHp, u.hp + res.amount * row.heal);
+  if (ctx.cx) casterAfterHit(world, u, t, row, ctx, res, CASTER_OPS);
   if (t.hp <= 0) die(world, t, u);
   return res;
 }
@@ -990,3 +1006,6 @@ export function spawnRoamers(world, regionId, at, { packs = 1 } = {}) {
   }
   return out.filter(Boolean);
 }
+
+/** How many sim steps a dodge dash lasts (the browser's prediction uses the same count). */
+export function dashSteps(C, dt) { return Math.max(1, Math.round((C.stamina.dodgeSeconds ?? 0.25) / dt)); }

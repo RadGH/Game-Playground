@@ -1,6 +1,16 @@
 {
  "_doc": "Every paid fal.ai job (tools/fal-job.mjs). price = US$ from the model page at the time.",
- "total": 36.6,
+ "total": 48.7,
+ "rounds": [
+  {
+   "tag": "oathwild3",
+   "name": "Oathwild art, round 3 (2026-11-24)",
+   "added": 50,
+   "cap": 13,
+   "before": 36.6,
+   "rule": "Owner: \"NO REDOS. Send them to me to review instead if there are problems … Use only what's necessary and leave leftover for feedback.\" Every model is made once; a bad one is flagged here, not paid for again."
+  }
+ ],
  "jobs": [
   {
    "id": "male-rodin",
@@ -3957,6 +3967,1180 @@
    "submitted": "2026-11-24T00:55:00.974Z",
    "done": "2026-11-24T00:56:35.289Z",
    "seconds": 121
+  },
+  {
+   "id": "riding-horse-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20ee5-1c6b-7770-8535-58073721e6b5",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/riding-horse-front.png",
+    "face_limit": 4000,
+    "texture": true
+   },
+   "note": "riding-horse: Tripo P1 textured, face_limit 4000",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/riding-horse-tripo/model_mesh-model.glb",
+     "bytes": 2927756
+    },
+    {
+     "file": "models/riding-horse-tripo/model_urls.glb-model.glb",
+     "bytes": 2927756
+    },
+    {
+     "file": "models/riding-horse-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2927756
+    },
+    {
+     "file": "models/riding-horse-tripo/rendered_image-preview.png",
+     "bytes": 149590
+    }
+   ],
+   "submitted": "2026-11-24T18:50:25.824Z",
+   "done": "2026-11-24T18:51:37.493Z",
+   "seconds": 96
+  },
+  {
+   "id": "sheet-ow-weapons-a",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ee5-d89e-7270-aae0-35059f37bf45",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-ow-weapons-a.png",
+    "resolution": 1024,
+    "decimation_target": 12000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild boss weapons: warchief-cleaver hag-staff barrow-blade chief-axe",
+   "tag": "oathwild3-weapons",
+   "files": [
+    {
+     "file": "models/sheet-ow-weapons-a/model_glb-trellis2_421cad48ebee4561aa5d71c76895031c.glb",
+     "bytes": 1348132
+    }
+   ],
+   "submitted": "2026-11-24T18:51:14.003Z",
+   "done": "2026-11-24T18:52:55.852Z",
+   "seconds": 109
+  },
+  {
+   "id": "scn-sc-village",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ee5-f025-7813-b40e-41a1a21f16e5",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-village.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-village (trellis-2 1024): smithy watermill watchtower well",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-village/model_glb-trellis2_3c523c7f01b448c9a50c32bc31f89875.glb",
+     "bytes": 2847448
+    }
+   ],
+   "submitted": "2026-11-24T18:51:20.023Z",
+   "done": "2026-11-24T18:53:24.589Z",
+   "seconds": 143
+  },
+  {
+   "id": "goblin-warchief-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20ee6-fdc7-7993-ac9e-88db7853a938",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/goblin-warchief-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "goblin-warchief: Tripo P1 textured, face_limit 4500",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/goblin-warchief-tripo/model_mesh-model.glb",
+     "bytes": 3407908
+    },
+    {
+     "file": "models/goblin-warchief-tripo/model_urls.glb-model.glb",
+     "bytes": 3407908
+    },
+    {
+     "file": "models/goblin-warchief-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3407908
+    },
+    {
+     "file": "models/goblin-warchief-tripo/rendered_image-preview.png",
+     "bytes": 146296
+    }
+   ],
+   "submitted": "2026-11-24T18:52:29.041Z",
+   "done": "2026-11-24T18:53:44.070Z",
+   "seconds": 114
+  },
+  {
+   "id": "scn-sc-palisade",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ee8-a8da-7801-9180-5fce7a26facd",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-palisade.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-palisade (trellis-2 1024): palisade-wall palisade-corner palisade-gate fence-rail",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-palisade/model_glb-trellis2_ceac08235d5e4c95a1e51ba8adc744cc.glb",
+     "bytes": 1874656
+    }
+   ],
+   "submitted": "2026-11-24T18:54:18.374Z",
+   "done": "2026-11-24T18:54:59.017Z",
+   "seconds": 56
+  },
+  {
+   "id": "marsh-hag-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20ee8-e6e3-72f0-84a1-6ed046265a0d",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/marsh-hag-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "marsh-hag: Tripo P1 textured, face_limit 4500",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/marsh-hag-tripo/model_mesh-model.glb",
+     "bytes": 3271804
+    },
+    {
+     "file": "models/marsh-hag-tripo/model_urls.glb-model.glb",
+     "bytes": 3271804
+    },
+    {
+     "file": "models/marsh-hag-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3271804
+    },
+    {
+     "file": "models/marsh-hag-tripo/rendered_image-preview.png",
+     "bytes": 119720
+    }
+   ],
+   "submitted": "2026-11-24T18:54:34.254Z",
+   "done": "2026-11-24T18:55:44.545Z",
+   "seconds": 110
+  },
+  {
+   "id": "goblin-warchief-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20ee9-006f-71e2-adb5-bde060df52fd",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/goblin-warchief-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "goblin-warchief: Meshy rigging",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/goblin-warchief-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1420380
+    },
+    {
+     "file": "models/goblin-warchief-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1324092
+    },
+    {
+     "file": "models/goblin-warchief-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1552992
+    },
+    {
+     "file": "models/goblin-warchief-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1372988
+    },
+    {
+     "file": "models/goblin-warchief-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52080
+    },
+    {
+     "file": "models/goblin-warchief-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1521764
+    },
+    {
+     "file": "models/goblin-warchief-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1352300
+    },
+    {
+     "file": "models/goblin-warchief-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41020
+    }
+   ],
+   "submitted": "2026-11-24T18:54:40.793Z",
+   "done": "2026-11-24T18:55:47.588Z",
+   "seconds": 97
+  },
+  {
+   "id": "scn-sc-market",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ee9-f4b0-7d52-8338-65ee251d54e8",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-market.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-market (trellis-2 1024): market-stall cart haystack signpost",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-market/model_glb-trellis2_b9d8ddf4dd514384bf4c1dc0db835a23.glb",
+     "bytes": 2795688
+    }
+   ],
+   "submitted": "2026-11-24T18:55:43.323Z",
+   "done": "2026-11-24T18:56:07.598Z",
+   "seconds": 40
+  },
+  {
+   "id": "sheet-ow-hero-b",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20eea-8132-7530-8662-658e9e53ad66",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-ow-hero-b.png",
+    "resolution": 1024,
+    "decimation_target": 12000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild hero weapons b: ow-warhammer ow-halberd ow-quarterstaff ow-shortbow",
+   "tag": "oathwild3-weapons",
+   "files": [
+    {
+     "file": "models/sheet-ow-hero-b/model_glb-trellis2_06c804afd1354073ace89f01d710cef1.glb",
+     "bytes": 1391748
+    }
+   ],
+   "submitted": "2026-11-24T18:56:19.287Z",
+   "done": "2026-11-24T18:56:43.566Z",
+   "seconds": 29
+  },
+  {
+   "id": "sheet-ow-hero-a",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20eea-9c06-73e1-bcbd-eb162252aa8f",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-ow-hero-a.png",
+    "resolution": 1024,
+    "decimation_target": 12000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild hero weapons a: ow-wand ow-sceptre ow-orb ow-tome",
+   "tag": "oathwild3-weapons",
+   "files": [
+    {
+     "file": "models/sheet-ow-hero-a/model_glb-trellis2_8ea1d6af5dcd482aa50c15f534cb0d86.glb",
+     "bytes": 1557384
+    }
+   ],
+   "submitted": "2026-11-24T18:56:26.157Z",
+   "done": "2026-11-24T18:56:49.933Z",
+   "seconds": 35
+  },
+  {
+   "id": "scn-sc-workshop",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20eea-e7d7-7002-856c-dad9406601cd",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-workshop.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-workshop (trellis-2 1024): lamp-post anvil stone-wall-low woodpile",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-workshop/model_glb-trellis2_93449b535582497b9ea553da4ef1d0ea.glb",
+     "bytes": 2007196
+    }
+   ],
+   "submitted": "2026-11-24T18:56:45.575Z",
+   "done": "2026-11-24T18:57:09.907Z",
+   "seconds": 39
+  },
+  {
+   "id": "barrow-king-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20eea-aa54-76a1-97f8-a94484f6c0d3",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/barrow-king-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "barrow-king: Tripo P1 textured, face_limit 4500",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/barrow-king-tripo/model_mesh-model.glb",
+     "bytes": 3379008
+    },
+    {
+     "file": "models/barrow-king-tripo/model_urls.glb-model.glb",
+     "bytes": 3379008
+    },
+    {
+     "file": "models/barrow-king-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3379008
+    },
+    {
+     "file": "models/barrow-king-tripo/rendered_image-preview.png",
+     "bytes": 113352
+    }
+   ],
+   "submitted": "2026-11-24T18:56:29.824Z",
+   "done": "2026-11-24T18:57:39.104Z",
+   "seconds": 106
+  },
+  {
+   "id": "scn-sc-camp",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20eec-0316-7280-bf0a-119f1c3ca6c1",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-camp.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-camp (trellis-2 1024): bedroll campfire tent-small tent-large",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-camp/model_glb-trellis2_9f65de3cbb6f4cd29525cbd1052ea6b3.glb",
+     "bytes": 2270392
+    }
+   ],
+   "submitted": "2026-11-24T18:57:58.076Z",
+   "done": "2026-11-24T18:58:27.709Z",
+   "seconds": 44
+  },
+  {
+   "id": "scn-sc-banners-chests",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20eed-277a-7652-b797-eee46944c810",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-banners-chests.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-banners-chests (trellis-2 1024): banner-bandit banner-village chest-common chest-rare",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-banners-chests/model_glb-trellis2_adf57b5add114cad9c6f55f6e3d197f6.glb",
+     "bytes": 2039464
+    }
+   ],
+   "submitted": "2026-11-24T18:59:12.931Z",
+   "done": "2026-11-24T18:59:37.255Z",
+   "seconds": 37
+  },
+  {
+   "id": "hill-ogre-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20eec-8cae-77a1-95df-efc603cd09f5",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/hill-ogre-front.png",
+    "face_limit": 4500,
+    "texture": true
+   },
+   "note": "hill-ogre: Tripo P1 textured, face_limit 4500",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/hill-ogre-tripo/model_mesh-model.glb",
+     "bytes": 3212548
+    },
+    {
+     "file": "models/hill-ogre-tripo/model_urls.glb-model.glb",
+     "bytes": 3212548
+    },
+    {
+     "file": "models/hill-ogre-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3212548
+    },
+    {
+     "file": "models/hill-ogre-tripo/rendered_image-preview.png",
+     "bytes": 131136
+    }
+   ],
+   "submitted": "2026-11-24T18:58:33.306Z",
+   "done": "2026-11-24T18:59:42.289Z",
+   "seconds": 113
+  },
+  {
+   "id": "marsh-hag-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20eed-38d4-7671-a8e2-0b4876b407a5",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/marsh-hag-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "marsh-hag: Meshy rigging",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/marsh-hag-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1223576
+    },
+    {
+     "file": "models/marsh-hag-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1181564
+    },
+    {
+     "file": "models/marsh-hag-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1355916
+    },
+    {
+     "file": "models/marsh-hag-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1230460
+    },
+    {
+     "file": "models/marsh-hag-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52080
+    },
+    {
+     "file": "models/marsh-hag-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1324684
+    },
+    {
+     "file": "models/marsh-hag-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1209772
+    },
+    {
+     "file": "models/marsh-hag-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41020
+    }
+   ],
+   "submitted": "2026-11-24T18:59:17.377Z",
+   "done": "2026-11-24T18:59:49.921Z",
+   "seconds": 59
+  },
+  {
+   "id": "barrow-king-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20eee-38b7-78a3-a848-6f2421dbc083",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/barrow-king-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "barrow-king: Meshy rigging",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/barrow-king-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1351520
+    },
+    {
+     "file": "models/barrow-king-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1250428
+    },
+    {
+     "file": "models/barrow-king-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1484032
+    },
+    {
+     "file": "models/barrow-king-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1299324
+    },
+    {
+     "file": "models/barrow-king-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52068
+    },
+    {
+     "file": "models/barrow-king-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1452792
+    },
+    {
+     "file": "models/barrow-king-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1278636
+    },
+    {
+     "file": "models/barrow-king-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41008
+    }
+   ],
+   "submitted": "2026-11-24T19:00:22.890Z",
+   "done": "2026-11-24T19:01:13.783Z",
+   "seconds": 79
+  },
+  {
+   "id": "scn-sc-loot",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20eee-2928-7652-a197-4d8f3a367c54",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-loot.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-loot (trellis-2 1024): chest-epic loot-sack crate-stack barrel-open",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-loot/model_glb-trellis2_c4ae487ea06b4830bd35db6b6f83a070.glb",
+     "bytes": 2576196
+    }
+   ],
+   "submitted": "2026-11-24T19:00:18.898Z",
+   "done": "2026-11-24T19:01:43.249Z",
+   "seconds": 102
+  },
+  {
+   "id": "shrine-cultist-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20eee-4eef-71f1-a10c-2eb3f7b6db45",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/shrine-cultist-front.png",
+    "face_limit": 4000,
+    "texture": true
+   },
+   "note": "shrine-cultist: Tripo P1 textured, face_limit 4000",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/shrine-cultist-tripo/model_mesh-model.glb",
+     "bytes": 2859748
+    },
+    {
+     "file": "models/shrine-cultist-tripo/model_urls.glb-model.glb",
+     "bytes": 2859748
+    },
+    {
+     "file": "models/shrine-cultist-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2859748
+    },
+    {
+     "file": "models/shrine-cultist-tripo/rendered_image-preview.png",
+     "bytes": 106854
+    }
+   ],
+   "submitted": "2026-11-24T19:00:28.566Z",
+   "done": "2026-11-24T19:01:44.057Z",
+   "seconds": 112
+  },
+  {
+   "id": "hill-ogre-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20eef-e2b4-78f1-b23e-848972e24164",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/hill-ogre-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "hill-ogre: Meshy rigging",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/hill-ogre-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1321696
+    },
+    {
+     "file": "models/hill-ogre-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1249100
+    },
+    {
+     "file": "models/hill-ogre-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1453968
+    },
+    {
+     "file": "models/hill-ogre-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1298012
+    },
+    {
+     "file": "models/hill-ogre-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52092
+    },
+    {
+     "file": "models/hill-ogre-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1422744
+    },
+    {
+     "file": "models/hill-ogre-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1277324
+    },
+    {
+     "file": "models/hill-ogre-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 41032
+    }
+   ],
+   "submitted": "2026-11-24T19:02:11.943Z",
+   "done": "2026-11-24T19:02:41.083Z",
+   "seconds": 54
+  },
+  {
+   "id": "scn-sc-travel",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ef0-6b4f-7e20-8fd6-651ab9fe65fe",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-travel.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-travel (trellis-2 1024): bridge-wood bridge-stone road-marker waystone",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-travel/model_glb-trellis2_e8fdd10b0d174c4a8c8440b849e1a09d.glb",
+     "bytes": 1759344
+    }
+   ],
+   "submitted": "2026-11-24T19:02:46.907Z",
+   "done": "2026-11-24T19:03:17.295Z",
+   "seconds": 44
+  },
+  {
+   "id": "bog-lurker-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20ef0-2dcf-7bc3-ac12-b2c7e7eef048",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/bog-lurker-front.png",
+    "face_limit": 4000,
+    "texture": true
+   },
+   "note": "bog-lurker: Tripo P1 textured, face_limit 4000",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/bog-lurker-tripo/model_mesh-model.glb",
+     "bytes": 2789428
+    },
+    {
+     "file": "models/bog-lurker-tripo/model_urls.glb-model.glb",
+     "bytes": 2789428
+    },
+    {
+     "file": "models/bog-lurker-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2789428
+    },
+    {
+     "file": "models/bog-lurker-tripo/rendered_image-preview.png",
+     "bytes": 156448
+    }
+   ],
+   "submitted": "2026-11-24T19:02:31.156Z",
+   "done": "2026-11-24T19:04:21.972Z",
+   "seconds": 148
+  },
+  {
+   "id": "scn-sc-shrines",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ef1-834a-73f2-afa3-02c3bf91ae75",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-shrines.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-shrines (trellis-2 1024): shrine-respawn standing-stone-a standing-stone-b druid-stone",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-shrines/model_glb-trellis2_26081bb3f15c45f5893b77cea9c24ebf.glb",
+     "bytes": 2300296
+    }
+   ],
+   "submitted": "2026-11-24T19:03:58.583Z",
+   "done": "2026-11-24T19:04:28.471Z",
+   "seconds": 45
+  },
+  {
+   "id": "shrine-cultist-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20ef2-1bce-73e1-b1f7-dbce19efb5c2",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/shrine-cultist-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "shrine-cultist: Meshy rigging",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/shrine-cultist-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1176704
+    },
+    {
+     "file": "models/shrine-cultist-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1129740
+    },
+    {
+     "file": "models/shrine-cultist-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1309124
+    },
+    {
+     "file": "models/shrine-cultist-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1178636
+    },
+    {
+     "file": "models/shrine-cultist-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52048
+    },
+    {
+     "file": "models/shrine-cultist-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1277888
+    },
+    {
+     "file": "models/shrine-cultist-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1157948
+    },
+    {
+     "file": "models/shrine-cultist-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40984
+    }
+   ],
+   "submitted": "2026-11-24T19:04:37.623Z",
+   "done": "2026-11-24T19:05:07.827Z",
+   "seconds": 57
+  },
+  {
+   "id": "scn-sc-ruins",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ef2-9c4c-7f03-86d5-a8712c507c9e",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-ruins.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-ruins (trellis-2 1024): ruin-wall ruin-arch ruin-pillar ruin-tower",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-ruins/model_glb-trellis2_eb31bf400e9b4965946f9d0cfc46a5a1.glb",
+     "bytes": 1934516
+    }
+   ],
+   "submitted": "2026-11-24T19:05:10.524Z",
+   "done": "2026-11-24T19:05:39.994Z",
+   "seconds": 45
+  },
+  {
+   "id": "barrow-ghoul-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20ef2-9749-7413-86bf-8c04d1864c14",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/barrow-ghoul-front.png",
+    "face_limit": 4000,
+    "texture": true
+   },
+   "note": "barrow-ghoul: Tripo P1 textured, face_limit 4000",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/barrow-ghoul-tripo/model_mesh-model.glb",
+     "bytes": 3197740
+    },
+    {
+     "file": "models/barrow-ghoul-tripo/model_urls.glb-model.glb",
+     "bytes": 3197740
+    },
+    {
+     "file": "models/barrow-ghoul-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 3197740
+    },
+    {
+     "file": "models/barrow-ghoul-tripo/rendered_image-preview.png",
+     "bytes": 75476
+    }
+   ],
+   "submitted": "2026-11-24T19:05:09.238Z",
+   "done": "2026-11-24T19:06:24.168Z",
+   "seconds": 113
+  },
+  {
+   "id": "scn-sc-barrow",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ef3-b0c6-7d10-a1e0-ea130282557c",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-barrow.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-barrow (trellis-2 1024): barrow-entrance sarcophagus gravestone-a gravestone-b",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-barrow/model_glb-trellis2_ebd13322c8f94b219497bc64263d093e.glb",
+     "bytes": 1837060
+    }
+   ],
+   "submitted": "2026-11-24T19:06:21.295Z",
+   "done": "2026-11-24T19:06:51.542Z",
+   "seconds": 46
+  },
+  {
+   "id": "bog-lurker-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20ef4-4995-74f1-b951-027a19bed426",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/bog-lurker-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "bog-lurker: Meshy rigging",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/bog-lurker-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1139136
+    },
+    {
+     "file": "models/bog-lurker-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1085628
+    },
+    {
+     "file": "models/bog-lurker-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1271544
+    },
+    {
+     "file": "models/bog-lurker-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1134524
+    },
+    {
+     "file": "models/bog-lurker-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52012
+    },
+    {
+     "file": "models/bog-lurker-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1240260
+    },
+    {
+     "file": "models/bog-lurker-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1113836
+    },
+    {
+     "file": "models/bog-lurker-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40952
+    }
+   ],
+   "submitted": "2026-11-24T19:07:00.412Z",
+   "done": "2026-11-24T19:07:29.071Z",
+   "seconds": 52
+  },
+  {
+   "id": "scn-sc-graves",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ef4-9b32-7ce2-88bc-86295b3c6cef",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-graves.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-graves (trellis-2 1024): gravestone-c grave-fence statue-broken rubble",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-graves/model_glb-trellis2_62088af3a01e4aa5a1438e8d6b0b57a1.glb",
+     "bytes": 1833500
+    }
+   ],
+   "submitted": "2026-11-24T19:07:21.311Z",
+   "done": "2026-11-24T19:07:45.080Z",
+   "seconds": 40
+  },
+  {
+   "id": "fen-harpy-tripo",
+   "endpoint": "tripo3d/p1/image-to-3d",
+   "request_id": "01a20ef4-6bcf-78c1-b1d1-4b22899a6708",
+   "price": 0.5,
+   "input": {
+    "image_url": "@ref/fen-harpy-front.png",
+    "face_limit": 4000,
+    "texture": true
+   },
+   "note": "fen-harpy: Tripo P1 textured, face_limit 4000",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/fen-harpy-tripo/model_mesh-model.glb",
+     "bytes": 2892008
+    },
+    {
+     "file": "models/fen-harpy-tripo/model_urls.glb-model.glb",
+     "bytes": 2892008
+    },
+    {
+     "file": "models/fen-harpy-tripo/model_urls.pbr_model-model.glb",
+     "bytes": 2892008
+    },
+    {
+     "file": "models/fen-harpy-tripo/rendered_image-preview.png",
+     "bytes": 95530
+    }
+   ],
+   "submitted": "2026-11-24T19:07:09.171Z",
+   "done": "2026-11-24T19:08:18.919Z",
+   "seconds": 105
+  },
+  {
+   "id": "scn-sc-goblins",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ef5-88be-7e93-b81b-ef5642f9ad26",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-goblins.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-goblins (trellis-2 1024): goblin-hut goblin-totem spike-barricade junk-pile",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-goblins/model_glb-trellis2_a48163f623b941acbef374fac6253f03.glb",
+     "bytes": 2027664
+    }
+   ],
+   "submitted": "2026-11-24T19:08:22.119Z",
+   "done": "2026-11-24T19:08:51.798Z",
+   "seconds": 46
+  },
+  {
+   "id": "barrow-ghoul-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20ef6-0af9-76c2-b71b-6427f53dd4b6",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/barrow-ghoul-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "barrow-ghoul: Meshy rigging",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/barrow-ghoul-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1198656
+    },
+    {
+     "file": "models/barrow-ghoul-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1127564
+    },
+    {
+     "file": "models/barrow-ghoul-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1331320
+    },
+    {
+     "file": "models/barrow-ghoul-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1176460
+    },
+    {
+     "file": "models/barrow-ghoul-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 51732
+    },
+    {
+     "file": "models/barrow-ghoul-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1300088
+    },
+    {
+     "file": "models/barrow-ghoul-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1155772
+    },
+    {
+     "file": "models/barrow-ghoul-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40672
+    }
+   ],
+   "submitted": "2026-11-24T19:08:55.460Z",
+   "done": "2026-11-24T19:09:22.512Z",
+   "seconds": 55
+  },
+  {
+   "id": "scn-sc-farm",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ef6-9a3a-76a1-860d-a1e84857b6f8",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-farm.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-farm (trellis-2 1024): wheelbarrow trough pumpkins scarecrow-post",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-farm/model_glb-trellis2_1b8d25237d8c43bfaf63924724ad9085.glb",
+     "bytes": 1990904
+    }
+   ],
+   "submitted": "2026-11-24T19:09:32.136Z",
+   "done": "2026-11-24T19:10:02.205Z",
+   "seconds": 43
+  },
+  {
+   "id": "scn-sc-marsh",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ef7-61e2-7501-addb-46407a703b2c",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-marsh.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-marsh (trellis-2 1024): hag-hut boardwalk rowboat fish-rack",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-marsh/model_glb-trellis2_f6691f5036204013bb40b86bc6507530.glb",
+     "bytes": 2456236
+    }
+   ],
+   "submitted": "2026-11-24T19:10:23.250Z",
+   "done": "2026-11-24T19:10:47.866Z",
+   "seconds": 38
+  },
+  {
+   "id": "fen-harpy-rig",
+   "endpoint": "fal-ai/meshy/rigging",
+   "request_id": "01a20ef7-1fce-71f0-8810-f77c116b1d55",
+   "price": 0.2,
+   "input": {
+    "model_url": "@models/upright/fen-harpy-tripo.glb",
+    "height_meters": 1,
+    "skeleton_template": "ue5_mannequin",
+    "include_fingers": false
+   },
+   "note": "fen-harpy: Meshy rigging",
+   "tag": "oathwild3-enemies",
+   "files": [
+    {
+     "file": "models/fen-harpy-rig/rigged_character_glb-rigged_character.glb",
+     "bytes": 1131088
+    },
+    {
+     "file": "models/fen-harpy-rig/rigged_character_fbx-rigged_character.fbx",
+     "bytes": 1091244
+    },
+    {
+     "file": "models/fen-harpy-rig/basic_animations.walking_glb-walking.glb",
+     "bytes": 1263736
+    },
+    {
+     "file": "models/fen-harpy-rig/basic_animations.walking_fbx-walking.fbx",
+     "bytes": 1140140
+    },
+    {
+     "file": "models/fen-harpy-rig/basic_animations.walking_armature_glb-walking_armature.glb",
+     "bytes": 52056
+    },
+    {
+     "file": "models/fen-harpy-rig/basic_animations.running_glb-running.glb",
+     "bytes": 1232472
+    },
+    {
+     "file": "models/fen-harpy-rig/basic_animations.running_fbx-running.fbx",
+     "bytes": 1119452
+    },
+    {
+     "file": "models/fen-harpy-rig/basic_animations.running_armature_glb-running_armature.glb",
+     "bytes": 40996
+    }
+   ],
+   "submitted": "2026-11-24T19:10:06.331Z",
+   "done": "2026-11-24T19:11:13.624Z",
+   "seconds": 94
+  },
+  {
+   "id": "scn-sc-bandits",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ef8-65f1-7f73-8ce3-e05da6b789ac",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-bandits.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-bandits (trellis-2 1024): lookout cage stolen-goods wanted-board",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-bandits/model_glb-trellis2_a4c18fe4829948c982fce57c373a06e9.glb",
+     "bytes": 2148720
+    }
+   ],
+   "submitted": "2026-11-24T19:11:29.826Z",
+   "done": "2026-11-24T19:11:59.446Z",
+   "seconds": 48
+  },
+  {
+   "id": "scn-sc-druid",
+   "endpoint": "fal-ai/trellis-2",
+   "request_id": "01a20ef9-9a1f-7a72-ba7a-5a62a01890b5",
+   "price": 0.3,
+   "input": {
+    "image_url": "@ref/sheet-sc-druid.png",
+    "resolution": 1024,
+    "decimation_target": 20000,
+    "texture_size": 2048
+   },
+   "note": "Oathwild scenery sheet sc-druid (trellis-2 1024): druid-altar antler-totem wicker-effigy spirit-pool",
+   "tag": "oathwild3-props",
+   "files": [
+    {
+     "file": "models/scn-sc-druid/model_glb-trellis2_ea5f45088c7545028aaaeb8734f48219.glb",
+     "bytes": 2448556
+    }
+   ],
+   "submitted": "2026-11-24T19:12:48.714Z",
+   "done": "2026-11-24T19:13:28.961Z",
+   "seconds": 54
   }
  ]
 }

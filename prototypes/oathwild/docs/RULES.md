@@ -111,7 +111,63 @@ Honeyed Words (Speech 25), Runic Hand (Enchanting 50), the elemental Affinities,
 - The tooltip shows exactly this, with your numbers: *"Deals 62–96 Holy damage to everything within 6.5 m of you."*
   and under "How it's worked out": *"Spell power (Wisdom) 18–28 x 140% (Blessed Earth) x 1.96 (its 16s cooldown) x
   1.25 (Paladin level 6) = 62–96 per hit, before armour."*
-- Magic weapons (wand, staff, sceptre, orb) shoot a bolt of spell power instead of swinging (as in Thousandvale).
+- Magic weapons attack with spell power in their own style — next section.
+
+## Magic weapons: wands, tomes, staves, sceptres, off-hand foci (2026-11-24)
+
+Owner: *"Did you keep the itemization from Thousandvale? Especially wands and tomes having special attacks or other
+effects. I'd like to see those elements in this new game too."* Which style an item has is **Thousandvale's**
+(`thousandvale/js/rules/caster-forms.js` + its `caster-forms.json`, borrowed through `js/rules/farhold.js` and pinned
+by the drift guard); Oathwild fights it with its own world-sim shapes (`js/rules/casters.js` makes the plan,
+`js/rules/caster-attack.js` carries it out) and writes the item card **from the same plan**, so a card never promises
+what the attack does not do. Oathwild's own knobs are in `data/casters.json`.
+
+- **Every magic item is made with an element** (Farhold's: Fire, Frost, Lightning, Poison, Shadow, Arcane — the name
+  says it, "Flame Wand"), and its hits leave that element's status (Burning, Chilled, Shocked, Poisoned, Cursed;
+  Arcane leaves none). Same item id = same element and style, so an old saved item learns them the first time it is
+  seen and keeps them.
+- **Damage** = spell power (Intelligence) × 80% (a magic weapon's share) × the style's share × the element's school
+  bonus. Mana: none. Half the weapon's own dice add to spell power (so does an orb or tome in the off hand).
+- **Wands** roll one of 13 styles, weighted like Thousandvale (`w`): True Bolt (3), Bursting Bolt, Fan of Three, Chain
+  Bolt, Seeking Bolt, Heavy Bolt, Cone, Beam, Forking Bolt (2 each), Ring, Lobbed Blast, Warding Bolt, Lingering Bolt
+  (1.5 each). The first six are Farhold's wand behaviours with Farhold's numbers. A bolt hits the first enemy and half
+  that to everything within its splash; a fan throws three bolts (45% each); a chain jumps up to 2 more times to the
+  nearest enemy within 8 m at 65% of the hit before; a seeking bolt turns toward the nearest enemy ahead (14 m, 50°,
+  5 radians a second — Guessed); a heavy bolt flies at 60% speed and hits for 145%; a cone is 52° × 9 m; a beam is
+  18 m × 1.2 m, instant; a ring hits everything within 5 m of you; a lob lands where the crosshair points (clamped to
+  16 m, 20 m a second) for everything within 3 m; a fork splits into 2 shards (50%) to other enemies within 8 m; a ward
+  adds 2% of maximum health as a shield per attack that hits (up to 10%, 4 s); a lingering bolt leaves ground 4.8 m
+  across that strikes every 0.75 s, 4 times, for 20%.
+- **Tomes** (one hand, main hand) roll one of four forms on a 1.5× slower clock, hitting harder: **Rune** (a lob
+  onto the crosshair, 3.6 m, 130%; the sigil shows on the ground first), **Column** (a lance 22 m × 1.8 m, 115%),
+  **Gale** (a 72° cone 11 m long, 120%), **Brand** (a heavy bolt, 105%, leaving burning ground 6 m across for 4 s,
+  5 strikes of 25%). **In the off hand** a tome adds **Echo** (Oathwild's choice — Thousandvale made tomes main-hand
+  only; Guessed).
+- **Staves** (two hands): 22% have one of Thousandvale's styles — **Lance** (a lance 16 m × 1.4 m, 85%) or **Aegis
+  Ring** (5 m round you, 60%, and a 3% shield for you and every ally inside it, up to 12%, 5 s); the rest cast
+  Farhold's element spell: a cone, a nova round you, a wave (a wide line), a lobbed flask, a chain (13 m, 3 jumps) or
+  burning ground (placed up to 14 m away, 3 strikes a second apart — Guessed). A new hero's first staff is always a
+  **Lance** (`starter`, Guessed), so a starting Mage has a readable ranged attack.
+- **Sceptres** swing in melee (Farhold's two-strike pattern: Overhead 2.9 m then Slash 2.5 m) and deal their element
+  instead of physical damage, for 100% × each strike's share (Guessed).
+- **Off-hand riders** (only with a wand, tome or sceptre in the main hand): **Echo** — every fourth attack repeats
+  0.25 s later at 60%; **Burst** — a hit bursts 2.5 m round the first enemy struck for 35%; **Ward** — a hit adds a
+  2% shield (up to 10%, 4 s); **Siphon** — a hit gives 2 mana back. An **orb** is an off-hand implement only (refused
+  in the main hand) and rolls Burst (2), Siphon (1) or Echo (1); the foci (Warded Focus, Rune Aegis, Arcane Bulwark)
+  give Ward, the Spellguard Orb gives Burst.
+- A **quarterstaff** stays Farhold's pole for its element (it keeps the old plain arcane bolt) — Farhold made it a pole
+  on purpose and Oathwild's druids start with one.
+- **Named casters** (`casters.json named`, a 12% chance on a boss's corpse or chest): Wand of the Ninth Star (arcane
+  Fan — Thousandvale's), Hearthkindle Wand (fire Lingering Bolt), Stormcatch Sceptre (lightning), Rimebough Staff
+  (frost nova); **The Lost Tome** quest gives the Barrow-Lantern Tome (shadow Column).
+- **Where they come from**: the `magic` loot kind (wands most, then tomes and orbs, staves, sceptres and the four
+  foci) drops from people, elites, bosses and chests; Pell Dunmore (Larkford) and Quartermaster Bree (Thornwatch)
+  sell them.
+- **Aiming**: bolts, cones and beams go along the crosshair; a lob or placed style lands on the crosshair's ground
+  point (the client sends it with the attack, the server clamps it to the reach) and shows the ground indicator while
+  you attack; a ring needs no aim.
+- **Timing**: held down, each attack is timed from when the last was due, so the rate over a fight is exactly the
+  card's "every 0.48s" (not rounded up to 20 Hz ticks).
 
 ## Spells and aiming (ARCH.md "Spell targeting")
 

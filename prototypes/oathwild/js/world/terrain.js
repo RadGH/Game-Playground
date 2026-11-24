@@ -7,6 +7,7 @@
 //   T.waterAt(x, z)           { surface, depth, kind: 'river' | 'marsh' } | null   (depth > 0 = wet)
 //   T.slopeAt(x, z)           ground slope in degrees
 //   T.walkable(x, z)          inside the play area, slope < limits.maxSlope, water shallower than limits.wadeDepth
+//   T.swimmable(x, z)         deeper water inside the play area (walkHeightAt says on: 'swim', y = surface − wadeDepth)
 //                             (or on a bridge deck)
 //   T.biomeAt(x, z)           'meadow' | 'wildgrass' | 'forest' | 'field' | 'village' | 'road' | 'trail' |
 //                             'boardwalk' | 'water' | 'shore' | 'marsh' | 'rock'
@@ -334,14 +335,26 @@ export function createTerrain(map, { seed = map.seed } = {}) {
     const b = deckAt(x, z);
     if (b) return { y: b.deck, on: 'deck', bridge: b.id };
     const w = waterAt(x, z), g = heightAt(x, z);
+    // deeper than wading: swimming — the body floats at the same height a wader at the deepest wade has, so walking
+    // into a river and swimming on is one smooth slope (no ledge at the edge); the client sinks the drawn body more
+    if (w && w.depth > LIM.wadeDepth) return { y: round2(w.surface - LIM.wadeDepth), on: 'swim', depth: w.depth, surface: w.surface };
     if (w && w.depth > 0) return { y: g, on: 'water', depth: w.depth, surface: w.surface };
     return { y: g, on: 'ground' };
+  }
+  /** Deep water a body can swim in (inside the play area). walkable() stays "stand on foot" for spawns and scenery. */
+  function swimmable(x, z) {
+    if (!inPlay(x, z) || deckAt(x, z)) return false;
+    const w = waterAt(x, z);
+    return !!(w && w.depth > LIM.wadeDepth);
   }
   function walkable(x, z) {
     if (!inPlay(x, z)) return false;
     if (deckAt(x, z)) return true;
     const w = waterAt(x, z);
     if (w && w.depth > LIM.wadeDepth) return false;
+    // a river or pool's bank, just above or below the waterline, may be steeper: you scramble in to swim and climb
+    // back out (owner 2026-11-24 "I can't swim across water" — banks of 39° were walls). Dry hillsides keep maxSlope.
+    if (w && w.depth > -(LIM.bankBand ?? 0.8)) return slopeAt(x, z) < (LIM.bankSlope ?? 50);
     return slopeAt(x, z) < LIM.maxSlope;
   }
   const regionAt = (x, z) => (x < borderX(z) ? map.border.west : map.border.east);
@@ -406,7 +419,7 @@ export function createTerrain(map, { seed = map.seed } = {}) {
     biomeGrid: { nx: bnx, nz: bnz, cell: bc, minX: B.minX, minZ: B.minZ, ids },
     roads, rivers, bridges, places, marshes, regionIds,
     marshLevel: id => marshById[id]?.level ?? null,
-    inPlay, heightAt, walkHeightAt, waterAt, deckAt, slopeAt, walkable, biomeAt, forestAt, fieldAt: fieldHit,
+    inPlay, heightAt, walkHeightAt, waterAt, deckAt, slopeAt, walkable, swimmable, biomeAt, forestAt, fieldAt: fieldHit,
     regionAt, areaAt, levelBandAt, roadAt, borderX,
   };
 }

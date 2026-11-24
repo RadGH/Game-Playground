@@ -14,6 +14,7 @@ import { ATTRS, attrBreakdown, perPointShare } from './attributes.js';
 import { classGrowth, passiveMods } from './classes.js';
 import { talentMods } from './talents.js';
 import { carriedWeight, isBroken } from './inventory.js';
+import { attackPlan } from './casters.js';
 
 /** The mods vocabulary (class passives, talents, backgrounds, forms). Percent keys are percent numbers (5 = +5%). */
 export const STAT_KEYS = Object.freeze([
@@ -182,7 +183,7 @@ export function sheetOf(rules, char, { form = null } = {}) {
     spell: { base: spellBase, levelK: lvlK, gear: gearSpell, pct: m('spellPct') },
   };
 
-  return {
+  const out = {
     level, attrs, A,
     maxHp, maxMp, maxStamina,
     hpRegen: r2(base.hpRegen + (d.hpRegen - (fp.hpRegen ?? 0)) + m('hpRegen')),
@@ -204,4 +205,8 @@ export function sheetOf(rules, char, { form = null } = {}) {
     how,
     farhold: d,
   };
+  // a magic weapon's basic attack (wand / tome / staff style, a sceptre's swing, the off hand's rider): one plan
+  // that js/rules/caster-attack.js fights with and describe.js writes the card from (js/rules/casters.js)
+  out.caster = attackPlan(rules, { weapon: weapon ? char.gear?.weapon : null, offhand: unit.equipment.offhand ? char.gear?.offhand : null }, out);
+  return out;
 }

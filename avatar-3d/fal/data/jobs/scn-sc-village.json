@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-village",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-village.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c942/2RQ8tiWSl5R6EtPniZwC5_sheet-sc-village.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-village (trellis-2 1024): smithy watermill watchtower well",
+ "tag": "oathwild3-props",
+ "request_id": "01a20ee5-f025-7813-b40e-41a1a21f16e5",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ee5-f025-7813-b40e-41a1a21f16e5/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ee5-f025-7813-b40e-41a1a21f16e5",
+ "submitted": "2026-11-24T18:51:20.023Z",
+ "logged": true
+}

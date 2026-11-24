@@ -59,3 +59,17 @@
 .fl-roster td { height: 44px; }
 .fl-roster td small { display: block; color: var(--ink2); font-size: 11px; }
 .fl-roster tbody tr.fl-pick.on td small { color: #e8d6a8; }
+
+/* review marks (owner 2026-11-24): "New" = made in the newest paid round; "Needs your review" = flagged, kept out of games */
+.fl-marks { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 3px; }
+.fl-pill { display: inline-block; border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 600; letter-spacing: .02em; line-height: 18px; }
+.fl-pill.new { background: #1f3a2c; color: #9fe3b9; box-shadow: inset 0 0 0 1px #3d7a57; }
+.fl-pill.warn { background: #4a2a1a; color: #ffc59a; box-shadow: inset 0 0 0 1px #b46a36; }
+.fl-review-note { flex-basis: 100%; color: #ffc59a !important; font-size: 11.5px; }
+.fl-roster tbody tr.fl-flagged td:first-child { box-shadow: inset 3px 0 0 #d07a3e; }
+.fl-chip.new { box-shadow: inset 0 0 0 1px #3d7a57; }
+.fl-chip.warn { box-shadow: inset 0 0 0 1px #b46a36; }
+.fl-chip.warn small { color: #ffc59a; }
+.fl-round { border-color: #6b5630; }
+.fl-round h2 { color: var(--gold2); }
+#c-filter { margin-bottom: 8px; }

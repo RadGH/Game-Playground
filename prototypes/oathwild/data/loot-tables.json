@@ -9,17 +9,19 @@
     "_doc": "Which Emberveil base keys can drop, by kind. Bases with minAct > 2 or dragon parts are left out of round 1.",
     "weapon": ["dagger", "sword", "longsword", "rapier", "wand", "scepter", "staff", "quarterstaff", "hammer", "warhammer", "battleaxe", "iron_mace", "sword2h", "axe2h", "halberd", "spear", "bow", "shortbow", "crossbow", "javelin", "orb", "tome"],
     "armour": ["cloth_helm", "light_helm", "medium_helm", "heavy_helm", "cloth_chest", "light_chest", "medium_chest", "heavy_chest", "cloth_legs", "light_legs", "medium_legs", "heavy_legs", "light_gauntlets", "medium_gauntlets", "heavy_gauntlets", "light_boots", "medium_boots", "heavy_boots", "buckler", "shield", "kite_shield", "warded_focus", "quiver"],
-    "jewellery": ["ring", "necklace", "silver_amulet", "gold_signet"]
+    "jewellery": ["ring", "necklace", "silver_amulet", "gold_signet"],
+    "magic": ["wand", "wand", "wand", "tome", "tome", "staff", "scepter", "orb", "orb", "warded_focus", "rune_aegis", "spellguard_orb", "arcane_bulwark"],
+    "_magicDoc": "Magic weapons and off-hand foci (2026-11-24: Thousandvale's caster styles, js/rules/casters.js). A base listed twice comes up twice as often: a wand most, then a tome or an orb. The off-hand foci (Warded Focus, Rune Aegis, Spellguard Orb, Arcane Bulwark) add a rider to a wand, tome or sceptre."
   },
   "monsterTable": { "boss": "boss", "rare": "elite", "champion": "elite", "humanoid": "humanoid", "giant": "humanoid", "default": "beast" },
   "tables": {
     "beast": { "gold": [0, 2], "items": { "chance": 0.08, "count": [1, 1] }, "kinds": { "armour": 2, "jewellery": 1 }, "rarityBoost": 1 },
-    "humanoid": { "gold": [2, 7], "items": { "chance": 0.22, "count": [1, 1] }, "kinds": { "weapon": 3, "armour": 3, "jewellery": 1 }, "rarityBoost": 1 },
-    "elite": { "gold": [6, 14], "items": { "chance": 0.8, "count": [1, 2] }, "kinds": { "weapon": 2, "armour": 3, "jewellery": 1 }, "rarityBoost": 1.8 },
-    "boss": { "gold": [20, 40], "items": { "chance": 1, "count": [2, 3] }, "kinds": { "weapon": 2, "armour": 2, "jewellery": 1 }, "rarityBoost": 3, "minRarity": "magic" },
-    "chest_common": { "gold": [4, 12], "items": { "chance": 0.6, "count": [1, 2] }, "kinds": { "weapon": 1, "armour": 2, "jewellery": 1 }, "rarityBoost": 1.3 },
-    "chest_camp": { "gold": [10, 24], "items": { "chance": 0.9, "count": [1, 3] }, "kinds": { "weapon": 2, "armour": 2, "jewellery": 1 }, "rarityBoost": 1.8 },
-    "chest_boss": { "gold": [25, 50], "items": { "chance": 1, "count": [2, 3] }, "kinds": { "weapon": 2, "armour": 2, "jewellery": 2 }, "rarityBoost": 3, "minRarity": "magic" },
+    "humanoid": { "gold": [2, 7], "items": { "chance": 0.22, "count": [1, 1] }, "kinds": { "weapon": 3, "armour": 3, "jewellery": 1, "magic": 1 }, "rarityBoost": 1 },
+    "elite": { "gold": [6, 14], "items": { "chance": 0.8, "count": [1, 2] }, "kinds": { "weapon": 2, "armour": 3, "jewellery": 1, "magic": 1 }, "rarityBoost": 1.8 },
+    "boss": { "gold": [20, 40], "items": { "chance": 1, "count": [2, 3] }, "kinds": { "weapon": 2, "armour": 2, "jewellery": 1, "magic": 1 }, "rarityBoost": 3, "minRarity": "magic" },
+    "chest_common": { "gold": [4, 12], "items": { "chance": 0.6, "count": [1, 2] }, "kinds": { "weapon": 1, "armour": 2, "jewellery": 1, "magic": 0.5 }, "rarityBoost": 1.3 },
+    "chest_camp": { "gold": [10, 24], "items": { "chance": 0.9, "count": [1, 3] }, "kinds": { "weapon": 2, "armour": 2, "jewellery": 1, "magic": 1 }, "rarityBoost": 1.8 },
+    "chest_boss": { "gold": [25, 50], "items": { "chance": 1, "count": [2, 3] }, "kinds": { "weapon": 2, "armour": 2, "jewellery": 2, "magic": 1 }, "rarityBoost": 3, "minRarity": "magic" },
     "bag": { "gold": [0, 0], "items": { "chance": 0, "count": [0, 0] }, "kinds": {}, "rarityBoost": 1 }
   }
 }

@@ -1,0 +1,24 @@
+{
+ "endpoint": "fal-ai/trellis-2",
+ "name": "scn-sc-palisade",
+ "price": 0.3,
+ "input": {
+  "image_url": "@ref/sheet-sc-palisade.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "resolved": {
+  "image_url": "https://v3b.fal.media/files/b/0ab3c954/MbzPRI0nqjrQqX7SrwZRY_sheet-sc-palisade.png",
+  "resolution": 1024,
+  "decimation_target": 20000,
+  "texture_size": 2048
+ },
+ "note": "Oathwild scenery sheet sc-palisade (trellis-2 1024): palisade-wall palisade-corner palisade-gate fence-rail",
+ "tag": "oathwild3-props",
+ "request_id": "01a20ee8-a8da-7801-9180-5fce7a26facd",
+ "status_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ee8-a8da-7801-9180-5fce7a26facd/status",
+ "response_url": "https://queue.fal.run/fal-ai/trellis-2/requests/01a20ee8-a8da-7801-9180-5fce7a26facd",
+ "submitted": "2026-11-24T18:54:18.374Z",
+ "logged": true
+}

@@ -1,0 +1,65 @@
+{
+  "_doc": "How the ground is painted (js/client/render/ground.js is the one reader; tools/bake-ground.mjs bakes `layers` into img/ground/*.webp). `layers`: the painted surfaces in order (the first eight are the splat channels, the ninth is rock, laid on by slope in the shader); `metres` = how many metres one repeat covers; `tone` × `bright` multiply the picture (warm it, lift it); `low` = the 1-texel stand-in drawn until the pictures load. `biomes`: which layer each terrain biome paints. `towns`: paving per town (squares, streets = the roads inside the town, yards round buildings and listed props). `fields`: the crops planted in map.json's fields (a field is cut into strips across its long side, one crop per strip) and their fence. `grass`: the tufts that grow round the camera per quality setting.",
+  "layers": [
+    { "id": "grass", "surface": "grass", "metres": 5, "low": "#6f9a48" },
+    { "id": "wild", "surface": "meadow", "tint": "#b9c8a0", "metres": 6, "low": "#6e8a48" },
+    { "id": "forest", "surface": "forest_floor", "metres": 6, "low": "#5a5a36" },
+    { "id": "dirt", "surface": "dirt", "metres": 5, "low": "#9c8260" },
+    { "id": "cobble", "surface": "cobble", "contrast": 0.62, "metres": 2.7, "tone": "#efe0c8", "bright": 1.25, "low": "#9a9284" },
+    { "id": "soil", "surface": "mud", "tint": "#e6d0b8", "metres": 4, "tone": "#f0dcc4", "low": "#7a6248" },
+    { "id": "sand", "surface": "sand", "metres": 6, "low": "#c4b48a" },
+    { "id": "marsh", "surface": "moss", "tint": "#c8d0b0", "metres": 6, "low": "#5d7450" },
+    { "id": "rock", "surface": "rock", "metres": 9, "low": "#8a8478" }
+  ],
+  "biomes": {
+    "meadow": "grass", "wildgrass": "wild", "forest": "forest", "field": "soil", "village": "grass", "road": "dirt", "trail": "dirt",
+    "boardwalk": "marsh", "water": "sand", "shore": "sand", "marsh": "marsh", "rock": "rock"
+  },
+  "roads": {
+    "_doc": "Worn into the ground (not laid on top): `width` adds to the road's own width, `soft` = how many metres the edge fades over, `wear` = a trodden band either side (metres) at that strength.",
+    "road": { "layer": "dirt", "extra": 0.6, "soft": 1.6, "wear": 2.2, "wearStrength": 0.35 },
+    "trail": { "layer": "dirt", "extra": 0.2, "soft": 1.4, "wear": 1.4, "wearStrength": 0.25 },
+    "boardwalk": { "layer": "dirt", "extra": 0, "soft": 1.2, "wear": 1, "wearStrength": 0.2 }
+  },
+  "towns": {
+    "larkford": {
+      "trodden": 0.28,
+      "streets": { "layer": "cobble", "extra": 1.2, "soft": 1.2 },
+      "squares": [
+        { "_doc": "the green: well, signpost, lamps", "layer": "cobble", "at": [-261, -4], "size": [46, 22], "round": 8, "angle": 0.02 },
+        { "_doc": "the market by the smithy", "layer": "cobble", "at": [-260, -40], "size": [24, 14], "round": 5, "angle": 0.15 },
+        { "_doc": "the inn yard", "layer": "dirt", "at": [-280, 30], "size": [20, 14], "round": 6, "angle": -0.42 }
+      ],
+      "yards": { "layer": "dirt", "pad": 2.5, "soft": 2.5, "strength": 0.75 }
+    },
+    "thornwatch": {
+      "trodden": 0.4,
+      "streets": { "layer": "cobble", "extra": 1, "soft": 1.2 },
+      "squares": [
+        { "_doc": "round the fire", "layer": "cobble", "at": [170, -44], "size": [16, 13], "round": 6, "angle": 0 },
+        { "_doc": "the tent row", "layer": "dirt", "at": [176, -24], "size": [44, 12], "round": 5, "angle": 0.05 },
+        { "_doc": "the cottages' yard", "layer": "dirt", "at": [164, -72], "size": [40, 16], "round": 6, "angle": 0.1 }
+      ],
+      "yards": { "layer": "dirt", "pad": 2.5, "soft": 2.5, "strength": 0.8 }
+    }
+  },
+  "yardProps": ["market-stall", "well", "cart", "trough", "anvil", "haystack", "woodpile", "crate-stack", "tent-large", "tent-small", "campfire", "weapon-rack"],
+  "fields": {
+    "strip": 13,
+    "baulk": 1.6,
+    "fence": "wooden",
+    "fenceStep": 2.6,
+    "plans": {
+      "west_fields": ["wheat", "barley", "cabbage", "wheat", "oats"],
+      "south_fields": ["corn", "pumpkin", "wheat", "turnip"],
+      "tansy_field": ["wheat", "flax", "rye"],
+      "north_fields": ["barley", "potato", "wheat"]
+    }
+  },
+  "grass": {
+    "_doc": "radius = metres round the camera, spacing = metres between tufts, blades per tuft; none on a surface that is not grass.",
+    "low": { "radius": 18, "spacing": 0.95, "blades": 5 },
+    "medium": { "radius": 27, "spacing": 0.8, "blades": 6 },
+    "high": { "radius": 38, "spacing": 0.66, "blades": 7 }
+  }
+}

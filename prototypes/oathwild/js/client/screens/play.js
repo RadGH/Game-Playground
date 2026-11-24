@@ -6,6 +6,8 @@ import { createView } from '../render/view.js';
 import { createWorldView } from '../render/world.js';
 import { createActors } from '../render/actors.js';
 import { createFx } from '../render/fx.js';
+import { createCasterFx } from '../render/caster-fx.js';
+import { attackPlan } from '../../rules/casters.js';
 import { createCamera } from '../play/camera.js';
 import { createPredictor } from '../play/predict.js';
 import { createHud } from '../play/hud.js';
@@ -31,8 +33,28 @@ export async function show(app, { enter = null } = {}) {
     app.worldView = createWorldView(app.view, { T, placements, art: app.art, scattered: app.scattered, book, quality: app.settings.quality });
     app.actors = createActors(app.view, { rules: app.rules, art: app.art, quality: app.settings.quality, maxTabards: app.settings.quality === 'low' ? 6 : 16 });
     app.fx = await createFx(app.view, { heightAt, quality: app.settings.quality });
+    // a quest object that is an animal (Chestnut the mare): a real body instead of the world's fallback box
+    const mountIds = new Set((app.art.mounts || []).map(m => m.id));
+    for (const o of placements.objects || []) {
+      if (!mountIds.has(o.art)) continue;
+      const box = app.worldView.objectMeshes.get(o.id); if (box) box.visible = false;
+      app.actors.standingHorse(o.at[0], o.y ?? heightAt(o.at[0], o.at[1]), o.at[1], o.facing || 0).catch(e => { console.warn('standing horse', e); if (box) box.visible = true; });
+    }
   }
   const view = app.view, actors = app.actors, fx = app.fx;
+  // a wand / tome / staff / sceptre's own attack: how each style looks (data/casters.json look)
+  fx.looks = app.rules.data.casters?.look || {};
+  const handV = new THREE.Vector3();
+  const cfx = createCasterFx(fx, {
+    heightAt, looks: fx.looks,
+    handOf: id => {
+      const a = actors.get(id), bone = a?.body?.bones?.hand_r;
+      if (bone && actors.shown?.(id) !== false) { bone.getWorldPosition(handV); return [handV.x, handV.y, handV.z]; }
+      const u = S.units.get(id);
+      return u ? [u.x, (u.y || heightAt(u.x, u.z)) + 1.3, u.z] : null;
+    },
+    bodyOf: id => actors.get(id)?.root || null,
+  });
   const canvas = view.renderer.domElement;
   canvas.style.visibility = 'visible';
   if (!app.input) {
@@ -40,7 +62,7 @@ export async function show(app, { enter = null } = {}) {
     app.input.onDevice = d => { app.device = d; app.emit('device', d); };
   }
   const input = app.input;
-  const cam = createCamera(view, { heightAt, tuning: app.tuning || {}, settings: app.settings });
+  const cam = createCamera(view, { heightAt, tuning: app.tuning || {}, settings: app.settings, solidsNear: (x, z, r) => app.ground.solidsNear(x, z, r) });
   const pred = createPredictor({ ground: app.ground, combat: app.rules.data.combat });
 
   // ---------------------------------------------------------------- state
@@ -104,15 +126,25 @@ export async function show(app, { enter = null } = {}) {
         if (p) app.play.hud.number(p[0], p[1], p[2], `${e.crit ? '' : ''}${fmt(e.amount)}${e.crit ? '!' : ''}`, e.to === me ? 'hurt' : e.from === me ? (e.crit ? 'crit' : 'mine') : 'other');
         actors.get(e.to)?.act('hit');
         const from = S.units.get(e.from);
-        if (from && !e.spell && performance.now() / 1000 - (from.swungAt || 0) > 0.35) { from.swungAt = performance.now() / 1000; from.actedAt = from.swungAt; actors.get(e.from)?.act('attack'); }
+        if (from && !e.spell && !e.vis && performance.now() / 1000 - (from.swungAt || 0) > 0.35) { from.swungAt = performance.now() / 1000; from.actedAt = from.swungAt; actors.get(e.from)?.act('attack'); }
         if (p && e.spell) fx.impact(p.map((v, i) => (i === 1 ? v + 1.1 : v)), e.spell, e.element, 1);
-        if (e.from === me || e.to === me) app.sfx(e.crit ? 'melee.crit' : e.spell ? `spell.${e.element === 'ice' ? 'ice' : e.element || 'physical'}.impact` : 'melee.hit');
+        else if (p && e.vis) fx.impact(p.map((v, i) => (i === 1 ? v + 1.1 : v)), fx.kit ? fx.kit.visualFor(null, { kind: 'bolt', element: e.element }) : null, e.element, 0.7);   // a magic weapon's hit lands in its element
+        if (e.from === me || e.to === me) app.sfx(e.crit ? 'melee.crit' : e.spell || e.vis ? `spell.${e.element === 'ice' ? 'ice' : e.element || 'physical'}.impact` : 'melee.hit');
         if (e.from === me && S.units.get(e.to)?.hostile) softTarget = { id: e.to, until: performance.now() + 6000 };
         break;
       }
       case 'tick': { const p = posOf(e.to); if (p && e.to === me) app.play.hud.number(p[0], p[1], p[2], fmt(e.amount), 'tick'); break; }
       case 'heal': { const p = posOf(e.to); if (p && e.amount > 0) app.play.hud.number(p[0], p[1], p[2], `+${fmt(e.amount)}`, 'heal'); if (e.to === me) app.sfx('heal'); break; }
-      case 'barrier': { const p = posOf(e.who); if (p) app.play.hud.number(p[0], p[1], p[2], `+${fmt(e.amount)} shield`, 'heal'); break; }
+      case 'barrier': { const p = posOf(e.who); if (p) app.play.hud.number(p[0], p[1], p[2], `+${fmt(e.amount)} shield`, 'heal'); if (e.ward) cfx.ward(e); break; }
+      case 'attack': {      // a wand / tome / staff / sceptre's basic attack in its own style (js/rules/caster-attack.js)
+        const u = S.units.get(e.who);
+        if (u && e.shape !== 'pool' && e.shape !== 'burst') { u.actedAt = u.swungAt = performance.now() / 1000; actors.get(e.who)?.act(e.shape === 'melee' ? 'attack' : 'cast'); }
+        cfx.attack(e);
+        if (e.who === me && e.shape !== 'bolt' && e.shape !== 'pool' && e.shape !== 'burst') app.sfx(e.shape === 'melee' ? 'melee.swing' : 'cast.start');
+        break;
+      }
+      case 'hop': cfx.hop(e); break;
+      case 'rider': if (e.who === me && e.rider === 'siphon' && e.amt > 0) { const p = posOf(e.who); if (p) app.play.hud.number(p[0], p[1], p[2], `+${fmt(e.amt)} mana`, 'heal'); } break;
       case 'miss': { const p = posOf(e.to || e.who); if (p && (e.who === me || e.to === me)) app.play.hud.number(p[0], p[1], p[2], e.dodged ? 'Dodged' : e.evade ? 'Evaded' : 'Miss', 'miss'); if (e.who && !e.to) { const u = S.units.get(e.who); if (u && performance.now() / 1000 - (u.swungAt || 0) > 0.35) { u.swungAt = u.actedAt = performance.now() / 1000; actors.get(e.who)?.act('attack'); } } if (e.who === me) app.sfx('melee.swing'); break; }
       case 'cast': {
         const u = S.units.get(e.who); if (u) { u.actedAt = performance.now() / 1000; actors.get(e.who)?.act('cast'); }
@@ -291,12 +323,41 @@ export async function show(app, { enter = null } = {}) {
     const msg = { t: 'in', q: pred.state.q, mx: round(dx), mz: round(dz), ax: round(hero.x), ay: round(heightAt(hero.x, hero.z) + 1.4), az: round(hero.z), dx: round(d.x), dy: 0, dz: round(d.z),
       b: packButtons({ attack: attack || power, power, block, sprint, sneak: sneakOn, dodge, mount, respawn, interact: reviving }), c: -1, h: channelSlot != null };
     if (pending) { msg.c = pending.slot; if (pending.at) msg.at = pending.at.map(round); msg.h = !!pending.held || channelSlot != null; pending = null; }
+    else if ((attack || power) && aim && LANDS.has(myPlan()?.shape)) msg.at = landAt().map(round);     // where a lobbed wand / tome / staff attack lands
     if (reviving) msg.rv = it.id;
     if (S.target) msg.tg = S.target;
     app.net.send(msg);
     if (attack || power) lastAttackAt = performance.now() / 1000;
   }
   const round = v => Math.round(v * 100) / 100;
+
+  // ---------------------------------------------------------------- the magic weapon's attack (lobs and placed styles)
+  const LANDS = new Set(['lob', 'ground']);
+  let planKey = '', planNow = null, landFx = null;
+  /** My main hand's caster plan (js/rules/casters.js), recomputed when the weapon or off hand changes. */
+  function myPlan() {
+    const g = app.me?.char?.gear || {};
+    const k = `${g.weapon?.id || ''}|${g.offhand?.id || ''}`;
+    if (k !== planKey) { planKey = k; try { planNow = attackPlan(app.rules, g, null); } catch { planNow = null; } }
+    return planNow;
+  }
+  /** The crosshair's ground point clamped to the attack's reach (what the server does too). */
+  function landAt() {
+    const p = myPlan(), mx = pred.state.x, mz = pred.state.z;
+    let x = aim.point.x, z = aim.point.z;
+    const d = Math.hypot(x - mx, z - mz);
+    if (p && d > p.range) { x = mx + (x - mx) / d * p.range; z = mz + (z - mz) / d * p.range; }
+    return [x, heightAt(x, z), z];
+  }
+  /** While attacking with a lobbed or placed style, the ground indicator shows where it will land and how wide. */
+  function updateLandFx() {
+    const p = myPlan();
+    const want = p && LANDS.has(p.shape) && aim && S.aimingSlot == null && !meUnit()?.downed && (input.held('attack') || performance.now() / 1000 - lastAttackAt < 0.6);
+    if (!want) { landFx?.stop(); landFx = null; return; }
+    if (!landFx) landFx = fx.indicator('circle', { at: { x: 0, z: 0 }, radius: p.radius, kind: 'hostile' });
+    const [x, , z] = landAt();
+    landFx.set({ at: { x, z }, radius: p.radius });
+  }
 
   // ---------------------------------------------------------------- the frame
   const ndc = new THREE.Vector3();
@@ -305,7 +366,7 @@ export async function show(app, { enter = null } = {}) {
     if (ndc.z > 1 || ndc.z < -1 || Math.abs(ndc.x) > 1.1 || Math.abs(ndc.y) > 1.1) return null;
     return { x: (ndc.x + 1) / 2 * view.size.w, y: (1 - ndc.y) / 2 * view.size.h };
   }
-  let npcTick = 0, slowTick = 0;
+  let npcTick = 0, slowTick = 0, bodyTick = 0;
   function frame(t) {
     if (!alive) return;
     raf = requestAnimationFrame(frame);
@@ -365,6 +426,7 @@ export async function show(app, { enter = null } = {}) {
         else aimFx.h.set({ at: { x: mx, z: mz }, dir: aim.dir });
       }
       app.play.hud.crosshair(aim.unit ? (aim.unit.hostile ? 'foe' : 'friend') : '');
+      updateLandFx();
     }
     const nowS = performance.now() / 1000;
     for (const u of S.units.values()) {
@@ -384,7 +446,12 @@ export async function show(app, { enter = null } = {}) {
       }
       if (!Number.isFinite(face)) face = u.drawFacing || 0;
       u.drawFacing = lerpAngle(u.drawFacing ?? face, face, Math.min(1, dt * 12));
-      a.place(u.x, u.y, u.z, u.drawFacing);
+      a.swimming = app.ground.swimming(u.x, u.z);
+      // a swimmer: the library swim clips already drop the body (head ≈ 0.5 m above the base), so the base goes UP to
+      // just under the surface (the walked height is surface − wadeDepth): head and shoulders out of the water
+      const lift = a.swimming ? (a.clip === 'Swim_Fwd_Loop' ? (app.tuning?.swimLiftStroke ?? 0.8) : (app.tuning?.swimLift ?? 0.55)) : 0;   // the stroke lies flatter: a little higher so the back shows
+      a.lift = (a.lift ?? lift) + (lift - (a.lift ?? lift)) * Math.min(1, dt * 6);
+      a.place(u.x, u.y + a.lift, u.z, u.drawFacing);
       a.channeling = !!(u.fl & UF.channel);
       if (!!(u.fl & UF.mounted) !== !!a.mounted) actors.setMounted(a, !!(u.fl & UF.mounted));
       if (u.downed && !a.dead) a.act('death'); else if (!u.downed && a.dead && !dying.has(u.id)) a.revive();
@@ -392,6 +459,7 @@ export async function show(app, { enter = null } = {}) {
     }
     // people: drawn while near, facing whoever comes close
     if (me && (npcTick += dt) > 0.5) { npcTick = 0; syncNpcs(); }
+    if ((bodyTick += dt) > 0.25) { bodyTick = 0; actors.budget(pred.state.x, pred.state.z); }   // nearest people get bodies first
     for (const n of S.npcs) { const a = actors.get('npc:' + n.id); if (!a) continue; const y = heightAt(n.x, n.z); let f = n.face ?? 0; const dx = pred.state.x - n.x, dz = pred.state.z - n.z; if (Math.hypot(dx, dz) < 7) f = Math.atan2(dx, dz); n.face = lerpAngle(n.face ?? f, f, Math.min(1, dt * 4)); a.place(n.x, y, n.z, n.face); actors.moveClip(a, 0); }
     // tags: enemies near, damaged ones, the party, people (with ! / ? for quests)
     S.tags = [];
@@ -400,10 +468,11 @@ export async function show(app, { enter = null } = {}) {
       if (u.id === S.meId) continue;
       const d = Math.hypot(u.x - pred.state.x, u.z - pred.state.z);
       if (d > tagR && u.info.k !== 'player') continue;
+      if (!actors.shown(u.id)) continue;                 // no floating name over a body that is still loading
       const cls = u.info.k === 'player' ? 'ally' : u.hostile ? `foe ${u.info.rank || ''}${S.target === u.id ? ' tgt' : ''}` : 'pet';
       S.tags.push({ id: u.id, x: u.x, y: u.y, z: u.z, h: actors.get(u.id)?.height || 1.8, name: u.info.k === 'monster' ? `${u.info.n} · ${u.info.lv}` : u.info.n, cls, hp: u.hostile || u.info.k === 'player' ? u.hp / Math.max(1, u.mh) : null });
     }
-    for (const n of S.npcs) if (Math.hypot(n.x - pred.state.x, n.z - pred.state.z) < 22) S.tags.push({ id: 'npc:' + n.id, x: n.x, y: heightAt(n.x, n.z), z: n.z, h: 1.85, name: `${n.mark ? n.mark + ' ' : ''}${n.name}`, cls: `npc${n.mark ? ' quest' : ''}`, hp: null });
+    for (const n of S.npcs) if (Math.hypot(n.x - pred.state.x, n.z - pred.state.z) < 22 && actors.shown('npc:' + n.id)) S.tags.push({ id: 'npc:' + n.id, x: n.x, y: heightAt(n.x, n.z), z: n.z, h: 1.85, name: `${n.mark ? n.mark + ' ' : ''}${n.name}`, cls: `npc${n.mark ? ' quest' : ''}`, hp: null });
     if ((slowTick += dt) > 0.5) {
       slowTick = 0;
       S.liveObjects = liveObjects(book, wsLike());
@@ -461,6 +530,7 @@ export async function show(app, { enter = null } = {}) {
       alive = false; cancelAnimationFrame(raf);
       for (const off of offs) off();
       stopAim();
+      landFx?.stop(); landFx = null;
       for (const id of [...S.units.keys()]) actors.drop(id);
       for (const n of S.npcs) actors.drop('npc:' + n.id);
       app.snapBuf = [];

@@ -1,0 +1,8 @@
+:root { --bg: #20252b; --ink: #e8e2d4; --dim: #a8a294; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, sans-serif; overflow: hidden; }
+.kg-head { position: fixed; top: 0; left: 0; right: 0; padding: 10px 16px; background: rgba(20, 24, 28, 0.82); z-index: 2; }
+.kg-head h1 { margin: 0 0 4px; font-size: 18px; }
+.kg-head p { margin: 0; color: var(--dim); }
+#kg-view { display: block; width: 100vw; height: 100vh; }
+#kg-labels { position: fixed; inset: 0; pointer-events: none; }
+.kg-label { position: absolute; transform: translate(-50%, 0); padding: 2px 6px; border-radius: 4px; background: rgba(20, 24, 28, 0.7); color: var(--ink); font-size: 12px; white-space: nowrap; }

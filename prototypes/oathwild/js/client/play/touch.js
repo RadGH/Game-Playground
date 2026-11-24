@@ -19,6 +19,10 @@ export function createTouch(app, input, play) {
     </div>
     <div class="hud-place" hidden><span></span><button type="button" class="ow-btn ow-small" data-tb="cancel">Cancel</button></div>`;
   document.getElementById('hud').append(root);
+  // the stick and buttons sit just above the action bar, however many rows it wraps to on this screen
+  const bottom = document.querySelector('#hud .hud-bottom');
+  const lift = () => { const h = bottom ? Math.ceil(bottom.getBoundingClientRect().height) : 80; root.style.setProperty('--tb-lift', `${h + 22}px`); };
+  const ro = new ResizeObserver(lift); if (bottom) ro.observe(bottom); lift();
   const stick = root.querySelector('[data-stick]'), knob = stick.querySelector('i');
   const fingers = new Map();
   const T = input.touch;
@@ -76,7 +80,7 @@ export function createTouch(app, input, play) {
     root,
     placing(text) { const p = root.querySelector('.hud-place'); p.hidden = !text; if (text) p.querySelector('span').textContent = text; },
     show(on) { root.hidden = !on; },
-    destroy() { root.remove(); },
+    destroy() { ro.disconnect(); root.remove(); },
     esc,
   };
 }

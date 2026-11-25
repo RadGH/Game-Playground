@@ -8,7 +8,7 @@ import { createCredits } from '../../../../../shared/credits.js';
 import { account } from '../../../../../shared/rgs-account.js';
 import { openSignIn } from '../../../../../shared/rgs-signin.js';
 
-const CHAR = [['bag', 'Bag', 'bag', 'bag'], ['sheet', 'Character', 'sheet', 'sheet'], ['classes', 'Classes', 'skills', 'classes'], ['talents', 'Talents', 'perks', 'talents'], ['spellbook', 'Spellbook', 'journal', 'spellbook'], ['quests', 'Quests', 'callboard', 'quests'], ['map', 'Map', 'map', 'map']];
+const CHAR = [['bag', 'Bag', 'bag', 'bag'], ['sheet', 'Character', 'sheet', 'sheet'], ['classes', 'Classes', 'skills', 'classes'], ['talents', 'Talents', 'perks', 'talents'], ['spellbook', 'Spellbook', 'journal', 'spellbook'], ['quests', 'Quests', 'callboard', 'quests'], ['trade', 'Trade skills', 'prof_enchanting', 'trade'], ['map', 'Map', 'map', 'map']];
 let credits = null;
 
 export function open(app, opts = {}) {

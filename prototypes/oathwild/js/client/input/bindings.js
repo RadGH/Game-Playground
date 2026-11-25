@@ -36,6 +36,7 @@ export const ACTIONS = [
   ['Windows', 'talents', 'Talents', ['KeyT'], [], 'press'],
   ['Windows', 'spellbook', 'Spellbook', ['KeyP'], [], 'press'],
   ['Windows', 'quests', 'Quests', ['KeyJ'], [], 'press'],
+  ['Windows', 'trade', 'Trade skills (enchanting)', ['KeyK'], [], 'press'],
   ['Windows', 'map', 'Map', ['KeyM'], [14], 'press'],
   ['Windows', 'menu', 'Menu', ['Escape'], [9], 'press'],
   ['Camera', 'freeMouse', 'Free the mouse (hold)', ['AltLeft'], [], 'hold'],

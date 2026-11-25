@@ -1,7 +1,8 @@
 // Oathwild — where a body may stand, for the server AND the browser's own-hero prediction (one function, so the
 // drawn hero and the server's hero walk the same ground — lessons rule 22).
 //
-//   const G = createGround(T, placements, scattered)   T = js/world/terrain.js, scattered = js/world/scatter.js result
+//   const G = createGround(T, placements, scattered, town)   T = js/world/terrain.js, scattered = js/world/scatter.js result,
+//                                      town = js/world/town.js plan (its houses, stalls and terrace walls are solid boxes)
 //   G.settle(prev, next)  → { x, z }   the step from prev to next, refused / slid along where the ground says no:
 //                                      off the walkable ground (cliffs, out of bounds — deep water is SWUM, see swimming()), up or down a ledge
 //                                      steeper than the walk limit, onto or off a bridge deck except at its ends, or
@@ -15,7 +16,7 @@
 
 const CELL = 8;
 
-export function createGround(T, placements = null, scattered = null) {
+export function createGround(T, placements = null, scattered = null, town = null) {
   const maxRise = Math.tan(T.limits.maxSlope * Math.PI / 180);
   // round colliders: buildings (footprint), solid props, tree trunks, solid decor
   const grid = new Map();
@@ -36,6 +37,34 @@ export function createGround(T, placements = null, scattered = null) {
     for (const t of scattered.trees || []) add(t.x, t.z, Math.max(0.3, (t.r || 0.5) * 0.85));     // the trunk (scatter.js TREE_SPECIES)
     for (const d of scattered.decor || []) if (d.solid) add(d.x, d.z, (d.r || 1) * 0.8);
   }
+  for (const t of town?.trees || []) add(t.x, t.z, Math.max(0.3, (t.r || 0.5) * 0.85));   // the towns' own trees (js/world/town.js)
+  for (const c of town?.circles || []) add(c.x, c.z, c.r);                                   // the fountain
+  // oriented boxes (town houses, stalls, terrace walls): pushed out of along the shallower side
+  const bgrid = new Map(), boxes = [];
+  for (const b of town?.boxes || []) {
+    const c = Math.cos(b.facing), sn = Math.sin(b.facing), R = Math.hypot(b.hw, b.hd);
+    const bx = { x: b.x, z: b.z, hw: b.hw, hd: b.hd, c, s: sn, R };
+    boxes.push(bx);
+    const i0 = Math.floor((b.x - R) / CELL), i1 = Math.floor((b.x + R) / CELL), k0 = Math.floor((b.z - R) / CELL), k1 = Math.floor((b.z + R) / CELL);
+    for (let i = i0; i <= i1; i++) for (let k = k0; k <= k1; k++) { const kk = key(i, k); if (!bgrid.has(kk)) bgrid.set(kk, []); bgrid.get(kk).push(bx); }
+  }
+  function boxesNear(x, z) { return bgrid.get(key(Math.floor(x / CELL), Math.floor(z / CELL))) || []; }
+  function pushBoxes(p, body) {
+    for (const b of boxesNear(p.x, p.z)) {
+      const dx = p.x - b.x, dz = p.z - b.z, lx = dx * b.c - dz * b.s, lz = dx * b.s + dz * b.c;
+      const ox = b.hw + body - Math.abs(lx), oz = b.hd + body - Math.abs(lz);
+      if (ox <= 0 || oz <= 0) continue;
+      let nx = lx, nz = lz;
+      if (ox < oz) nx = Math.sign(lx || 1) * (b.hw + body); else nz = Math.sign(lz || 1) * (b.hd + body);
+      // back to world: the inverse turn
+      p.x = b.x + nx * b.c + nz * b.s; p.z = b.z - nx * b.s + nz * b.c;
+    }
+  }
+  /** Is (x, z) inside a solid box (grown by `pad`)? */
+  function inBox(x, z, pad = 0) {
+    for (const b of boxesNear(x, z)) { const dx = x - b.x, dz = z - b.z, lx = dx * b.c - dz * b.s, lz = dx * b.s + dz * b.c; if (Math.abs(lx) < b.hw + pad && Math.abs(lz) < b.hd + pad) return true; }
+    return false;
+  }
   function solidsNear(x, z, r = 2) {
     const out = new Set();
     const i0 = Math.floor((x - r) / CELL), i1 = Math.floor((x + r) / CELL), k0 = Math.floor((z - r) / CELL), k1 = Math.floor((z + r) / CELL);
@@ -46,6 +75,7 @@ export function createGround(T, placements = null, scattered = null) {
 
   function stepOk(ax, az, bx, bz) {
     if (!T.walkable(bx, bz) && !T.swimmable(bx, bz)) return false;          // deep water is swum, not a wall
+    if (boxes.length && inBox(bx, bz, 0.3) && !inBox(ax, az, 0.3)) return false;   // a house wall (a body already inside one may walk out)
     const h0 = T.walkHeightAt(ax, az), h1 = T.walkHeightAt(bx, bz);
     const d = Math.hypot(bx - ax, bz - az);
     if (Math.abs(h1.y - h0.y) > Math.max(0.35, maxRise * d * 1.25)) return false;   // a ledge, not a slope
@@ -57,6 +87,7 @@ export function createGround(T, placements = null, scattered = null) {
       const dx = p.x - s.x, dz = p.z - s.z, d = Math.hypot(dx, dz), min = s.r + body;
       if (d < min) { const k = d > 1e-4 ? (min - d) / d : 0; p.x += d > 1e-4 ? dx * k : min; p.z += dz * k; }
     }
+    if (boxes.length) pushBoxes(p, body);
     return p;
   }
   /** One step: from prev toward next, as far as the ground allows (sliding along an edge). */
@@ -92,5 +123,5 @@ export function createGround(T, placements = null, scattered = null) {
   }
   /** Is a body at (x, z) swimming (deep water)? The server slows it and the browser's prediction does the same. */
   const swimming = (x, z) => T.walkHeightAt(x, z).on === 'swim';
-  return { settle, y, solidsNear, standAt, solids, stepOk, swimming };
+  return { settle, y, solidsNear, standAt, solids, stepOk, swimming, inBox, boxes };
 }

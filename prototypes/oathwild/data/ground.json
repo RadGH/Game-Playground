@@ -26,9 +26,12 @@
       "trodden": 0.28,
       "streets": { "layer": "cobble", "extra": 1.2, "soft": 1.2 },
       "squares": [
-        { "_doc": "the green: well, signpost, lamps", "layer": "cobble", "at": [-261, -4], "size": [46, 22], "round": 8, "angle": 0.02 },
-        { "_doc": "the market by the smithy", "layer": "cobble", "at": [-260, -40], "size": [24, 14], "round": 5, "angle": 0.15 },
-        { "_doc": "the inn yard", "layer": "dirt", "at": [-280, 30], "size": [20, 14], "round": 6, "angle": -0.42 }
+        { "_doc": "the market square (town round 2026-11-25: matches the level pad in map.json)", "layer": "cobble", "at": [-263, -4], "size": [31, 23], "round": 3, "angle": 0.03 },
+        { "_doc": "the shrine yard", "layer": "cobble", "at": [-252.5, -23], "size": [11, 8], "round": 2, "angle": 0.05 },
+        { "_doc": "the tower terrace", "layer": "cobble", "at": [-327, -15], "size": [14, 13], "round": 2, "angle": 0.1 },
+        { "_doc": "the smithy's work yard", "layer": "dirt", "at": [-219, -8], "size": [10, 6], "round": 2, "angle": 0 },
+        { "_doc": "the training yard", "layer": "dirt", "at": [-225, 22.5], "size": [12, 10], "round": 4, "angle": 0.7 },
+        { "_doc": "the stable yard", "layer": "dirt", "at": [-213, 1], "size": [10, 6], "round": 2, "angle": 0 }
       ],
       "yards": { "layer": "dirt", "pad": 2.5, "soft": 2.5, "strength": 0.75 }
     },

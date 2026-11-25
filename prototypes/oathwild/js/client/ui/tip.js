@@ -61,6 +61,30 @@ export function describeAttr(rules, char, key) {
   return { title: `${A.names[key]} ${fmt(total)}`, kind: 'Attribute', rows: [], lines: lines.filter(Boolean), auras: [], how: parts.length ? [parts.join(' · ')] : [], compare: [], next: null, needs: [], ok: true };
 }
 
+/**
+ * An item (by app.itemRef ref) as the one item model: the describe.js card, compared against what you wear, with the
+ * price row when given. The tooltip and the details panes of the shop / repair / trade windows both draw THIS.
+ * → { m, hint, it } or null.
+ */
+export function itemModel(app, ref, { price = null, sell = false, label = null } = {}) {
+  const rules = app.rules, char = app.me?.char || app.draftChar;
+  const it = rules && char ? app.itemRef(ref) : null;
+  if (!it) return null;
+  let slot = null;
+  if (it.slot === 'ring') slot = compareAlt ? 'ring2' : 'ring';
+  if (it.type === 'weapon' && compareAlt) slot = 'offhand';
+  const m = describeItem(rules, char, it, { slot: ref?.startsWith('gear:') ? ref.slice(5) : slot });
+  if (price != null) m.rows = [...m.rows, { label: label || (sell ? 'Sells for' : 'Price'), value: `${fmt(+price)} gold` }];
+  let hint = '';
+  if (!ref?.startsWith('gear:') && (it.slot === 'ring' || it.type === 'weapon')) hint = it.slot === 'ring' ? `Comparing with ${compareAlt ? 'your second ring' : 'your first ring'} — Shift to switch` : (compareAlt ? 'Comparing with your off hand — Shift to switch' : '');
+  return { m, hint, it };
+}
+/** The item card's HTML (the same card the tooltip shows), or ''. */
+export function itemCardHtml(app, ref, opts = {}) {
+  const r = itemModel(app, ref, opts);
+  return r ? tipCard(r.m, { hint: opts.hint ?? r.hint }) : '';
+}
+
 /** Install the shared tooltip engine with the game's one renderer. `app` gives rules, char, unit lookups and items. */
 export function installTips(app) {
   installTooltips(document);
@@ -73,15 +97,9 @@ export function installTips(app) {
       switch (d.k) {
         case 'spell': m = describeSpell(rules, char, d.id, { rank: d.rank ? +d.rank : null, cls: d.cls || null }); break;
         case 'item': {
-          const it = app.itemRef(d.ref);
-          if (!it) return null;
-          let slot = null;
-          if (it.slot === 'ring') slot = compareAlt ? 'ring2' : 'ring';
-          if (it.type === 'weapon' && compareAlt) slot = 'offhand';
-          m = describeItem(rules, char, it, { slot: d.ref?.startsWith('gear:') ? d.ref.slice(5) : slot });
-          if (d.price) m.rows = [...m.rows, { label: d.sell ? 'Sells for' : 'Price', value: `${fmt(+d.price)} gold` }];
-          if (!d.ref?.startsWith('gear:') && (it.slot === 'ring' || it.type === 'weapon')) hint = it.slot === 'ring' ? `Comparing with ${compareAlt ? 'your second ring' : 'your first ring'} — Shift to switch` : (compareAlt ? 'Comparing with your off hand — Shift to switch' : '');
-          if (d.hint) hint = d.hint;
+          const r = itemModel(app, d.ref, { price: d.price ? +d.price : null, sell: !!d.sell });
+          if (!r) return null;
+          m = r.m; hint = d.hint || r.hint;
           break;
         }
         case 'aura': { const u = app.auraUnit(d.unit); if (!u) return null; m = describeAura(rules, u, d.id); break; }

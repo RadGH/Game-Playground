@@ -185,13 +185,33 @@ export function createTerrain(map, { seed = map.seed } = {}) {
     if (!p.flat) continue;
     let c = sampleH(p.at[0], p.at[1]);
     if (p.lift) for (const m of marshes) c = Math.max(c, m.level + p.lift);
+    // `relief` (0..1, towns 2026-11-25): how much of the land's own rise and fall survives — a town that follows its
+    // hill (streets climbing, houses stepping up on plinths) instead of one flat plate ("tiny houses plopped onto a
+    // flat area", owner). 0 / absent = the old flat plate.
+    const relief = p.relief || 0;
     box(p.at[0], p.at[1], p.flat, (i, k, x, z, j) => {
       const d = Math.hypot(x - p.at[0], z - p.at[1]);
       const w = 1 - smoothstep(p.flat * 0.6, p.flat, d);
       if (w <= 0) return;
-      H[j] = lerp(H[j], c, w);
+      H[j] = lerp(H[j], c + (H[j] - c) * relief, w);
       if (p.lift && w > 0.5 && H[j] > W[j]) { W[j] = NaN; WK[j] = 0; }
     });
+    // level pads (a town's square, yards, terraces): an oriented rectangle levelled to the ground at its middle, the
+    // edge falling away over `soft` metres — short on purpose, so a terrace has a real edge that a retaining wall
+    // (drawn by the client from the same pad) stands on. Streets crossing a pad are graded after this, so they ramp.
+    for (const pad of p.pads || []) {
+      const [cx, cz] = pad.at, [pw, pd] = pad.size, ang = pad.angle || 0, soft = pad.soft ?? 2;
+      const py = pad.y ?? sampleH(cx, cz) + (pad.raise || 0);
+      const cs = Math.cos(ang), sn = Math.sin(ang);
+      box(cx, cz, Math.hypot(pw, pd) / 2 + soft, (i, k, x, z, j) => {
+        const dx = x - cx, dz = z - cz;
+        const lx = dx * cs - dz * sn, lz = dx * sn + dz * cs;       // into the pad's own frame (angle = turn about y)
+        const ex = Math.max(0, Math.abs(lx) - pw / 2), ez = Math.max(0, Math.abs(lz) - pd / 2);
+        const w = 1 - smoothstep(0, soft, Math.hypot(ex, ez));
+        if (w > 0) H[j] = lerp(H[j], py, w);
+      });
+      pad.levelY = round2(py);
+    }
   }
 
   // 4. rivers: a water surface that only ever falls downstream, a channel cut under it, sloped banks
@@ -275,9 +295,9 @@ export function createTerrain(map, { seed = map.seed } = {}) {
       for (let q = pts.length - 2; q >= 0; q--) if (pinned[q] == null) prof[q] = clamp(prof[q], prof[q + 1] - g(q + 1), prof[q + 1] + g(q + 1));
     }
     pts.forEach((p, q) => { p.y = round2(prof[q]); p.zone = pinned[q] != null; });
-    roads.push({ id: r.id, name: r.name, class: r.class, width: r.width, pts });
+    roads.push({ id: r.id, name: r.name, class: r.class, width: r.width, pts, surface: r.surface || null, town: r.town || null });
     // stamp onto the ground
-    const shoulder = 5;
+    const shoulder = r.shoulder ?? 5;              // town lanes use a short one, so the ground between them keeps its shape
     const bestD = new Float32Array(N).fill(Infinity), bestY = new Float32Array(N), bestZone = new Uint8Array(N);
     const touched = [];
     for (const p of pts) box(p.x, p.z, half + shoulder, (i, k, x, z, j) => {

@@ -94,7 +94,7 @@ export function createInput({ canvas, bindings, blocked = () => false }) {
     if (e.target?.closest?.('input, textarea, select')) return;
     setDevice('keys');
     document.body.classList.add('ow-nomouse');
-    if (!down.has(e.code)) for (const a of actionsFor(e.code)) if (!blocked() || a === 'menu' || a === 'freeMouse' || ['bag', 'sheet', 'levelup', 'classes', 'talents', 'spellbook', 'quests', 'map'].includes(a)) presses.add(a);
+    if (!down.has(e.code)) for (const a of actionsFor(e.code)) if (!blocked() || a === 'menu' || a === 'freeMouse' || ['bag', 'sheet', 'levelup', 'classes', 'talents', 'spellbook', 'quests', 'trade', 'map'].includes(a)) presses.add(a);
     down.add(e.code);
     if (!blocked() && (e.code === 'Tab' || e.code === 'Space' || e.code.startsWith('Arrow') || e.code === 'AltLeft' || e.code === 'Backquote')) e.preventDefault();
   });

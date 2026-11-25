@@ -4,6 +4,7 @@
 //   itemWeight(rules, item) / carriedWeight(rules, char)
 //   durabilityOf(rules, item) / isBroken(rules, item) / wearOnRespawn(rules, char) / repairPrice / repairItem
 //   disenchant(rules, char, item, rng)        { ok, why, learned: [affixId], skill } — destroys the item
+//   learnable(rules, char, item)              { fresh: [affixId], n } — what breaking it could teach you
 //   enchantRefusal(rules, char, item, affixId, { sheet })   null or why
 //   enchant(rules, char, item, affixId, rng, { sheet })     { ok, why, affix, price, skill }
 //   affixTemplate(rules, affixId)              the Emberveil/Farhold affix row (for its stat and range)
@@ -86,6 +87,14 @@ export function affixTemplate(rules, id) {
 
 /** The affixes an item can teach (rolled ones, not the base's own built-in properties). */
 const teachable = (rules, item) => (item.affixes || []).filter(a => !a.baseIntrinsic && !a.intrinsic && !a.oathwild && !a.enchanted && affixTemplate(rules, a.id));
+/** What breaking `item` could teach `char`: { fresh: [affix ids not known yet], n: how many one break teaches }. */
+export function learnable(rules, char, item) {
+  if (!item || !I(rules).enchanting.learnFrom.includes(item.rarity)) return { fresh: [], n: 0 };
+  const known = char.enchant?.known || [];
+  const fresh = [...new Set(teachable(rules, item).map(a => a.id).filter(id => !known.includes(id)))];
+  const n = hasPerk(rules, char, 'keen_reader') && ['rare', 'legendary'].includes(item.rarity) ? 2 : 1;
+  return { fresh, n: Math.min(n, fresh.length) };
+}
 
 /**
  * Break a magic-or-better item to learn one (or, with Keen Reader, two) of its enchantments.

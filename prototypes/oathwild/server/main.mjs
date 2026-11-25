@@ -36,7 +36,7 @@ const t0 = Date.now();
 const rules = await bootRules({ seed: 7 });
 const W = await bootWorld({ regions: rules.data.regions });
 const scattered = scatter(W.terrain, W.data.placements);
-const ground = createGround(W.terrain, W.data.placements, scattered);
+const ground = createGround(W.terrain, W.data.placements, scattered, W.town);
 log('server.boot', { ms: Date.now() - t0, saves: savesDir });
 
 const store = createStore(savesDir);

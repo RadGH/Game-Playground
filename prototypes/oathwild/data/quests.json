@@ -19,7 +19,7 @@
       "title": "Tracks by the River", "kind": "main", "region": "brightwater_vale", "level": 2,
       "giver": "brother_tobin", "turnIn": "captain_edda", "requires": { "quests": ["silent_bell"] },
       "summary": "Someone has been carrying shrine candles away along the river at night.",
-      "offer": ["The shrine's candle chest is half empty, and there were wet footprints on the floor.", "Fisher Wynn says lights move along Lantern Reach at night. Will you look there, and take what you find to Captain Brandt?"],
+      "offer": ["The shrine's candle chest is half empty, and there were wet footprints on the floor.", "The fisher says lights move along Lantern Reach at night. Will you look there, and take what you find to Captain Brandt?"],
       "acceptReply": "Follow the river south from the bridge. Lantern Reach is the shallow bend.",
       "steps": [
         { "id": "go_reach", "kind": "reach", "place": "riverbank", "text": "Search Lantern Reach, south of Larkford along the river." },
@@ -113,7 +113,7 @@
     "wolves_at_the_fold": {
       "title": "Wolves at the Fold", "kind": "side", "region": "brightwater_vale", "level": 1, "minLevel": 1,
       "giver": "shepherd_ada", "turnIn": "shepherd_ada",
-      "summary": "Wolves from the Hartwood keep taking Ada Fenn's lambs.",
+      "summary": "Wolves from the Hartwood keep taking the shepherd's lambs.",
       "offer": ["Three lambs this month. The wolves come out of the Hartwood bold as anything.", "Thin the pack for me? Six should teach the rest some manners."],
       "acceptReply": "They lope along the wood's edge, north of the fold.",
       "steps": [
@@ -123,46 +123,46 @@
       "rewards": { "xp": 52, "gold": 6, "items": [{ "base": "light_boots", "label": "sturdy boots", "rarity": "normal" }], "worldFlags": ["fold_safe"] }
     },
     "pip_in_the_hartwood": {
-      "title": "Pip in the Hartwood", "kind": "side", "region": "brightwater_vale", "level": 1, "minLevel": 1,
+      "title": "A Boy in the Hartwood", "kind": "side", "region": "brightwater_vale", "level": 1, "minLevel": 1,
       "giver": "farmer_della", "turnIn": "farmer_della",
-      "summary": "Della's boy went to look at the wolves. Bring him home.",
-      "offer": ["My Pip went off to 'see a wolf up close'. He is seven.", "He will be at the edge of the Hartwood, north-east, scared stiff and pretending not to be. Bring him home?"],
+      "summary": "The farmer's boy went to look at the wolves. Bring him home.",
+      "offer": ["My boy went off to 'see a wolf up close'. He is seven.", "He will be at the edge of the Hartwood, north-east, scared stiff and pretending not to be. Bring him home?"],
       "acceptReply": "Thank you. Tell him there is pie. That usually works.",
       "steps": [
-        { "id": "find", "kind": "escort", "npc": "pip_rowe", "to": "larkford", "radius": 40, "ask": "There is pie at home, Pip.", "say": ["Pie? ...All right. But you go first. In case of wolves."], "text": "Find Pip at the Hartwood's edge and walk him home to Larkford." }
+        { "id": "find", "kind": "escort", "npc": "pip_rowe", "to": "larkford", "radius": 40, "ask": "There is pie at home, lad.", "say": ["Pie? ...All right. But you go first. In case of wolves."], "text": "Find the farmer's boy at the Hartwood's edge and walk him home to Larkford." }
       ],
-      "done": ["Pip! Oh, you muddy little - thank you. Thank you so much."],
+      "done": ["There you are! Oh, you muddy little - thank you. Thank you so much."],
       "rewards": { "xp": 52, "gold": 5, "worldFlags": ["pip_home"] }
     },
     "the_millers_sacks": {
       "title": "The Miller's Sacks", "kind": "side", "region": "brightwater_vale", "level": 2,
       "giver": "miller_hobb", "turnIn": "miller_hobb",
       "summary": "Three sacks of flour went missing from the mill. They turned up somewhere strange.",
-      "offer": ["Three sacks of good flour, gone in the night! Thieves, I say.", "Find them for me. I hear things are odd in Tansy's Field lately. The scarecrows have been... wandering."],
-      "acceptReply": "Tansy's Field is south of the village, by the river.",
+      "offer": ["Three sacks of good flour, gone in the night! Thieves, I say.", "Find them for me. I hear things are odd in the Miller's Field lately. The scarecrows have been... wandering."],
+      "acceptReply": "The Miller's Field is south of the village, by the river.",
       "steps": [
-        { "id": "sacks", "kind": "collect", "objects": ["tansy_sack_1", "tansy_sack_2", "tansy_sack_3"], "item": "flour sacks", "text": "Recover the three flour sacks from Tansy's Field." },
-        { "id": "perrin", "kind": "talk", "npc": "widow_perrin", "text": "The sacks are stitched with Widow Perrin's mark. Ask her about it.", "ask": "Why are these sacks stitched with your mark?",
-          "say": ["Oh. Oh dear. I sewed those for Hobb, years ago. I... asked the scarecrow-man to bring me one. Just one. The children were hungry.", "I did not think he would bring three. Or that the scarecrows would walk."],
+        { "id": "sacks", "kind": "collect", "objects": ["tansy_sack_1", "tansy_sack_2", "tansy_sack_3"], "item": "flour sacks", "text": "Recover the three flour sacks from the Miller's Field." },
+        { "id": "perrin", "kind": "talk", "npc": "widow_perrin", "text": "The sacks are stitched with the weaver's mark. Ask her about it.", "ask": "Why are these sacks stitched with your mark?",
+          "say": ["Oh. Oh dear. I sewed those for the miller, years ago. I... asked the scarecrow-man to bring me one. Just one. The children were hungry.", "I did not think he would bring three. Or that the scarecrows would walk."],
           "options": [
-            { "id": "share", "text": "Keep one sack. I will tell Hobb it was the scarecrows.", "flag": "perrin_fed", "reply": ["Bless you. I will pay him back in cloth, I promise."] },
-            { "id": "return", "text": "These go back to the mill. Talk to Hobb yourself.", "reply": ["...Yes. Yes, you are right. I will go and see him."] }
+            { "id": "share", "text": "Keep one sack. I will tell the miller it was the scarecrows.", "flag": "perrin_fed", "reply": ["Bless you. I will pay him back in cloth, I promise."] },
+            { "id": "return", "text": "These go back to the mill. Talk to the miller yourself.", "reply": ["...Yes. Yes, you are right. I will go and see him."] }
           ] }
       ],
       "done": ["Two sacks? One got 'eaten by scarecrows'? ...Never mind. Two is better than none."],
-      "rewards": { "xp": 74, "gold": 12, "byChoice": { "share": { "gold": 6, "items": [{ "base": "silver_amulet", "label": "Widow Perrin's knitted charm", "rarity": "magic" }] }, "return": { "gold": 18 } } }
+      "rewards": { "xp": 74, "gold": 12, "byChoice": { "share": { "gold": 6, "items": [{ "base": "silver_amulet", "label": "The weaver's knitted charm", "rarity": "magic" }] }, "return": { "gold": 18 } } }
     },
     "the_runaway_mare": {
       "title": "The Runaway Mare", "kind": "side", "region": "brightwater_vale", "level": 2,
       "giver": "stable_corwin", "turnIn": "stable_corwin",
-      "summary": "Corwin's best mare bolted in the storm and will not come home.",
+      "summary": "The stable master's best mare bolted in the storm and will not come home.",
       "offer": ["Chestnut bolted in last night's storm. She is out by Watch Knoll, I think, too frightened to come home.", "She knows the smell of apples. Calm her down, and she will follow her nose back."],
       "acceptReply": "Watch Knoll is east, past the bridge. Take an apple. Take two.",
       "steps": [
         { "id": "calm", "kind": "use", "objects": ["runaway_mare"], "item": "Chestnut", "text": "Calm Chestnut the mare near Watch Knoll." }
       ],
       "done": ["She came trotting in with her tail up like nothing happened. Horses!", "From now on, you get the friend price on any horse in my stable."],
-      "rewards": { "xp": 74, "gold": 10, "worldFlags": ["stable_friend"], "flagsText": ["Horses from Corwin cost less"] }
+      "rewards": { "xp": 74, "gold": 10, "worldFlags": ["stable_friend"], "flagsText": ["Horses from the stable master cost less"] }
     },
     "wanted_rook_varrow": {
       "title": "Wanted: Rook Varrow", "kind": "side", "region": "brightwater_vale", "level": 3,
@@ -184,15 +184,15 @@
       "acceptReply": "Under the willow, on the bank. Quietly, now.",
       "steps": [
         { "id": "stash", "kind": "collect", "objects": ["smuggler_stash"], "item": "a smuggler's bundle", "text": "Search the hollow under the willow at Lantern Reach." },
-        { "id": "josse", "kind": "talk", "npc": "innkeeper_josse", "text": "The bundle holds bottles marked with the inn's brand. Ask Josse Amberley.", "ask": "These bottles have your brand on them.",
+        { "id": "josse", "kind": "talk", "npc": "innkeeper_josse", "text": "The bundle holds bottles marked with the inn's brand. Ask the innkeeper.", "ask": "These bottles have your brand on them.",
           "say": ["Ah. Yes. Cider from over the ridge. The tax on it is... very large. I bring it in by boat, at night.", "I have done no harm! But you could tell the captain, I suppose."],
           "options": [
             { "id": "report", "text": "The captain should know.", "flag": "josse_reported", "reply": ["...Fair. I will go and pay what I owe. Tomorrow. Today. Today."] },
             { "id": "keep", "text": "Your secret is safe. Pour me a cup sometime.", "flag": "josse_secret", "reply": ["A friend for life! And a cup, whenever you like."] }
           ] }
       ],
-      "done": ["Josse? The innkeeper? Ha! So that is the little light. Thank you for settling my nerves."],
-      "rewards": { "xp": 96, "gold": 14, "byChoice": { "report": { "gold": 28 }, "keep": { "gold": 8, "items": [{ "base": "gold_signet", "label": "Josse's spare signet ring", "rarity": "magic" }] } } }
+      "done": ["The innkeeper? Ha! So that is the little light. Thank you for settling my nerves."],
+      "rewards": { "xp": 96, "gold": 14, "byChoice": { "report": { "gold": 28 }, "keep": { "gold": 8, "items": [{ "base": "gold_signet", "label": "The innkeeper's spare signet ring", "rarity": "magic" }] } } }
     },
     "goblin_trouble": {
       "title": "Goblin Trouble", "kind": "side", "region": "brightwater_vale", "level": 4,
@@ -211,14 +211,14 @@
       "title": "The Grove Trial", "kind": "side", "region": "thornmere_wilds", "level": 6,
       "giver": "archdruid_teodor", "turnIn": "archdruid_teodor", "requires": { "quests": ["through_the_gate"] },
       "summary": "A blight has taken a grove south of the circle. Clear it and wake the spirit pools, and the grove will trust you.",
-      "offer": ["A grove south of here has gone sour. Thornlings and root-callers, twisted by something.", "Clear the blight and wake the two spirit pools beside it. Do it, and the grove will trust you. Warden Ysolde teaches only those the grove trusts."],
+      "offer": ["A grove south of here has gone sour. Thornlings and root-callers, twisted by something.", "Clear the blight and wake the two spirit pools beside it. Do it, and the grove will trust you. The grove warden teaches only those the grove trusts."],
       "acceptReply": "The Blighted Grove lies along the trail, between here and Thornwatch.",
       "steps": [
         { "id": "blight", "kind": "kill", "targets": [{ "camp": "blighted_grove", "monster": "thornling", "count": 3, "label": "Thornlings" }, { "camp": "blighted_grove", "monster": "root_caller", "count": 2, "label": "Root Callers" }], "text": "Clear the blight from the Blighted Grove." },
         { "id": "pools", "kind": "use", "objects": ["spirit_pool_1", "spirit_pool_2"], "item": "spirit pools", "text": "Wake the two spirit pools by the grove." }
       ],
-      "done": ["The grove breathes again. Warden Ysolde is waiting for you by the stones. She will teach Druids to call the wolf and the bear."],
-      "rewards": { "xp": 162, "gold": 18, "worldFlags": ["grove_trial"], "flagsText": ["Warden Ysolde comes to the Druid Circle"] }
+      "done": ["The grove breathes again. The grove warden is waiting for you by the stones. She will teach Druids to call the wolf and the bear."],
+      "rewards": { "xp": 162, "gold": 18, "worldFlags": ["grove_trial"], "flagsText": ["The grove warden comes to the Druid Circle"] }
     },
     "the_toll_bridge": {
       "title": "The Toll Bridge", "kind": "side", "region": "thornmere_wilds", "level": 7,
@@ -253,7 +253,7 @@
       "steps": [
         { "id": "stone", "kind": "reach", "place": "black_stone", "text": "Find the Black Stone at the end of the Bearwood Trail." },
         { "id": "sallow", "kind": "talk", "npc": "mother_sallow", "text": "Listen to the voice in the stone.", "ask": "Who speaks?",
-          "say": ["I am Mother Sallow, little candle. Bound in this stone by the same druids who bound your Barrow King.", "I can teach a mage the old bargains: hexes, a servant from below, a gate you pay for in blood. All I ask is a promise."],
+          "say": ["I am only a voice now, little candle. Bound in this stone by the same druids who bound your Barrow King.", "I can teach a mage the old bargains: hexes, a servant from below, a gate you pay for in blood. All I ask is a promise."],
           "options": [
             { "id": "seal", "text": "I will make your pact.", "personalFlag": "pact_sealed", "flag": "pact_offered", "reply": ["Lovely. A drop of you, a drop of me. There. Come back when you know three spells, and we will begin."] },
             { "id": "refuse", "text": "No bargains today.", "flag": "pact_offered", "reply": ["Today. Ha! I am very patient. Come back whenever you like."] }
@@ -265,11 +265,11 @@
     "lost_in_the_mire": {
       "title": "Lost in the Mire", "kind": "side", "region": "thornmere_wilds", "level": 8,
       "giver": "quartermaster_bree", "turnIn": "quartermaster_bree", "requires": { "quests": ["through_the_gate"] },
-      "summary": "Tamsin the herbalist went into the mire for herbs two days ago.",
-      "offer": ["Tamsin went into the mire for bog-lily two days ago. She always comes back in one.", "Herb Hollow, along the Mire Way. Bring her to the Mire Shrine; she can find her way from there."],
+      "summary": "The herbalist went into the mire for herbs two days ago.",
+      "offer": ["The herbalist went into the mire for bog-lily two days ago. She always comes back in one.", "Herb Hollow, along the Mire Way. Bring her to the Mire Shrine; she can find her way from there."],
       "acceptReply": "Take the Mire Way from the troll's bridge. Watch your step.",
       "steps": [
-        { "id": "tamsin", "kind": "escort", "npc": "herbalist_tamsin", "to": "mire_shrine", "radius": 12, "ask": "Follow me, I know the dry way.", "say": ["Oh thank goodness. Lead on. I will be right behind you. Right behind. Do not walk fast."], "text": "Find Tamsin at Herb Hollow and lead her to the Mire Shrine.", "worldFlags": ["tamsin_safe"] }
+        { "id": "tamsin", "kind": "escort", "npc": "herbalist_tamsin", "to": "mire_shrine", "radius": 12, "ask": "Follow me, I know the dry way.", "say": ["Oh thank goodness. Lead on. I will be right behind you. Right behind. Do not walk fast."], "text": "Find the herbalist at Herb Hollow and lead her to the Mire Shrine.", "worldFlags": ["tamsin_safe"] }
       ],
       "done": ["She is back, with a basket of bog-lily and a new fear of frogs. Thank you."],
       "rewards": { "xp": 206, "gold": 26, "pick": [{ "base": "medium_boots", "label": "fine boots" }, { "base": "medium_gauntlets", "label": "fine gauntlets" }] }
@@ -289,7 +289,7 @@
     "the_lost_tome": {
       "title": "The Lost Tome", "kind": "side", "region": "thornmere_wilds", "level": 9,
       "giver": "scholar_ilsabet", "turnIn": "scholar_ilsabet", "requires": { "quests": ["words_of_the_grove"] },
-      "summary": "Ilsabet's teacher left a tome in the Undead Barrow. She wants it back, and so might you.",
+      "summary": "The scholar's teacher left a tome in the Undead Barrow. She wants it back, and so might you.",
       "offer": ["My teacher went into the barrow to study the dead and left his tome on a sarcophagus. He was not brave twice.", "Fetch it? Read it first if you like. Everyone who reads it learns something about the dead."],
       "acceptReply": "The tome lies on a stone coffin just outside the barrow mouth.",
       "steps": [
@@ -302,13 +302,13 @@
       "title": "The Drowned Ruins", "kind": "side", "region": "thornmere_wilds", "level": 10,
       "giver": "quartermaster_bree", "turnIn": "quartermaster_bree", "requires": { "quests": ["lost_in_the_mire"] },
       "summary": "The Marsh Hag keeps a woodcutter in a cage in the Drowned Ruins.",
-      "offer": ["Tamsin saw a man in a cage in the Drowned Ruins. Odo, a woodcutter, missing a week.", "The Marsh Hag keeps him for... I do not want to say. Get him out. Deal with her."],
+      "offer": ["The herbalist saw a man in a cage in the Drowned Ruins. A woodcutter, missing a week.", "The Marsh Hag keeps him for... I do not want to say. Get him out. Deal with her."],
       "acceptReply": "The Mire Way ends at the ruins. Bring friends. Bring all of them.",
       "steps": [
         { "id": "hag", "kind": "kill", "targets": [{ "camp": "ruins", "monster": "marsh_hag", "count": 1, "label": "Marsh Hag" }], "text": "Defeat the Marsh Hag in the Drowned Ruins." },
-        { "id": "cage", "kind": "use", "objects": ["woodcutter_cage"], "item": "Odo's cage", "text": "Open Odo's cage." }
+        { "id": "cage", "kind": "use", "objects": ["woodcutter_cage"], "item": "the woodcutter's cage", "text": "Open the woodcutter's cage." }
       ],
-      "done": ["Odo walked in an hour ago, soaked and singing. He says to tell you his axe is yours whenever you need firewood."],
+      "done": ["The woodcutter walked in an hour ago, soaked and singing. He says to tell you his axe is yours whenever you need firewood."],
       "rewards": { "xp": 250, "gold": 45, "pick": [{ "base": "battleaxe", "label": "a rare axe", "rarity": "rare" }, { "base": "orb", "label": "a rare orb", "rarity": "rare" }, { "base": "heavy_chest", "label": "rare plate", "rarity": "rare" }] }
     }
   }

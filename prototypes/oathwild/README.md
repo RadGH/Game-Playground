@@ -1,6 +1,6 @@
 # Oathwild
 
-**Status:** round 1 playable on the LAN: world server (shared saved worlds, ≤ 10 players, create/join by code) + the 3D client (title, character select, Tabard creator (Look → Class with its tree → Background → Attributes), world list, the world with over-the-shoulder aim, spells with ground indicators, loot windows, inventory, sheet, level-up, class trees, talents, spellbook, quests, map, people, shops, shrines, menus). Live on games.radgh.com since 2026-11-24 (world server on the droplet, saves in /var/lib/oathwild, archived hourly). Not yet played by a person.
+**Status:** town round 2026-11-25 (Larkford rebuilt as a crowded hillside town, Thornwatch cabins, villagers, townspeople at work spots, people called by their job, shops look-then-buy, Trade skills window, phone ability fix). Round 1 playable on the LAN: world server (shared saved worlds, ≤ 10 players, create/join by code) + the 3D client (title, character select, Tabard creator (Look → Class with its tree → Background → Attributes), world list, the world with over-the-shoulder aim, spells with ground indicators, loot windows, inventory, sheet, level-up, class trees, talents, spellbook, quests, map, people, shops, shrines, menus). Live on games.radgh.com since 2026-11-24 (world server on the droplet, saves in /var/lib/oathwild, archived hourly). Not yet played by a person.
 **Play:** https://games.radgh.com/oathwild/ · LAN dev http://192.168.1.34:8401/prototypes/oathwild/ (start the world server first: `tools/game-servers.sh start oathwild-dev`; https for controllers: https://192.168.1.34:8441/prototypes/oathwild/). Stable 8400/8442 pairs with the `oathwild` unit (8660/8662) after publish-stable.
 **Next:** (tried and reverted 2026-11-24: compiling every world material on load — where the browser cannot compile in the background it froze the first seconds in the world, worse than the stalls it meant to remove) investigate prediction on very slow frames (2026-11-24: in the software test browser, at a few frames a second, the client sends ~1/3 of its 20 Hz steps and its predicted position overshoots the server by up to 30 m after the key is released, then snaps — fine at real frame rates, but a slow phone could feel it); a person plays it (check the new look on a real phone: Low 139-159 draw calls / ~400k triangles measured; software frame time ~60% above the old flat world); instance the fal building/prop models (≈490 single meshes on Medium); tune the Look group with `?tune`; item pictures drawn from the worn models (rule 20); buff/debuff visuals on bodies; real horse/boss models as the art budget allows.
 **Parked:** Smithing / Alchemy benches and the Tinker class (later round); Chronomancer, Oracle, Dragon Knight, Starcaller; charm/turn spells; Farhold's resource / afterimage / "consumes" spell rules; playing offline without the world server; chat box (the server relays chat, no UI yet); **placeholder art to replace later: `docs/PLACEHOLDERS.md`** (props, 8 monsters, horse, items — about $23 of models when there is budget).
@@ -101,6 +101,40 @@ clipped numbers per picture (a washed-out picture has a high mean, low spread, l
 Not done from the guide, on purpose: §8 spending (needs the owner's OK), ez-tree (big-leaf rule 74; tufts instead),
 three-csm (see above), KTX2 texture compression (see the round's notes), @takram atmosphere (our painted sky + matched fog).
 
+## Towns (town round, 2026-11-25 — owner: "the town is still very empty … just tiny houses plopped onto a flat area")
+
+Streets first, then the houses that line them (lessons rule 76). Larkford went from nine 6 m houses on a 120 m disc of
+flattened dirt to 57 terraced houses along a high street, a ring lane, West Street up the hill and two alleys, with
+back yards, a market square, terraces and townsfolk; Thornwatch got 13 log cabins along two lanes.
+
+| Part | What it does |
+|---|---|
+| `data/map.json` | The towns' own streets are real roads (`town`, `surface` cobble / dirt, a short `shoulder`), so grading, paving, tree clearing and walking read them. A town keeps `relief` of its hill (Larkford 60%); `pads` are level terraces (the square, the shrine yard, the tower terrace); `front: true` = houses face that square. |
+| `data/towns.json` | Per town: the street rules (house widths / depths / storeys in 3 m kit cells, shop fronts), work `spots` for townspeople (where they stand, which way they look, their routine), stalls, props, villager `stops`; `idles` = the work routines (shopkeeper, smith, innkeeper, minstrel, priest, guard, trainer, mage, groom, crafter, watcher, elder). |
+| `js/world/town.js` | The planner, pure, run by the server (colliders) and the browser (drawing): terraced houses on every frontage (an alley gap every 3-6 houses, the town's edge spaced out), each tested along its whole footprint against every street, square, placed thing, person and other house; floors above the ground under them (stone plinths on the slope); fenced / hedged / stone-walled back yards with clutter and vegetable beds; lamps; terrace walls where a pad stands over the ground; a few big trees in open ground whose crowns clear every roof; the street network and each villager's walking loop. |
+| `js/client/render/town-draw.js` | Draws it: Kenney Fantasy Town Kit wall pieces storey by storey (windows, shutters, doors, half-timber bracing by style: timber / stone / plaster / wood), roofs made here from the wall rectangle (they cannot disagree with the walls), plinths, doorsteps, smoking chimneys, shop awnings and banners, fences, hedges, stalls, the fountain, lamps, Survival Kit clutter. Each house's plaster / roof / timber colour comes from swatches painted into the kit palette's empty top row (texture coordinates moved per house) — one material; one merged mesh per 48 m chunk (Larkford: 20 draw calls). |
+| `js/client/play/villagers.js` | Nameless townsfolk ("Villager") walking their loops on the wall clock (every player sees them in about the same place, nothing sent by the server); they linger at stalls, the fountain, doors; never units, talk targets, tap targets or name tags; step aside for a hero (drawn only). 4 / 10 / 14 by quality; they give bodies up first when bodies run short. |
+| `js/client/screens/play.js` | Townspeople play their routine at their spot, turn to a hero within 4.5 m, talk while their window is open. |
+| `js/game/ground.js` | Houses, stalls and terrace walls are solid boxes (a step into one is refused; someone inside one from an old save walks out); town trees and the fountain are solid circles. |
+
+Checks: `node --test tests/world/town.test.mjs` (crowded, nothing on a street / square / water / another house every
+0.5 m, every door on a street, floors span the hill, walls stop a walker, villagers never walk through a house or the
+fountain and their loops close, spots clear and kept in step with npcs.json, trees clear of roofs, spawn and shrines in
+the open, same data = same town); `node tools/town-preview.mjs [--town thornwatch]` (the plan from above, pure Node);
+`tests/ui/town-shots.mjs [--house N] [--only aerial,square]` (street level + aerial pictures, the town's cost).
+Art: `playground/assets/kenney/` (CC0, credits in `shared/credits.json`).
+
+**Ideas for fuller towns (the brainstorm, 2026-11-25).** Done this round: streets drawn first with houses lining them
+as terraces; alleys between terraces into the back yards; the hill kept (plinths, steps, terraces with retaining
+walls); back yards with fences, hedges, walls, woodpiles, crates, vegetable beds; 1-3 storeys with gables both ways,
+smoking chimneys; shop fronts with awnings and banners and goods at the door; a market square with stalls, a fountain
+and benches; lamps along every street; big trees in the open ground; villagers walking and townspeople working.
+Next (not built yet): walk-in interiors for the inn and shops; a palisade with a gatehouse at the bridge; a mill race
+through town with footbridges; market day (more stalls and a crowd at set hours) and evening (lamps lit, villagers
+go home); animals (chickens in yards, a dog, horses at the stable); hanging trade signs, window boxes, ivy; jettied
+upper storeys and balconies, an alley that passes under a house; worn steps, puddles, cart ruts, moss on old roofs;
+smithy hammering and market chatter in the town's sound; a tall landmark (a temple spire) that shows from afar.
+
 ## Tests and tools
 
 - `node --test prototypes/oathwild/tests/rules/*.test.mjs` — 145 tests: purity, drift guard (pins every borrowed
@@ -124,6 +158,15 @@ three-csm (see above), KTX2 texture compression (see the round's notes), @takram
 - `node prototypes/oathwild/tools/classes-md.mjs --write` — regenerate the trees in `docs/CLASSES.md`.
 
 ## History
+
+- 2026-11-25 — town round (owner: shops buy on a tap on phones; names → jobs; "the town is still very empty"; enchanting
+  as the player's trade skill; motionless town; shopkeepers' spots + idles; "brainstorm … detailed terrain, realistic
+  paths and alley ways"). See "Towns" above. Shops and repairs: tap = look (the one item card) + a separate Buy / Sell /
+  Repair button (`win-shop.js`, `win-services.js`, test `tests/ui/shop-buy.mjs`). Trade skills: `win-trade.js` (K, ☰,
+  HUD), works anywhere but mid-fight (`tests/net/trade.test.mjs`). People: only the main story's five keep names
+  (`tests/world/npc-names.test.mjs`). Phone fix reported mid-round ("can no longer press my first action ability"):
+  the drag-to-look layer covered the lone centred slot; the bottom bar now sits above the touch layer
+  (`tests/ui/phone-slots.mjs`, real touch taps, warrior + mage; lessons rule 15 sharpened).
 
 - 2026-11-24 — tap the world + creator pages + trees (owner: "I cannot click to interact with npcs or loot corpses on
   mobile … cannot click to revive at the shrine … class selection after customization on its own screen … view the

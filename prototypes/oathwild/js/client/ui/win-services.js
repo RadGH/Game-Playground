@@ -1,31 +1,38 @@
 // The services people and shrines offer: a trainer's classes, the stable's horse, changing your path (respec), fast
 // travel between the shrines your world has found, mending gear, a locked chest, and the SHRINE window (travel, change
-// your path, enchanting, rest here). One module, one window per kind; each redraws when the character changes (gold,
-// bag, what is known), so prices and "can I afford it" are always the live ones.
+// your path, rest here). One module, one window per kind; each redraws when the character changes (gold, bag, what is
+// known), so prices and "can I afford it" are always the live ones. Enchanting is the player's own Trade skills window
+// (win-trade.js, owner 2026-11-25), not the shrine's.
 //
-//   open(app, { kind: 'trainer' | 'stable' | 'respec' | 'travel' | 'repair' | 'locked' | 'shrine' | 'enchant', … })
+//   open(app, { kind: 'trainer' | 'stable' | 'respec' | 'travel' | 'repair' | 'locked' | 'shrine', … })
 // The server's 'win' message is passed in as it came (server/world.js openService); 'shrine' comes from the play
 // screen (interacting with a shrine: { id, name }).
-// Also exports the small helpers the other world windows share: itemCell, live, goldLine, shrineName.
-import { openWin, esc, ask, toast } from './kit.js';
-import { tipAttrs } from './tip.js';
+// Also exports the small helpers the other world windows share: itemCell, live, goldLine, shrineName, and the
+// LOOK-THEN-COMMIT kit (owner 2026-11-25 "shops instantly purchase items on mobile so you can't read their description";
+// lessons rule 47): a tap on an item only picks it; a details pane shows its card and the one button that commits.
+//   itemCell(it, { pick: 'buy:shop:i1', sel }) · wirePick(app, w, body) · dropGonePick(w, keys) · pickFoot(app, f, w, {…})
+// The window gets cls 'ow-pickwin': desktop = the pane is a column beside the grids; phone = the pane is pinned at
+// the bottom of the window (its card scrolls by itself; the button never leaves the screen).
+import { openWin, esc, ask, toast, findWin } from './kit.js';
+import { tipAttrs, hideTip, itemCardHtml } from './tip.js';
 import { glyph, uiIcon } from './icons.js';
 import { fmt } from '../../../../../shared/format.js';
 import { describeClass } from '../../rules/describe.js';
 import { respecPrice } from '../../rules/levels.js';
-import { affixTemplate, enchantRefusal, enchantPrice, repairPrice } from '../../rules/inventory.js';
+import { repairPrice } from '../../rules/inventory.js';
 import { lockpickChance } from '../../rules/skills-use.js';
 import { chestDef } from '../../rules/loot.js';
-import { sheetOf } from '../../rules/sheet.js';
 import { hintFor } from '../input/bindings.js';
 
 // ---------------------------------------------------------------- shared helpers (shop, quests, map use these)
 const KIND_GLYPH = { weapon: 'sword', armor: 'shield', accessory: 'star', quest: 'scroll' };
 /** One item as a grid cell: rarity-coloured name, a type glyph, the tooltip (the one renderer) and optional price. */
-export function itemCell(it, { ref, price = null, sell = false, act = '', disabled = false, why = '', extra = '' } = {}) {
+export function itemCell(it, { ref, price = null, sell = false, act = '', disabled = false, why = '', extra = '', pick = '', sel = false, tip = true } = {}) {
   const rar = it.rarity && it.rarity !== 'normal' ? it.rarity : 'normal';
   const g = KIND_GLYPH[it.type] || (it.isShield ? 'shield' : 'info');
-  return `<button type="button" class="ow-wcell rar-${esc(rar)}${disabled ? ' ow-wcell-off' : ''}" ${act} ${tipAttrs('item', { ref, price, sell: sell ? 1 : null })}>
+  // `pick`: the look-then-commit windows (a tap picks it; the pane commits). `sel` = the picked one ('is-' classes are
+  // left out of kit.js keepView's keys, so the focus and scroll survive picking)
+  return `<button type="button" class="ow-wcell rar-${esc(rar)}${disabled ? ' ow-wcell-off' : ''}${sel ? ' is-sel' : ''}" ${act} ${pick ? `data-pick="${esc(pick)}" aria-pressed="${sel}"` : ''} ${tip ? tipAttrs('item', { ref, price, sell: sell ? 1 : null }) : ''}>
     <span class="ow-wcell-ico">${glyph(it.isShield ? 'shield' : g, 22)}</span>
     <span class="ow-wcell-name">${esc(it.name)}</span>
     ${price != null ? `<span class="ow-wcell-price${disabled ? ' ow-bad' : ''}">${glyph('coin', 14)}${fmt(price)}</span>` : ''}
@@ -43,6 +50,66 @@ export function live(app, w, types = ['me']) {
 }
 export const goldOf = app => app.me?.char?.gold || 0;
 export const goldLine = app => `<span class="ow-svc-gold">${glyph('coin', 16)}${fmt(goldOf(app))} gold</span>`;
+// ---------------------------------------------------------------- look, then commit (shop, repair, trade skills)
+/** Hover tooltips on item cells only where there is hovering: on a touch screen the details pane is the card. */
+export const cellTips = app => app.device !== 'touch';
+/** Wire a body's [data-pick] cells: a tap picks (the pane shows it); a tap on the picked one moves to its button. */
+export function wirePick(app, w, body) {
+  const cells = [...body.querySelectorAll('[data-pick]')];
+  const modeOf = k => k.slice(0, k.indexOf(':'));
+  for (const b of cells) {
+    b.addEventListener('click', () => {
+      const k = b.dataset.pick;
+      if (w.data.sel === k) { w.footEl?.querySelector('[data-commit]:not([disabled])')?.focus({ preventScroll: true }); hideTip(); return; }
+      w.data.sel = k; w.data.opt = null;
+      w.data.selIdx = cells.filter(c => modeOf(c.dataset.pick) === modeOf(k)).indexOf(b);
+      w.render(); hideTip();
+      // on a phone the pane takes the bottom of the window: keep the picked item in sight above it
+      w.body?.querySelector('.ow-wcell.is-sel')?.scrollIntoView({ block: 'nearest' });
+    });
+  }
+  // the picked item is gone (bought, sold, broken): the focus moves to its neighbour, so the next one is a press away
+  if (w.data.refocus) {
+    const { mode, idx } = w.data.refocus; w.data.refocus = null;
+    const same = cells.filter(c => modeOf(c.dataset.pick) === mode);
+    (same[Math.min(idx, same.length - 1)] || cells[0])?.focus({ preventScroll: true });
+    hideTip();
+  }
+}
+/** Forget a pick whose item is no longer there; `keys` = every data-pick the body is about to draw. */
+export function dropGonePick(w, keys) {
+  if (!w.data.sel || keys.includes(w.data.sel)) return;
+  const had = w.el.contains(document.activeElement) && document.activeElement !== w.el;
+  w.data.refocus = had ? { mode: w.data.sel.slice(0, w.data.sel.indexOf(':')), idx: w.data.selIdx || 0 } : null;
+  w.data.sel = null; w.data.opt = null;
+}
+/** The ref part of a pick key ('buy:shop:i1' → 'shop:i1'). */
+export const pickRef = k => (k ? k.slice(k.indexOf(':') + 1) : null);
+/**
+ * The details pane + the commit row, drawn into a window's footer.
+ *   card   HTML of the picked item's card (itemCardHtml) or '' for nothing picked
+ *   empty  what the pane says before anything is picked
+ *   more   extra HTML under the card (the enchantment choices)
+ *   act    { label, sub, icon, kind: 'primary' | 'danger', disabled, run } — the one button that commits
+ *   side   extra buttons before it (Repair everything)
+ */
+export function pickFoot(app, f, w, { card = '', empty = 'Pick an item to see it here.', more = '', act = null, side = '' } = {}) {
+  f.innerHTML = `<div class="ow-pick${card ? '' : ' ow-pick-none'}" data-scroll-key="pick">${card ? `<div class="ow-pick-card">${card}</div>${more}` : `<p class="ow-pick-empty">${glyph('info', 18)}<span>${esc(empty)}</span></p>`}</div>
+    <div class="ow-pick-row">${goldLine(app)}<span class="ow-spacer"></span>${side}${act ? `<button type="button" class="ow-btn ow-pick-go ${act.kind === 'danger' ? 'ow-danger' : 'ow-primary'}" data-commit ${act.disabled ? 'disabled' : ''}>${act.icon || ''}<span class="ow-pick-go-text"><b>${esc(act.label)}</b>${act.sub ? `<small>${esc(act.sub)}</small>` : ''}</span></button>` : ''}</div>`;
+  if (act && !act.disabled) f.querySelector('[data-commit]').onclick = () => act.run?.();
+  return f;
+}
+/** What a pick window redraws on: the parts of my character it shows (lessons rule 12b — never on every update). */
+export const charSig = app => { const c = app.me?.char; return c ? JSON.stringify([c.gold, c.bag, c.gear, c.enchant, c.skills]) : ''; };
+/** Once per new pick window: redraw only when my gold / bag / gear / enchantments / skills change, and never leave a
+ *  hover card floating over the picked item (its pane already shows it). */
+export function pickWatch(app, w, fresh) {
+  if (!fresh) return w;
+  w.follow(app, 'me', () => charSig(app));
+  w.onRender = () => { if (document.activeElement?.classList?.contains('is-sel')) hideTip(); };
+  return w;
+}
+
 export function shrineName(app, id) { return app.W?.data.placements.shrines.find(s => s.id === id)?.name || 'a shrine'; }
 const npcName = (app, id) => app.W?.book.npcs[id]?.name || '';
 
@@ -55,7 +122,7 @@ export function open(app, opts = {}) {
   if (k === 'travel') return travel(app, opts);
   if (k === 'repair') return repair(app, opts);
   if (k === 'locked') return locked(app, opts);
-  if (k === 'shrine' || k === 'enchant') return shrine(app, opts);
+  if (k === 'shrine') return shrine(app, opts);
   return null;
 }
 
@@ -176,23 +243,38 @@ function travel(app, opts) {
   return live(app, w, ['me', 'wstate']);
 }
 
+// repairs: tap a worn item to see it (its wear is on the card), then Repair; or Repair everything at once
+const repairList = (app, c) => [...Object.entries(c.gear || {}).filter(([, it]) => it).map(([s, it]) => ({ it, ref: `gear:${s}` })), ...(c.bag || []).map(it => ({ it, ref: `bag:${it.id}` }))]
+  .map(x => ({ ...x, price: repairPrice(app.rules, x.it) })).filter(x => x.price > 0);
 function repair(app, opts) {
+  const fresh = !findWin('repair');
   const w = openWin({
-    id: 'repair', title: opts.name ? `${opts.name}: repairs` : 'Repairs', sub: 'Mend worn gear', size: 'wide', cls: 'ow-svc',
+    id: 'repair', title: opts.name ? `${opts.name}: repairs` : 'Repairs', sub: 'Mend worn gear', size: 'wide', cls: 'ow-svc ow-repair ow-pickwin',
     render(body, tab, w) {
       const c = app.me?.char; if (!c) return '';
-      const items = [...Object.entries(c.gear || {}).filter(([, it]) => it).map(([s, it]) => ({ it, ref: `gear:${s}` })), ...(c.bag || []).map(it => ({ it, ref: `bag:${it.id}` }))]
-        .map(x => ({ ...x, price: repairPrice(app.rules, x.it) })).filter(x => x.price > 0);
+      const items = repairList(app, c);
+      dropGonePick(w, items.map(x => `fix:${x.ref}`));
       w.data.total = items.reduce((s, x) => s + x.price, 0);
-      body.innerHTML = items.length ? `<div class="ow-shop-grid">${items.map(x => itemCell(x.it, { ref: x.ref, price: x.price, act: `data-fix="${esc(x.it.id)}"`, disabled: goldOf(app) < x.price })).join('')}</div>` : '<p class="ow-empty">Everything you carry is in good repair.</p>';
-      body.querySelectorAll('[data-fix]').forEach(b => { b.onclick = () => app.act('repair', { npc: opts.npc, item: b.dataset.fix }); });
+      body.innerHTML = items.length
+        ? `<section class="ow-section"><h3>${uiIcon('prof_smithing', 18)} Worn gear (${fmt(items.length)})</h3><div class="ow-shop-grid">${items.map(x => itemCell(x.it, { ref: x.ref, price: x.price, pick: `fix:${x.ref}`, sel: w.data.sel === `fix:${x.ref}`, disabled: goldOf(app) < x.price, tip: cellTips(app), why: goldOf(app) < x.price ? `${fmt(x.price - goldOf(app))} gold short` : '' })).join('')}</div></section>`
+        : '<p class="ow-empty">Everything you carry is in good repair.</p>';
+      wirePick(app, w, body);
     },
     foot(f, w) {
-      f.innerHTML = `${goldLine(app)}<span class="ow-spacer"></span><button type="button" class="ow-btn ow-primary" data-all>${uiIcon('prof_smithing', 18)}<span>Repair everything${w?.data?.total ? ` (${fmt(w.data.total)} gold)` : ''}</span></button>`;
-      f.querySelector('[data-all]').onclick = () => app.act('repair', { npc: opts.npc, item: 'all' });
+      const c = app.me?.char; if (!c) return;
+      const x = repairList(app, c).find(r => `fix:${r.ref}` === w.data.sel) || null;
+      const gold = goldOf(app), total = w.data.total || 0;
+      const side = total ? `<button type="button" class="ow-btn ow-ghost ow-pick-side" data-all ${gold < total ? 'disabled' : ''}>${uiIcon('prof_smithing', 18)}<span>All (${fmt(total)} gold)</span></button>` : '';
+      pickFoot(app, f, w, {
+        card: x ? itemCardHtml(app, x.ref, { price: x.price, label: 'Repair cost' }) : '',
+        empty: total ? 'Pick an item to see how worn it is.' : 'Nothing needs mending.',
+        side,
+        act: x ? { label: `Repair — ${fmt(x.price)} gold`, sub: gold < x.price ? `${fmt(x.price - gold)} gold short` : '', disabled: gold < x.price, icon: uiIcon('prof_smithing', 18), run: () => app.act('repair', { npc: opts.npc, item: x.it.id }) } : null,
+      });
+      f.querySelector('[data-all]:not([disabled])')?.addEventListener('click', () => app.act('repair', { npc: opts.npc, item: 'all' }));
     },
   });
-  return live(app, w);
+  return pickWatch(app, w, fresh);
 }
 
 function locked(app, opts) {
@@ -215,55 +297,22 @@ function locked(app, opts) {
 }
 
 // ---------------------------------------------------------------- the shrine
-const ENCH_ITEM = it => it && (it.type === 'weapon' || it.type === 'armor' || it.type === 'accessory');
 function shrine(app, opts) {
   const sid = opts.id || nearestShrine(app);
   const w = openWin({
     id: 'shrine', title: opts.name || shrineName(app, sid), sub: 'Shrine', size: 'wide', cls: 'ow-svc ow-shrine',
-    tab: opts.kind === 'enchant' ? 'enchant' : opts.tab || 'travel',
-    tabs: [{ id: 'travel', label: 'Travel' }, { id: 'path', label: 'Change your path' }, { id: 'enchant', label: 'Enchanting' }, { id: 'rest', label: 'Rest here' }],
+    tab: opts.tab || 'travel',
+    tabs: [{ id: 'travel', label: 'Travel' }, { id: 'path', label: 'Change your path' }, { id: 'rest', label: 'Rest here' }],
     render(body, tab, w) {
       const c = app.me?.char; if (!c) return '';
       if (tab === 'travel') { body.innerHTML = travelBody(app, sid); wireTravel(app, body, w); return; }
       if (tab === 'path') { body.innerHTML = respecBody(app, null, {}); body.querySelectorAll('[data-respec]').forEach(b => { b.onclick = () => confirmRespec(app, b.dataset.respec); }); return; }
-      if (tab === 'rest') {
-        const home = app.me?.home === sid;
-        body.innerHTML = `<div class="ow-card ow-svc-rest"><div class="ow-svc-horse-ico">${glyph('shrine', 48)}</div><div>
-          <h3>${esc(shrineName(app, sid))}</h3>
-          <p>${home ? 'This is where you wake after a fall.' : `After a fall you wake at ${esc(shrineName(app, app.me?.home))}.`}</p>
-          ${home ? '' : '<button type="button" class="ow-btn ow-primary" data-rest data-primary>Wake here after a fall</button>'}</div></div>`;
-        body.querySelector('[data-rest]')?.addEventListener('click', () => app.act('home', { shrine: sid }));
-        return;
-      }
-      // enchanting: break (learn) and put on
-      const learnFrom = app.rules.data.inventory.enchanting.learnFrom;
-      const breakable = (c.bag || []).filter(it => learnFrom.includes(it.rarity));
-      const known = c.enchant?.known || [];
-      const targets = [...Object.entries(c.gear || {}).filter(([, it]) => ENCH_ITEM(it)).map(([s, it]) => ({ it, ref: `gear:${s}` })), ...(c.bag || []).filter(ENCH_ITEM).map(it => ({ it, ref: `bag:${it.id}` }))];
-      const pick = targets.find(t => t.it.id === w.data.target) || null;
-      const sheet = sheetOf(app.rules, c);
-      body.innerHTML = `
-        <section class="ow-section"><h3>Break an item to learn its enchantment</h3>
-          ${breakable.length ? `<div class="ow-shop-grid">${breakable.map(it => itemCell(it, { ref: `bag:${it.id}`, act: `data-break="${esc(it.id)}"`, extra: '<span class="ow-wcell-act">Break</span>' })).join('')}</div>` : '<p class="ow-empty">Magic, rare and legendary items in your bag can be broken here. You have none right now.</p>'}
-        </section>
-        <section class="ow-section"><h3>Enchantments you know (${fmt(known.length)})</h3>
-          ${known.length ? `<div class="ow-svc-known">${known.map(id => `<span class="ow-svc-chip">${esc(affixTemplate(app.rules, id)?.name || 'An old enchantment')}</span>`).join('')}</div>` : '<p class="ow-empty">None yet.</p>'}
-        </section>
-        <section class="ow-section"><h3>Put one on your gear</h3>
-          ${targets.length ? `<div class="ow-shop-grid">${targets.map(t => itemCell(t.it, { ref: t.ref, act: `data-target="${esc(t.it.id)}"`, extra: t.it.id === w.data.target ? '<span class="ow-wcell-act ow-good">Chosen</span>' : '' })).join('')}</div>` : '<p class="ow-empty">Nothing to enchant.</p>'}
-          ${pick ? `<div class="ow-svc-enchant">${known.map(id => {
-            const why = enchantRefusal(app.rules, c, pick.it, id, { sheet });
-            return `<div class="ow-svc-erow"><span><b>${esc(affixTemplate(app.rules, id)?.name || 'Enchantment')}</b> on ${esc(pick.it.name)}${why ? `<small class="ow-bad">${esc(why)}</small>` : ''}</span><button type="button" class="ow-btn ow-small ow-primary" data-ench="${esc(id)}" ${why ? 'disabled' : ''}>${glyph('enchant', 16)}<span>${fmt(enchantPrice(app.rules, pick.it))} gold</span></button></div>`;
-          }).join('') || '<p class="ow-empty">Learn an enchantment first.</p>'}</div>` : ''}
-        </section>`;
-      body.querySelectorAll('[data-break]').forEach(b => {
-        b.onclick = async () => {
-          const it = (c.bag || []).find(x => x.id === b.dataset.break);
-          if (it && await ask({ title: `Break ${it.name}?`, text: 'The item is destroyed and you learn an enchantment it carries.', ok: 'Break it', cancel: 'Keep it', danger: true })) app.act('disenchant', { item: it.id });
-        };
-      });
-      body.querySelectorAll('[data-target]').forEach(b => { b.onclick = () => { w.data.target = b.dataset.target; w.render(); }; });
-      body.querySelectorAll('[data-ench]').forEach(b => { b.onclick = () => app.act('enchant', { item: w.data.target, affix: b.dataset.ench }); });
+      const home = app.me?.home === sid;
+      body.innerHTML = `<div class="ow-card ow-svc-rest"><div class="ow-svc-horse-ico">${glyph('shrine', 48)}</div><div>
+        <h3>${esc(shrineName(app, sid))}</h3>
+        <p>${home ? 'This is where you wake after a fall.' : `After a fall you wake at ${esc(shrineName(app, app.me?.home))}.`}</p>
+        ${home ? '' : '<button type="button" class="ow-btn ow-primary" data-rest data-primary>Wake here after a fall</button>'}</div></div>`;
+      body.querySelector('[data-rest]')?.addEventListener('click', () => app.act('home', { shrine: sid }));
     },
     foot(f, w) { f.innerHTML = `${goldLine(app)}<span class="ow-spacer"></span><button type="button" class="ow-btn" data-done>Done</button>`; f.querySelector('[data-done]').onclick = () => w.close(); },
   });

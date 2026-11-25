@@ -6,8 +6,9 @@
 
 import { createTerrain } from './terrain.js';
 import { createQuestBook } from './quests.js';
+import { planTowns } from './town.js';
 
-export const WORLD_DATA_FILES = { map: '../../data/map.json', placements: '../../data/placements.json', quests: '../../data/quests.json', npcs: '../../data/npcs.json' };
+export const WORLD_DATA_FILES = { map: '../../data/map.json', placements: '../../data/placements.json', quests: '../../data/quests.json', npcs: '../../data/npcs.json', towns: '../../data/towns.json' };
 
 export async function loadWorldData(readJson) {
   const out = {};
@@ -29,6 +30,9 @@ async function readJson(url) {
 export async function bootWorld({ regions, data = null } = {}) {
   const d = data || await loadWorldData(readJson);
   const terrain = createTerrain(d.map);
+  // the towns (js/world/town.js): houses, yards, lamps, villagers; a townsperson stands at their work spot
+  const town = planTowns(terrain, d.towns || {}, { placements: d.placements, npcs: d.npcs?.npcs });
+  for (const [id, s] of Object.entries(town.spots)) { const n = d.npcs?.npcs?.[id]; if (n) { n.at = s.at; n.face = s.face; n.idle = s.idle; } }
   const book = createQuestBook({ ...d, regions });
-  return { data: d, terrain, book };
+  return { data: d, terrain, book, town };
 }

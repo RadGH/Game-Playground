@@ -1,0 +1,116 @@
+{
+  "_doc": "Town plans (town round 2026-11-25), read by js/world/town.js planTowns() on the server (colliders, people's spots) and in the browser (houses, yards, lamps, villagers). Streets come from data/map.json roads (town: <id>) plus `streets` (main roads through the town). Houses line every street; `streetRules` per road id or class override widths/depths/storeys in kit cells (3 m). `spots` = where a townsperson stands to work, `face` = the way they look, as the game turns people: atan2(dx, dz) of their gaze (0 = south, π = north, π/2 = east), `idle` = their work routine (data/towns.json idles). `stalls` and `props` are placed by hand; `stops` are where villagers linger. Villagers are nameless ('Villager'), walk the street network on the world clock and cannot be talked to.",
+  "idles": {
+    "_doc": "Work routines: [clip, seconds min, seconds max] played in order, looping; clips are the animation library's (avatar-3d/tabard CLIPS ids or library names). A person turns to face a hero who comes within 4 m and talks, then goes back to work.",
+    "shopkeeper": [["idle", 4, 7], ["PickUp_Table", 2.2, 2.2], ["idle", 3, 5], ["talk", 4, 6], ["Interact", 1.6, 1.6]],
+    "smith": [["Interact", 1.4, 1.4], ["Interact", 1.4, 1.4], ["Interact", 1.4, 1.4], ["idle", 2, 3], ["Fixing_Kneeling", 5, 7], ["idle", 2, 3]],
+    "innkeeper": [["idle", 3, 5], ["talk", 3, 5], ["Interact", 1.6, 1.6], ["idle", 4, 6], ["PickUp_Table", 2.2, 2.2]],
+    "minstrel": [["talk", 4, 6], ["dance", 5, 8], ["idle", 2, 4]],
+    "elder": [["idle", 5, 8], ["talk", 3, 5]],
+    "priest": [["idle", 4, 6], ["channel", 4, 6], ["idle", 3, 4], ["talk", 3, 4]],
+    "guard": [["idle", 5, 8], ["ready", 4, 6]],
+    "trainer": [["ready", 3, 5], ["attack", 1.2, 1.2], ["ready", 2, 3], ["attack", 1.2, 1.2], ["idle", 3, 5]],
+    "mage": [["channel", 5, 8], ["idle", 3, 5], ["cast", 1.5, 1.5], ["idle", 2, 3]],
+    "groom": [["idle", 3, 5], ["Fixing_Kneeling", 4, 6], ["Interact", 1.6, 1.6], ["idle", 2, 3]],
+    "crafter": [["Fixing_Kneeling", 5, 8], ["idle", 3, 4], ["PickUp_Table", 2.2, 2.2], ["idle", 2, 3]],
+    "watcher": [["idle", 6, 10], ["talk", 2, 4]]
+  },
+  "larkford": {
+    "seed": 4127,
+    "radius": 62,
+    "streets": ["lark_road", "north_track", "south_road"],
+    "styles": [["timber", 4], ["stone", 2], ["plaster", 3]],
+    "fences": [["wood", 4], ["hedge", 3], ["stone", 2]],
+    "villagers": 14,
+    "lampEvery": 16,
+    "streetRules": {
+      "lark_road": { "storeys": [[2, 3], [3, 2]], "depths": [[3, 3], [2, 1]], "shops": 0.45 },
+      "square": { "widths": [[2, 3], [3, 3], [4, 1]], "depths": [[3, 2], [2, 1]], "storeys": [[2, 2], [3, 3]], "shops": 0.6, "setback": 0.3 },
+      "road": { "widths": [[2, 3], [3, 3], [4, 1]], "setback": 0.4 },
+      "north_track": { "storeys": [[2, 4], [3, 1]], "shops": 0.25 },
+      "south_road": { "storeys": [[2, 4], [3, 1]], "shops": 0.25 },
+      "lark_west": { "storeys": [[2, 3], [3, 1]], "shops": 0.3 },
+      "trail": { "widths": [[2, 3], [3, 1]], "storeys": [[1, 2], [2, 2]], "depths": [[2, 1]] },
+      "lark_mill_lane": { "none": true }
+    },
+    "keep": [[-225, 22.5, 6], [-258.5, -10, 4.2]],
+    "spots": [
+      { "npc": "merchant_pell", "at": [-272, -13.7], "face": 0, "idle": "shopkeeper" },
+      { "npc": "widow_perrin", "at": [-258.5, 6.4], "face": 3.14, "idle": "shopkeeper" },
+      { "npc": "nim_tallow", "at": [-251.2, 2.5], "face": -1.57, "idle": "crafter" },
+      { "npc": "smith_ulla", "at": [-219.6, -10.9], "face": 0, "idle": "smith" },
+      { "npc": "innkeeper_josse", "at": [-280.2, 4.2], "face": 1.57, "idle": "innkeeper" },
+      { "npc": "lark_minstrel", "at": [-277.2, 11.6], "face": 2.41, "idle": "minstrel" },
+      { "npc": "elder_maren", "at": [-309.6, -15.4], "face": 0, "idle": "elder" },
+      { "npc": "brother_tobin", "at": [-249.2, -19.6], "face": -0.72, "idle": "priest" },
+      { "npc": "captain_edda", "at": [-232.4, -7.6], "face": 1.31, "idle": "guard" },
+      { "npc": "sergeant_holt", "at": [-228.6, 19.4], "face": 0.67, "idle": "trainer" },
+      { "npc": "ser_dario", "at": [-221.4, 25.6], "face": -2.26, "idle": "trainer" },
+      { "npc": "magister_oriel", "at": [-323.6, -12.8], "face": 1.57, "idle": "mage" },
+      { "npc": "stable_corwin", "at": [-217.6, 3.6], "face": 0.75, "idle": "groom" },
+      { "npc": "wren_ashby", "at": [-280.2, -49.6], "face": 3.14, "idle": "watcher" },
+      { "npc": "grandmother_isk", "at": [-290.6, -31.2], "face": 0.76, "idle": "elder" }
+    ],
+    "stalls": [
+      { "at": [-272, -12], "facing": 3.14, "kind": "stall", "colour": "red" },
+      { "at": [-258.5, 4.6], "facing": 0, "kind": "stall", "colour": "green" },
+      { "at": [-253, 2.5], "facing": -1.57, "kind": "stall", "colour": "red" }
+    ],
+    "props": [
+      { "kind": "fountain", "at": [-258.5, -10], "solid": 3.1 },
+      { "kind": "bench", "at": [-263.2, -10.4], "facing": 1.57 },
+      { "kind": "bench", "at": [-258.6, -5.2], "facing": 0 },
+      { "kind": "cart", "at": [-272.6, 3.4], "facing": 0.5 },
+      { "kind": "crate", "at": [-274.6, -12.4], "facing": 0.2 },
+      { "kind": "barrel", "at": [-269.6, -12.9], "facing": 0 },
+      { "kind": "sacks", "at": [-256.2, 5.4], "facing": 0.3 },
+      { "kind": "banner", "at": [-249.5, -11.5], "facing": -1.57 },
+      { "kind": "dummy", "at": [-226.2, 22.4], "facing": 0.75 },
+      { "kind": "dummy", "at": [-223.6, 23.8], "facing": -2.4 },
+      { "kind": "rack", "at": [-229.6, 24.2], "facing": 2.2 }
+    ],
+    "stops": [
+      { "at": [-272, -9.7], "kind": "stall", "face": 3.14 },
+      { "at": [-258.5, 2.4], "kind": "stall", "face": 0 },
+      { "at": [-255.4, 2.5], "kind": "stall", "face": 1.57 },
+      { "at": [-258.5, -6.3], "kind": "square", "face": 3.14 },
+      { "at": [-262.4, -10], "kind": "square", "face": 1.57 },
+      { "at": [-254.6, -10], "kind": "square", "face": -1.57 },
+      { "at": [-251.5, -16.6], "kind": "shrine", "face": -3.05 },
+      { "at": [-277.8, 6.2], "kind": "door", "face": -1.57 },
+      { "at": [-219.6, -6.6], "kind": "square", "face": 3.14 }
+    ]
+  },
+  "thornwatch": {
+    "seed": 911,
+    "radius": 40,
+    "streets": ["grove_trail", "lark_road"],
+    "styles": [["wood", 1]],
+    "fences": [["wood", 3], ["hedge", 1]],
+    "villagers": 6,
+    "lampEvery": 20,
+    "rules": { "widths": [[2, 4], [3, 2]], "depths": [[2, 1]], "storeys": [[1, 3], [2, 2]], "gapEvery": [2, 3], "outskirts": 0.8 },
+    "streetRules": { "lark_road": { "sides": [-1] } },
+    "spots": [
+      { "npc": "ranger_captain_fen", "at": [172, -60], "face": -0.17, "idle": "guard" },
+      { "npc": "quartermaster_bree", "at": [158, -66], "face": 0.24, "idle": "shopkeeper" },
+      { "npc": "dame_alys", "at": [184, -64], "face": 2.9, "idle": "trainer" },
+      { "npc": "scholar_ilsabet", "at": [148, -52], "face": 0.59, "idle": "crafter" },
+      { "npc": "sable", "at": [194, -48], "face": -1.85, "idle": "watcher" },
+      { "npc": "brannoc", "at": [178, -76], "face": 1.25, "idle": "trainer" },
+      { "npc": "hunter_sorrel", "at": [154, -70], "face": 0.54, "idle": "watcher" },
+      { "npc": "rowan_thistle", "at": [190, -70], "face": -0.54, "idle": "elder" },
+      { "npc": "stormcaller_oda", "at": [164, -78], "face": 0.24, "idle": "mage" }
+    ],
+    "props": [
+      { "kind": "barrel", "at": [161.5, -64.5], "facing": 0.3 },
+      { "kind": "crate", "at": [156.2, -64.2], "facing": -0.2 },
+      { "kind": "woodpile", "at": [180.5, -50.2], "facing": 1.2 }
+    ],
+    "stops": [
+      { "at": [170, -48.5], "kind": "square", "face": 3.14 },
+      { "at": [160, -61.5], "kind": "stall", "face": 3.14 },
+      { "at": [186, -70], "kind": "square", "face": 1.57 }
+    ]
+  }
+}

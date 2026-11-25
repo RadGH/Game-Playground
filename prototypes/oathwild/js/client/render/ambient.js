@@ -78,7 +78,8 @@ export function createAmbient(view, { T, trees = [], chimneys = [], quality = 'm
   const broad = trees.filter(tr => /oak|birch|willow|marsh|sapling/.test(tr.art) && !/spruce/.test(tr.art));
 
   // ---- chimney smoke: 9 puffs per chimney, the nearest 14 chimneys (a warm mid grey: light grey vanished against the sky)
-  const PUFFS = 9, NC = Math.min(14, chimneys.length);
+  // (the list may still grow after this — the towns' chimneys arrive when town-draw.js has built them)
+  const PUFFS = 9, NC = 14;
   const smokeGeo = new THREE.PlaneGeometry(1, 1);
   const fade = new THREE.InstancedBufferAttribute(new Float32Array(Math.max(1, NC * PUFFS)), 1); fade.setUsage(THREE.DynamicDrawUsage);
   smokeGeo.setAttribute('aFade', fade);

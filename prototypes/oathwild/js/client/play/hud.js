@@ -70,7 +70,7 @@ export function createHud(app, play) {
   const minimap = createMinimap(app, root.querySelector('.hud-mini canvas'));
 
   // ---- window buttons (bottom right; on phones they live in the ☰ menu)
-  const WINS = [['bag', 'bag', 'Bag'], ['sheet', 'sheet', 'Character'], ['classes', 'skills', 'Classes'], ['talents', 'perks', 'Talents'], ['spellbook', 'journal', 'Spellbook'], ['quests', 'callboard', 'Quests'], ['map', 'map', 'Map']];
+  const WINS = [['bag', 'bag', 'Bag'], ['sheet', 'sheet', 'Character'], ['classes', 'skills', 'Classes'], ['talents', 'perks', 'Talents'], ['spellbook', 'journal', 'Spellbook'], ['quests', 'callboard', 'Quests'], ['trade', 'prof_enchanting', 'Trade skills'], ['map', 'map', 'Map']];
   function drawWins() {
     el.wins.innerHTML = WINS.map(([id, ic, name]) => `<button type="button" class="hud-win-btn" data-win="${id}" ${tipAttrs('text', { title: name, text: hintFor(app.bindings, id, app.device) ? `Key: ${hintFor(app.bindings, id, app.device)}` : name })} aria-label="${name}">${uiIcon(ic, 24)}<span class="hud-key">${esc(hintFor(app.bindings, id, app.device))}</span></button>`).join('');
     for (const b of el.wins.querySelectorAll('[data-win]')) b.onclick = () => app.openWindow(b.dataset.win);

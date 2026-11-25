@@ -13,10 +13,11 @@ import { createCamera } from '../play/camera.js';
 import { createPredictor } from '../play/predict.js';
 import { createHud } from '../play/hud.js';
 import { createTouch } from '../play/touch.js';
+import { createVillagers } from '../play/villagers.js';
 import { createInput } from '../input/input.js';
 import { castRow } from '../../rules/classes.js';
 import { targetKind } from '../../rules/spells.js';
-import { npcAt, npcPresent, liveObjects, questStatus } from '../../world/quests.js';
+import { npcAt, npcPresent, liveObjects, questStatus, npcCall } from '../../world/quests.js';
 import { STEP, BTN, UF, packButtons } from '../../net/protocol.js';
 import { windowsOpen, closeAll, findWin } from '../ui/kit.js';
 import { fmt } from '../../../../../shared/format.js';
@@ -31,7 +32,7 @@ export async function show(app, { enter = null } = {}) {
   // ---------------------------------------------------------------- the 3D view (made once per page)
   if (!app.view) {
     app.view = createView(document.getElementById('view'), { quality: app.settings.quality });
-    app.worldView = createWorldView(app.view, { T, placements, art: app.art, scattered: app.scattered, book, quality: app.settings.quality });
+    app.worldView = createWorldView(app.view, { T, placements, art: app.art, scattered: app.scattered, book, town: app.W.town, quality: app.settings.quality });
     app.actors = createActors(app.view, { rules: app.rules, art: app.art, quality: app.settings.quality, maxTabards: app.settings.quality === 'low' ? 6 : 16 });
     app.fx = await createFx(app.view, { heightAt, quality: app.settings.quality });
     // a quest object that is an animal (Chestnut the mare): a real body instead of the world's fallback box
@@ -43,6 +44,8 @@ export async function show(app, { enter = null } = {}) {
     }
   }
   const view = app.view, actors = app.actors, fx = app.fx;
+  const IDLES = W.data.towns?.idles || {};                 // townspeople's work routines (data/towns.json)
+  const villagers = W.town ? createVillagers({ plan: W.town, actors: app.actors, heightAt, quality: app.settings.quality }) : null;
   view.tuning = app.tuning;          // the Look numbers (lighting, grade, bloom, mist, clouds) live from the ?tune panel
   // ambient life round the camera (motes, leaves, chimney smoke, birds, butterflies) and the ambience bed for where you stand
   const ambient = createAmbient(view, { T, trees: app.scattered.trees, chimneys: app.worldView.chimneys || [], quality: app.settings.quality, sound: () => (app.settings.sfxOn ? app.sound : null) });
@@ -265,10 +268,10 @@ export async function show(app, { enter = null } = {}) {
     const D = app.rules.data.combat.death;
     for (const u of S.units.values()) if (u.info.k === 'player' && u.downed && u.id !== S.meId) add({ kind: 'revive', id: u.id, name: u.info.n, r: D.reviveRange + 0.5, bias: -99, h: 0.6, text: `Hold to bring ${u.info.n} back`, progress: S.revive?.id === u.id ? S.revive.held / D.reviveSeconds : null }, u.x, u.z);
     for (const b of S.lootBoxes) add({ kind: 'loot', id: b.id, name: b.name || 'the remains', r: R, bias: -1, h: 0.7, text: `Search ${b.name || 'the remains'}` }, b.x, b.z);
-    for (const n of S.npcs) add({ kind: 'talk', id: n.id, name: n.name, r: NPC_R, bias: 0, h: 1.85, text: `Talk to ${n.name}` }, n.x, n.z);
+    for (const n of S.npcs) add({ kind: 'talk', id: n.id, name: n.name, r: NPC_R, bias: 0, h: 1.85, text: `Talk to ${npcCall(book.npcs[n.id] || n)}` }, n.x, n.z);
     for (const c of placements.chests) add({ kind: 'chest', id: c.id, name: c.name || 'the chest', r: OBJ_R, bias: 0, h: 0.9, text: `Open ${c.name || 'the chest'}` }, c.at[0], c.at[1]);
     for (const o of S.liveObjects || []) { const ob = book.objects[o.object]; if (ob) add({ kind: 'use', id: o.object, name: ob.name, r: OBJ_R + 0.5, bias: -0.5, h: 1.2, text: `${o.kind === 'use' ? 'Use' : 'Search'} ${ob.name}` }, ob.at[0], ob.at[1]); }
-    for (const sh of placements.shrines) add({ kind: 'shrine', id: sh.id, name: sh.name, r: SHRINE_R, bias: 0.5, h: 2.6, text: `${sh.name}: travel, enchant, change your path` }, sh.at[0], sh.at[1]);
+    for (const sh of placements.shrines) add({ kind: 'shrine', id: sh.id, name: sh.name, r: SHRINE_R, bias: 0.5, h: 2.6, text: `${sh.name}: travel, change your path` }, sh.at[0], sh.at[1]);
     return out;
   }
   function findInteract() {
@@ -325,7 +328,7 @@ export async function show(app, { enter = null } = {}) {
 
   // ---------------------------------------------------------------- the HUD
   app.play = {
-    S, cam, slotDown, slotUp, cancelPlace, tapAt, ambient,
+    S, cam, slotDown, slotUp, cancelPlace, tapAt, ambient, villagers,
     /** Where a world point is on screen (css px) or null — tests and game-eye aim taps with it. */
     screenOf(x, z, h = 1) { return project(x, heightAt(x, z) + h, z); },
     get target() { return S.target; },
@@ -431,7 +434,7 @@ export async function show(app, { enter = null } = {}) {
     input.poll(dt);
     // one-shot presses are taken here (frame rate) and handed to the next step
     if (input.take('menu')) { if (windowsOpen()) closeAll(); else { input.unlock(); app.openWindow('menu', { where: 'play' }); } }
-    for (const w of ['bag', 'sheet', 'levelup', 'classes', 'talents', 'spellbook', 'quests', 'map']) if (input.take(w)) { if (findWin(w)) findWin(w).close(); else { input.unlock(); app.openWindow(w); } }
+    for (const w of ['bag', 'sheet', 'levelup', 'classes', 'talents', 'spellbook', 'quests', 'trade', 'map']) if (input.take(w)) { if (findWin(w)) findWin(w).close(); else { input.unlock(); app.openWindow(w); } }
     if (input.take('dodge')) dodgePress = true;
     if (input.take('mount')) mountPress = true;
     if (input.take('power')) powerPress = true;
@@ -517,7 +520,20 @@ export async function show(app, { enter = null } = {}) {
     // people: drawn while near, facing whoever comes close
     if (me && (npcTick += dt) > 0.5) { npcTick = 0; syncNpcs(); }
     if ((bodyTick += dt) > 0.25) { bodyTick = 0; actors.budget(pred.state.x, pred.state.z); }   // nearest people get bodies first
-    for (const n of S.npcs) { const a = actors.get('npc:' + n.id); if (!a) continue; const y = heightAt(n.x, n.z); let f = n.face ?? 0; const dx = pred.state.x - n.x, dz = pred.state.z - n.z; if (Math.hypot(dx, dz) < 7) f = Math.atan2(dx, dz); n.face = lerpAngle(n.face ?? f, f, Math.min(1, dt * 4)); a.place(n.x, y, n.z, n.face); actors.moveClip(a, 0); }
+    // townspeople work at their spot (data/towns.json idles: the smith at the anvil, the shopkeeper behind the stall…),
+    // turn to a hero who comes close, and talk while their window is open
+    for (const n of S.npcs) {
+      const a = actors.get('npc:' + n.id); if (!a) continue;
+      const def = book.npcs[n.id] || {}, y = heightAt(n.x, n.z);
+      const dx = pred.state.x - n.x, dz = pred.state.z - n.z, close = Math.hypot(dx, dz) < 4.5, talking = app.talkingTo === n.id;
+      const f = close || talking ? Math.atan2(dx, dz) : (def.face ?? n.face ?? 0);
+      n.face = lerpAngle(n.face ?? f, f, Math.min(1, dt * 4));
+      a.place(n.x, y, n.z, n.face);
+      if (talking) actors.playLoop(a, 'talk');
+      else if (close || n.escort || !IDLES[def.idle]) actors.moveClip(a, 0);
+      else actors.playLoop(a, routineClip(IDLES[def.idle], nowS + (n.id.length * 7.3) % 11));
+    }
+    villagers?.update(dt, pred.state);
     // tags: enemies near, damaged ones, the party, people (with ! / ? for quests)
     S.tags = [];
     const tagR = app.tuning?.nameplateMetres || 38;
@@ -586,10 +602,17 @@ export async function show(app, { enter = null } = {}) {
         }
       }
       const prev = S.npcs.find(x => x.id === n.id);
-      near.push({ id: n.id, name: n.name, x: at[0], z: at[1], quest: !!mark, mark, face: prev?.face });
+      near.push({ id: n.id, name: n.name, x: at[0], z: at[1], quest: !!mark, mark, face: prev?.face, escort: esc.has(n.id) });
       actors.npc(n);
     }
     S.npcs = near;
+  }
+  /** The clip a work routine ([clip, min s, max s]…, looping) plays at time t: each step lasts the middle of its range. */
+  function routineClip(steps, t) {
+    const total = steps.reduce((s, [, lo, hi]) => s + (lo + hi) / 2, 0);
+    let x = t % total;
+    for (const [clip, lo, hi] of steps) { if ((x -= (lo + hi) / 2) < 0) return clip; }
+    return steps[0][0];
   }
   const lerpAngle = (a, b, k) => { let d = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI; if (d < -Math.PI) d += Math.PI * 2; return a + d * k; };
   raf = requestAnimationFrame(frame);
@@ -605,6 +628,7 @@ export async function show(app, { enter = null } = {}) {
       ambient.dispose();
       for (const id of [...S.units.keys()]) actors.drop(id);
       for (const n of S.npcs) actors.drop('npc:' + n.id);
+      villagers?.dispose();
       app.snapBuf = [];
       app.play.hud.destroy(); app.play.touch?.destroy();
       app.play = null;

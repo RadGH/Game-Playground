@@ -10,7 +10,7 @@ const FOCUSABLE = 'button:not([disabled]), [data-act]:not([disabled]), input:not
 const visible = el => { const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return false; const s = getComputedStyle(el); return s.visibility !== 'hidden' && s.display !== 'none' && s.pointerEvents !== 'none'; };
 
 export function createPadNav({ busy = () => false, back = () => false } = {}) {
-  let cur = null, curSig = '', held = new Map(), raf = 0, lastPad = 0;
+  let cur = null, curSig = '', held = new Map(), raf = 0, lastPad = 0, lastAe = null;
   const sig = el => [el.tagName, el.id, el.dataset.act, el.dataset.key, el.dataset.value, el.dataset.num, el.dataset.bool, el.dataset.i, el.dataset.pid, el.textContent.trim().slice(0, 40)].join('|');
   const layer = () => [...document.querySelectorAll('.modal, .ow-win, .wn-root, .cr-root, .rgs-signin, .gdlg')].filter(visible).pop() || document.getElementById('ui') || document.body;
   const items = () => { const L = layer(); return [...L.querySelectorAll(FOCUSABLE)].filter(el => visible(el)); };
@@ -69,6 +69,10 @@ export function createPadNav({ busy = () => false, back = () => false } = {}) {
       const same = items().find(el => sig(el) === curSig), keep = curSig;
       cur = null; mark(same || null); if (!same) curSig = keep;
     }
+    // the game moved the focus itself (a window opened on its first useful control, a shop's Buy button after picking an
+    // item, the next item after a sale): the highlight follows it
+    const ae = document.activeElement;
+    if (ae !== lastAe) { lastAe = ae; if (ae && ae !== cur && ae !== document.body && items().includes(ae)) mark(ae); }
   }
   raf = requestAnimationFrame(frame);
   return { stop: () => cancelAnimationFrame(raf), get current() { return cur; } };

@@ -28,7 +28,7 @@
     "price": 120
   },
   "enchanting": {
-    "_doc": "Break (disenchant) a magic or better item to learn one of its enchantments (the item is destroyed). Put a learned enchantment on your own weapon or armour at a shrine's enchanting stone: its value = a fresh roll for the item's level x (base + Enchanting x perPoint, skills-use.json) and costs gold. Each item takes `slots` of your enchantments (more from the Enchanting perks and the Runic Hand talent).",
+    "_doc": "Break (disenchant) a magic or better item to learn one of its enchantments (the item is destroyed). Put a learned enchantment on your own weapon or armour from your Trade skills window, anywhere but in the middle of a fight (owner 2026-11-25: the player does trade skills, not the shrine): its value = a fresh roll for the item's level x (base + Enchanting x perPoint, skills-use.json) and costs gold. Each item takes `slots` of your enchantments (more from the Enchanting perks and the Runic Hand talent).",
     "learnFrom": ["magic", "rare", "legendary"],
     "base": 0.6,
     "slots": 1,

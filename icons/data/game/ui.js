@@ -472,6 +472,19 @@ export default {
       + star(22, 20, 5, .3, '#7fd0ff')
       + star(22, 20, 2.8, .3, P),
   },
+  prof_enchanting: {
+    name: 'Enchanting',
+    description: 'A violet cut gem carved with a glowing gold rune rests on a dark stone, ringed by small bright sparks.',
+    art: shape('M5 25 H27 L25 30 H7 Z', N, G)
+      + path('M8 26 H24 L23 28 H9 Z', D)
+      + shape('M16 3 L26 10 L22 23 H10 L6 10 Z', '#a77ee8')
+      + path('M16 4 L25 10 L16 12.5 L7 10 Z', '#d8c6ff')
+      + mark('M7 10 L16 12.5 L25 10 M16 12.5 V22', '#5a3a9a', 1.2)
+      + mark('M12.5 15 L16 18.5 L19.5 15 M16 18.5 V21', G, 1.8)
+      + star(27, 4, 3, .35, G)
+      + star(4, 17, 2.4, .35, G)
+      + star(28.5, 20, 2, .35, P),
+  },
 
   // Small utilities, including the full-height equipment mannequin.
   eye: {

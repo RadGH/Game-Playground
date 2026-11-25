@@ -172,7 +172,10 @@ export function paintGround(T, { placements, art, cfg, res = 1, trees = [] }) {
           const dt = Math.hypot(x - t.at[0], z - t.at[1]);
           if (dt > t.radius) continue;
           const sh = r.width / 2 + st.extra;
-          put(cobble, j, (1 - smoothstep(sh - st.soft * 0.4, sh + st.soft * 0.6, dd)) * (1 - smoothstep(t.radius * 0.6, t.radius * 0.92, dt + wob(x, z) * 6)));
+          // a town street says its own surface (map.json `surface`): cobbles to its end, or a packed-dirt alley
+          if (r.surface === 'dirt') continue;
+          const fade = r.surface === 'cobble' ? 1 : 1 - smoothstep(t.radius * 0.6, t.radius * 0.92, dt + wob(x, z) * 6);
+          put(cobble, j, (1 - smoothstep(sh - st.soft * 0.4, sh + st.soft * 0.6, dd)) * fade);
         }
       });
     }

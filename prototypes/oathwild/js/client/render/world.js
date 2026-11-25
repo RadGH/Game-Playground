@@ -14,6 +14,7 @@ import { createGrass } from './grass.js';
 import { kitModel } from './kit-props.js';
 import { createKitDraw } from './kit-draw.js';
 import { createTrees } from './trees.js';
+import { createTownView } from './town-draw.js';
 import { addContactShade } from './contact.js';
 import { findChimney } from './chimney.js';
 import { ATMOS } from './atmos.js';
@@ -27,7 +28,7 @@ const glb = file => { if (!glbCache.has(file)) glbCache.set(file, loader.loadAsy
 
 const hash = (x, z) => { const s = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return s - Math.floor(s); };
 
-export function createWorldView(view, { T, placements, art, scattered, book, quality = 'medium' }) {
+export function createWorldView(view, { T, placements, art, scattered, book, town = null, quality = 'medium' }) {
   const scene = view.scene;
   const root = new THREE.Group(); root.name = 'world'; scene.add(root);
   const tiles = new Map();          // "i,k" -> Group
@@ -146,6 +147,11 @@ export function createWorldView(view, { T, placements, art, scattered, book, qua
     const h = o.art ? place(o.art, o.at[0], o.at[1], o.y, o.facing || 0, { name: o.name }) : (() => { const g = new THREE.Group(); g.position.set(o.at[0], o.y ?? T.heightAt(o.at[0], o.at[1]), o.at[1]); g.add(placeholderMesh({ placeholder: { ...(o.fallback || { shape: 'box', size: [1, 1, 1], colour: '#b08d3c' }) } })); tileGroup(o.at[0], o.at[1]).add(g); return g; })();
     objectMeshes.set(o.id, h);
   }
+  // the towns (js/world/town.js plan → town-draw.js); the few town props drawn with the scenery kit go in first
+  const TOWN_ART = { rack: 'weapon-rack', banner: 'banner-village', dummy: 'scarecrow-post' };
+  for (const p of town?.props || []) if (TOWN_ART[p.kind]) place(TOWN_ART[p.kind], p.at[0], p.at[1], p.y, p.facing || 0);
+  let townView = null;
+  if (town) pending.push(createTownView({ T, plan: town, quality, tileGroup, chimneys: kit.chimneys }).then(v => { townView = v; }).catch(e => console.warn('town', e)));
   kit.build();
   if (!new URLSearchParams(location.search).has('envoff')) addContactShade(view, { T, placements });
   // the mist pools in the low ground: its base is set from this map's own heights (the lowest 4% of the land: river bottoms)
@@ -218,7 +224,7 @@ export function createWorldView(view, { T, placements, art, scattered, book, qua
   // ---------------------------------------------------------------- per frame
   let wt = 0;
   return {
-    root, tiles, chestMeshes, objectMeshes, shrineMarks, ground, grass, kitStats: kit.stats, chimneys: kit.chimneys, get treeStats() { return treeView?.stats || null; }, ready: () => Promise.allSettled([...pending, ground.ready]),
+    root, tiles, chestMeshes, objectMeshes, shrineMarks, ground, grass, kitStats: kit.stats, chimneys: kit.chimneys, get treeStats() { return treeView?.stats || null; }, get townStats() { return townView?.stats || null; }, ready: () => Promise.allSettled([...pending, ground.ready]),
     update(dt, at) {
       wt += dt;
       kit.update(dt, wt);

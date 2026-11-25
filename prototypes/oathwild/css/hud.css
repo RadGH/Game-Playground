@@ -51,7 +51,9 @@ body.ow-nomouse[data-screen="play"] #view { cursor: none; }
 body[data-device="touch"] .hud-key:empty, .hud-key:empty { display: none; }
 .hud-cast { position: absolute; left: 50%; bottom: 160px; transform: translateX(-50%); width: 240px; height: 14px; background: rgba(0, 0, 0, .6); border: 1px solid var(--edge); border-radius: 6px; overflow: hidden; }
 .hud-cast i { display: block; height: 100%; background: var(--gold); } .hud-cast span { position: absolute; inset: 0; text-align: center; font-size: 11px; font-weight: 800; }
-.hud-bottom { position: absolute; left: 50%; bottom: calc(10px + var(--safe-b)); transform: translateX(-50%); display: grid; justify-items: center; gap: 6px; }
+/* above the touch layer (.hud-touch, added later): its drag-to-look area covered a lone ability in the middle of a
+   phone (owner 2026-11-25); only the slots themselves take touches, the rest of the bar lets drags through */
+.hud-bottom { z-index: 4; position: absolute; left: 50%; bottom: calc(10px + var(--safe-b)); transform: translateX(-50%); display: grid; justify-items: center; gap: 6px; }
 .hud-xp { position: relative; width: min(520px, 70vw); height: 8px; border-radius: 4px; background: rgba(0, 0, 0, .6); border: 1px solid var(--edge-soft); overflow: visible; }
 .hud-xp i { display: block; height: 100%; width: 0; border-radius: 4px; background: linear-gradient(90deg, #8a5ad0, var(--xp)); }
 .hud-xp span { position: absolute; left: 0; right: 0; top: -17px; text-align: center; font-size: 12px; font-weight: 700; color: var(--ink-dim); text-shadow: 0 1px 2px #000; opacity: 0; transition: opacity .2s; }
@@ -109,6 +111,8 @@ body.ow-touch .hud-slot.empty { display: none; }
 .hud-tb.on { border-color: var(--gold); color: var(--gold); }
 .hud-place { position: absolute; left: 50%; top: calc(70px + var(--safe-t)); transform: translateX(-50%); display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: rgba(26, 21, 15, .85); border: 1px solid var(--gold); border-radius: 10px; font-weight: 700; }
 body.ow-touch .hud-wins, body.ow-touch .hud-tracker, body.ow-touch .hud-cross { display: none; }
+/* eight window buttons in one row reach the action bar below ~1440 px: two rows of four instead */
+@media (max-width: 1440px) { .hud-wins { display: grid; grid-template-columns: repeat(4, 46px); } }
 @media (max-width: 760px) {
   .hud-me { width: min(220px, 52vw); padding: 6px 8px; }
   .hud-mini { right: calc(62px + var(--safe-r)); width: 108px; } .hud-mini canvas { width: 108px; height: 108px; }

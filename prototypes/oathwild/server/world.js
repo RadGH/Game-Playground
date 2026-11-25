@@ -23,7 +23,7 @@ import { repairItem, repairPrice, enchant, disenchant, carriedWeight, mountDef }
 import { auraList } from '../js/rules/auras.js';
 import { finishCaster } from '../js/rules/casters.js';
 import { makeRng, hashStr } from '../js/rules/farhold.js';
-import { notify, escortTick, talkTo, choose, npcAt, npcPresent, servicesOf, liveObjects, escorts } from '../js/world/quests.js';
+import { notify, escortTick, npcCall, talkTo, choose, npcAt, npcPresent, servicesOf, liveObjects, escorts } from '../js/world/quests.js';
 import { spawnCampFor, spawnZone } from '../js/world/encounters.js';
 import { equip, unequip, buyPrice, sellPrice, shopStock } from '../js/game/gear.js';
 import { STEP, MAX_PLAYERS, VIEW_METRES, EVENT_METRES, UF, unpackButtons } from '../js/net/protocol.js';
@@ -172,6 +172,18 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     }
     // dev builds only: fall where you stand (the fallen panel and Wake at the shrine, on a phone)
     if (msg.t === 'devDown' && dev) { const u = unitOf(P); if (u && !u.downed) die(world, u, null); return; }
+    // dev builds only: gold and magic items to try the shop and the Trade skills window with (tests/ui/shop-buy.mjs)
+    if (msg.t === 'devGold' && dev) {
+      const c = P.char;
+      if (Number.isFinite(msg.n)) c.gold = Math.max(0, Math.min(1e6, Math.round(msg.n)));
+      const bases = Object.keys(rules.data.items.weaponBases).filter(k => !rules.data.items.weaponBases[k].magic);
+      for (let i = 0; i < Math.min(6, msg.magic | 0); i++) {
+        const it = rules.rpg.loot.generate(bases[i % bases.length], 'magic', 'medium', { rng: makeRng(hashStr(`${c.id}:dev:${i}:${world.t}`)), ilvl: c.level || 1, level: c.level || 1 });
+        if (it) { it.id = `i${Math.floor(rng() * 1e9).toString(36)}`; c.bag.push(it); }
+      }
+      changed(P);
+      return;
+    }
     // dev builds only: still, unkillable targets in a fan ahead of the hero (screenshots of attacks)
     if (msg.t === 'devDummy' && dev) {
       const u = unitOf(P); if (!u) return;
@@ -287,13 +299,13 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
       case 'destroy': { const i = (c.bag || []).findIndex(it => it.id === m.item); if (i < 0) return err(P, 'Not in your bag.'); const [it] = c.bag.splice(i, 1); say(P, `${it.name} was thrown away.`); changed(P, { refresh: false }); return; }
       case 'disenchant': {
         const it = itemIn(P, m.item); if (!it) return err(P, 'Not in your bag.');
-        if (!nearShrine(u)) return err(P, 'Breaking enchantments needs a shrine\'s enchanting stone.');
+        if (fighting(u)) return err(P, 'Not in the middle of a fight. Break it once the fighting is over.');
         const r = disenchant(rules, c, it, rng); if (!r.ok) return err(P, r.why);
         say(P, `You learned ${r.learned.length > 1 ? `${r.learned.length} enchantments` : 'an enchantment'} from ${it.name}. It crumbles to dust.`, 'good'); c.bag = c.bag.filter(x => x !== it); changed(P); return;
       }
       case 'enchant': {
         const it = itemIn(P, m.item) || Object.values(c.gear || {}).find(g => g?.id === m.item); if (!it) return err(P, 'You do not have that item.');
-        if (!nearShrine(u)) return err(P, 'Enchanting needs a shrine\'s enchanting stone.');
+        if (fighting(u)) return err(P, 'Not in the middle of a fight. Enchant it once the fighting is over.');
         const r = enchant(rules, c, it, m.affix, rng, { sheet: sheetOf(rules, c) }); if (!r.ok) return err(P, r.why);
         say(P, `${it.name} now carries ${r.affix?.name || 'the enchantment'} (${r.price} gold).`, 'good'); changed(P); return;
       }
@@ -373,6 +385,9 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
   }
 
   function nearShrine(u) { return !!u && placements.shrines.some(s => near(u, s.at, SHRINE_METRES)); }
+  // in a fight: hit or was hit within data/combat.json combatState.seconds (the same window combat.js uses; it ends —
+  // lessons rule 40). Trade skills (enchanting) work anywhere but here (owner 2026-11-25).
+  function fighting(u) { return !!u && world.t - (u.lastFight ?? -999) < rules.data.combat.combatState.seconds; }
   function stockOf(npc, shop) {
     const day = Math.floor(ws.time / 1800);       // the stock changes every half hour of world time
     const k = `${npc}:${day}`;
@@ -437,7 +452,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
       if (e.t === 'quest-count') broadcast({ t: 'say', text: `${q.title}: ${e.progress}`, kind: 'quest' });
       else if (e.t === 'quest-step') broadcast({ t: 'say', text: `${q.title}: ${q.steps[ws.quests[e.quest]?.step]?.text || 'ready to hand in'}`, kind: 'quest' });
       else if (e.t === 'quest-start') broadcast({ t: 'say', text: `New quest: ${q.title}`, kind: 'quest' });
-      else if (e.t === 'quest-ready') broadcast({ t: 'say', text: `${q.title}: return to ${book.npcs[q.turnIn]?.name}.`, kind: 'quest' });
+      else if (e.t === 'quest-ready') broadcast({ t: 'say', text: `${q.title}: return to ${npcCall(book.npcs[q.turnIn])}.`, kind: 'quest' });
       else if (e.t === 'quest-done') { broadcast({ t: 'say', text: `Quest complete: ${q.title}`, kind: 'quest' }); note(ws, `${q.title} was completed.`); }
       else if (e.t === 'flag') { /* class unlocks etc.: the world-state message carries them */ }
     }

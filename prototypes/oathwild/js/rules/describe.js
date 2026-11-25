@@ -20,6 +20,7 @@
 //   describeNode(rules, char, cls, nodeId)
 //   describeClass(rules, char, cls, { flags })
 //   describeSkill(rules, char, skillId)
+//   enchantLine(def, { ilvl, power, roll })     what a learned enchantment adds to an item ("+6% attack speed")
 //   modLine(rules, key, value)                   one stat change as a sentence piece ("+5% maximum health")
 
 import { fmt, fmtHp, fmtPctOf, fmtSign, fmtRange, fmtSecs, describeAffix, handText, cooldownPower, STATUS_POWER_SHARE, makeRng } from './farhold.js';
@@ -284,8 +285,23 @@ function summedAffixLines(item) {
     const cur = by.get(k);
     if (cur) cur.value += a.value; else by.set(k, { ...a });
   }
-  const ATTR = { str: 'Strength', dex: 'Dexterity', int: 'Intelligence', con: 'Constitution', wis: 'Wisdom', cha: 'Charisma' };
-  return [...by.values()].map(a => ATTR[a.stat] ? `${fmtSign(Math.round(a.value))} ${ATTR[a.stat]}` : cap(describeAffix(a) || '').replace(/\bintellect\b/gi, 'Intelligence')).filter(Boolean);
+  return [...by.values()].map(affixLine).filter(Boolean);
+}
+const AFFIX_ATTR = { str: 'Strength', dex: 'Dexterity', int: 'Intelligence', con: 'Constitution', wis: 'Wisdom', cha: 'Charisma' };
+/** One affix (with its value) as the item card's line: "+2 Strength", "+6% attack speed". */
+const affixLine = a => (AFFIX_ATTR[a.stat] ? `${fmtSign(Math.round(a.value))} ${AFFIX_ATTR[a.stat]}` : cap(describeAffix(a) || '').replace(/\bintellect\b/gi, 'Intelligence'));
+
+/**
+ * What one of your learned enchantments would add to `item` (Trade skills window): the card's own line for a middle
+ * roll at the item's level times your Enchanting strength — "+6% attack speed". `power` = enchantPower (skills-use.js),
+ * `roll(def, ilvl)` = a middle roll (the caller passes inventory's rollAffixValue with a fixed 0.5).
+ */
+export function enchantLine(def, { ilvl = 1, power = 1, roll }) {
+  if (!def) return '';
+  try {
+    const v = roll(def, ilvl) * power;
+    return affixLine({ ...def, value: Math.round(v * 100) / 100 });
+  } catch { return ''; }
 }
 
 export function describeItem(rules, char, item, { slot = null } = {}) {

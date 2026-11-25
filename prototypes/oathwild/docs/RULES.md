@@ -161,7 +161,7 @@ what the attack does not do. Oathwild's own knobs are in `data/casters.json`.
   Fan — Thousandvale's), Hearthkindle Wand (fire Lingering Bolt), Stormcatch Sceptre (lightning), Rimebough Staff
   (frost nova); **The Lost Tome** quest gives the Barrow-Lantern Tome (shadow Column).
 - **Where they come from**: the `magic` loot kind (wands most, then tomes and orbs, staves, sceptres and the four
-  foci) drops from people, elites, bosses and chests; Pell Dunmore (Larkford) and Quartermaster Bree (Thornwatch)
+  foci) drops from people, elites, bosses and chests; the Shopkeeper (Larkford) and the Quartermaster (Thornwatch)
   sell them.
 - **Aiming**: bolts, cones and beams go along the crosshair; a lob or placed style lands on the crosshair's ground
   point (the client sends it with the attack, the server clamps it to the reach) and shows the ground indicator while
@@ -227,7 +227,8 @@ waiting for their benches in a later round). Each milestone (25, 50, 75, 100) gi
 ## Enchanting and the horse (round-1 extras)
 
 - **Break** a magic, rare or legendary item to learn one of its enchantments (two from a rare with Keen Reader).
-  **Put** a learned enchantment on your own gear at a shrine for gold: its strength is a fresh roll for the item's
+  **Put** a learned enchantment on your own gear for gold, from your own **Trade skills** window (key K, the ☰ menu),
+  anywhere but in the middle of a fight (owner 2026-11-25: the player does trade skills, not the shrine): its strength is a fresh roll for the item's
   level × (60% + Enchanting × 0.5%). One per item (two at Enchanting 50, three at 100, +1 with Runic Hand).
 - **Horse**: bought at a stable (120 gold, Guessed); call it standing still out of combat; ×1.9 speed; a hit or an
   attack throws you off.

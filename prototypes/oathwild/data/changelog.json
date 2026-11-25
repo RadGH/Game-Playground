@@ -1,6 +1,24 @@
 {
   "entries": [
     {
+      "id": "2026-11-25-towns",
+      "date": "2026-11-25",
+      "title": "Living towns",
+      "items": [
+        "Larkford is a real town now: tall timber, stone and plaster houses packed shoulder to shoulder along a high street, a ring lane, West Street up the hill and narrow alleys, every house its own colours.",
+        "The town follows its hill: houses stand on stone footings with steps up to their doors, and the square, the shrine yard and the tower terrace are level terraces with walls round them.",
+        "Back yards behind the houses, with fences, hedges and low walls, woodpiles, crates and vegetable beds. Big trees stand in the open ground between the houses.",
+        "A market square with stalls, a fountain and benches; lamps along every street; shops with awnings, banners and goods at the door; smoke from the chimneys.",
+        "Villagers walk the streets, stop at the stalls and the fountain and go in and out of doors. They are just villagers: you cannot talk to them.",
+        "Townspeople work at their own spot: the shopkeeper behind the stall, the blacksmith at the anvil, the innkeeper at the inn door, trainers drilling at the training yard. They turn to you when you come close.",
+        "People are called by their job (the Blacksmith, the Shopkeeper, the Innkeeper…); only the people of the main story keep their names.",
+        "Thornwatch has log cabins along its lanes, yards and trees.",
+        "Shops: tapping or clicking an item shows its details first; a separate Buy or Sell button does the trade.",
+        "Enchanting moved to your own Trade skills window (K, or the ☰ menu): break items to learn enchantments and put them on your gear anywhere outside a fight. Shrines no longer do it. Repairs also show the item first, then a Repair button.",
+        "Phones: your first ability button works again (an invisible camera-drag area was covering it)."
+      ]
+    },
+    {
       "id": "2026-11-24-environment",
       "date": "2026-11-24",
       "title": "Air, light and life",

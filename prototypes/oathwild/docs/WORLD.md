@@ -25,6 +25,13 @@ north is −z as in three.js). Mountains ring the edge; a 40 m border inside the
   (marsh, pools, a boardwalk), the **Troll Bridge** where the Lark Road crosses the Mirewater, the **Undead Barrow**
   on the downs in the north-east, **Ogre Hill** in the east and the **Drowned Ruins** out in the mire.
 
+**Towns (2026-11-25).** Larkford is a market town on a hillside falling east to the Brightwater: a cobbled square
+(fountain, three stalls) where the Lark Road, North Track, South Road and West Street meet; a ring lane ~40 m out (Bell
+Lane, Well Lane, Fiddle Lane, Tower Lane); two alleys (shrine to Bell Lane, square to Fiddle Lane); Mill Lane down to the
+river; the Lark Tower on a terrace at the top of West Street; the smithy, stable and training yard at the east way in.
+Thornwatch is a frontier outpost of log cabins on Ranger Row and the Grove Trail. Houses, yards, lamps and villagers
+come from `js/world/town.js` + `data/towns.json` (README "Towns").
+
 Roads: the **Lark Road** (Larkford → Lark Bridge → Thornmere Gate → Thornwatch → Troll Bridge → Ogre Hill) is the
 spine; trails branch to every place (North Track, Ford Road, Watch Lane, Old Hill Path, Fold Lane, Poacher's Path,
 Grove Trail, Barrow Road, Bearwood Trail, the Mire Way boardwalk, Redtusk Trail). Every place is within 80 m of a road
@@ -37,7 +44,7 @@ deep), **the Troll Bridge** and the **Old Stone Bridge** (stone).
 |---|---|---|---|---|
 | Larkford and around | 1–2 | | Thornmere Gate, Thornwatch | 5–6 |
 | the Hartwood | 1–3 | | Greenhollow (Druid Circle, Blighted Grove) | 6–7 |
-| southern vale (Tansy's Field, Lantern Reach) | 2–3 | | Troll Bridge, Bearwood | 6–7 |
+| southern vale (the Miller's Field, Lantern Reach) | 2–3 | | Troll Bridge, Bearwood | 6–7 |
 | Gobbet Hills (goblin warren) | 2–5 | | Redtusk Camp, the Mire Way | 7–8 |
 | Rook's Hideout | 3 | | Thornmere Mire, Barrow Downs | 7–9 |
 | the Ford | 3–4 | | Ogre Hill | 8–9 |
@@ -59,23 +66,27 @@ Camp (7–8, Redtusk), Ogre Hill (8–9, Hill Ogre), the Undead Barrow (7–9, t
 Drowned Ruins (8–10, Marsh Hag).
 
 **Wildlife and roamers** (17 zones): wolves in the Hartwood, boars by the fold and in the west meadows, walking
-scarecrows in Tansy's Field, thugs on the Ford Road, goblin scouts, Thornmere wolves at the gate, mountain lions on the
+scarecrows in the Miller's Field, thugs on the Ford Road, goblin scouts, Thornmere wolves at the gate, mountain lions on the
 Greenhollow Heights, bears and lions in the Bearwood, orc raiders on the road, the restless dead on the Barrow Downs,
 earth elementals on the east downs, drowned things in the mire.
 
-**Larkford:** Elder Maren Holloway, Brother Tobin (shrine keeper, Cleric trainer, respec), Captain Edda Brandt
-(watch, bounties), Sergeant Holt Bracken (Warrior, Bladesworn), Wren Ashby (Ranger, Spellfletcher), Nim Tallow
-(Rogue, Shadowdancer), Magister Oriel Venn (Mage, Spellblade, Pyromancer), Old Moss (Druid), Lark the minstrel
-(Bard), Grandmother Isk (Shaman), Ser Dario Fell (Duelist), Ulla Graves (smith: weapons, armour, repairs), Pell
-Dunmore (goods), Josse Amberley (the Fiddler's Rest inn), Corwin Hale (stable: the horse), Hobb Tansy (miller),
-Widow Perrin, Della Rowe, Wynn Pike (fisher); Ada Fenn at her fold; Pip Rowe at the Hartwood's edge.
+Only the people of the main story have personal names (Elder Maren Holloway, Brother Tobin, Captain Edda Brandt,
+Ranger-Captain Fen Asher, Archdruid Teodor; owner 2026-11-25). Everyone else is called by their job, and sentences
+say "the Blacksmith" (`role: true` in data/npcs.json; tests/world/npc-names.test.mjs checks it).
 
-**Thornwatch:** Ranger-Captain Fen Asher, Quartermaster Bree (goods, repairs), Dame Alys Corbin (Paladin), Ilsabet
-Crane (Necromancer, after the barrow tome), Sable (Gravecutter, after the contract), Brannoc the Unbowed (Wrathborn),
-Sorrel Vane (Witch Hunter), Rowan Thistle (Wayfarer), Oda Greycloud (Stormcaller).
-**Druid Circle:** Archdruid Teodor; **Warden Ysolde** (teaches Druids to call the wolf and the bear — she comes only
-after the Grove Trial). **The Black Stone:** Mother Sallow, the voice in the stone (Warlock pact and trainer).
-**Herb Hollow:** Tamsin Reed, the herbalist (moves to the Mire Shrine once you lead her out).
+**Larkford:** Elder Maren Holloway, Brother Tobin (shrine keeper, Cleric trainer, respec), Captain Edda Brandt
+(watch, bounties), the Weapons Master (Warrior, Bladesworn), the Hunter (Ranger, Spellfletcher), the Locksmith
+(Rogue, Shadowdancer), the Tower Mage (Mage, Spellblade, Pyromancer), the Hedge Druid (Druid), the Minstrel (Bard),
+the Spirit-Talker (Shaman), the Fencing Master (Duelist), the Blacksmith (weapons, armour, repairs), the Shopkeeper
+(goods), the Innkeeper (the Fiddler's Rest), the Stable Master (the horse), the Miller, the Weaver, the Farmer, the
+Fisher; the Shepherd at her fold; the Farmer's Boy at the Hartwood's edge.
+
+**Thornwatch:** Ranger-Captain Fen Asher, the Quartermaster (goods, repairs), the Paladin, the Scholar (Necromancer,
+after the barrow tome), the Hooded Stranger (Gravecutter, after the contract), the Wild Fighter (Wrathborn), the
+Witch Hunter, the Wayfarer, the Stormcaller.
+**Druid Circle:** Archdruid Teodor; **the Grove Warden** (teaches Druids to call the wolf and the bear — she comes only
+after the Grove Trial). **The Black Stone:** the Voice in the Stone (Warlock pact and trainer).
+**Herb Hollow:** the Herbalist (moves to the Mire Shrine once you lead her out).
 
 Every round-1 class has a trainer (a test checks it).
 
@@ -99,21 +110,21 @@ Thornmere. Now a cult, **the Hollow Choir**, is putting out the old shrine flame
 
 | Quest | Region | Level | Giver | Kind | What happens | Reward |
 |---|---|---|---|---|---|---|
-| Wolves at the Fold | Vale | 1 | Ada Fenn | bounty | Hunt 6 Vale Wolves at the Hartwood's edge. | 52 XP, 6 gold, boots |
-| Pip in the Hartwood | Vale | 1 | Della Rowe | escort | Walk Della's boy home from the wolf woods (he follows your footsteps over the bridge). | 52 XP, 5 gold |
-| The Miller's Sacks | Vale | 2 | Hobb Tansy | fetch with a twist | The stolen flour turns up in Tansy's Field; Widow Perrin asked for it. Keep one for her or return all. | 74 XP; her knitted charm + 6 gold, or 18 gold |
-| The Runaway Mare | Vale | 2 | Corwin Hale | use | Calm Chestnut by Watch Knoll. | 74 XP, 10 gold, **horses cost 25% less** |
+| Wolves at the Fold | Vale | 1 | Shepherd | bounty | Hunt 6 Vale Wolves at the Hartwood's edge. | 52 XP, 6 gold, boots |
+| A Boy in the Hartwood | Vale | 1 | Farmer | escort | Walk the farmer's boy home from the wolf woods (he follows your footsteps over the bridge). | 52 XP, 5 gold |
+| The Miller's Sacks | Vale | 2 | Miller | fetch with a twist | The stolen flour turns up in the Miller's Field; the weaver asked for it. Keep one for her or return all. | 74 XP; her knitted charm + 6 gold, or 18 gold |
+| The Runaway Mare | Vale | 2 | Stable Master | use | Calm Chestnut by Watch Knoll. | 74 XP, 10 gold, **horses cost 25% less** |
 | Wanted: Rook Varrow | Vale | 3 | Captain Edda | bounty | Stop the poacher at his hideout. | 96 XP, 25 gold |
-| Lights on the Water | Vale | 3 | Wynn Pike | mystery | A second light on the river: the innkeeper smuggles cider. Report him or keep his secret. | 96 XP; 28 gold, or a signet ring + 8 gold |
+| Lights on the Water | Vale | 3 | Fisher | mystery | A second light on the river: the innkeeper smuggles cider. Report him or keep his secret. | 96 XP; 28 gold, or a signet ring + 8 gold |
 | Goblin Trouble | Vale | 4 | Captain Edda | clear a camp | Clear the Goblin Warren and its warchief. | 118 XP, 22 gold, a buckler |
-| The Grove Trial | Wilds | 6 | Archdruid Teodor | druid trial | Clear the Blighted Grove, wake two spirit pools. **Brings Warden Ysolde (Druid companions).** | 162 XP, 18 gold |
+| The Grove Trial | Wilds | 6 | Archdruid Teodor | druid trial | Clear the Blighted Grove, wake two spirit pools. **Brings the Grove Warden (Druid companions).** | 162 XP, 18 gold |
 | The Toll Bridge | Wilds | 7 | Fen Asher | boss | Move the Bridge Troll. | 184 XP, 30 gold, a helm |
-| Bounty: Old Scarback | Wilds | 7 | Sorrel Vane | bounty | Hunt the great scarred bear. | 184 XP, 28 gold, a bearskin jerkin |
-| A Voice in the Mire | Wilds | 7 | Sorrel Vane | pact | Mother Sallow offers a pact. Sealing it is **per player** and **opens the Warlock** for that player. | 184 XP |
-| Lost in the Mire | Wilds | 8 | Quartermaster Bree | escort | Lead Tamsin out of Herb Hollow to the Mire Shrine. | 206 XP, 26 gold, boots or gauntlets |
-| The Gravecutter's Contract | Wilds | 8 | Sable | contract | Remove the orc raider Redtusk. Each player who collects gets **the Gravecutter contract**. | 206 XP, 40 gold |
-| The Lost Tome | Wilds | 9 | Ilsabet Crane | lost item in the barrow | Fetch the tome from a coffin at the barrow. Each player who collects gets **the barrow tome (Necromancer)**. | 228 XP, 30 gold |
-| The Drowned Ruins | Wilds | 10 | Quartermaster Bree | boss + rescue | Defeat the Marsh Hag, open Odo's cage. | 250 XP, 45 gold, a rare axe / orb / plate |
+| Bounty: Old Scarback | Wilds | 7 | Witch Hunter | bounty | Hunt the great scarred bear. | 184 XP, 28 gold, a bearskin jerkin |
+| A Voice in the Mire | Wilds | 7 | Witch Hunter | pact | The Voice in the Stone offers a pact. Sealing it is **per player** and **opens the Warlock** for that player. | 184 XP |
+| Lost in the Mire | Wilds | 8 | Quartermaster | escort | Lead the Herbalist out of Herb Hollow to the Mire Shrine. | 206 XP, 26 gold, boots or gauntlets |
+| The Gravecutter's Contract | Wilds | 8 | Hooded Stranger | contract | Remove the orc raider Redtusk. Each player who collects gets **the Gravecutter contract**. | 206 XP, 40 gold |
+| The Lost Tome | Wilds | 9 | Scholar | lost item in the barrow | Fetch the tome from a coffin at the barrow. Each player who collects gets **the barrow tome (Necromancer)**. | 228 XP, 30 gold |
+| The Drowned Ruins | Wilds | 10 | Quartermaster | boss + rescue | Defeat the Marsh Hag, open the woodcutter's cage. | 250 XP, 45 gold, a rare axe / orb / plate |
 
 Quest progress belongs to the world (anyone's kills, pickups and talks move it once the group has started the quest;
 nothing counts before). Each player collects each reward once from the hand-in person, also a player who joined after

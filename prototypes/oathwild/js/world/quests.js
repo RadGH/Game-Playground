@@ -27,6 +27,14 @@ import { startQuest, setQuestStep, completeQuest, claimQuestReward, setFlag, has
 import { addXp } from '../rules/levels.js';
 import { makeNamed } from '../rules/casters.js';
 
+// How a sentence names a person: main-story people by name ("Captain Edda Brandt"), everyone else by
+// their job ("the Blacksmith"; `start` = at the start of a sentence, "The Blacksmith"). Name tags and window
+// headers show the bare `name` ("Blacksmith").
+export function npcCall(n, { start = false } = {}) {
+  if (!n) return start ? 'Someone' : 'someone';
+  return n.role ? `${start ? 'The' : 'the'} ${n.name}` : n.name;
+}
+
 export const STEP_KINDS = Object.freeze(['talk', 'kill', 'collect', 'reach', 'use', 'escort']);
 
 // ---------------------------------------------------------------- the book
@@ -117,7 +125,7 @@ function enterStep(book, ws, id) {
 function ready(book, ws, id) {
   const q = book.quests[id];
   if (!q.turnIn) return finish(book, ws, id);
-  return [{ t: 'quest-ready', quest: id, text: `Return to ${book.npcs[q.turnIn].name}.` }];
+  return [{ t: 'quest-ready', quest: id, text: `Return to ${npcCall(book.npcs[q.turnIn])}.` }];
 }
 
 function finish(book, ws, id) {
@@ -256,10 +264,10 @@ export function markerOf(book, ws, id) {
   const q = book.quests[id], st = ws.quests[id];
   if (!st || st.done) return null;
   const s = q.steps[st.step];
-  if (!s) { const n = book.npcs[q.turnIn]; return n ? { at: n.at, radius: 3, label: n.name } : null; }
-  if (s.kind === 'talk') return { at: book.npcs[s.npc].at, radius: 3, label: book.npcs[s.npc].name };
+  if (!s) { const n = book.npcs[q.turnIn]; return n ? { at: n.at, radius: 3, label: npcCall(n) } : null; }
+  if (s.kind === 'talk') return { at: book.npcs[s.npc].at, radius: 3, label: npcCall(book.npcs[s.npc]) };
   if (s.kind === 'reach') { const p = book.places[s.place]; return { at: p.at, radius: s.radius || p.radius || 12, label: p.name }; }
-  if (s.kind === 'escort') { const g = book.places[s.to]; return st.data.escort?.moving ? { at: g.at, radius: s.radius || g.radius || 10, label: g.name } : { at: book.npcs[s.npc].at, radius: 3, label: book.npcs[s.npc].name }; }
+  if (s.kind === 'escort') { const g = book.places[s.to]; return st.data.escort?.moving ? { at: g.at, radius: s.radius || g.radius || 10, label: g.name } : { at: book.npcs[s.npc].at, radius: 3, label: npcCall(book.npcs[s.npc]) }; }
   if (s.kind === 'collect' || s.kind === 'use') {
     const left = s.objects.filter(o => !(st.data[s.id] || []).includes(o)).map(o => book.objects[o].at);
     if (!left.length) return null;
@@ -296,8 +304,8 @@ export function questLog(book, ws, ctx = {}) {
     const st = ws.quests[id];
     const entry = {
       id, title: q.title, kind: q.kind, region: q.region, level: q.level, status, summary: q.summary,
-      giver: q.giver ? { id: q.giver, name: book.npcs[q.giver].name, at: book.npcs[q.giver].at } : null,
-      turnIn: q.turnIn ? { id: q.turnIn, name: book.npcs[q.turnIn].name, at: book.npcs[q.turnIn].at } : null,
+      giver: q.giver ? { id: q.giver, name: npcCall(book.npcs[q.giver]), at: book.npcs[q.giver].at } : null,
+      turnIn: q.turnIn ? { id: q.turnIn, name: npcCall(book.npcs[q.turnIn]), at: book.npcs[q.turnIn].at } : null,
       steps: q.steps.map((s, i) => ({ id: s.id, text: s.text, done: !!st && (st.done || i < st.step), current: !!st && !st.done && i === st.step })).filter((s, i) => !st || st.done || i <= st.step),
       progress: st && !st.done ? progressText(book, ws, id) : null,
       marker: markerOf(book, ws, id),
@@ -368,7 +376,7 @@ export function talkTo(book, ws, npcId, ctx = {}) {
     }
   }
   const pick = n.lines?.find(l => l.flag && hasFlag(ws, l.flag)) || n.lines?.find(l => !l.flag);
-  lines.push(...(pick?.say || [`${n.name} nods to you.`]));
+  lines.push(...(pick?.say || [`${npcCall(n, { start: true })} nods to you.`]));
   for (const s of servicesOf(book, ws, npcId, ctx)) options.push({ id: `service:${s.kind}`, text: s.text || SERVICE_TEXT[s.kind] || s.kind, kind: 'service' });
   options.push({ id: 'bye', text: 'Goodbye.', kind: 'bye' });
   return { npc: { id: n.id, name: n.name, title: n.title || null }, lines, options };

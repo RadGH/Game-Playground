@@ -12,8 +12,9 @@ const KIND_GLYPH = { offer: 'scroll', accept: 'check', turnin: 'check', reward: 
 
 export function open(app, opts = {}) {
   if (opts.kind === 'close' || !opts.npc) { findWin('talk')?.close(); return null; }
+  app.talkingTo = opts.npc.id || null;          // the person turns to you and talks while this is open (play.js)
   const w = openWin({
-    id: 'talk', title: opts.npc.name, sub: opts.npc.title || '', size: 'narrow', cls: 'ow-talk',
+    id: 'talk', title: opts.npc.name, sub: opts.npc.title || '', size: 'narrow', cls: 'ow-talk', onClose() { app.talkingTo = null; },
     render(body, tab, win) {
       const d = win.data.msg || opts;
       win.data.msg = d;

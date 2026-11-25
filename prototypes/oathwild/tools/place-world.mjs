@@ -14,7 +14,9 @@ import { createTerrain } from '../js/world/terrain.js';
 
 const here = p => new URL(p, import.meta.url);
 const J = p => JSON.parse(readFileSync(here(p), 'utf8'));
-const map = J('../data/map.json'), regions = J('../data/regions.json'), npcs = J('../data/npcs.json'), art = J('../data/art.json');
+const map = J('../data/map.json'), regions = J('../data/regions.json'), npcs = J('../data/npcs.json'), art = J('../data/art.json'), towns = J('../data/towns.json');
+// a townsperson's work spot (data/towns.json spots) is where they stand — it wins over npcs.json `at` (written back with --write)
+for (const t of Object.values(towns)) for (const s of t.spots || []) if (npcs.npcs[s.npc]) npcs.npcs[s.npc].at = s.at;
 const T = createTerrain(map);
 const SCEN = Object.fromEntries(art.scenery.map(s => [s.id, s]));
 
@@ -35,25 +37,22 @@ const P = id => map.places[id].at;
 const off = (id, dx, dz) => [P(id)[0] + dx, P(id)[1] + dz];
 
 const BUILDINGS = [
-  // Larkford: houses round the square, the inn on the north side, the smithy and stable by the east road
-  { id: 'fiddlers_rest', name: "The Fiddler's Rest", art: 'inn', at: off('larkford', -18, 40), face: 'larkford', role: 'inn' },
-  { id: 'ulla_smithy', name: "Ulla's Smithy", art: 'smithy', at: off('larkford', 22, -44), face: 'larkford', role: 'smithy' },
-  { id: 'corwin_stable', name: "Corwin's Stable", art: 'cottage-log', at: off('larkford', 44, -30), face: [-226, -22], role: 'stable' },
-  { id: 'lark_tower', name: 'Lark Tower', art: 'watchtower', at: off('larkford', -44, 12), face: 'larkford', role: 'tower' },
-  { id: 'maren_house', name: "Maren's House", art: 'cottage-stone', at: off('larkford', -12, -34), face: 'larkford' },
-  { id: 'house_1', name: 'Cottage', art: 'cottage-thatch', at: off('larkford', -42, -22), face: 'larkford' },
-  { id: 'house_2', name: 'Cottage', art: 'cottage-thatch', at: off('larkford', -36, 34), face: 'larkford' },
-  { id: 'perrin_house', name: "Perrin's Cottage", art: 'cottage-thatch', at: off('larkford', 42, 50), face: 'larkford' },
-  { id: 'house_3', name: 'Cottage', art: 'cottage-thatch', at: off('larkford', 30, 24), face: 'larkford' },
-  { id: 'della_farm', name: "Rowe Farmhouse", art: 'cottage-stone', at: [-312, 70], face: [-298, 58] },
+  // Larkford (town round 2026-11-25): only the landmarks are placed by hand; js/world/town.js lines every street with
+  // houses, yards, lamps and stalls from data/towns.json. The inn fronts the square, the elder's house sits on West
+  // Street, the tower on its terrace at the top of the hill, the smithy and the stable at the east way in.
+  { id: 'fiddlers_rest', name: "The Fiddler's Rest", art: 'inn', at: [-285.5, 6.5], face: [-263, 6.5], role: 'inn', nudge: 1 },
+  { id: 'larkford_smithy', name: 'The Smithy', art: 'smithy', at: [-214, -12.5], face: [-214, 0], role: 'smithy', nudge: 1 },
+  { id: 'larkford_stable', name: 'The Stable', art: 'cottage-log', at: [-213, 8.5], face: [-213, -6], role: 'stable', nudge: 1 },
+  { id: 'lark_tower', name: 'Lark Tower', art: 'watchtower', at: [-330, -16], face: [-300, -12], role: 'tower', nudge: 1 },
+  { id: 'maren_house', name: "The Elder's House", art: 'cottage-stone', at: [-313, -21], face: [-313, 0], nudge: 1 },
   { id: 'larkford_mill', name: 'Larkford Mill', art: 'watermill', at: [-206, -50], face: 'larkford' },
-  { id: 'ada_hut', name: "Ada's Hut", art: 'cottage-thatch', at: off('ada_fold', 14, -14), face: 'ada_fold' },
+  { id: 'ada_hut', name: "The Shepherd's Hut", art: 'cottage-thatch', at: off('ada_fold', 14, -14), face: 'ada_fold' },
   { id: 'knoll_tower', name: 'Watch Knoll Tower', art: 'watchtower', at: P('watchtower'), face: [-8, 62] },
   // Thornwatch: a log lodge, cabins and a lookout
   { id: 'thornwatch_lodge', name: 'Thornwatch Lodge', art: 'cottage-log', at: off('thornwatch', 2, -30), face: 'thornwatch', role: 'lodge' },
   { id: 'tw_cabin_1', name: 'Cabin', art: 'cottage-log', at: off('thornwatch', -28, -12), face: 'thornwatch' },
   { id: 'tw_cabin_2', name: 'Cabin', art: 'cottage-log', at: off('thornwatch', 30, -14), face: 'thornwatch' },
-  { id: 'tw_store', name: "Bree's Stores", art: 'cottage-stone', at: off('thornwatch', -20, -36), face: 'thornwatch', role: 'shop' },
+  { id: 'tw_store', name: 'Thornwatch Stores', art: 'cottage-stone', at: off('thornwatch', -20, -36), face: 'thornwatch', role: 'shop' },
   { id: 'tw_lookout', name: 'Thornwatch Lookout', art: 'lookout', at: off('thornwatch', 34, 10), face: 'thornwatch' },
   // camps and set pieces
   { id: 'goblin_hut_1', name: 'Goblin Hut', art: 'goblin-hut', at: off('goblin_warren', -12, -10), face: 'goblin_warren' },
@@ -67,10 +66,9 @@ const BUILDINGS = [
 
 // [art, at, face?] — clutter and set dressing
 const PROPS = [
-  ['well', off('larkford', 8, 12)], ['market-stall', [-268, -40]], ['market-stall', [-256, -44]], ['signpost', [-258, -12]],
-  ['lamp-post', [-240, -10]], ['lamp-post', [-240, 4]], ['lamp-post', [-284, -10]], ['banner-village', [-226, -10]], ['banner-village', [-226, 4]],
-  ['wanted-board', [-246, 16]], ['weapon-rack', [-230, 22]], ['anvil', [-252, -46]], ['barrel', [-276, 26]], ['barrel', [-274, 28]], ['sacks', [-270, -44]],
-  ['cart', [-262, 26]], ['trough', [-222, -28]], ['haystack', [-232, -34]], ['woodpile', [-300, -4]], ['crate-stack', [-292, 36]],
+  // Larkford's lamps, stalls, fountain, barrels and yards come from the town plan (data/towns.json); by hand only:
+  ['wanted-board', [-235.2, -8.4], [-235.2, 0]], ['anvil', [-219.6, -9.2]], ['trough', [-218.4, 10]], ['haystack', [-207, 13]],
+  ['woodpile', [-208.4, -11.5]], ['signpost', [-206.5, -7.6]], ['banner-village', [-203.5, 2.6]], ['banner-village', [-203.5, -8.8]],
   ['pumpkins', [-304, 62]], ['haystack', [-330, 70]], ['scarecrow-post', [-335, 40]], ['scarecrow-post', [-345, -36]], ['wheelbarrow', [-320, -64]],
   ['sacks', [-214, -40]], ['barrel', [-210, -36]], ['rowboat', [-194, 16]], ['fish-rack', [-200, 20]],
   ['fence-rail', [-150, -96]], ['fence-rail', [-150, -120]], ['fence-rail', [-128, -124]], ['fence-rail', [-128, -92]], ['haystack', [-142, -126]], ['trough', [-134, -96]],
@@ -126,7 +124,7 @@ const OBJECTS = [
   { id: 'spirit_pool_1', name: 'a spirit pool', kind: 'use', art: 'spirit-pool', at: off('blighted_grove', -18, -14) },
   { id: 'spirit_pool_2', name: 'a spirit pool', kind: 'use', art: 'spirit-pool', at: off('blighted_grove', 18, -12) },
   { id: 'barrow_tome_case', name: 'a stone coffin', kind: 'container', item: 'the barrow tome', art: 'sarcophagus', at: [458, -238] },
-  { id: 'woodcutter_cage', name: "Odo's cage", kind: 'use', art: 'cage', at: off('ruins', -6, 16) },
+  { id: 'woodcutter_cage', name: "the woodcutter's cage", kind: 'use', art: 'cage', at: off('ruins', -6, 16) },
 ];
 
 // roam zones: monsters (and wildlife) that wander a circle; `packs` live at once; levels inside the area's band
@@ -134,7 +132,7 @@ const ROAM = [
   { id: 'hartwood_wolves', name: 'Hartwood wolves', kind: 'wildlife', at: [-108, -186], radius: 45, levels: [1, 2], packs: 4, roster: [{ id: 'vale_wolf', weight: 1, pack: [1, 3] }] },
   { id: 'fold_boars', name: 'boars by the fold', kind: 'wildlife', at: [-176, -152], radius: 26, levels: [1, 2], packs: 2, roster: [{ id: 'bristleback', weight: 1, pack: [1, 1] }] },
   { id: 'west_meadow_boars', name: 'west meadow boars', kind: 'wildlife', at: [-420, -40], radius: 45, levels: [1, 2], packs: 2, roster: [{ id: 'bristleback', weight: 2, pack: [1, 1] }, { id: 'vale_wolf', weight: 1, pack: [1, 2] }] },
-  { id: 'tansy_scarecrows', name: "Tansy's walking scarecrows", kind: 'roamer', at: [-205, 104], radius: 22, levels: [2, 3], packs: 2, roster: [{ id: 'field_scarecrow', weight: 1, pack: [1, 2] }] },
+  { id: 'tansy_scarecrows', name: 'the walking scarecrows', kind: 'roamer', at: [-205, 104], radius: 22, levels: [2, 3], packs: 2, roster: [{ id: 'field_scarecrow', weight: 1, pack: [1, 2] }] },
   { id: 'ford_road_thugs', name: 'thugs on the Ford Road', kind: 'roamer', at: [-205, 160], radius: 26, levels: [2, 3], packs: 2, roster: [{ id: 'road_thug', weight: 2, pack: [1, 2] }, { id: 'cutpurse', weight: 1, pack: [1, 1] }] },
   { id: 'gobbet_scouts', name: 'goblin scouts', kind: 'roamer', at: [-352, -186], radius: 26, levels: [2, 3], packs: 2, roster: [{ id: 'goblin_sneak', weight: 1, pack: [1, 1] }, { id: 'goblin_warrior', weight: 2, pack: [1, 2] }] },
   { id: 'knoll_wildlife', name: 'Watch Knoll wolves and boars', kind: 'wildlife', at: [30, 150], radius: 40, levels: [3, 4], packs: 2, roster: [{ id: 'vale_wolf', weight: 1, pack: [2, 3] }, { id: 'bristleback', weight: 1, pack: [1, 1] }] },
@@ -202,7 +200,7 @@ function facingTo(at, face) {
 
 const buildings = BUILDINGS.map(b => {
   const r = radiusOf(b.art, 4);
-  const at = settle(b.id, b.at, r, { building: true }, 26);
+  const at = settle(b.id, b.at, r, { building: true }, b.nudge ?? 26);
   return { id: b.id, name: b.name, art: b.art, role: b.role || 'house', at, y: Math.round(T.heightAt(...at) * 100) / 100, facing: facingTo(at, b.face), footprint: Math.round(r * 2 * 10) / 10, region: T.regionAt(...at) };
 });
 const objects = OBJECTS.map(o => {
@@ -249,6 +247,14 @@ if (process.argv.includes('--write')) {
   writeFileSync(here('../data/placements.json'), compact(out) + '\n');
   void lines;
   console.log('wrote data/placements.json');
+  // keep npcs.json in step with the work spots (text edit of each person's "at", so the file keeps its layout)
+  let txt = readFileSync(here('../data/npcs.json'), 'utf8'), synced = 0;
+  for (const t of Object.values(towns)) for (const sp of t.spots || []) {
+    const re = new RegExp(`("${sp.npc}"\\s*:\\s*\\{[^{}]*?"at"\\s*:\\s*)\\[[^\\]]*\\]`);
+    if (re.test(txt)) { txt = txt.replace(re, `$1[${sp.at[0]}, ${sp.at[1]}]`); synced++; }
+  }
+  writeFileSync(here('../data/npcs.json'), txt);
+  console.log(`npcs.json: ${synced} work spots written`);
 }
 /** One row per line for arrays of objects (readable diffs). */
 function compact(o) {

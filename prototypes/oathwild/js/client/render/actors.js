@@ -182,7 +182,8 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
    */
   function budget(x, z) {
     const people = [];
-    for (const a of actors.values()) if (a.info.k === 'player' || a.npc) people.push({ a, d: a.isMe ? -1 : Math.hypot(a.root.position.x - x, a.root.position.z - z) });
+    // (villagers give way: a townsperson or hero 18 m further off still gets a body before a passing villager)
+    for (const a of actors.values()) if (a.info.k === 'player' || a.npc) people.push({ a, d: a.isMe ? -1 : Math.hypot(a.root.position.x - x, a.root.position.z - z) + (a.villager || a.npc?.villager ? 18 : 0) });
     people.sort((p, q) => p.d - q.d);
     people.forEach(({ a }, i) => {
       if (i < maxTabards) giveTabard(a);
@@ -257,8 +258,18 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
     if (a.clip !== want) { b.play(want, 0.22); a.clip = want; }
   }
 
+  /** Hold a looping clip (a townsperson's work routine, a villager chatting at a stall); one-shot reactions still win. */
+  function playLoop(a, clip) {
+    if (a.dead) return;
+    const b = a.formBody || a.body;
+    if (!b || (a.once && performance.now() < a.onceUntil)) return;
+    a.once = null;
+    if (a.clip !== clip) { b.play(clip, 0.3); a.clip = clip; }
+  }
+
   return {
     actors,
+    playLoop,
     get(id) { return actors.get(id) || null; },
     unit(id, info, opts = {}) {
       let a = actors.get(id);

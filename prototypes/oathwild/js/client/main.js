@@ -10,8 +10,8 @@
 //   app.settings (persisted per device) · app.saveSettings() · app.bindings / app.input / app.device
 //   app.go(screen, opts)  'title' | 'chars' | 'creator' | 'worlds' | 'play'  (js/client/screens/<name>.js show(app, opts))
 //   app.openWindow(name, opts) → a window from js/client/ui/win-<name>.js open(app, opts) (bag, sheet, levelup, classes,
-//                         talents, spellbook, quests, map, loot, talk, shop, trainer, stable, respec, travel, repair,
-//                         enchant, locked, menu, settings, report, rate, death …)
+//                         talents, spellbook, quests, trade, map, loot, talk, shop, trainer, stable, respec, travel, repair,
+//                         locked, shrine, menu, settings, report, rate, death …)
 //   app.on(type, fn)      server messages and app events ('me', 'wstate', 'win', 'say', 'err', 'enter', 'leveled', 'units')
 //   app.itemRef(ref)      'bag:<id>' | 'gear:<slot>' | 'loot:<cid>:<id>' | 'shop:<id>' → an item (tooltips)
 //   app.auraUnit(id)      a unit with .statuses for describeAura · app.toast(text, kind) · app.sfx(id)
@@ -132,8 +132,9 @@ async function boot() {
   progress(0.6, 'Planting the Hartwood…');
   await new Promise(r => setTimeout(r, 0));
   app.scattered = scatter(app.W.terrain, app.W.data.placements);
+  app.scattered.trees.push(...(app.W.town?.trees || []));                  // the towns' own big trees are drawn with the rest
   app.scattered.understory = understory(app.W.terrain, app.W.data.placements, app.scattered.trees);   // drawing only (no colliders)
-  app.ground = createGround(app.W.terrain, app.W.data.placements, app.scattered);
+  app.ground = createGround(app.W.terrain, app.W.data.placements, app.scattered, app.W.town);
   progress(0.85, 'Lighting the shrines…');
   try { app.tuning = await loadTuning(new URL('../../data/tuning.json', import.meta.url), { game: 'oathwild' }); tunePanel({ game: 'oathwild', tuning: app.tuning }); } catch (e) { console.warn('tuning', e); app.tuning = {}; }
   installTips(app);

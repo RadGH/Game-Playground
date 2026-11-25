@@ -45,6 +45,9 @@ export async function show(app, { enter = null } = {}) {
   const view = app.view, actors = app.actors, fx = app.fx;
   view.tuning = app.tuning;          // the Look numbers (lighting, grade, bloom, mist, clouds) live from the ?tune panel
   // ambient life round the camera (motes, leaves, chimney smoke, birds, butterflies) and the ambience bed for where you stand
+  // compile every material in the world as soon as it has loaded (in the background where the browser can), so the
+  // first steps in the world do not stall on shader builds (environment round: tufts, ambient, contact shade are new)
+  if (!app.compiledOnce) { app.compiledOnce = true; app.worldView.ready?.().then(() => { try { (view.renderer.compileAsync ? view.renderer.compileAsync(view.scene, view.camera) : Promise.resolve(view.renderer.compile(view.scene, view.camera))).catch?.(() => {}); } catch { /* the first frames build them instead */ } }); }
   const ambient = createAmbient(view, { T, trees: app.scattered.trees, chimneys: app.worldView.chimneys || [], quality: app.settings.quality, sound: () => (app.settings.sfxOn ? app.sound : null) });
   // a wand / tome / staff / sceptre's own attack: how each style looks (data/casters.json look)
   fx.looks = app.rules.data.casters?.look || {};

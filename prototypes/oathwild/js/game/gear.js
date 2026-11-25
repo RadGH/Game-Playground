@@ -36,7 +36,7 @@ export function equipRefusal(rules, char, item, slot) {
     : item.slot === 'ring' ? (slot === 'ring' || slot === 'ring2') : item.slot === slot;
   if (!fits) return `${item.name} does not go there.`;
   if (slot === 'weapon' && casterKind(item) === 'orb') return `${item.name} is an off-hand implement — it has no attack of its own. Hold it in your off hand beside a wand, tome or sceptre.`;
-  if ((char.level || 1) < (item.levelReq || 1)) return `${item.name} needs level ${item.levelReq}.`;
+  // (level, training and attributes: proficiency.js canWear — owner 2026-11-25: gear mostly by attributes and training)
   const w = canWear(rules, char, item, { slot });
   if (!w.ok) return w.why;
   if (slot === 'offhand') {

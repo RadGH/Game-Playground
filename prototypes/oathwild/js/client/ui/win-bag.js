@@ -5,7 +5,11 @@
 //
 //   app.openWindow('bag', { shop })   → .win-bag  (cells: .bag-cell[data-ref], slots: .bag-slot[data-slot])
 import { openWin, esc, ask } from './kit.js';
-import { tipAttrs, setCompareAlt, compareSlotAlt, hideTip } from './tip.js';
+import { tipAttrs, setCompareAlt, compareSlotAlt, hideTip, itemCardHtml } from './tip.js';
+import { canWear, levelGate } from '../../rules/proficiency.js';
+// (itemCell is a plain function other windows call without rules: the bag window hands its rules over when it opens)
+const rulesRef = { r: null };
+const cellLevel = item => (rulesRef.r ? levelGate(rulesRef.r, item) : 1);
 import { glyph, uiIcon } from './icons.js';
 import { SLOTS, SLOT_NAME, slotFor, equipRefusal } from '../../game/gear.js';
 import { itemWeight, durabilityOf, isBroken } from '../../rules/inventory.js';
@@ -36,14 +40,15 @@ export function itemGlyph(item, size = 26) {
 export const rarityOf = item => (item?.quest || item?.type === 'quest' ? 'quest' : item?.setId ? 'set' : item?.isUnique ? 'unique' : item?.rarity || 'normal');
 
 /** One item cell (bag grid, loot list, shop). `ref` is what tip.js / app.itemRef look it up by. */
-export function itemCell(item, ref, { cls = 'bag-cell', extra = '', selected = false, price = null, sell = false } = {}) {
+export function itemCell(item, ref, { cls = 'bag-cell', extra = '', selected = false, price = null, sell = false, tip = true } = {}) {
   const r = rarityOf(item);
-  return `<button type="button" class="${cls} rbox-${r}${selected ? ' is-sel' : ''}" data-ref="${esc(ref)}" ${tipAttrs('item', { ref, price, sell: sell ? 1 : null })}>
+  return `<button type="button" class="${cls} rbox-${r}${selected ? ' is-sel' : ''}" data-ref="${esc(ref)}" ${tip ? tipAttrs('item', { ref, price, sell: sell ? 1 : null }) : ''}>
     <span class="bag-ico">${itemGlyph(item)}</span>
-    <span class="bag-txt"><b class="rar-${r}">${esc(item.name)}</b><small>${esc(kindLabel(item))}${item.levelReq > 1 ? ` · level ${fmt(item.levelReq)}` : ''}</small></span>${extra}</button>`;
+    <span class="bag-txt"><b class="rar-${r}">${esc(item.name)}</b><small>${esc(kindLabel(item))}${cellLevel(item) > 1 ? ` · level ${fmt(cellLevel(item))}` : ''}</small></span>${extra}</button>`;
 }
 
 export function open(app, opts = {}) {
+  rulesRef.r = app.rules;
   let off = () => {};
   const w = openWin({
     id: 'bag', title: 'Bag', size: 'wide', cls: 'win-bag',
@@ -67,6 +72,9 @@ function render(app, body, w) {
   const rules = app.rules;
   const sel = w.data.sel && app.itemRef(w.data.sel) ? w.data.sel : null;
   w.data.sel = sel;
+  // touch: the picked item's whole card opens under it, so no floating tooltip on a tap (it covered the card)
+  const touch = document.body.classList.contains('ow-touch');
+  const pane = sel ? panel(app, w, sel, shopOpen(app, w)) : '';
   const sh = app.me.sheet || {};
   const carried = sh.carried ?? 0, carry = sh.carry || 1, over = carried > carry;
   const worn = SLOTS.map(s => {
@@ -75,18 +83,19 @@ function render(app, body, w) {
     const low = du != null && du <= 25;
     if (!it) return `<div class="bag-slot is-empty" data-slot="${s}"><span class="bag-slot-name">${esc(SLOT_NAME[s])}</span><span class="ow-dim">Nothing</span></div>`;
     const ref = `gear:${s}`;
-    return `<button type="button" class="bag-slot rbox-${rarityOf(it)}${sel === ref ? ' is-sel' : ''}" data-slot="${s}" data-ref="${ref}" ${tipAttrs('item', { ref })}>
+    return `<button type="button" class="bag-slot rbox-${rarityOf(it)}${sel === ref ? ' is-sel' : ''}" data-slot="${s}" data-ref="${ref}" ${touch ? '' : tipAttrs('item', { ref })}>
       <span class="bag-slot-name">${esc(SLOT_NAME[s])}</span><span class="bag-ico">${itemGlyph(it, 22)}</span>
       <b class="rar-${rarityOf(it)}">${esc(it.name)}</b>${low ? `<em class="bag-wear ${isBroken(rules, it) ? 'is-broken' : ''}">${isBroken(rules, it) ? 'Broken' : `Worn ${fmt(du)}%`}</em>` : ''}</button>`;
   }).join('');
   const bag = c.bag || [];
   const shop = shopOpen(app, w);
   const sellOf = id => shop?.sell?.find(s => s.id === id)?.price ?? null;
-  const cells = bag.length ? bag.map(it => itemCell(it, `bag:${it.id}`, { selected: sel === `bag:${it.id}`, price: shop ? sellOf(it.id) : null, sell: !!shop })).join('') : '<p class="ow-empty bag-none">Your bag is empty. Loot from corpses and chests lands here.</p>';
+  // the picked item's panel opens right under it (a grid row of its own), not after the whole list
+  const cells = bag.length ? bag.map(it => itemCell(it, `bag:${it.id}`, { selected: sel === `bag:${it.id}`, price: shop ? sellOf(it.id) : null, sell: !!shop, tip: !touch }) + (sel === `bag:${it.id}` ? pane : '')).join('') : '<p class="ow-empty bag-none">Your bag is empty. Loot from corpses and chests lands here.</p>';
   const broken = Object.values(c.gear || {}).filter(it => it && isBroken(rules, it));
   const pct = Math.min(100, carried / carry * 100);
   return `<div class="bag-wrap">
-    <section class="bag-doll" aria-label="Worn gear"><h3>Worn</h3><div class="bag-slots">${worn}</div></section>
+    <section class="bag-doll" aria-label="Worn gear"><h3>Worn</h3><div class="bag-slots">${worn}</div>${sel?.startsWith('gear:') ? pane : ''}</section>
     <section class="bag-main" aria-label="Carried">
       <div class="bag-stats">
         <span class="bag-gold">${glyph('coin', 20)}<b>${fmt(c.gold || 0)}</b> gold</span>
@@ -96,7 +105,6 @@ function render(app, body, w) {
       ${broken.length ? `<p class="bag-warn">${esc(broken.map(b => b.name).join(', '))} ${broken.length > 1 ? 'are' : 'is'} broken and give${broken.length > 1 ? '' : 's'} nothing until repaired by a smith.</p>` : ''}
       <h3>Carried <span class="ow-dim">(${fmt(bag.length)})</span></h3>
       <div class="bag-grid">${cells}</div>
-      ${sel ? panel(app, w, sel, shop) : ''}
     </section></div>`;
 }
 
@@ -111,7 +119,7 @@ function panel(app, w, ref, shop) {
     const slot = slotFor(it, c, null);
     const alt = (it.slot === 'ring' && compareSlotAlt()) ? 'ring2' : (it.type === 'weapon' && compareSlotAlt()) ? 'offhand' : slot;
     const why = equipRefusal(rules, c, it, alt);
-    rows.push(why ? `<p class="bag-why">${esc(why)}</p>` : `<button type="button" class="ow-btn ow-primary" data-primary data-act="equip" data-slot="${esc(alt)}">${glyph('check', 18)}Wear${alt !== slot || it.slot === 'ring' ? ` (${esc(alt === 'ring2' ? 'second ring' : SLOT_NAME[alt].toLowerCase())})` : ''}</button>`);
+    rows.push(why ? (canWear(rules, c, it, { slot: alt }).ok ? `<p class="bag-why">${esc(why)}</p>` : '') : `<button type="button" class="ow-btn ow-primary" data-primary data-act="equip" data-slot="${esc(alt)}">${glyph('check', 18)}Wear${alt !== slot || it.slot === 'ring' ? ` (${esc(alt === 'ring2' ? 'second ring' : SLOT_NAME[alt].toLowerCase())})` : ''}</button>`);
     if (it.slot === 'ring' || (it.type === 'weapon' && !it.twoHanded)) {
       const label = it.slot === 'ring' ? (compareSlotAlt() ? 'Compare: Ring 1' : 'Compare: Ring 2') : (compareSlotAlt() ? 'Compare: main hand' : 'Compare: off hand');
       rows.push(`<button type="button" class="ow-btn ow-ghost" data-act="cmp">${glyph('refresh', 18)}${label}</button>`);
@@ -119,9 +127,11 @@ function panel(app, w, ref, shop) {
     if (shop) { const p = shop.sell?.find(s => s.id === it.id)?.price; if (p != null) rows.push(`<button type="button" class="ow-btn" data-act="sell">${glyph('coin', 18)}Sell for ${fmt(p)} gold</button>`); }
     rows.push(`<button type="button" class="ow-btn ow-danger ow-small" data-act="destroy">${glyph('trash', 18)}Throw away</button>`);
   }
+  // the whole item card right here (owner 2026-11-25: "This tooltip is about 5% of what it needs to be. What does the
+  // item do?") — on a phone a hover tooltip behind a Details button is not reading material; the card is the one
+  // describe.js model the tooltip, shop and trade windows draw too (what it does, every requirement, the comparison)
   return `<div class="bag-panel" aria-label="${esc(it.name)}">
-    <div class="bag-panel-head"><span class="bag-ico">${itemGlyph(it, 30)}</span><div><b class="rar-${rarityOf(it)}">${esc(it.name)}</b><small>${esc(kindLabel(it))} · ${mat(itemWeight(rules, it))} kg</small></div>
-    <button type="button" class="ow-btn ow-ghost ow-small" data-act="info" ${tipAttrs('item', { ref })}>${glyph('info', 18)}Details</button></div>
+    <div class="ow-pick-card bag-card">${itemCardHtml(app, ref)}</div>
     <div class="bag-panel-acts">${rows.join('')}</div></div>`;
 }
 
@@ -137,7 +147,7 @@ function wire(app, w) {
   const body = w.body;
   body.querySelectorAll('[data-ref]').forEach(b => {
     if (b.dataset.act) return;
-    b.onclick = () => { w.data.sel = w.data.sel === b.dataset.ref ? null : b.dataset.ref; hideTip(); w.render(); };
+    b.onclick = () => { w.data.sel = w.data.sel === b.dataset.ref ? null : b.dataset.ref; hideTip(); w.render(); if (w.data.sel) setTimeout(() => w.body?.querySelector('.is-sel')?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 80); };   // after the kit restores the old scroll (keepView)
   });
   const it = () => app.itemRef(w.data.sel);
   const on = (act, fn) => body.querySelectorAll(`[data-act="${act}"]`).forEach(b => { b.onclick = fn; });

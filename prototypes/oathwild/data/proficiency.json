@@ -32,6 +32,20 @@
     },
     "twoHandedStr": { "heavy": 13, "light": 0, "magic": 0 }
   },
+  "attrNeeds": {
+    "_doc": "Owner 2026-11-25: gear is gated by attributes and training, hardly by level. need = base + floor(item level / perLevels), met by the HIGHER of the listed attributes (a hybrid wears its kind of gear: leather by Dexterity or Wisdom, a sword by Strength or Dexterity), counted WITHOUT the item being replaced. base 0 = no need. `levelGate`: only these rarities keep a level requirement, at item level minus the number (never below 1); every other item has none. js/rules/proficiency.js itemNeeds is the one reader. Numbers Guessed 2026-11-25 (tests/rules/combat.test.mjs: every class still wins its level-10 fight in its own kind of gear).",
+    "perLevels": 4,
+    "armour": { "cloth": { "stat": ["int", "wis"], "base": 0 }, "leather": { "stat": ["dex", "wis"], "base": 9 }, "mail": { "stat": ["str", "con"], "base": 11 }, "plate": { "stat": ["str"], "base": 13 } },
+    "weapons": {
+      "dagger": { "stat": ["dex", "int"], "base": 8 }, "mace": { "stat": ["str", "wis"], "base": 8 }, "spear": { "stat": ["str", "dex"], "base": 8 }, "javelin": { "stat": ["dex", "str"], "base": 8 },
+      "staff": { "stat": ["int", "wis"], "base": 8 }, "sword": { "stat": ["str", "dex"], "base": 10 }, "axe": { "stat": ["str"], "base": 11 }, "hammer": { "stat": ["str", "wis"], "base": 11 },
+      "sword2h": { "stat": ["str"], "base": 12 }, "axe2h": { "stat": ["str"], "base": 13 }, "polearm": { "stat": ["str", "dex"], "base": 12 },
+      "bow": { "stat": ["dex"], "base": 10 }, "crossbow": { "stat": ["dex", "str"], "base": 9 },
+      "wand": { "stat": ["int", "cha"], "base": 9 }, "scepter": { "stat": ["wis", "cha"], "base": 9 }, "orb": { "stat": ["int", "wis"], "base": 10 }, "tome": { "stat": ["int", "wis"], "base": 10 }
+    },
+    "shields": { "buckler": { "stat": ["dex", "str"], "base": 9 }, "shield": { "stat": ["str", "con"], "base": 10 }, "kite_shield": { "stat": ["str", "con"], "base": 11 }, "tower_shield": { "stat": ["str"], "base": 13 }, "aegis_shield": { "stat": ["str"], "base": 14 }, "quiver": { "stat": ["dex"], "base": 0 }, "magic": { "stat": ["int", "wis"], "base": 9 } },
+    "levelGate": { "rare": 4, "legendary": 3, "unique": 3, "set": 3 }
+  },
   "affixes": [
     { "id": "of_the_bulwark", "name": "of the Bulwark", "grants": "plate", "minRarity": "magic", "weight": 3 },
     { "id": "of_the_hauberk", "name": "of the Hauberk", "grants": "mail", "minRarity": "magic", "weight": 4 },

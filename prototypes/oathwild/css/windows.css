@@ -38,6 +38,7 @@
 .bag-cell, .loot-cell { display: flex; align-items: center; gap: 10px; min-height: 54px; padding: 6px 10px 6px 6px; border-radius: 8px; border: 1px solid var(--rb, var(--edge-soft)); background: rgba(0, 0, 0, .2); color: var(--ink); cursor: pointer; font: inherit; min-width: 0; }
 .bag-cell:hover, .bag-slot:not(.is-empty):hover, .loot-cell:hover { background: rgba(232, 193, 112, .08); }
 .bag-none { grid-column: 1 / -1; }
+.bag-grid > .bag-panel { grid-column: 1 / -1; margin-top: 2px; margin-bottom: 6px; }   /* opens under the picked item */
 .bag-panel { margin-top: 14px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--gold-deep); background: linear-gradient(rgba(232, 193, 112, .07), rgba(0, 0, 0, .2)); }
 .bag-panel-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
 .bag-panel-head > div { flex: 1; min-width: 0; display: flex; flex-direction: column; }

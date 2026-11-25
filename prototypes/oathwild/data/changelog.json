@@ -15,7 +15,9 @@
         "Thornwatch has log cabins along its lanes, yards and trees.",
         "Shops: tapping or clicking an item shows its details first; a separate Buy or Sell button does the trade.",
         "Enchanting moved to your own Trade skills window (K, or the ☰ menu): break items to learn enchantments and put them on your gear anywhere outside a fight. Shrines no longer do it. Repairs also show the item first, then a Repair button.",
-        "Phones: your first ability button works again (an invisible camera-drag area was covering it)."
+        "Phones: your first ability button works again (an invisible camera-drag area was covering it).",
+        "Picking an item in your bag shows everything about it: what it does with its numbers, each requirement next to what you have, and how it compares with what you wear.",
+        "Gear now asks mostly for attributes and training instead of level: leather wants Dexterity or Wisdom, mail Strength or Constitution, plate Strength, swords Strength or Dexterity, staves and tomes Intelligence or Wisdom, a little more on better pieces. Only rare and better items still ask for a level, and well below their own."
       ]
     },
     {

@@ -167,6 +167,13 @@ smithy hammering and market chatter in the town's sound; a tall landmark (a temp
   (`tests/world/npc-names.test.mjs`). Phone fix reported mid-round ("can no longer press my first action ability"):
   the drag-to-look layer covered the lone centred slot; the bottom bar now sits above the touch layer
   (`tests/ui/phone-slots.mjs`, real touch taps, warrior + mage; lessons rule 15 sharpened).
+  Then (owner, phone bag: "This tooltip is about 5% of what it needs to be … Reduce level requirements, gear should
+  mostly be based on stats requirements and feat requirements"): the bag panel draws the whole item card inline
+  (`win-bag.js`, `tip.js itemCardHtml`); requirements are data (`data/proficiency.json attrNeeds`: an attribute — or
+  either of two, so hybrids wear their kind of gear — per armour tier / weapon type / shield, + 1 per 4 item levels;
+  training as before; a level only on rare and better, item level − 3/4) read by `proficiency.js itemNeeds / canWear`
+  (one rule for the server, the bag and the card); the card lists each requirement against what you have.
+  `tests/rules/gear.test.mjs` checks every base class can meet its own gear's needs at level 10.
 
 - 2026-11-24 — tap the world + creator pages + trees (owner: "I cannot click to interact with npcs or loot corpses on
   mobile … cannot click to revive at the shrine … class selection after customization on its own screen … view the

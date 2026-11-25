@@ -24,16 +24,15 @@
 //   modLine(rules, key, value)                   one stat change as a sentence piece ("+5% maximum health")
 
 import { fmt, fmtHp, fmtPctOf, fmtSign, fmtRange, fmtSecs, describeAffix, handText, cooldownPower, STATUS_POWER_SHARE, makeRng } from './farhold.js';
-import { sheetOf } from './sheet.js';
+import { sheetOf, attrTotals } from './sheet.js';
 import { spellRow, targetKind } from './spells.js';
 import { castRow, spellSources, classDef, nodeOf, nodeKey, nodeName, nodeMaxRank, levelForRank, nodeRefusal, modsForSpell, classRefusal, classPower, rankCapAt, pointsLeft, classRules, requirementGaps } from './classes.js';
 import { talentDef, talentRefusal, rowLevel } from './talents.js';
-import { canWear, itemNeeds, profSources } from './proficiency.js';
+import { canWear, itemNeeds, profSources, attrHave } from './proficiency.js';
 import { itemWeight, durabilityOf, isBroken } from './inventory.js';
 import { auraNumbers, iconOf, dispelKind, isBeneficial } from './auras.js';
 import { skillValue, xpToNext } from './skills-use.js';
 import { spellPowerRange, spellMultiplier, monsterDef } from './combat.js';
-import { attrTotals } from './sheet.js';
 import { finishCaster, casterKind, attackCard, riderLine, casterForms } from './casters.js';
 
 export const ELEMENT_NAME = Object.freeze({ physical: 'Physical', fire: 'Fire', ice: 'Frost', lightning: 'Lightning', arcane: 'Arcane', shadow: 'Shadow', holy: 'Holy', nature: 'Nature', poison: 'Poison' });
@@ -328,7 +327,13 @@ export function describeItem(rules, char, item, { slot = null } = {}) {
   const du = durabilityOf(rules, item);
   if (du != null) out.rows.push({ label: 'Durability', value: isBroken(rules, item) ? 'Broken — gives nothing until repaired' : `${fmt(du)} / ${fmt(rules.data.inventory.durability.max)}` });
   if (item.ilvl) out.rows.push({ label: 'Item level', value: fmt(item.ilvl) });
-  if (need) out.rows.push({ label: 'Needs', value: `${need.label}${need.str ? `, ${fmt(need.str)} Strength` : ''}` });
+  if (need) {
+    // every requirement on its own row with what you have (owner 2026-11-25: gear by attributes and training, hardly level)
+    const have = attrTotals(rules, char);
+    if (need.prof) out.rows.push({ label: 'Training', value: `${need.label}${profSources(rules, char, { item, slot: into })[need.prof] ? ' (you have it)' : ' (you lack it)'}` });
+    if (need.attr) out.rows.push({ label: need.attr.name, value: `${fmt(need.attr.value)} or more (you have ${fmt(attrHave(need.attr, have))})` });
+    if (need.level > 1) out.rows.push({ label: 'Level', value: `${fmt(need.level)} or more (you are ${fmt(char.level || 1)})` });
+  }
   out.lines.push(...summedAffixLines(item).filter(l => !/^\+?[\d.]+ armou?r$/i.test(l)));
   for (const a of item.affixes || []) if (a.stat === 'proficiency') out.lines.push(`Grants ${rules.data.proficiency.names[a.grants]} training while worn (${a.name}).`);
   if (ck && ck !== 'pole') casterLines(rules, char, item, ck, out);
@@ -347,7 +352,7 @@ export function describeItem(rules, char, item, { slot = null } = {}) {
     const val = (s, key, isRange) => key === 'spellInt' ? avgOf(s.spell.int) : isRange ? (s[key] ? avgOf(s[key]) : null) : s[key];
     for (const [label, key, isRange] of rows) {
       const a = val(now, key, isRange), b = val(then, key, isRange);
-      if (a == null || b == null || Math.abs(a - b) < 0.005) continue;
+      if (a == null || b == null || Math.round((b - a) * 10) === 0) continue;     // no "5.1 → 5.1 (+0)" rows
       out.compare.push({ label, now: fmt(a, { decimals: 1 }), then: fmt(b, { decimals: 1 }), diff: fmtSign(Math.round((b - a) * 10) / 10), better: b > a });
     }
     if (worn) out.how.push(`Compared with ${worn.name} (${into === 'weapon' ? 'main hand' : into}).`);
@@ -484,7 +489,7 @@ export function describeNode(rules, char, cls, nodeId) {
       out.lines.push(...modLines(rules, Object.fromEntries(Object.entries(node.mods || {}).map(([k, v]) => [k, v * shown]))));
       if (have && have < max) out.next = { title: `Rank ${have + 1}`, lines: modLines(rules, Object.fromEntries(Object.entries(node.mods || {}).map(([k, v]) => [k, v * (have + 1)]))), needs: `${def.name} level ${levelForRank(rules, node, have + 1)}` };
     } else if (node.kind === 'prof') {
-      for (const g of node.grants || []) out.lines.push(`Lets you wear or wield ${rules.data.proficiency.names[g].toLowerCase()}${rules.data.proficiency.armour[g]?.str ? ` (it still needs ${fmt(rules.data.proficiency.armour[g].str)} Strength)` : ''}.`);
+      for (const g of node.grants || []) { const a = rules.data.proficiency.attrNeeds?.armour?.[g], AN = { str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' }; out.lines.push(`Lets you wear or wield ${rules.data.proficiency.names[g].toLowerCase()}${a?.base ? ` (it still needs ${fmt(a.base)} ${[].concat(a.stat).map(k => AN[k] || k).join(' or ')} or more, a little more on better pieces)` : ''}.`); }
     } else if (node.kind === 'mod') {
       const target = nodeOf(rules, cls, node.on);
       out.lines.push(`Changes ${nodeName(rules, target)}: ${changeLines(rules, node).join(', ')}.`);

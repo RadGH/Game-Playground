@@ -542,7 +542,7 @@ export async function show(app, { enter = null } = {}) {
       const d = Math.hypot(u.x - pred.state.x, u.z - pred.state.z);
       if (d > tagR && u.info.k !== 'player') continue;
       if (!actors.shown(u.id)) continue;                 // no floating name over a body that is still loading
-      const cls = u.info.k === 'player' ? 'ally' : u.hostile ? `foe ${u.info.rank || ''}${S.target === u.id ? ' tgt' : ''}` : 'pet';
+      const cls = u.info.k === 'player' ? 'ally' : u.hostile ? `${u.info.tp ? 'calm' : 'foe'} ${u.info.rank || ''}${S.target === u.id ? ' tgt' : ''}` : 'pet';   // calm: an animal that will not start a fight
       S.tags.push({ id: u.id, x: u.x, y: u.y, z: u.z, h: actors.get(u.id)?.height || 1.8, name: u.info.k === 'monster' ? `${u.info.n} · ${u.info.lv}` : u.info.n, cls, hp: u.hostile || u.info.k === 'player' ? u.hp / Math.max(1, u.mh) : null });
     }
     for (const n of S.npcs) if (Math.hypot(n.x - pred.state.x, n.z - pred.state.z) < 22 && actors.shown('npc:' + n.id)) S.tags.push({ id: 'npc:' + n.id, x: n.x, y: heightAt(n.x, n.z), z: n.z, h: 1.85, name: `${n.mark ? n.mark + ' ' : ''}${n.name}`, cls: `npc${n.mark ? ' quest' : ''}`, hp: null });

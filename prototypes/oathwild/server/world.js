@@ -614,7 +614,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
   function unitInfo(u) {
     const info = { id: u.id, k: u.kind, n: u.name, lv: u.level, side: u.side, mh: u.maxHp, mm: u.maxMp ?? null, ms: u.maxStamina ?? null };
     if (u.kind === 'player') { info.look = u.char.look || null; info.gear = gearLook(u.char); info.form = u.form?.id || null; info.body = u.form?.body?.creature || null; info.horse = !!u.char.horse; }
-    else { info.def = u.defId; info.art = u.art; info.rank = u.rank || 'normal'; info.owner = u.owner || null; }
+    else { info.def = u.defId; info.art = u.art; info.rank = u.rank || 'normal'; info.owner = u.owner || null; if (u.temper && u.temper !== 'hostile') info.tp = u.temper; }   // tp: a peaceful animal (yellow tag)
     return info;
   }
   function gearLook(char) {

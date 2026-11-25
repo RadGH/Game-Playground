@@ -88,6 +88,8 @@ body[data-device="touch"] .hud-key:empty, .hud-key:empty { display: none; }
 .hud-plate.tgt b { text-decoration: underline; text-decoration-color: var(--gold); }
 .hud-plate i { width: 60px; height: 5px; background: rgba(0, 0, 0, .6); border-radius: 3px; overflow: hidden; }
 .hud-plate i s { display: block; height: 100%; background: #e0503c; } .hud-plate.ally i s { background: #6fd05a; }
+/* an animal that will not start a fight (deer, sheep, cows): yellow, not enemy red */
+.hud-plate.calm b { color: #f2dc8a; } .hud-plate.calm i s { background: #d8b440; }
 .hud-num { position: absolute; left: 0; top: 0; font-weight: 800; font-size: 18px; color: #fff; text-shadow: 0 2px 3px #000; will-change: transform, opacity; }
 .hud-num.mine { color: #fff3c8; } .hud-num.crit { color: #ffcf4a; font-size: 24px; } .hud-num.hurt { color: #ff6a50; } .hud-num.heal { color: #8fe07a; }
 .hud-num.other { color: #d8d0c0; font-size: 14px; } .hud-num.miss { color: #c8c8d8; font-size: 14px; } .hud-num.tick { color: #ffa080; font-size: 14px; }

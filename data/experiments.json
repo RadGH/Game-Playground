@@ -1024,6 +1024,23 @@
     "co-op",
     "open world"
    ]
+  },
+  {
+   "id": "pixelsplat",
+   "group": "characters",
+   "title": "Pixel Splats",
+   "href": "avatar-3d/pixelsplat/",
+   "folder": "avatar-3d/pixelsplat",
+   "summary": "A knight made of tens of thousands of square splats, each carrying its own material (colour, surface direction, how metal, how rough), lit live and kept on a fixed pixel grid, so it stays crisp pixel art while it turns and the highlights slide over the steel. Compare it with baked-light splats, a pixel filter on the normal model, and the smooth model.",
+   "status": "playable",
+   "date": "2026-11-24",
+   "tags": [
+    "3d",
+    "pixel-art",
+    "rendering",
+    "splats"
+   ],
+   "isNew": true
   }
  ]
 }

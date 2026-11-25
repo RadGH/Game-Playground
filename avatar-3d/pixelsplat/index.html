@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pixel Splats</title>
+<link rel="stylesheet" href="pixelsplat.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body>
+<main class="ps">
+  <header class="ps-head">
+    <a class="ps-back" href="../../">Playground</a>
+    <h1>Pixel Splats</h1>
+    <p>A knight made of square splats that each carry their own material, lit live and kept on a pixel grid.</p>
+  </header>
+  <div class="ps-stage"><canvas id="view" aria-label="The knight"></canvas><p id="status" class="ps-status" role="status"></p></div>
+  <aside id="panel" class="ps-panel"></aside>
+</main>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

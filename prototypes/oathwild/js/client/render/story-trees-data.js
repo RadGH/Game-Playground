@@ -35,6 +35,14 @@ export const STORY_TREES = Object.freeze({
   dead_snag:   { form: 'snag', h: 8.5, rB: 0.328, rT: 0.15, flare: 0.8, twist: 1.2, ridge: 0.14, limbs: 3, bark: [1.7, 1.75, 1.9] },
   dead_pine:   { form: 'snag', h: 15, rB: 0.393, rT: 0.094, flare: 0.6, twist: 0.7, ridge: 0.1, limbs: 5, bark: [1.8, 1.85, 2.0], tall: true },
   palm_fan:    { form: 'palm', h: 7, rB: 0.183, rT: 0.129, flare: 0.5, twist: 0, ridge: 0, fronds: 8, frondLen: 3.1, leafRow: 3, leaf: [0.98, 1.22, 0.5], bark: [1.8, 1.45, 1.05] },
+  // Oathwild understory (environment round 2026-11-24): shrubs are 'round' trees with no trunk to speak of — a low dome of
+  // leaf tufts, the same leaves as the big trees so the woods read as one place; saplings are young oaks and spruces
+  shrub:       { form: 'round', h: 1.8, trunkH: 0.08, rB: 0.07, rT: 0.04, flare: 0.3, twist: 0, ridge: 0, crownR: 1.3, clumps: 4, squash: 0.7, leafRow: 0, leaf: [0.8, 1.12, 0.48], bark: [1.4, 1.1, 0.85], limbs: 0 },
+  shrub_tall:  { form: 'round', h: 2.8, trunkH: 0.12, rB: 0.09, rT: 0.05, flare: 0.3, twist: 0, ridge: 0, crownR: 1.5, clumps: 4, squash: 0.95, leafRow: 0, leaf: [0.9, 1.18, 0.5], bark: [1.4, 1.1, 0.85], limbs: 0 },
+  shrub_berry: { form: 'round', h: 1.6, trunkH: 0.08, rB: 0.07, rT: 0.04, flare: 0.3, twist: 0, ridge: 0, crownR: 1.2, clumps: 3, squash: 0.72, leafRow: 0, leaf: [0.74, 1.04, 0.5], bark: [1.4, 1.1, 0.85], limbs: 0,
+    accent: { kind: 'blossom', color: [2.3, 0.75, 0.9], n: 9 } },
+  shrub_dry:   { form: 'round', h: 1.5, trunkH: 0.08, rB: 0.07, rT: 0.04, flare: 0.3, twist: 0, ridge: 0, crownR: 1.15, clumps: 3, squash: 0.7, leafRow: 0, leaf: [1.15, 1.1, 0.5], bark: [1.4, 1.1, 0.85], limbs: 0 },
+  sapling:     { form: 'round', h: 6.5, trunkH: 0.4, rB: 0.16, rT: 0.1, flare: 0.5, twist: 0.3, ridge: 0.06, crownR: 2.4, clumps: 4, squash: 0.85, leafRow: 0, leaf: [0.95, 1.24, 0.5], bark: [1.6, 1.22, 0.92], limbs: 2 },
   story_fern_a: { form: 'fern', h: 3.0, rB: 0.22, rT: 0.183, flare: 0.5, twist: 0.15, ridge: 0.12, fronds: 9, frondLen: 2.3, leafRow: 3, leaf: [0.85, 1.2, 0.52], bark: [1.5, 1.15, 0.85] },
   story_fern_b: { form: 'fern', h: 3.5, rB: 0.218, rT: 0.182, flare: 0.5, twist: 0.15, ridge: 0.12, fronds: 10, frondLen: 2.6, leafRow: 3, leaf: [0.8, 1.18, 0.55], bark: [1.5, 1.15, 0.85] },
   story_fern_c: { form: 'fern', h: 2.7, rB: 0.215, rT: 0.179, flare: 0.5, twist: 0.15, ridge: 0.12, fronds: 11, frondLen: 2.1, leafRow: 3, leaf: [0.92, 1.22, 0.5], bark: [1.5, 1.15, 0.85] },
@@ -44,5 +52,5 @@ export const STORY_TREES = Object.freeze({
 export const STORY_LOD = Object.freeze([
   { sides: 8, rings: 7, limbSides: 5, cards: 8, cardRows: 3, core: 1, accent: 1, strandsK: 1, frondSegs: 4 },
   { sides: 6, rings: 4, limbSides: 4, cards: 5, cardRows: 2, core: 0, accent: 0.5, strandsK: 0.5, frondSegs: 2 },
-  { sides: 3, rings: 2, limbSides: 0, cards: 0, cardRows: 2, core: 0, accent: 0, strandsK: 0, frondSegs: 1 },
+  { sides: 5, rings: 3, limbSides: 0, cards: 0, cardRows: 2, core: 0, accent: 0, strandsK: 0, frondSegs: 1 },   // Oathwild: 5 sides (3 made a giant's trunk a pyramid on Low)
 ]);

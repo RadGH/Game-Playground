@@ -38,7 +38,8 @@ function render(app, body, tab, w) {
   const c = app.me?.char;
   if (!c) return '<p class="ow-empty">Your character is still on the way.</p>';
   if (tab === 'all' && !w.data.view) return browse(app, c);
-  return tree(app, c, tab === 'all' ? w.data.view : tab, w, tab === 'all');
+  const cls = tab === 'all' ? w.data.view : tab;
+  return treeHtml(app, c, cls, { sel: w.data.sel?.cls === cls ? w.data.sel.id : null, readOnly: tab === 'all' });
 }
 
 function browse(app, c) {
@@ -54,7 +55,12 @@ function browse(app, c) {
   }).join('')}</div></section>`).join('');
 }
 
-function tree(app, c, cls, w, readOnly) {
+/**
+ * One class's tree as HTML — the Classes window's tab, and the creator's class step (`preview: true`: a would-be hero
+ * at class level 1, no head, the detail says when each node opens instead of offering to buy it).
+ * opts: { sel: node id shown in the detail card, readOnly, preview, head = !preview }
+ */
+export function treeHtml(app, c, cls, { sel = null, readOnly = false, preview = false, head: withHead = !preview } = {}) {
   const rules = app.rules, d = classDef(rules, cls);
   if (!d) return '<p class="ow-empty">Choose a class.</p>';
   const lvl = c.classLevels?.[cls] || 0, max = maxClassLevel(rules, cls), R = classRules(rules);
@@ -62,7 +68,6 @@ function tree(app, c, cls, w, readOnly) {
   const path = c.paths?.[cls] || null;
   const rows = [{ id: null, name: 'Core' }, ...Object.entries(d.paths || {}).map(([id, p]) => ({ id, name: p.name, blurb: p.blurb }))];
   const cols = [...new Set(d.nodes.map(n => n.level))].sort((a, b) => a - b);
-  const sel = w.data.sel?.cls === cls ? w.data.sel.id : null;
   const tile = n => {
     const have = c.nodes?.[nodeKey(cls, n.id)] || 0, mx = nodeMaxRank(rules, n);
     const why = lvl && have < mx ? nodeRefusal(rules, c, cls, n.id) : null;
@@ -92,10 +97,11 @@ function tree(app, c, cls, w, readOnly) {
       const have = c.nodes?.[nodeKey(cls, n.id)] || 0, mx = nodeMaxRank(rules, n);
       const why = have >= mx ? null : nodeRefusal(rules, c, cls, n.id);
       const model = describeNode(rules, c, cls, n.id);
-      detail = `<div class="cls-detail ow-card">${tipCard(model)}<div class="cls-detail-acts">${have >= mx ? '<span class="ow-good">Highest rank</span>' : readOnly && !lvl ? '<span class="ow-dim">Take this class at a level up to learn it.</span>' : why ? `<p class="cls-why">${esc(why)}</p>` : `<button type="button" class="ow-btn ow-primary" data-act="buy" data-node="${esc(n.id)}" data-primary>${glyph('plus', 18)}${have ? `Rank ${fmt(have + 1)}` : 'Learn'} (${fmt(n.free && !have ? 0 : n.cost || 1)} point${(n.cost || 1) === 1 ? '' : 's'})</button>`}</div></div>`;
+      const opensAt = n.level <= 1 ? `${d.name} level 1` : `${d.name} level ${fmt(n.level)}`;
+      detail = `<div class="cls-detail ow-card">${tipCard(model)}<div class="cls-detail-acts">${preview ? (have ? '<span class="ow-good">You start with this</span>' : `<span class="ow-dim">Opens at ${esc(opensAt)}${n.path ? ` on the ${esc(d.paths?.[n.path]?.name || '')} path` : ''}</span>`) : have >= mx ? '<span class="ow-good">Highest rank</span>' : readOnly && !lvl ? '<span class="ow-dim">Take this class at a level up to learn it.</span>' : why ? `<p class="cls-why">${esc(why)}</p>` : `<button type="button" class="ow-btn ow-primary" data-act="buy" data-node="${esc(n.id)}" data-primary>${glyph('plus', 18)}${have ? `Rank ${fmt(have + 1)}` : 'Learn'} (${fmt(n.free && !have ? 0 : n.cost || 1)} point${(n.cost || 1) === 1 ? '' : 's'})</button>`}</div></div>`;
     }
   }
-  return `${head}${pathPick}<div class="cls-tree" role="group" aria-label="${esc(d.name)} tree">${levels}${grid}</div>${detail}<p class="ow-dim cls-blurb">${esc(d.blurb || '')}</p>`;
+  return `${withHead ? head : ''}${preview ? '' : pathPick}<div class="cls-tree" role="group" aria-label="${esc(d.name)} tree">${levels}${grid}</div>${detail}${preview ? '' : `<p class="ow-dim cls-blurb">${esc(d.blurb || '')}</p>`}`;
 }
 
 function wire(app, el, w) {

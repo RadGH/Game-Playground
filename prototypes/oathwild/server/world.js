@@ -9,7 +9,7 @@
 // `meta` = { code, name, public, owner, created } · `state` = world-state.js record (or null for a new world)
 // `persist({ world, chars })` is called with what to write (the hub writes files).
 import {
-  createWorld, addPlayer, removePlayer, refreshPlayer, step as simStep, respawnPlayer, castRefusal, spellPowerRange, spawnMonster,
+  createWorld, addPlayer, removePlayer, refreshPlayer, step as simStep, respawnPlayer, die, castRefusal, spellPowerRange, spawnMonster,
 } from '../js/rules/combat.js';
 import { createWorldState, fromJSON, toJSON, flagsFor, discoverShrine, setHomeShrine, homeShrine, clearCamp, campsToRespawn, note } from '../js/rules/world-state.js';
 import { openFor, takeItem, takeGold, takeAll, chestOpenFor, chestDef, isEmptyFor, createContainer } from '../js/rules/loot.js';
@@ -170,6 +170,8 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
       changed(P);
       return;
     }
+    // dev builds only: fall where you stand (the fallen panel and Wake at the shrine, on a phone)
+    if (msg.t === 'devDown' && dev) { const u = unitOf(P); if (u && !u.downed) die(world, u, null); return; }
     // dev builds only: still, unkillable targets in a fan ahead of the hero (screenshots of attacks)
     if (msg.t === 'devDummy' && dev) {
       const u = unitOf(P); if (!u) return;
@@ -177,7 +179,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
       for (let i = 0; i < n; i++) {
         const a = f + (i - (n - 1) / 2) * 0.28, r = 7 + (i % 3) * 2.5;
         const m = spawnMonster(world, 'vale_wolf', 1, [u.x + Math.sin(a) * r, u.z + Math.cos(a) * r]);
-        if (m) { m.hp = m.maxHp = 1e7; m.speed = 0; m.attackEvery = 1e6; m.aggroRange = 0; m.home = { x: m.x, z: m.z }; }
+        if (m) { m.hp = m.maxHp = msg.hp > 0 ? msg.hp : 1e7; m.speed = 0; m.attackEvery = 1e6; m.aggroRange = 0; m.home = { x: m.x, z: m.z }; }
       }
       return;
     }

@@ -37,6 +37,7 @@ export function createCamera(view, { heightAt, tuning = {}, settings, solidsNear
     },
     zoom(steps) { st.wantDist = Math.max(2.2, Math.min(9, st.wantDist + steps * 0.6)); },
     setYaw(y) { st.yaw = y; },
+    setPitch(p) { st.pitch = Math.max(-0.55, Math.min(1.1, p)); },   // tests and look checks (radians; 0 = level, + looks down)
     forward() { return { x: Math.sin(st.yaw), z: Math.cos(st.yaw) }; },
     right() { return { x: -Math.cos(st.yaw), z: Math.sin(st.yaw) }; },
     update(dt, hero, { snap = false } = {}) {

@@ -14,6 +14,10 @@ import { createGrass } from './grass.js';
 import { kitModel } from './kit-props.js';
 import { createKitDraw } from './kit-draw.js';
 import { createTrees } from './trees.js';
+import { addContactShade } from './contact.js';
+import { findChimney } from './chimney.js';
+import { ATMOS } from './atmos.js';
+import { UNDERSTORY_SPECIES } from '../../world/scatter.js';
 
 const TILE = 128;
 const ROOT = new URL('../../../../../', import.meta.url);     // the playground folder
@@ -36,7 +40,7 @@ export function createWorldView(view, { T, placements, art, scattered, book, qua
   const artById = new Map((art.scenery || []).map(a => [a.id, a]));
 
   // ---------------------------------------------------------------- ground, roads (worn into it), water, fields, grass: ground.js
-  const ground = createGround(view, { T, placements, art, cfg: GROUND_CFG, quality, tileGroup });
+  const ground = createGround(view, { T, placements, art, cfg: GROUND_CFG, quality, tileGroup, scattered });
   const grass = createGrass(view, ground, GROUND_CFG.grass[quality] || GROUND_CFG.grass.medium, { quality });
 
   // ---------------------------------------------------------------- bridges (decks at their deck height)
@@ -96,6 +100,7 @@ export function createWorldView(view, { T, placements, art, scattered, book, qua
   const seedAt = (x, z) => ((Math.floor(x * 7.31) * 73856093) ^ (Math.floor(z * 5.17) * 19349663)) >>> 0;
   /** A kit model for an art row (null when the row has a GLB or no kit). Same spot, same seed, same model. */
   const kitFor = (a, seed) => (a && a.status !== 'ready' ? kitModel(a.id, { seed, size: a.size || a.placeholder?.size }) : null);
+  const chimneyOf = new Map();       // art id → chimney top in model space (or null)
   function place(id, x, z, y, facing = 0, { scale = 1, name = '' } = {}) {
     const a = artById.get(id);
     const holder = new THREE.Group();
@@ -110,6 +115,17 @@ export function createWorldView(view, { T, placements, art, scattered, book, qua
         m.traverse(o => { if (o.isMesh) { o.castShadow = o.receiveShadow = true; if (o.material?.map) o.material.map.colorSpace = THREE.SRGBColorSpace; } });
         m.scale.setScalar(scale);
         holder.add(m);
+        // a lived-in house smokes: find its chimney from its shape (cached per model) and tell the ambient smoke
+        if (/cottage|inn|smithy|house|hut|mill|tavern|hall/.test(id)) {
+          if (!chimneyOf.has(id)) {
+            holder.updateWorldMatrix(true, true); const inv = new THREE.Matrix4().copy(holder.matrixWorld).invert(), pts = [], v = new THREE.Vector3();
+            m.traverse(o => { if (!o.isMesh) return; const P = o.geometry.attributes.position, M = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld); for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i).applyMatrix4(M); pts.push(v.x, v.y, v.z); } });
+            chimneyOf.set(id, findChimney(pts));
+          }
+          const c = chimneyOf.get(id);
+          // (the holder's world matrix refreshed for every house, not only the first of its model)
+          if (c) { holder.updateWorldMatrix(true, false); const w = new THREE.Vector3(c.x, c.y, c.z).applyMatrix4(holder.matrixWorld); kit.chimneys.push({ x: w.x, y: w.y, z: w.z }); }
+        }
       }).catch(() => holder.add(placeholderMesh({ ...a, placeholder: { shape: 'box', size: a.size || [2, 2, 2], colour: '#8a7a64' } }))));
       return holder;
     }
@@ -131,6 +147,9 @@ export function createWorldView(view, { T, placements, art, scattered, book, qua
     objectMeshes.set(o.id, h);
   }
   kit.build();
+  if (!new URLSearchParams(location.search).has('envoff')) addContactShade(view, { T, placements });
+  // the mist pools in the low ground: its base is set from this map's own heights (the lowest 4% of the land: river bottoms)
+  { const hs = Float32Array.from(T.grid.heights).sort(); ATMOS.set({ mist: { base: hs[Math.floor(hs.length * 0.04)] } }); }
 
   // ---------------------------------------------------------------- trees and decor (instanced per art id and tile)
   const Q = { low: [0.55, 0.4], medium: [0.85, 0.75], high: [1, 1] }[quality] || [0.85, 0.75];
@@ -154,7 +173,7 @@ export function createWorldView(view, { T, placements, art, scattered, book, qua
   }
   const vcMat = new THREE.MeshLambertMaterial({ vertexColors: true });
   const geoCache = new Map();
-  const VARIANTS = quality === 'low' ? 1 : 3;   // each rock / bush kind is baked three ways (lean, which stones), picked by spot; one on Low (fewer draw calls on phones)
+  const VARIANTS = quality === 'low' ? 1 : quality === 'medium' ? 2 : 3;   // each rock / bush kind is baked three ways (lean, which stones), picked by spot; one on Low (fewer draw calls on phones)
   function instGeo(id, v = 0) {
     const key = id + '#' + v;
     if (geoCache.has(key)) return geoCache.get(key);
@@ -169,7 +188,9 @@ export function createWorldView(view, { T, placements, art, scattered, book, qua
   }
   function instance(list, keep) {
     const groups = new Map();
-    list.forEach((t, n) => { if (!keep(n)) return; const v = Math.floor(hash(t.x * 0.37, t.z * 0.41) * VARIANTS) % VARIANTS; const k = `${tileOf(t.x, t.z)}|${t.art}|${v}`; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(t); });
+    // grouped in 256 m blocks (two tiles a side): 442 draw calls on Medium at 128 m (environment round)
+    const blockOf = (x, z) => `${Math.floor(x / (TILE * 2)) * 2},${Math.floor(z / (TILE * 2)) * 2}`;
+    list.forEach((t, n) => { if (!keep(n)) return; const v = Math.floor(hash(t.x * 0.37, t.z * 0.41) * VARIANTS) % VARIANTS; const k = `${blockOf(t.x, t.z)}|${t.art}|${v}`; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(t); });
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
     for (const [k, items] of groups) {
       const [tk, art, v] = k.split('|');
@@ -179,18 +200,25 @@ export function createWorldView(view, { T, placements, art, scattered, book, qua
       mesh.computeBoundingSphere();
       mesh.name = 'scatter ' + art;
       const [i, j] = tk.split(',').map(Number);
-      tileGroup((i + 0.5) * TILE, (j + 0.5) * TILE).add(mesh);
+      tileGroup((i + 1) * TILE, (j + 1) * TILE).add(mesh);   // the block's middle
     }
   }
   // trees: big storybook trees, sized by js/world/scatter.js (trees.js)
   let treeView = null;
-  pending.push(createTrees({ trees: (scattered.trees || []).filter((t, n) => (n % 100) / 100 < Q[0]), tileGroup, cell: TILE * 2, quality }).then(v => { treeView = v; }));
-  instance(scattered.decor || [], n => (n % 100) / 100 < Q[1]);
+  // bushes are leaf tufts like the trees now (the kit's bush balls looked faceted beside fluffy crowns); the understory
+  // (shrubs at tree feet, saplings + shrubs along wood edges: scatter.js understory()) joins them, thinned on Low
+  const BUSH_AS = { 'bush-a': 'shrub', 'bush-b': 'shrub-berry', 'bush-c': 'shrub-dry' };
+  const keepU = { low: 0.3, medium: 0.8, high: 1 }[quality] ?? 0.8;
+  const bushes = (scattered.decor || []).filter(d => BUSH_AS[d.art]).map(d => ({ ...d, art: BUSH_AS[d.art], h: UNDERSTORY_SPECIES[BUSH_AS[d.art]].h * (d.scale || 1) }));
+  const under = [...bushes, ...(scattered.understory || [])].filter((t, n) => (n % 100) / 100 < keepU);
+  pending.push(createTrees({ trees: [...(scattered.trees || []).filter((t, n) => (n % 100) / 100 < Q[0]), ...under], tileGroup: quality === 'low' ? () => root : tileGroup, cell: TILE * (quality === 'low' ? 4 : 2), quality }).then(v => { treeView = v; }));
+  // (Low: 512 m blocks hang on the root — a far tile's hiding must not take a block whose near edge is beside you)
+  instance((scattered.decor || []).filter(d => !BUSH_AS[d.art]), n => (n % 100) / 100 < Q[1]);
 
   // ---------------------------------------------------------------- per frame
   let wt = 0;
   return {
-    root, tiles, chestMeshes, objectMeshes, shrineMarks, ground, grass, kitStats: kit.stats, get treeStats() { return treeView?.stats || null; }, ready: () => Promise.allSettled([...pending, ground.ready]),
+    root, tiles, chestMeshes, objectMeshes, shrineMarks, ground, grass, kitStats: kit.stats, chimneys: kit.chimneys, get treeStats() { return treeView?.stats || null; }, ready: () => Promise.allSettled([...pending, ground.ready]),
     update(dt, at) {
       wt += dt;
       kit.update(dt, wt);

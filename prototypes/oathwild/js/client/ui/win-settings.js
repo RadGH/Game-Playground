@@ -7,7 +7,7 @@ import { fmt } from '../../../../../shared/format.js';
 import { ACTIONS, keyName, padName, rebind, saveBindings, resetBindings } from '../input/bindings.js';
 
 const TABS = [{ id: 'game', label: 'Game' }, { id: 'graphics', label: 'Graphics' }, { id: 'sound', label: 'Sound' }, { id: 'controls', label: 'Controls' }];
-const QUALITY = [['low', 'Low', 'Fewer trees, no shadows, sharper on old phones'], ['medium', 'Medium', 'Shadows near you, most trees'], ['high', 'High', 'Every tree, sharper shadows, full detail']];
+const QUALITY = [['low', 'Low', 'Fewer trees and plants, no shadows or after-effects: smoothest on phones'], ['medium', 'Medium', 'Shadows near you, colour grading and a soft glow, most plants'], ['high', 'High', 'Every plant, longer sharper shadows, soft shade where things meet the ground']];
 
 export function open(app, opts = {}) {
   const S = app.settings;
@@ -44,7 +44,7 @@ export function open(app, opts = {}) {
       }
       body.querySelectorAll('[data-bool]').forEach(i => { i.onchange = () => set(i.dataset.bool, i.checked); });
       body.querySelectorAll('[data-num]').forEach(i => { i.oninput = () => { const k = i.dataset.num; set(k, +i.value); const o = body.querySelector(`[data-out="${k}"]`); if (o) o.textContent = SHOW[k](+i.value); }; });
-      body.querySelectorAll('[data-quality]').forEach(b => { b.onclick = () => { set('quality', b.dataset.quality); win.render(); }; });
+      body.querySelectorAll('[data-quality]').forEach(b => { b.onclick = () => { app.settings.qualityAuto = false; set('quality', b.dataset.quality); win.render(); }; });   // the player's own pick: never changed for them again
       body.querySelectorAll('[data-rebind]').forEach(b => { b.onclick = () => listen(app, win, b.dataset.rebind, b.dataset.pad === '1'); });
       body.querySelector('[data-reset]')?.addEventListener('click', () => {
         const fresh = resetBindings();

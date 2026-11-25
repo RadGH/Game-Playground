@@ -56,13 +56,13 @@ function layerTexture(cfg, px, aniso) {
   return { tex, ready };
 }
 
-export function createGround(view, { T, placements, art, cfg, quality = 'medium', tileGroup }) {
+export function createGround(view, { T, placements, art, cfg, quality = 'medium', tileGroup, scattered = null }) {
   const low = quality === 'low', high = quality === 'high';
   const G = T.grid, stepCells = 128 / G.cell;
   const maxAniso = view.renderer.capabilities.getMaxAnisotropy?.() || 1;
 
   // ---------------------------------------------------------------- the splat maps (1 m a texel; 2 m on Low)
-  const S = paintGround(T, { placements, art, cfg, res: low ? 2 : 1 });
+  const S = paintGround(T, { placements, art, cfg, res: low ? 2 : 1, trees: scattered?.trees || [] });
   const splatTex = data => {
     const t = new THREE.DataTexture(data, S.nx, S.nz, THREE.RGBAFormat, THREE.UnsignedByteType);
     t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter; t.generateMipmaps = true;
@@ -133,6 +133,10 @@ export function createGround(view, { T, placements, art, cfg, quality = 'medium'
           }
           vec3 col = acc / max(tot, 1e-4);
           col *= 0.88 + 0.24 * macro;
+          // big slow patches of colour on the grass (environment round): straw-yellow in some, deeper green in others
+          float hueN = owNoise(p * 0.0085 + 3.1) * 0.65 + owNoise(p * 0.027 + 9.7) * 0.35;
+          float grassy = (w[0] + w[1]) / max(1e-4, w[0] + w[1] + w[2] + w[3] + w[4] + w[5] + w[6] + w[7] + w[8]);
+          col *= mix(vec3(1.0), mix(vec3(0.9, 1.03, 0.94), vec3(1.09, 1.03, 0.8), smoothstep(0.3, 0.72, hueN)), grassy);
           diffuseColor.rgb *= col;
         }`);
     if (!low) sh.defines = { ...(sh.defines || {}), OW_TWO_SCALE: '' };
@@ -175,8 +179,28 @@ export function createGround(view, { T, placements, art, cfg, quality = 'medium'
     for (let n = 0; n < 220; n++) { x.fillStyle = `rgba(170,210,235,${0.08 + hash(n, 3) * 0.2})`; const px = hash(n, 1) * 128, py = hash(n, 2) * 128; x.fillRect(px, py, 6 + hash(n, 4) * 18, 1.5); }
     const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; return t;
   })();
-  const waterMat = new THREE.MeshLambertMaterial({ color: '#4a8fb0', map: waterTex, transparent: true, opacity: 0.8, depthWrite: false, emissive: '#143a4a' });
-  const marshMat = new THREE.MeshLambertMaterial({ color: '#5a7a58', map: waterTex, transparent: true, opacity: 0.78, depthWrite: false, emissive: '#18281a' });
+  // ripples (environment round): a tiling normal map from soft noise, scrolled two ways, so the surface catches the sky's
+  // light (scene.environment) and the sun in small moving glints — brighter at a low angle, darker looking straight down
+  const rippleTex = (() => {
+    const N = 128, h = new Float32Array(N * N);
+    for (let k = 0; k < N; k++) for (let i = 0; i < N; i++) {
+      let v = 0; for (const [f, a] of [[2, 1], [5, 0.5], [11, 0.25]]) v += a * Math.sin((i / N) * 6.2832 * f + Math.sin((k / N) * 6.2832 * (f - 1)) * 1.3) * Math.cos((k / N) * 6.2832 * f + i * 0.0);
+      h[k * N + i] = v;
+    }
+    const d = new Uint8Array(N * N * 4);
+    for (let k = 0; k < N; k++) for (let i = 0; i < N; i++) {
+      const dx = h[k * N + (i + 1) % N] - h[k * N + (i + N - 1) % N], dz = h[((k + 1) % N) * N + i] - h[((k + N - 1) % N) * N + i];
+      const nx = -dx * 0.9, nz = -dz * 0.9, l = Math.hypot(nx, nz, 1);
+      const o = (k * N + i) * 4; d[o] = (nx / l * 0.5 + 0.5) * 255; d[o + 1] = (nz / l * 0.5 + 0.5) * 255; d[o + 2] = (1 / l * 0.5 + 0.5) * 255; d[o + 3] = 255;
+    }
+    const t = new THREE.DataTexture(d, N, N); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; t.needsUpdate = true; return t;
+  })();
+  const waterMat = low
+    ? new THREE.MeshLambertMaterial({ color: '#4a8fb0', map: waterTex, transparent: true, opacity: 0.8, depthWrite: false, emissive: '#143a4a' })
+    : new THREE.MeshStandardMaterial({ color: '#3f7f9e', map: waterTex, normalMap: rippleTex, normalScale: new THREE.Vector2(0.55, 0.55), roughness: 0.12, metalness: 0.0, envMapIntensity: 1.6, transparent: true, opacity: 0.86, depthWrite: false, emissive: '#0f2e3a' });
+  const marshMat = low
+    ? new THREE.MeshLambertMaterial({ color: '#5a7a58', map: waterTex, transparent: true, opacity: 0.78, depthWrite: false, emissive: '#18281a' })
+    : new THREE.MeshStandardMaterial({ color: '#4f6e4c', map: waterTex, normalMap: rippleTex, normalScale: new THREE.Vector2(0.3, 0.3), roughness: 0.32, envMapIntensity: 1.0, transparent: true, opacity: 0.82, depthWrite: false, emissive: '#152416' });
   for (let k0 = 0; k0 < G.nz - 1; k0 += stepCells) for (let i0 = 0; i0 < G.nx - 1; i0 += stepCells) {
     const verts = [], uvs = [], vertsM = [], uvsM = [];
     const i1 = Math.min(G.nx - 1, i0 + stepCells), k1 = Math.min(G.nz - 1, k0 + stepCells);
@@ -304,6 +328,7 @@ export function createGround(view, { T, placements, art, cfg, quality = 'medium'
       if (at) for (const f of fieldMeshes) f.im.visible = Math.hypot(f.x - at.x, f.z - at.z) - f.r < cropFar;
       U.uOwTime.value = wt;
       waterTex.offset.set(wt * 0.012, wt * 0.02);
+      if (waterMat.normalMap) waterMat.normalMap.offset.set(wt * 0.018, -wt * 0.011);
     },
   };
 }

@@ -1,8 +1,8 @@
 # Oathwild
 
-**Status:** round 1 playable on the LAN: world server (shared saved worlds, ≤ 10 players, create/join by code) + the 3D client (title, character select, Tabard creator, world list, the world with over-the-shoulder aim, spells with ground indicators, loot windows, inventory, sheet, level-up, class trees, talents, spellbook, quests, map, people, shops, shrines, menus). Live on games.radgh.com since 2026-11-24 (world server on the droplet, saves in /var/lib/oathwild, archived hourly). Not yet played by a person.
+**Status:** round 1 playable on the LAN: world server (shared saved worlds, ≤ 10 players, create/join by code) + the 3D client (title, character select, Tabard creator (Look → Class with its tree → Background → Attributes), world list, the world with over-the-shoulder aim, spells with ground indicators, loot windows, inventory, sheet, level-up, class trees, talents, spellbook, quests, map, people, shops, shrines, menus). Live on games.radgh.com since 2026-11-24 (world server on the droplet, saves in /var/lib/oathwild, archived hourly). Not yet played by a person.
 **Play:** https://games.radgh.com/oathwild/ · LAN dev http://192.168.1.34:8401/prototypes/oathwild/ (start the world server first: `tools/game-servers.sh start oathwild-dev`; https for controllers: https://192.168.1.34:8441/prototypes/oathwild/). Stable 8400/8442 pairs with the `oathwild` unit (8660/8662) after publish-stable.
-**Next:** a person plays it; tune feel (`?tune`); item pictures drawn from the worn models (rule 20); buff/debuff visuals on bodies with the Spell Kit's aura phase; real horse/boss models as the art budget allows.
+**Next:** a person plays it (check the new look on a real phone: Low 139-159 draw calls / ~400k triangles measured; software frame time ~60% above the old flat world); instance the fal building/prop models (≈490 single meshes on Medium); tune the Look group with `?tune`; item pictures drawn from the worn models (rule 20); buff/debuff visuals on bodies; real horse/boss models as the art budget allows.
 **Parked:** Smithing / Alchemy benches and the Tinker class (later round); Chronomancer, Oracle, Dragon Knight, Starcaller; charm/turn spells; Farhold's resource / afterimage / "consumes" spell rules; playing offline without the world server; chat box (the server relays chat, no UI yet); **placeholder art to replace later: `docs/PLACEHOLDERS.md`** (props, 8 monsters, horse, items — about $23 of models when there is budget).
 
 A third-person open-world fantasy RPG for 1–10 players in one shared, saved world. The heart of it is levelling:
@@ -61,7 +61,7 @@ belong to the art and spell-visual helpers.
 | `js/client/` | `main.js` (the app contract), `screens/` (title, chars, creator, worlds, play), `play/` (camera + aim, prediction, HUD, minimap, touch), `render/` (view, world, actors, fx + Spell Kit, `caster-fx.js` = how each wand / tome / staff style looks), `ui/` (window kit, the ONE tooltip renderer `tip.js`, every window), `input/` (one binding table, keyboard/mouse/pad/touch, padnav) |
 | `ops/` | `oathwild` / `oathwild-dev` user units (linked, never enabled: `tools/game-servers.sh start oathwild-dev`) |
 
-Controls (rebind in Settings → Controls): WASD move, mouse look (click the world), left click attack, right click block, F power attack, Space dodge, Shift sprint, X sneak, R horse, E talk/loot/use/revive (hold), 1–8 spells (ground spells: hold to aim, release to cast), Tab target, B bag, C character, N level up, L classes, T talents, P spellbook, J quests, M map, Esc menu. Controller: left stick move, right stick look, RT attack, LT block, A dodge, X use, Y power, B sneak, LB/RB + A/B/X/Y spells, Start menu, d-pad up horse. Phone: stick + drag to look, Attack/Dodge/Block/Use/Run buttons, tap a ground spell then tap the ground.
+Controls (rebind in Settings → Controls): WASD move, mouse look (click the world), left click attack, right click block, F power attack, Space dodge, Shift sprint, X sneak, R horse, E talk/loot/use/revive (hold), 1–8 spells (ground spells: hold to aim, release to cast), Tab target, B bag, C character, N level up, L classes, T talents, P spellbook, J quests, M map, Esc menu. Controller: left stick move, right stick look, RT attack, LT block, A dodge, X use, Y power, B sneak, LB/RB + A/B/X/Y spells, Start menu, d-pad up horse. Phone: stick + drag to look, Attack/Dodge/Block/Use/Run buttons, tap a person / remains / chest / shrine to use it (walks there when far), tap the prompt to use, tap a ground spell then tap the ground. Mouse: with a free mouse, click a person / remains / chest / shrine.
 
 ## The ground, sky and light (2026-11-24, "the world looks MVP")
 
@@ -73,10 +73,33 @@ Controls (rebind in Settings → Controls): WASD move, mouse look (click the wor
 | `js/client/render/grass.js` | Grass tufts on the graphics card round the camera (one draw call; a slot per lattice square, Farhold/Thousandvale's idea), grown from the splat, standing on the drawn triangles, fading out at the edge, a few flowers. |
 | `js/client/render/kit-props.js` | Pure (node-tested in `tests/world/kit-props.test.mjs`): every scenery piece without a GLB (98 ids: buildings, camp gear, shrines, stones, ruins, graves, chests, trees, rocks, plants) as unit-shape parts — proctown's set-piece kit (`propkit.js`), building kit (`buildkit.js` + `offices.js`) and Oathwild's own pieces in the same style — fitted to the art row's planned size (so placement radii and colliders still match) and turned so the front faces -Z like every placement. Gallery: `tools/kit-gallery.html` (`?group=building`); pictures: `tests/ui/kit-shots.mjs`. |
 | `js/client/render/kit-draw.js` | Draws them: every placed piece in a 128 m tile goes into one InstancedMesh per unit shape (plus an unlit one for glowing parts); trees / rocks / bushes are baked to one low-poly mesh per kind (three variants) for the scatter; campfires flicker, the mill wheel turns. Cost check: `tests/ui/perf-kit.mjs --spot larkford` (draw calls + triangles; `--swap` serves older files for a before/after). |
+| `js/client/render/tufts.js` | Leaf crowns as fluffy tufts (2026-11-24, owner: "trees look bad compared to Thousandvale"): each clump of a story tree is a ball of camera-facing tuft quads (the stylized "fluffy tree" technique — douges.dev / Pontus Karlsson, three.js forum), normals out of the clump, a painted dense leaf / needle tuft picture, a depth material for tuft-shaped shadows; conifer tiers as rings of needle tufts. Same full crown on High / Medium / Low (counts change, never flat cards). Gallery: `tools/tree-gallery.html`; pictures: `tests/ui/tree-gallery-shot.mjs`, `tests/ui/tree-shots.mjs`; test: `tests/world/tufts.test.mjs`. |
 | `js/client/render/view.js` | The painted sky (gradient, sun + glow, drifting clouds), warm sun + cool sky fill, horizon-coloured fog, shadow box that moves in whole texels (no crawling edges); soft shadows on High. |
 | `img/ground/*.webp` | The layer pictures, baked from highdef-3d's painted surfaces by `tools/bake-ground.mjs` (run it after changing `layers`). |
 
 Check: `node prototypes/oathwild/tests/ui/ground-probe.mjs --quality low|medium|high [--phone] [--at x,z]` (draw calls, triangles, forced frame time, who draws what, shader errors, a picture) and `tests/ui/look-shots.mjs --tag ground`.
+
+## The air, light and life (environment round, 2026-11-24)
+
+Owner's guide (`oathwild-environment-guide.md`, written by another thread without the code) → what was built:
+
+| File | What it does |
+|---|---|
+| `js/client/render/atmos.js` | Height mist (pools in low ground) and drifting cloud shadows on EVERY fogged material, by wrapping `Material.onBeforeCompile` once (each material keeps its own hook and program identity). Numbers: `ATMOS.set`. |
+| `js/client/render/post.js` | After-effects per quality: Low none; Medium bloom (half size, only the brightest) → tone map → grade + vignette → SMAA; High 4× MSAA + GTAO ground-contact shade + the same. The grade is a LUT written as numbers (warm highs, cool shadows, calmer greens, barely lifted blacks). |
+| `js/client/render/view.js` | Late-afternoon sun (~28°, warmer), image-based light baked from our own painted sky (PMREM; no HDRI download), distant hill rings inside the far plane, Look numbers from `data/tuning.json` applied live (`?tune` panel, group Look), `?envoff` = this round switched off (before/after), `?tone=agx` to compare tone mapping. High: one wider 4096 shadow box (80 m) instead of cascades (CSM replaces material hooks and adds a shadow pass per cascade). |
+| `js/client/render/ambient.js` | Dust motes, falling leaves from nearby crowns, chimney smoke (tops found by kit-draw.js), bird flocks, butterflies over meadows, and the ambience bed for where you stand (forest / town / marsh / wind, `sfx` library). |
+| `js/client/render/contact.js` | A soft contact shade under every building, prop, shrine and chest, tilted to the slope (one instanced draw). |
+| `js/world/scatter.js` `understory()` | Shrubs at tree feet and a stepped wood edge (saplings → shrubs → meadow); drawn by trees.js with leaf tufts (the kit's bush balls became tuft shrubs too); client only, walk-through, 0.15 s. Test: `tests/world/understory.test.mjs`. |
+| ground | Big straw/deep-green colour patches on grass (`ground.js`), leaf litter painted under every crown (`ground-plan.js paintGround({ trees })`), rippling water that reflects the sky (Medium/High). |
+| tufts | Backlit leaves glow with the sun's colour when you look toward it. |
+| quality | First visit picks a tier from the graphics chip (`main.js autoQuality`); an automatic pick that runs under ~24 fps steps down once; `?quality=low|medium|high` for one visit. |
+
+Measured (2026-11-24, `tests/ui/env-shots.mjs`, Medium): the first tune washed out (saturation −20-40%: valley mist veiling whole towns, bloom below the sky's brightness, lifted blacks) — retuned: bloom 0.1 above 1.15, mist 0.0012 max 0.22 in the lowest 4% of the land, no lift, saturation ×1.12, contrast ×1.1, sky light 0.3; after ≥ before on saturation in the field and valley views. High: GTAO blend 0.35 (0.55 left woods near black), god rays faint by design (`RAYS`). Phone Low: 139-159 draw calls, ~400k triangles (decor and trees grouped bigger, one look per species, shrubs merged, understory 30%).
+Check: `tests/ui/env-shots.mjs [--quality] [--tag] [--extra envoff] [--only views] [--pitch -0.5]`, `tests/ui/ambient-shots.mjs` (smoke, building base, under a tree; chimney count) — six fixed views + brightness / spread / saturation /
+clipped numbers per picture (a washed-out picture has a high mean, low spread, low saturation).
+Not done from the guide, on purpose: §8 spending (needs the owner's OK), ez-tree (big-leaf rule 74; tufts instead),
+three-csm (see above), KTX2 texture compression (see the round's notes), @takram atmosphere (our painted sky + matched fog).
 
 ## Tests and tools
 
@@ -101,6 +124,20 @@ Check: `node prototypes/oathwild/tests/ui/ground-probe.mjs --quality low|medium|
 - `node prototypes/oathwild/tools/classes-md.mjs --write` — regenerate the trees in `docs/CLASSES.md`.
 
 ## History
+
+- 2026-11-24 — tap the world + creator pages + trees (owner: "I cannot click to interact with npcs or loot corpses on
+  mobile … cannot click to revive at the shrine … class selection after customization on its own screen … view the
+  skill tree … background and attribute pages separate … trees look bad compared to Thousandvale"). Tapping (phone) or
+  clicking with a free mouse on a person, remains, chest, object or shrine uses it, walking over first when out of reach
+  (`play.js` `interactables` / `pickAtScreen` / `reach`); the prompt is a button (phones: above the action buttons); the
+  fallen panel sits above the touch look area (it covered Wake at the shrine) and is built once. Creator: Look → Class
+  (the class's whole tree, `win-classes.js` `treeHtml` preview mode, real numbers from a draft hero) → Background →
+  Attributes (starting numbers). Trees: two causes — the story trees were built ~12 m and SCALED to 18-50 m, so their
+  leaf cards became house-sized single leaves; and one detail level for all distances meant Low (every phone) drew the
+  far two-card clumps beside the hero. Leaves are now fluffy tufts (`tufts.js`). Low costs ~12% more triangles than the
+  old flat cards (ground-probe, phone, Low). Phone HUD: Tap hints from the start, an Attack button, no empty slots.
+  Checks: `tests/ui/tap-interact.mjs [--desktop]` (NPC, prompt, Use, far chest walk-to, wolf remains, Wake at the
+  shrine — real touch taps), `tests/ui/creator-shots.mjs [--phone]`; dev-only `devDown` / `devDummy hp`.
 
 - 2026-11-24 — Thousandvale's magic-weapon itemization (owner: "wands and tomes having special attacks"): 13 wand
   styles, 4 tome forms, staff styles and element spells, sceptres that swing their element, off-hand riders (Echo,

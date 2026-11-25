@@ -70,7 +70,8 @@ const MSGS = {
   join: [['code', S, 8], ['char', S, 64]], leave: [],
   devTp: [['x', N], ['z', N]],               // dev builds only (screenshots); the world room ignores it elsewhere
   devGear: [['base', S, 24], ['style', S, 24], ['el', S, 12], ['slot', S, 8]],   // dev builds only: hold a styled magic weapon
-  devDummy: [['n', N]],                     // dev builds only: still target dummies ahead
+  devDown: [],                              // dev builds only: fall where you stand (death / shrine checks)
+  devDummy: [['n', N], ['hp', N]],          // dev builds only: still target dummies ahead (hp: a weak one, for a corpse)
   in: [['q', N], ['mx', N], ['mz', N], ['ax', N], ['ay', N], ['az', N], ['dx', N], ['dy', N], ['dz', N], ['at', A, 3], ['b', N], ['c', N], ['h', B], ['rv', S, 64], ['tg', S, 64]],
   act: [['a', S, 24]],                       // + the fields of that action (ACTS[a])
   ping: [['at', N]],
@@ -102,7 +103,7 @@ export function parseFrame(text) {
 }
 
 /** Per-type rate limits: tokens per second and a burst. Inputs come 20 a second (+ slack for a catch-up burst). */
-const RATES = { in: [30, 60], act: [12, 30], ping: [2, 4], hello: [1, 3], chars: [2, 5], charNew: [1, 3], charDel: [1, 3], worlds: [2, 5], worldNew: [0.2, 2], worldDel: [0.5, 2], join: [1, 4], leave: [1, 3], devTp: [2, 4], devGear: [4, 8], devDummy: [1, 3] };
+const RATES = { in: [30, 60], act: [12, 30], ping: [2, 4], hello: [1, 3], chars: [2, 5], charNew: [1, 3], charDel: [1, 3], worlds: [2, 5], worldNew: [0.2, 2], worldDel: [0.5, 2], join: [1, 4], leave: [1, 3], devTp: [2, 4], devGear: [4, 8], devDummy: [1, 3], devDown: [1, 3] };
 export function createBuckets(now = () => Date.now()) {
   const B = new Map();
   return {

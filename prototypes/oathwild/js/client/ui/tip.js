@@ -65,7 +65,7 @@ export function describeAttr(rules, char, key) {
 export function installTips(app) {
   installTooltips(document);
   registerTip('ow', el => {
-    const rules = app.rules, char = app.me?.char;
+    const rules = app.rules, char = app.me?.char || app.draftChar;   // the creator's would-be hero before there is one
     if (!rules || !char) return null;
     const d = el.dataset;
     let m = null, hint = '';

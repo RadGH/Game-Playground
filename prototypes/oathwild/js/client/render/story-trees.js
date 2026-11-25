@@ -33,6 +33,7 @@
 import * as THREE from 'three';
 import { buildTree, cellRect, makeRng } from '../../../../../highdef-3d/js/kit/trees.js';
 import { STORY_TREES, STORY_LOD } from './story-trees-data.js';
+import { buildTufts, tierClumps } from './tufts.js';
 
 const TAU = Math.PI * 2;
 const UP = new THREE.Vector3(0, 1, 0);
@@ -137,7 +138,7 @@ export function storyPlan(name, seed = 1) {
   if (!S) throw new Error(`tree-style: no storybook tree "${name}"`);
   const rng = makeRng(seed);
   const h = S.h * rand(rng, 0.94, 1.06);
-  const plan = { name, form: S.form, h, S, limbs: [], clumps: [], tiers: [], fronds: [], strands: [], accents: [], stubs: [] };
+  const plan = { name, seed, form: S.form, h, S, limbs: [], clumps: [], tiers: [], fronds: [], strands: [], accents: [], stubs: [] };
   if (S.form === 'round' || S.form === 'weep') {
     const trunkTop = h * S.trunkH, R = S.crownR;
     const cy = trunkTop + R * S.squash * 0.75;
@@ -421,13 +422,16 @@ function drawStrands(leaf, plan, L, lod) {
   }
 }
 
-function drawTiers(leaf, plan, L, lod) {
-  const S = plan.S, shade = canopyShade(S, plan.canopy, S.leaf);
+function drawTiers(leaf, plan, L, lod, { cones = false } = {}) {
+  const S = plan.S, base0 = canopyShade(S, plan.canopy, S.leaf);
+  // under tufts the cone is only the dark solid middle (no needle spray cards: the tufts are the fringe)
+  const shade = cones ? (p => base0(p).map(x => x * 0.62)) : base0;
   const sides = lod === 0 ? 8 : lod === 1 ? 6 : 3;
-  const spokes = lod === 0 ? 8 : lod === 1 ? 5 : 0;
+  const spokes = cones ? 0 : lod === 0 ? 8 : lod === 1 ? 5 : 0;
   // far level: at most five skirts (the smallest, top one goes; the next one's point is carried up to the tip)
   const tiers = lod === 2 && plan.tiers.length > 5 ? plan.tiers.slice(0, 5).map((t, i, a) => (i === a.length - 1 ? { ...t, H: plan.tiers[plan.tiers.length - 1].y + plan.tiers[plan.tiers.length - 1].H - t.y } : t)) : plan.tiers;
   for (const [i, tr] of tiers.entries()) {
+    if (cones) continue;   // under tufts the skirts ARE the tufts (a solid cone showed through as flat dark paper)
     const apexY = tr.y + tr.H, base = [], baseY = tr.y;
     const wind = 0.35 + 0.4 * (i / tiers.length);
     // the solid skirt: a cone from a wavy rim to an apex (a fir is stacked cones in every picture book)
@@ -481,11 +485,18 @@ export function buildStoryTree(name, opts = {}) {
   const rng = makeRng((opts.seed ?? 1) * 7 + lod);
   drawTrunk(bark, plan, L, rng);
   drawLimbs(bark, plan, L);
-  if (plan.clumps.length) drawClumps(leaf, plan, L, lod);
+  // Oathwild 2026-11-24: leaf clumps as fluffy camera-facing tufts (tufts.js) when the caller passes the tuft atlas
+  let tufts = null;
+  if (plan.clumps.length && opts.tufts) tufts = buildTufts(plan, { lod, atlas: opts.tufts, kind: plan.S.leafRow === 1 ? 'needle' : 'leaf', shade: canopyShade(plan.S, plan.canopy, plan.S.leaf) });
+  else if (plan.clumps.length) drawClumps(leaf, plan, L, lod);
+  if (plan.tiers.length && opts.tufts && !tufts) {
+    const shade = canopyShade(plan.S, plan.canopy, plan.S.leaf);
+    tufts = buildTufts({ seed: plan.seed, clumps: tierClumps(plan, lod) }, { lod, atlas: opts.tufts, kind: 'needle', per: 0.42, shade });
+  }
   drawStrands(leaf, plan, L, lod);
-  if (plan.tiers.length) drawTiers(leaf, plan, L, lod);
+  if (plan.tiers.length) drawTiers(leaf, plan, L, lod, { cones: !!opts.tufts });
   if (plan.fronds.length) drawFronds(leaf, plan, L, lod);
   drawAccents(leaf, plan, L);
-  const radius = Math.sqrt(Math.max(bark.maxR2, leaf.maxR2));
-  return { bark: bark.geometry(), foliage: leaf.geometry(), height: Math.max(bark.maxY, leaf.maxY), radius, trunkRadius: plan.S.rB, plan, tris: { bark: bark.tris, leaf: leaf.tris } };
+  const radius = Math.max(Math.sqrt(Math.max(bark.maxR2, leaf.maxR2)), tufts?.userData.reach || 0);
+  return { bark: bark.geometry(), foliage: leaf.tris ? leaf.geometry() : null, tufts, height: Math.max(bark.maxY, leaf.maxY, tufts?.userData.top || 0), radius, trunkRadius: plan.S.rB, plan, tris: { bark: bark.tris, leaf: leaf.tris } };
 }

@@ -1,0 +1,33 @@
+/* Pixel Splats demo page. Dark stage, warm accents; the view on the left (top on a phone), controls beside / below. */
+:root { --bg: #14131d; --panel: #1d1b28; --edge: #34304a; --ink: #ece8f6; --dim: #a7a1bf; --gold: #e8c170; --font: system-ui, -apple-system, 'Segoe UI', sans-serif; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 16px/1.4 var(--font); }
+.ps { display: grid; grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows: auto minmax(0, 1fr); height: 100%; }
+.ps-head { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; padding: 12px 18px; border-bottom: 1px solid var(--edge); }
+.ps-head h1 { margin: 0; font-size: 22px; letter-spacing: .04em; color: var(--gold); }
+.ps-head p { margin: 0; color: var(--dim); font-size: 15px; }
+.ps-back { color: var(--dim); text-decoration: none; font-size: 14px; border: 1px solid var(--edge); border-radius: 16px; padding: 4px 12px; }
+.ps-back:hover { color: var(--ink); border-color: var(--gold); }
+.ps-stage { position: relative; min-height: 0; }
+#view { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; image-rendering: pixelated; }
+.ps-status { position: absolute; left: 14px; bottom: 10px; margin: 0; font-size: 13px; color: var(--dim); background: rgba(20, 19, 29, .7); padding: 3px 10px; border-radius: 12px; }
+.ps-panel { overflow-y: auto; padding: 14px 16px 20px; background: var(--panel); border-left: 1px solid var(--edge); display: flex; flex-direction: column; gap: 14px; }
+.ps-panel h2 { margin: 0 0 8px; font-size: 15px; color: var(--gold); }
+.ps-modes { display: flex; flex-direction: column; gap: 8px; }
+.ps-mode { display: flex; flex-direction: column; gap: 2px; text-align: left; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--edge); background: #24212f; color: var(--ink); font: inherit; cursor: pointer; }
+.ps-mode b { font-size: 16px; } .ps-mode span { font-size: 14px; color: var(--dim); }
+.ps-mode:hover { border-color: #5a5478; }
+.ps-mode[aria-pressed="true"] { border-color: var(--gold); background: #2f2a1f; }
+.ps-row { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+.ps-row label { font-weight: 700; font-size: 15px; }
+.ps-row select { grid-column: 2 / -1; font: inherit; padding: 8px; border-radius: 8px; background: #24212f; color: var(--ink); border: 1px solid var(--edge); min-height: 44px; }
+.ps-row input[type=range] { width: 100%; accent-color: var(--gold); min-height: 32px; }
+.ps-row output { font-size: 14px; color: var(--dim); min-width: 44px; text-align: right; }
+.ps-toggles { display: flex; flex-wrap: wrap; gap: 8px; }
+.ps-toggle { min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid var(--edge); background: #24212f; color: var(--dim); font: inherit; font-weight: 700; cursor: pointer; }
+.ps-toggle[aria-pressed="true"] { color: var(--gold); border-color: var(--gold); }
+@media (max-width: 760px) {
+  .ps { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 52vh auto; height: auto; min-height: 100%; }
+  .ps-panel { border-left: 0; border-top: 1px solid var(--edge); overflow: visible; }
+  .ps-head p { display: none; }
+}

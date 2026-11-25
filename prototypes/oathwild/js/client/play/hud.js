@@ -37,7 +37,7 @@ export function createHud(app, play) {
   <div class="hud-mini"><canvas width="168" height="168" aria-label="Minimap"></canvas><div class="hud-mini-place"></div></div>
   <div class="hud-tracker"></div>
   <div class="hud-cross" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b></div>
-  <div class="hud-prompt" hidden></div>
+  <button type="button" class="hud-prompt" data-act="use" hidden></button>
   <div class="hud-cast" hidden><i></i><span></span></div>
   <div class="hud-bottom">
     <button type="button" class="hud-levelup" data-act="levelup" hidden></button>
@@ -63,6 +63,10 @@ export function createHud(app, play) {
   root.querySelector('[data-act="menu"]').onclick = () => app.openWindow('menu', { where: 'play' });
   el.levelup.onclick = () => app.openWindow('levelup');
   for (const n of root.querySelectorAll('button')) n.style.pointerEvents = 'auto';
+  // the interact prompt is a button too: tap / click = Use, hold = bring a fallen friend back (phones have no E key)
+  const holdUse = on => { const T = app.input?.touch; if (!T) return; if (on) { T.held.add('interact'); T.presses.add('interact'); } else T.held.delete('interact'); };
+  el.prompt.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); holdUse(true); });
+  for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) el.prompt.addEventListener(ev, () => holdUse(false));
   const minimap = createMinimap(app, root.querySelector('.hud-mini canvas'));
 
   // ---- window buttons (bottom right; on phones they live in the ☰ menu)
@@ -251,11 +255,18 @@ export function createHud(app, play) {
       // downed panel
       const down = me.downed;
       el.down.hidden = !down;
+      document.body.classList.toggle('ow-fallen', !!down);
       if (down) {
+        // built once: a countdown that rewrote the whole panel every second also replaced the button mid-tap
+        if (!el.down.firstChild) {
+          el.down.innerHTML = `<h3>You have fallen</h3><p class="hud-down-left"></p><button type="button" class="ow-btn ow-primary hud-down-wake" data-act="respawn">${glyph('shrine', 18)} Wake at the shrine</button><p class="ow-dim">It costs a little gold and wear on your gear.</p>`;
+          const b = el.down.querySelector('[data-act="respawn"]');
+          b.style.pointerEvents = 'auto';
+          b.onclick = () => { b.disabled = true; app.act('respawn'); setTimeout(() => { b.disabled = false; }, 1500); };
+        }
         const left = S.downLeft ?? 0;
-        set(el.down, 'innerHTML', `<h3>You have fallen</h3><p>${left > 0 ? `A friend can bring you back for ${fmt(Math.ceil(left))} more seconds.` : 'Nobody came in time.'}</p><button type="button" class="ow-btn ow-primary" data-act="respawn">${glyph('shrine', 18)} Wake at the shrine</button><p class="ow-dim">It costs a little gold and wear on your gear.</p>`);
-        const b = el.down.querySelector('[data-act="respawn"]'); if (b) { b.style.pointerEvents = 'auto'; b.onclick = () => app.act('respawn'); }
-      }
+        set(el.down.querySelector('.hud-down-left'), 'textContent', left > 0 ? `A friend can bring you back for ${fmt(Math.ceil(left))} more seconds.` : 'Nobody came in time.');
+      } else if (el.down.firstChild) el.down.textContent = '';
       // connection
       const st = app.net?.state;
       el.net.hidden = st === 'open';

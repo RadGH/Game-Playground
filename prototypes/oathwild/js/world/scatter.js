@@ -35,6 +35,17 @@ export const TREE_SPECIES = Object.freeze({
   'ancient-oak':   { story: 'ancient_oak', h: 38, trunk: 3.4, crown: 19, giant: true },
   'giant-spruce':  { story: 'spruce', h: 44, trunk: 1.3, crown: 8, giant: true },
 });
+// The understory (environment round 2026-11-24, "the missing mid layer"): walk-through plants drawn with the same leaf
+// tufts as the trees — shrubs at the feet of trees, and a forest EDGE that steps down (wood → saplings → shrubs → meadow)
+// instead of a hard line. No colliders: the server never reads these (understory() is called by the client only).
+export const UNDERSTORY_SPECIES = Object.freeze({
+  'shrub':       { story: 'shrub', h: 1.8, shadow: false },
+  'shrub-tall':  { story: 'shrub_tall', h: 2.8, shadow: false },
+  'shrub-berry': { story: 'shrub_berry', h: 1.6, shadow: false },
+  'shrub-dry':   { story: 'shrub_dry', h: 1.5, shadow: false },
+  'sapling':     { story: 'sapling', h: 6.5, shadow: true },
+  'sapling-spruce': { story: 'spruce', h: 6, shadow: true },
+});
 const GIANT_OF = { brightwater_vale: 'ancient-oak', thornmere_wilds: 'giant-spruce' };
 const GIANT_WOOD = { brightwater_vale: 0.3, thornmere_wilds: 0.5 };   // how thick a wood must be for a giant (the vale's woods are thinner)
 const DECOR = {
@@ -126,3 +137,48 @@ export function scatter(T, placements, { seed = T.seed, box = null, treeStep = 1
   return { trees, decor };
 }
 const r2 = v => Math.round(v * 100) / 100;
+
+/**
+ * Shrubs and saplings round the trees and along the woods' edges (client drawing only; walk-through, same seed = same
+ * plants). `trees` = scatter()'s trees. → [{ art, x, z, y, rot, h }]
+ */
+export function understory(T, placements, trees, { seed = T.seed, box = null, step = 7 } = {}) {
+  const B = box || T.bounds;
+  const cells = new Map();          // keep-outs bucketed by 32 m cells (as scatter() does)
+  for (const ko of keepOuts(T, placements)) {
+    const r = ko[2] + 2;
+    for (let i = Math.floor((ko[0] - r) / 32); i <= Math.floor((ko[0] + r) / 32); i++) for (let k = Math.floor((ko[1] - r) / 32); k <= Math.floor((ko[1] + r) / 32); k++) {
+      const kk = i * 100003 + k; if (!cells.has(kk)) cells.set(kk, []); cells.get(kk).push(ko);
+    }
+  }
+  const blocked = (x, z, r) => (cells.get(Math.floor(x / 32) * 100003 + Math.floor(z / 32)) || []).some(([cx, cz, cr]) => Math.hypot(x - cx, z - cz) < cr + r);
+  // forestAt is 0 within 5 m of a road and in towns, fields, marsh and water, so "any forest here" stands in for the
+  // (75 µs) road check: a plant only grows where a tree could
+  const ok = (x, z, r, f = T.forestAt(x, z)) => f > 0 && T.inPlay(x, z) && !blocked(x, z, r) && T.slopeAt(x, z) < 30;
+  const out = [];
+  const add = (art, x, z, rng, k = 1) => { const sp = UNDERSTORY_SPECIES[art]; out.push({ art, x: r2(x), z: r2(z), y: r2(T.heightAt(x, z)), rot: r2(rng() * 6.283), h: r2(sp.h * k * (0.8 + rng() * 0.45)) }); };
+  const shrubFor = rng => rng() < 0.12 ? 'shrub-berry' : rng() < 0.3 ? 'shrub-tall' : 'shrub';
+  // 1) at the feet of trees: a shrub or two just inside the crown's edge (bushes hug trunks in every real wood)
+  for (const t of trees) {
+    if (/dead|giant|ancient/.test(t.art)) continue;
+    const rng = makeRng(hashStr(`u${seed}:${t.x}:${t.z}`));
+    const n = rng() < 0.45 ? 0 : rng() < 0.7 ? 1 : 2;
+    for (let i = 0; i < n; i++) {
+      const a = rng() * 6.283, d = (t.crown || 4) * (0.45 + rng() * 0.5);
+      const x = t.x + Math.cos(a) * d, z = t.z + Math.sin(a) * d;
+      if (ok(x, z, 1)) add(shrubFor(rng), x, z, rng);
+    }
+  }
+  // 2) the edge of a wood: where the forest thins (forestAt ≈ 0.1-0.5) saplings stand nearer the wood, shrubs further out
+  for (let gx = Math.ceil(B.minX / step) * step; gx < B.maxX; gx += step) for (let gz = Math.ceil(B.minZ / step) * step; gz < B.maxZ; gz += step) {
+    const rng = makeRng(hashStr(`e${seed}:${gx}:${gz}`));
+    const x = gx + (rng() - 0.5) * step * 0.9, z = gz + (rng() - 0.5) * step * 0.9;
+    const f = T.forestAt(x, z);
+    if (f < 0.06 || f > 0.55) continue;
+    const edge = 1 - Math.abs(f - 0.26) / 0.26;               // 1 at the middle of the edge band
+    const roll = rng();                                         // (forestAt is already 0 in towns, fields, roads and marsh)
+    if (f > 0.22 && roll < edge * 0.3) { if (ok(x, z, 1.2, f)) add(T.regionAt(x, z) === 'thornmere_wilds' && rng() < 0.6 ? 'sapling-spruce' : 'sapling', x, z, rng); }
+    else if (roll < edge * 0.75) { if (ok(x, z, 1, f)) add(T.regionAt(x, z) === 'thornmere_wilds' && rng() < 0.3 ? 'shrub-dry' : shrubFor(rng), x, z, rng); }
+  }
+  return out;
+}

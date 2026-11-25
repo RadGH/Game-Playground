@@ -3,6 +3,7 @@
 // Block, and the action bar's own buttons cast (a ground spell then waits for a tap on the ground to place it).
 // Stuck fingers are cleared on a fresh pointerdown BEFORE the control takes the new finger (lessons rule 30).
 import { esc } from '../ui/kit.js';
+import { glyph } from '../ui/icons.js';
 
 export function createTouch(app, input, play) {
   const root = document.createElement('div');
@@ -11,7 +12,7 @@ export function createTouch(app, input, play) {
     <div class="hud-stick" data-stick><i></i></div>
     <div class="hud-look" data-look></div>
     <div class="hud-tbtns">
-      <button type="button" class="hud-tb big" data-tb="attack">Attack</button>
+      <button type="button" class="hud-tb big" data-tb="attack">${glyph('sword', 30)}<span>Attack</span></button>
       <button type="button" class="hud-tb" data-tb="dodge">Dodge</button>
       <button type="button" class="hud-tb" data-tb="block">Block</button>
       <button type="button" class="hud-tb" data-tb="interact">Use</button>
@@ -21,7 +22,8 @@ export function createTouch(app, input, play) {
   document.getElementById('hud').append(root);
   // the stick and buttons sit just above the action bar, however many rows it wraps to on this screen
   const bottom = document.querySelector('#hud .hud-bottom');
-  const lift = () => { const h = bottom ? Math.ceil(bottom.getBoundingClientRect().height) : 80; root.style.setProperty('--tb-lift', `${h + 22}px`); };
+  // (set on #hud so the interact prompt, which lives outside the touch layer, can sit above the buttons too)
+  const lift = () => { const h = bottom ? Math.ceil(bottom.getBoundingClientRect().height) : 80; document.getElementById('hud').style.setProperty('--tb-lift', `${h + 22}px`); };
   const ro = new ResizeObserver(lift); if (bottom) ro.observe(bottom); lift();
   const stick = root.querySelector('[data-stick]'), knob = stick.querySelector('i');
   const fingers = new Map();

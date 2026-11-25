@@ -811,7 +811,7 @@ function tickRevive(world, u, targetId, dt) {
 
 // ---------------------------------------------------------------- death
 
-function die(world, t, killer) {
+export function die(world, t, killer) {
   const rules = world.rules;
   if (t.kind === 'player') {
     t.hp = 0; t.alive = false;

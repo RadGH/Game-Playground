@@ -1,6 +1,36 @@
 {
   "entries": [
     {
+      "id": "2026-11-24-environment",
+      "date": "2026-11-24",
+      "title": "Air, light and life",
+      "items": [
+        "A warm late-afternoon sun with long shadows, and the sky itself now lights the world, so armour and water pick up its blue.",
+        "Soft cloud shadows drift across the land, a thin mist gathers in the river bottoms, and far hills rise beyond the haze.",
+        "Woods have an understory: bushes at the feet of trees, and saplings and shrubs where a wood thins into meadow. Leaves glow when the sun shines through them.",
+        "Leaf litter darkens the ground under trees, and the grass has yellower and deeper-green patches.",
+        "Smoke rises from chimneys, leaves drift down from the trees near you, dust floats in the light, birds wheel overhead and butterflies flit over the meadows.",
+        "You can hear where you are: birdsong in the woods, bustle in town, frogs by the marsh, wind in the open.",
+        "Rivers ripple and catch the sky. Buildings and props sit into the ground instead of floating on it.",
+        "On computers, a light colour grade and a soft glow on the brightest things; High graphics adds soft shade where things meet the ground and longer shadows.",
+        "Graphics quality is picked for your device on your first visit, and steps down once by itself if the game runs slowly (your own choice in Settings always stays)."
+      ]
+    },
+    {
+      "id": "2026-11-24-tap-trees",
+      "date": "2026-11-24",
+      "title": "Tap the world, fuller forests",
+      "items": [
+        "On a phone, tap a person to talk, tap a fallen enemy's remains to search them, tap a chest or a shrine to open it. If it's too far, your hero walks over first.",
+        "With a free mouse on a computer, clicking a person, remains, a chest or a shrine does the same.",
+        "\"Wake at the shrine\" works on phones when you fall (the button was hidden under the screen's look area).",
+        "The \"Talk to…\" / \"Search…\" prompt is a button you can tap. On phones it sits above your action buttons, out of the way of what's in front of you.",
+        "Making a hero is now four pages: your look, then your class with its whole skill tree to explore, then your background, then your attributes with the health, mana and damage you'll start with.",
+        "Trees have full, round crowns of big leaves, and pines are soft needle tiers, near and far and on every graphics setting. They used to be a few huge flat leaves on low graphics.",
+        "Phones: the Attack button looks like one, empty spell slots no longer fill two rows, and button hints say Tap instead of keyboard keys."
+      ]
+    },
+    {
       "id": "2026-11-24-world",
       "date": "2026-11-24",
       "title": "A world worth walking",

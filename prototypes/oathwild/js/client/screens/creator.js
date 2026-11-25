@@ -1,6 +1,9 @@
-// The character creator (its own screen — lessons rule 13). The live 3D hero (a Tabard body in the chosen class's
-// starting gear) stays in view on phone and desktop; beside it (below it on a phone) a name with a random-name button,
-// then tabs of ‹ › rows — Class, Body, Face, Hair, Background, Attributes. Tapping a row's value opens the whole list.
+// The character creator (its own screen — lessons rule 13), in four steps, each its own page with Back / Next:
+//   1 Look (name, then Body / Face / Hair rows)  2 Class (the eight open classes and the chosen one's whole tree — the
+//   same tree the Classes window draws)  3 Background  4 Attributes (point buy, and what the hero starts with).
+// Owner 2026-11-24: "Make class selection come after customization using its own screen, and allow to view the skill
+// tree … Background and attribute pages should also be separate." The live 3D hero (a Tabard body in the chosen
+// class's starting gear) stays in view on phone and desktop. Tapping a row's value opens the whole list.
 // Works by mouse, thumb, keyboard and controller (the pad walks the buttons; the right stick turns the hero).
 // Starting points: Wyrmroad js/ui/creator.js and Oddhaven creator.js (rows, tabs, body always visible), Tumblefair
 // editor.js (character visible on phones). Also exports createPreview() — the 3D hero stage the character select uses.
@@ -9,11 +12,16 @@ import { createTabard } from '../../../../../avatar-3d/tabard/js/tabard.js';
 import { FACE_OPTIONS } from '../../../../../avatar-3d/tabard/js/face.js';
 import { tabardItems } from '../../game/gear.js';
 import { ATTRS, pointBuyCost, pointBuyRefusal, suggestedSpread } from '../../rules/attributes.js';
-import { classDef, classIds } from '../../rules/classes.js';
+import { classDef, classIds, classRules } from '../../rules/classes.js';
+import { createCharacter } from '../../rules/levels.js';
+import { sheetOf } from '../../rules/sheet.js';
+import { makeRng } from '../../rules/farhold.js';
+import { treeHtml } from '../ui/win-classes.js';
+import { tipAttrs } from '../ui/tip.js';
 import { spellRow } from '../../rules/spells.js';
 import { openWin, esc } from '../ui/kit.js';
 import { glyph, uiIcon, spellIcon } from '../ui/icons.js';
-import { fmt, sign } from '../../../../../shared/format.js';
+import { fmt, sign, hp, range, pctOf } from '../../../../../shared/format.js';
 
 // ---------------------------------------------------------------- the 3D stage (shared with the character select)
 /** A small three.js stage on `canvas` showing one Tabard hero. → { show(look, items), setFocus('body'|'face'), dispose() } */
@@ -115,7 +123,8 @@ const NAMES = {
   male: ['Aldric Venn', 'Bram Holloway', 'Corin Ashdale', 'Dunstan Reeve', 'Edric Marsh', 'Fennick Larke', 'Gareth Thorne', 'Hob Whitlow', 'Ivo Brackwater', 'Jory Fellwood', 'Kestran Moor', 'Lorcan Ditch', 'Merrick Vale', 'Osric Pell', 'Rowan Tallis', 'Tamsin Cole'],
   female: ['Ada Wren', 'Brisa Hollow', 'Celyn Marsh', 'Delphine Rook', 'Elowen Vance', 'Fenna Ashby', 'Gwen Thistle', 'Hesper Lane', 'Isolde Brack', 'Jessamy Reed', 'Kerra Dunmore', 'Liesel Crane', 'Maren Oakes', 'Nessa Fairweather', 'Orla Penhallow', 'Sorcha Vell'],
 };
-const TABS = [['class', 'Class'], ['body', 'Body'], ['face', 'Face'], ['hair', 'Hair'], ['background', 'Background'], ['attributes', 'Attributes']];
+const STEPS = [['look', 'Look'], ['class', 'Class'], ['background', 'Background'], ['attributes', 'Attributes']];
+const LOOK_TABS = [['body', 'Body'], ['face', 'Face'], ['hair', 'Hair']];
 const BASE_ORDER = ['warrior', 'ranger', 'rogue', 'mage', 'cleric', 'druid', 'bard', 'shaman'];
 
 // a row: [key, label, list, get, set] — list = [[value, name]]
@@ -163,16 +172,16 @@ export async function show(app, opts = {}) {
   const A = rules.data.attributes;
   const bases = BASE_ORDER.filter(c => classDef(rules, c)?.open).concat(classIds(rules).filter(c => classDef(rules, c).open && !BASE_ORDER.includes(c)));
   const bgs = rules.data.backgrounds.backgrounds;
-  const st = { tab: 'class', cls: opts.cls && bases.includes(opts.cls) ? opts.cls : 'warrior', bg: 'farmhand', look: freshLook(Math.random() < 0.5 ? 'male' : 'female'), attrs: null, name: '', busy: false, msg: '' };
+  const st = { step: 'look', tab: 'body', cls: opts.cls && bases.includes(opts.cls) ? opts.cls : 'warrior', bg: 'farmhand', look: freshLook(Math.random() < 0.5 ? 'male' : 'female'), attrs: null, name: '', busy: false, msg: '', sel: null };
   st.attrs = suggestedSpread(rules, classDef(rules, st.cls).primary.slice(0, 3));
   st.name = pick(NAMES[st.look.body]);
 
   const ui = document.getElementById('ui');
-  ui.innerHTML = `<section class="scr-creator" aria-label="New hero">
+  ui.innerHTML = `<section class="scr-creator" aria-label="New hero" data-step="look">
     <header class="scr-creator-bar">
       <button type="button" class="ow-x scr-creator-back" data-back aria-label="Back">${glyph('back', 22)}</button>
       <h1>New hero</h1>
-      <span class="ow-spacer"></span>
+      <nav class="scr-creator-steps" aria-label="Steps">${STEPS.map(([id, label], i) => `<button type="button" class="scr-creator-stepbtn" data-go="${id}"><span class="scr-creator-stepn">${fmt(i + 1)}</span><span class="scr-creator-stept"><b>${label}</b><small></small></span></button>`).join('')}</nav>
       <button type="button" class="ow-x" data-act="menu" aria-label="Menu">${uiIcon('menu', 22)}</button>
     </header>
     <div class="scr-creator-body">
@@ -185,49 +194,84 @@ export async function show(app, opts = {}) {
         <p class="scr-creator-who"></p>
       </div>
       <div class="scr-creator-panel">
-        <div class="scr-creator-name"><label for="scr-creator-name-in">Name</label><input id="scr-creator-name-in" class="ow-input" type="text" maxlength="18" autocomplete="off" spellcheck="false"><button type="button" class="ow-btn ow-small" data-act="rname" aria-label="Random name">${glyph('refresh', 18)}</button></div>
-        <nav class="ow-tabs scr-creator-tabs" role="tablist">${TABS.map(([id, label]) => `<button type="button" class="ow-tab" role="tab" data-tab="${id}">${label}</button>`).join('')}</nav>
-        <div class="scr-creator-rows"></div>
+        <div class="scr-creator-main"></div>
         <div class="scr-creator-foot" data-lint-skip>
           <p class="scr-creator-msg" role="status"></p>
-          <button type="button" class="ow-btn ow-primary scr-creator-go" data-act="create">${glyph('check', 20)}<span class="scr-creator-go-text"><b>Begin</b><small></small></span></button>
+          <div class="scr-creator-nav">
+            <button type="button" class="ow-btn scr-creator-prev" data-act="prev">${glyph('back', 18)}<span></span></button>
+            <button type="button" class="ow-btn ow-primary scr-creator-go" data-act="next"><span class="scr-creator-go-text"><b></b><small></small></span>${glyph('next', 20)}</button>
+          </div>
         </div>
       </div>
     </div>
   </section>`;
   const root = ui.firstElementChild;
   const $ = s => root.querySelector(s);
-  const body = $('.scr-creator-rows'), nameIn = $('#scr-creator-name-in'), msg = $('.scr-creator-msg');
-  nameIn.value = st.name;
-  nameIn.addEventListener('input', () => { st.name = nameIn.value; foot(); });
-  nameIn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); nameIn.blur(); } });
+  const main = $('.scr-creator-main'), msg = $('.scr-creator-msg');
 
   const preview = createPreview($('.scr-creator-canvas'), { quality: app.settings.quality });
   const redress = () => preview.show(st.look, starterItems(rules, st.cls));
   redress();
 
   const clsName = c => classDef(rules, c)?.name || c;
+  const stepIdx = () => STEPS.findIndex(s => s[0] === st.step);
+  const pointsLeft = () => A.pointBuy.points - pointBuyCost(rules, st.attrs);
+  const suggested = () => suggestedSpread(rules, classDef(rules, st.cls).primary.slice(0, 3));
+
+  // the would-be hero, built by the same rules the server uses — the tree, tooltips and "at the start" numbers read it
+  let draftKey = '', draftChar = null;
+  function draft() {
+    const k = JSON.stringify([st.cls, st.bg, st.attrs]);
+    if (k !== draftKey) {
+      draftKey = k;
+      const r = createCharacter(rules, { id: 'draft', name: st.name || 'Hero', look: st.look, background: st.bg, attributes: st.attrs, cls: st.cls }, makeRng(7));
+      draftChar = r.ok ? r.char : (draftChar || null);
+      app.draftChar = draftChar;
+    }
+    return draftChar;
+  }
+
   function foot() {
-    $('.scr-creator-go-text small').textContent = `${clsName(st.cls)} · ${bgs[st.bg]?.name || ''}`;
+    const i = stepIdx(), last = i === STEPS.length - 1;
+    const left = pointsLeft();
+    const sub = { look: st.name.trim() || 'Unnamed', class: clsName(st.cls), background: bgs[st.bg]?.name || '', attributes: left > 0 ? `${fmt(left)} point${left === 1 ? '' : 's'} left` : 'All spent' };
+    root.querySelectorAll('[data-go]').forEach((b, j) => {
+      b.setAttribute('aria-current', b.dataset.go === st.step ? 'step' : 'false');
+      b.classList.toggle('is-done', j < i);
+      b.querySelector('small').textContent = sub[b.dataset.go];
+    });
     $('.scr-creator-who').textContent = `${st.name.trim() || 'Unnamed'} — ${clsName(st.cls)}`;
-    const left = A.pointBuy.points - pointBuyCost(rules, st.attrs);
-    const tab = root.querySelector('[data-tab="attributes"]');
-    if (tab) tab.innerHTML = `Attributes${left > 0 ? `<span class="ow-badge">${fmt(left)}</span>` : ''}`;
+    const prev = $('.scr-creator-prev');
+    prev.hidden = i === 0;
+    if (i > 0) prev.querySelector('span').textContent = STEPS[i - 1][1];
+    $('.scr-creator-go-text b').textContent = last ? 'Begin' : `Next: ${STEPS[i + 1][1]}`;
+    $('.scr-creator-go-text small').textContent = last ? `${st.name.trim() || 'Unnamed'} · ${clsName(st.cls)} · ${bgs[st.bg]?.name || ''}` : '';
+    $('.scr-creator-go').classList.toggle('is-begin', last);
     msg.textContent = st.msg;
   }
 
-  // ---- tab bodies
-  function renderTab() {
-    root.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === st.tab)));
-    preview.setFocus(st.tab === 'face' || st.tab === 'hair' ? 'face' : 'body');
-    const keep = body.scrollTop, same = body.dataset.tab === st.tab;
-    body.dataset.tab = st.tab;
-    if (st.tab === 'class') body.innerHTML = classTab();
-    else if (st.tab === 'background') body.innerHTML = backgroundTab();
-    else if (st.tab === 'attributes') body.innerHTML = attributesTab();
-    else body.innerHTML = rows(st, st.tab).map(rowHtml).join('');
-    body.scrollTop = same ? keep : 0;
+  // ---- step bodies
+  function render({ top = false } = {}) {
+    root.dataset.step = st.step;
+    preview.setFocus(st.step === 'look' && (st.tab === 'face' || st.tab === 'hair') ? 'face' : 'body');
+    const keep = main.scrollTop;
+    if (st.step === 'look') main.innerHTML = lookStep();
+    else if (st.step === 'class') main.innerHTML = classStep();
+    else if (st.step === 'background') main.innerHTML = backgroundStep();
+    else main.innerHTML = attributesStep();
+    main.scrollTop = top ? 0 : keep;
+    if (st.step === 'look') {
+      const nameIn = $('#scr-creator-name-in');
+      nameIn.value = st.name;
+      nameIn.addEventListener('input', () => { st.name = nameIn.value; foot(); });
+      nameIn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); nameIn.blur(); } });
+    }
     foot();
+  }
+  function lookStep() {
+    return `<div class="scr-creator-name"><label for="scr-creator-name-in">Name</label><input id="scr-creator-name-in" class="ow-input" type="text" maxlength="18" autocomplete="off" spellcheck="false"><button type="button" class="ow-btn ow-small" data-act="rname" aria-label="Random name">${glyph('refresh', 18)}</button></div>
+      <nav class="ow-tabs scr-creator-tabs" role="tablist">${LOOK_TABS.map(([id, label]) => `<button type="button" class="ow-tab" role="tab" data-tab="${id}" aria-selected="${id === st.tab}">${label}</button>`).join('')}</nav>
+      <div class="scr-creator-rows">${rows(st, st.tab).map(rowHtml).join('')}</div>`;
   }
   function rowHtml(r) {
     const cur = r.get();
@@ -242,42 +286,74 @@ export async function show(app, opts = {}) {
       <button type="button" class="ow-btn ow-small scr-creator-value" data-list="${r.key}">${esc(name)}<small>${fmt(i + 1)} / ${fmt(r.list.length)}</small></button>
       <button type="button" class="ow-btn ow-small" data-step="1" aria-label="Next ${esc(r.label)}">${glyph('next', 18)}</button></div></div>`;
   }
-  function classTab() {
-    return `<div class="scr-creator-classes">${bases.map(c => {
-      const d = classDef(rules, c);
-      const spells = d.nodes.filter(n => n.free && n.kind === 'spell').map(n => { let nm = n.spell; try { nm = spellRow(rules, n.spell)?.name || n.spell; } catch { /* unknown */ } return { id: n.spell, name: nm }; });
-      const prim = d.primary.map(k => A.names[k]).join(', ');
-      return `<button type="button" class="scr-creator-class" data-cls="${c}" aria-pressed="${c === st.cls}">
-        <span class="scr-creator-class-icon">${spellIcon(spells[0]?.id || c, 44, { cls: c })}</span>
-        <span class="scr-creator-class-text"><b>${esc(d.name)}</b><em>${esc(d.role)}</em><span>${esc(d.blurb)}</span>
-        <small>Best with ${esc(prim)}${spells.length ? ` · Starts with ${esc(spells.map(s => s.name).join(', '))}` : ''}</small></span></button>`;
-    }).join('')}</div><p class="scr-creator-note">Every level you choose a class again: stay with this one or add any other.</p>`;
+  const freeSpells = d => d.nodes.filter(n => n.free && n.kind === 'spell').map(n => { let nm = n.spell; try { nm = spellRow(rules, n.spell)?.name || n.spell; } catch { /* unknown */ } return { id: n.spell, name: nm }; });
+  function classStep() {
+    const d = classDef(rules, st.cls), c = draft();
+    const list = bases.map(k => {
+      const x = classDef(rules, k), sp = freeSpells(x);
+      return `<button type="button" class="scr-creator-class" data-cls="${k}" aria-pressed="${k === st.cls}" ${tipAttrs('class', { cls: k })}>
+        <span class="scr-creator-class-icon">${spellIcon(sp[0]?.id || k, 40, { cls: k })}</span>
+        <span class="scr-creator-class-text"><b>${esc(x.name)}</b><em>${esc(x.role)}</em></span></button>`;
+    }).join('');
+    const spells = freeSpells(d);
+    const paths = Object.values(d.paths || {});
+    const R = classRules(rules);
+    const facts = [
+      `<div class="scr-creator-fact"><span>Best with</span><b>${esc(d.primary.map(k => A.names[k]).join(', '))}</b></div>`,
+      spells.length ? `<div class="scr-creator-fact"><span>Starts with</span><b>${esc(spells.map(x => x.name).join(', '))}</b></div>` : '',
+      d.growth ? `<div class="scr-creator-fact"><span>Each level</span><b>${esc([d.growth.hp ? `+${fmt(d.growth.hp)} health` : '', d.growth.mp ? `+${fmt(d.growth.mp)} mana` : ''].filter(Boolean).join(', '))}</b></div>` : '',
+    ].join('');
+    return `<div class="scr-creator-cls">
+      <div class="scr-creator-clslist" role="radiogroup" aria-label="Class">${list}</div>
+      <div class="scr-creator-clsinfo">
+        <div class="scr-creator-clshead">
+          <span class="scr-creator-clsbig">${spellIcon(spells[0]?.id || st.cls, 64, { cls: st.cls })}</span>
+          <div><h2>${esc(d.name)}</h2><em>${esc(d.role)}</em><p>${esc(d.blurb || '')}</p></div>
+        </div>
+        <div class="scr-creator-facts">${facts}</div>
+        ${paths.length ? `<div class="scr-creator-paths">${paths.map(p => `<div class="scr-creator-path"><b>${esc(p.name)}</b><span>${esc(p.blurb || '')}</span></div>`).join('')}<small class="ow-dim">Choose a path at ${esc(d.name)} level ${fmt(R.pathLevel)}.</small></div>` : ''}
+        <h3 class="scr-creator-h">${esc(d.name)} tree</h3>
+        ${c ? treeHtml(app, c, st.cls, { sel: st.sel, preview: true }) : ''}
+        <p class="scr-creator-note">Every level you choose a class again: stay with this one or add any other.</p>
+      </div>
+    </div>`;
   }
-  function backgroundTab() {
-    return `<div class="scr-creator-bgs">${Object.entries(bgs).map(([id, b]) => {
-      const bits = [];
-      for (const [k, v] of Object.entries(b.attrs || {})) bits.push(`${sign(v, { decimals: 0 })} ${A.names[k]}`);
-      for (const [k, v] of Object.entries(b.skills || {})) bits.push(`${sign(v, { decimals: 0 })} ${rules.data.skillsUse.skills[k]?.name || k}`);
-      if (b.mods?.carry) bits.push(`${sign(b.mods.carry, { decimals: 0 })} kg carry weight`);
-      if (b.mods?.maxStaminaPct) bits.push(`${sign(b.mods.maxStaminaPct, { decimals: 0 })}% stamina`);
-      bits.push(`${fmt(b.gold || 0)} gold`);
-      return `<button type="button" class="scr-creator-bg" data-bg="${id}" aria-pressed="${id === st.bg}"><b>${esc(b.name)}</b><span>${esc(b.blurb)}</span><small>${esc(bits.join(' · '))}</small></button>`;
+  function backgroundStep() {
+    return `<h2 class="scr-creator-title">Where you come from</h2><div class="scr-creator-bgs" role="radiogroup" aria-label="Background">${Object.entries(bgs).map(([id, b]) => {
+      const chips = [];
+      for (const [k, v] of Object.entries(b.attrs || {})) chips.push(`${sign(v, { decimals: 0 })} ${A.names[k]}`);
+      for (const [k, v] of Object.entries(b.skills || {})) chips.push(`${sign(v, { decimals: 0 })} ${rules.data.skillsUse.skills[k]?.name || k}`);
+      if (b.mods?.carry) chips.push(`${sign(b.mods.carry, { decimals: 0 })} kg carry weight`);
+      if (b.mods?.maxStaminaPct) chips.push(`${sign(b.mods.maxStaminaPct, { decimals: 0 })}% stamina`);
+      return `<button type="button" class="scr-creator-bg" data-bg="${id}" aria-pressed="${id === st.bg}">
+        <span class="scr-creator-bg-top"><b>${esc(b.name)}</b><span class="scr-creator-gold">${glyph('coin', 16)}${fmt(b.gold || 0)} gold</span></span>
+        <span class="scr-creator-bg-blurb">${esc(b.blurb)}</span>
+        <span class="scr-creator-chips">${chips.map(x => `<i>${esc(x)}</i>`).join('')}</span></button>`;
     }).join('')}</div>`;
   }
-  function attributesTab() {
+  function attributesStep() {
     const pb = A.pointBuy;
-    const left = pb.points - pointBuyCost(rules, st.attrs);
+    const left = pointsLeft();
     const bonus = bgs[st.bg]?.attrs || {};
+    const sug = suggested(), same = ATTRS.every(k => sug[k] === st.attrs[k]);
+    const c = draft(), s = c ? sheetOf(rules, c) : null;
+    const stat = (label, v) => `<div class="scr-creator-stat"><span>${esc(label)}</span><b>${esc(v)}</b></div>`;
+    const spell = s ? ['int', 'wis', 'cha'].map(k => [k, s.spell?.[k]]).filter(([, r]) => r).sort((a, b) => (b[1][1] || 0) - (a[1][1] || 0))[0] : null;
+    const start = s ? [
+      stat('Health', hp(s.maxHp)), stat('Mana', hp(s.maxMp)), stat('Stamina', hp(s.maxStamina)),
+      stat('Weapon damage', range(s.melee[0], s.melee[1])), spell ? stat(`Spell power (${A.names[spell[0]]})`, range(spell[1][0], spell[1][1])) : '',
+      stat('Critical chance', pctOf(s.critChance, 1)), stat('Armour', fmt(s.armor)), stat('Carry', `${fmt(s.carry)} kg`),
+    ].join('') : '';
     return `<div class="scr-creator-points"><span>Points left</span><b class="${left < 0 ? 'ow-bad' : left === 0 ? '' : 'ow-gold'}">${fmt(left)} / ${fmt(pb.points)}</b>
-      ${(() => { const sug = suggestedSpread(rules, classDef(rules, st.cls).primary.slice(0, 3)); const same = ATTRS.every(k => sug[k] === st.attrs[k]);
-        return `<button type="button" class="ow-btn ow-small" data-act="suggest" ${same ? 'disabled' : ''}>${glyph(same ? 'check' : 'star', 18)}<span>${same ? 'Using the spread suggested for' : 'Suggested for'} ${esc(clsName(st.cls))}</span></button>`; })()}</div>
-      ${ATTRS.map(k => {
+        <button type="button" class="ow-btn ow-small" data-act="suggest" ${same ? 'disabled' : ''}>${glyph(same ? 'check' : 'star', 18)}<span>${same ? 'Using the spread suggested for' : 'Suggested for'} ${esc(clsName(st.cls))}</span></button></div>
+      <div class="scr-creator-attrs">${ATTRS.map(k => {
         const v = st.attrs[k];
         const next = { ...st.attrs, [k]: v + 1 };
         const canUp = v < pb.max && pointBuyCost(rules, next) <= pb.points;
         const cost = canUp ? pb.cost[String(v + 1)] - pb.cost[String(v)] : 0;
-        return `<div class="scr-creator-attr" data-attr="${k}">
-          <div class="scr-creator-attr-text"><b>${esc(A.names[k])}</b><span>${esc(A.blurbs[k])}</span></div>
+        const prim = classDef(rules, st.cls).primary.includes(k);
+        return `<div class="scr-creator-attr${prim ? ' is-primary' : ''}" data-attr="${k}">
+          <button type="button" class="scr-creator-attr-text" ${tipAttrs('attr', { id: k })}><b>${esc(A.names[k])}${prim ? `<small class="ow-gold">${esc(clsName(st.cls))}</small>` : ''}</b><span>${esc(A.blurbs[k])}</span></button>
           <div class="scr-creator-step">
             <button type="button" class="ow-btn ow-small" data-attr-step="-1" aria-label="Lower ${esc(A.names[k])}" ${v <= pb.min ? 'disabled' : ''}>${glyph('minus', 18)}</button>
             <span class="scr-creator-attr-val">${fmt(v + (bonus[k] || 0))}${bonus[k] ? `<small class="ow-good">${sign(bonus[k], { decimals: 0 })} ${esc(bgs[st.bg].name)}</small>` : ''}</span>
@@ -285,7 +361,8 @@ export async function show(app, opts = {}) {
           </div>
           <small class="scr-creator-attr-cost">${canUp ? `Next point costs ${fmt(cost)}` : v >= pb.max ? `Highest at the start (${fmt(pb.max)})` : 'Not enough points'}</small>
         </div>`;
-      }).join('')}`;
+      }).join('')}</div>
+      ${start ? `<h3 class="scr-creator-h">At the start</h3><div class="scr-creator-stats">${start}</div>` : ''}`;
   }
 
   // ---- the whole list for one row (a window: big lists never scroll over the canvas)
@@ -297,21 +374,34 @@ export async function show(app, opts = {}) {
     w.body.addEventListener('click', e => { const b = e.target.closest('[data-pick]'); if (!b) return; r.set(b.dataset.pick); w.close(); changed(); });
   }
 
-  function changed(dress = false) { st.msg = ''; if (dress) redress(); else preview.show(st.look, starterItems(rules, st.cls)); renderTab(); }
+  function changed(dress = false) { st.msg = ''; if (dress) redress(); else preview.show(st.look, starterItems(rules, st.cls)); render(); }
+  function go(step) {
+    if (!STEPS.some(s => s[0] === step) || step === st.step) return;
+    st.step = step; st.msg = ''; render({ top: true });
+    // a controller needs a starting point on the new page; a mouse or a finger does not (focus would pop a tooltip)
+    if (app.device === 'pad') setTimeout(() => (main.querySelector('[aria-pressed="true"], [aria-selected="true"], button:not([disabled])'))?.focus({ preventScroll: true }), 30);
+  }
 
   root.addEventListener('click', e => {
     const t = e.target.closest('button'); if (!t) return;
-    if (t.dataset.tab) { st.tab = t.dataset.tab; renderTab(); return; }
+    if (t.dataset.go) return go(t.dataset.go);
+    if (t.dataset.tab) { st.tab = t.dataset.tab; render({ top: true }); return; }
     if (t.dataset.back != null) { app.go(opts.from === 'title' ? 'title' : 'chars'); return; }
     const act = t.dataset.act;
     if (act === 'menu') return app.openWindow('menu', { where: 'creator' });
     if (act === 'spin') { preview.spin = !preview.spin; t.setAttribute('aria-pressed', String(preview.spin)); return; }
     if (act === 'random') { st.look = freshLook(st.look.body); return changed(); }
-    if (act === 'rname') { st.name = pick(NAMES[st.look.body].filter(n => n !== st.name)); nameIn.value = st.name; return foot(); }
-    if (act === 'suggest') { st.attrsTouched = false; st.attrs = suggestedSpread(rules, classDef(rules, st.cls).primary.slice(0, 3)); return renderTab(); }
-    if (act === 'create') return create();
-    if (t.dataset.cls) { st.cls = t.dataset.cls; if (!st.attrsTouched) st.attrs = suggestedSpread(rules, classDef(rules, st.cls).primary.slice(0, 3)); return changed(true); }
-    if (t.dataset.bg) { st.bg = t.dataset.bg; return renderTab(); }
+    if (act === 'rname') { st.name = pick(NAMES[st.look.body].filter(n => n !== st.name)); const n = $('#scr-creator-name-in'); if (n) n.value = st.name; return foot(); }
+    if (act === 'suggest') { st.attrsTouched = false; st.attrs = suggested(); return render(); }
+    if (act === 'prev') return go(STEPS[Math.max(0, stepIdx() - 1)][0]);
+    if (act === 'next') {
+      if (st.step === 'look' && !st.name.trim()) { st.msg = 'Choose a name first.'; foot(); $('#scr-creator-name-in')?.focus(); return; }
+      return stepIdx() === STEPS.length - 1 ? create() : go(STEPS[stepIdx() + 1][0]);
+    }
+    // a tree node first: its tooltip attributes carry data-cls too, so it must not read as "pick this class"
+    if (t.dataset.node) { st.sel = st.sel === t.dataset.node ? null : t.dataset.node; render(); main.querySelector('.cls-detail')?.scrollIntoView({ block: 'nearest' }); return; }
+    if (t.dataset.cls && t.classList.contains('scr-creator-class')) { if (st.cls === t.dataset.cls) return; st.cls = t.dataset.cls; st.sel = null; if (!st.attrsTouched) st.attrs = suggested(); return changed(true); }
+    if (t.dataset.bg) { st.bg = t.dataset.bg; return render(); }
     if (t.dataset.swatch) { const row = rows(st, st.tab).find(r => r.key === t.closest('[data-row]').dataset.row); row?.set(t.dataset.swatch); return changed(); }
     if (t.dataset.list) { const row = rows(st, st.tab).find(r => r.key === t.dataset.list); if (row) openList(row); return; }
     if (t.dataset.step) {
@@ -325,16 +415,16 @@ export async function show(app, opts = {}) {
       const k = t.closest('[data-attr]').dataset.attr;
       const next = { ...st.attrs, [k]: st.attrs[k] + +t.dataset.attrStep };
       if (!pointBuyRefusal(rules, next)) { st.attrs = next; st.attrsTouched = true; }
-      return renderTab();
+      return render();
     }
   });
 
   async function create() {
     if (st.busy) return;
     const name = st.name.trim();
-    if (!name) { st.msg = 'Choose a name first.'; foot(); nameIn.focus(); return; }
+    if (!name) { st.msg = 'Choose a name first.'; go('look'); return; }
     const why = pointBuyRefusal(rules, st.attrs);
-    if (why) { st.msg = why; st.tab = 'attributes'; renderTab(); return; }
+    if (why) { st.msg = why; go('attributes'); foot(); return; }
     st.busy = true; st.msg = 'Making your hero…'; foot();
     $('.scr-creator-go').disabled = true;
     try {
@@ -349,10 +439,12 @@ export async function show(app, opts = {}) {
     }
   }
 
-  renderTab();
-  setTimeout(() => root.querySelector('[data-cls].scr-creator-class[aria-pressed="true"]')?.focus({ preventScroll: true }), 30);
+  render({ top: true });
+  // not on a phone: focusing the name box would open the keyboard over the hero
+  if (!matchMedia('(pointer: coarse)').matches) setTimeout(() => $('#scr-creator-name-in')?.focus({ preventScroll: true }), 30);
   return {
     get view() { return preview.ready ? 'ready' : 'loading'; },
-    close() { preview.dispose(); },
+    get step() { return st.step; },
+    close() { preview.dispose(); app.draftChar = null; },
   };
 }

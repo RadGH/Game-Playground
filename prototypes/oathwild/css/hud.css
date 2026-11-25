@@ -45,7 +45,7 @@ body.ow-nomouse[data-screen="play"] #view { cursor: none; }
 .hud-cross i:nth-child(3) { top: 12px; left: 0; height: 2px; width: 8px; } .hud-cross i:nth-child(4) { top: 12px; right: 0; height: 2px; width: 8px; }
 .hud-cross b { position: absolute; left: 11px; top: 11px; width: 4px; height: 4px; border-radius: 50%; background: #fff; }
 .hud-cross.foe i, .hud-cross.foe b { background: #ff7a5a; } .hud-cross.friend i, .hud-cross.friend b { background: #8fe07a; }
-.hud-prompt { position: absolute; left: 50%; top: calc(50% + 46px); transform: translateX(-50%); padding: 6px 12px; border-radius: 8px; background: rgba(26, 21, 15, .82); border: 1px solid var(--edge); font-weight: 700; font-size: 15px; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
+.hud-prompt { z-index: 6; color: var(--ink); font-family: inherit; cursor: pointer; min-height: 40px; position: absolute; left: 50%; top: calc(50% + 46px); transform: translateX(-50%); padding: 6px 12px; border-radius: 8px; background: rgba(26, 21, 15, .82); border: 1px solid var(--edge); font-weight: 700; font-size: 15px; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
 .hud-prompt i { display: block; height: 4px; margin-top: 4px; background: linear-gradient(90deg, var(--gold) var(--k), rgba(255, 255, 255, .15) var(--k)); border-radius: 2px; }
 .hud-key { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 4px; background: rgba(0, 0, 0, .55); border: 1px solid var(--edge-soft); color: var(--gold); font-size: 12px; font-weight: 800; text-align: center; line-height: 18px; }
 body[data-device="touch"] .hud-key:empty, .hud-key:empty { display: none; }
@@ -78,7 +78,7 @@ body[data-device="touch"] .hud-key:empty, .hud-key:empty { display: none; }
 .hud-log p.old { opacity: 0; }
 .hud-log .quest, .hud-log .found { border-left-color: var(--gold); } .hud-log .xp { border-left-color: #b9a0ef; } .hud-log .loot, .hud-log .gold { border-left-color: #e8c25a; } .hud-log .bad { border-left-color: #e8826a; } .hud-log .join { border-left-color: #6fb5e8; } .hud-log .level { border-left-color: #9fd27a; }
 .hud-log .quest, .hud-log .found { color: var(--gold); } .hud-log .xp { color: #d2b8ff; } .hud-log .loot, .hud-log .gold { color: #ffe08a; } .hud-log .bad { color: #ffb4a0; } .hud-log .join { color: #9fd6ff; } .hud-log .level { color: #c8f0a0; }
-.hud-down { position: absolute; left: 50%; top: 32%; transform: translateX(-50%); width: min(380px, 90vw); text-align: center; padding: 18px; background: rgba(30, 14, 10, .85); border: 1px solid #9a4a3a; border-radius: 12px; pointer-events: auto; }
+.hud-down { z-index: 7; position: absolute; left: 50%; top: 32%; transform: translateX(-50%); width: min(380px, 90vw); text-align: center; padding: 18px; background: rgba(30, 14, 10, .85); border: 1px solid #9a4a3a; border-radius: 12px; pointer-events: auto; }
 .hud-down h3 { color: #ffb4a0; font-size: 22px; margin-bottom: 6px; } .hud-down p { margin: 8px 0; }
 .hud-plates, .hud-nums { position: absolute; inset: 0; overflow: hidden; }
 .hud-plate { position: absolute; left: 0; top: 0; display: grid; justify-items: center; gap: 2px; font-size: 13px; font-weight: 700; white-space: nowrap; text-shadow: 0 1px 2px #000, 0 0 3px #000; will-change: transform; }
@@ -92,13 +92,20 @@ body[data-device="touch"] .hud-key:empty, .hud-key:empty { display: none; }
 .hud-net { position: absolute; left: 50%; top: calc(60px + var(--safe-t)); transform: translateX(-50%); padding: 6px 12px; border-radius: 8px; background: rgba(60, 20, 10, .85); border: 1px solid #9a4a3a; font-weight: 700; }
 /* touch */
 .hud-touch { position: absolute; inset: 0; pointer-events: none; }
+body.ow-fallen .hud-tbtns, body.ow-fallen .hud-prompt { display: none; }   /* fallen: only the camera and the panel */
+/* phones: the prompt is a button above the Attack / Use cluster, out of the middle where the things near you stand */
+body.ow-touch .hud-prompt { min-height: 48px; padding: 8px 14px; font-size: 16px; line-height: 1.25; white-space: normal; text-align: left; display: flex; align-items: center; gap: 8px; left: auto; right: calc(14px + var(--safe-r)); top: auto; bottom: calc(var(--tb-lift, 96px) + 140px + var(--safe-b)); transform: none; max-width: min(78vw, 360px); }
 .hud-touch > * { pointer-events: auto; }
 .hud-stick { position: absolute; left: calc(26px + var(--safe-l)); bottom: calc(var(--tb-lift, 96px) + var(--safe-b)); width: 132px; height: 132px; border-radius: 50%; background: rgba(26, 21, 15, .35); border: 2px solid rgba(232, 193, 112, .4); touch-action: none; }
 .hud-stick i { position: absolute; left: 41px; top: 41px; width: 50px; height: 50px; border-radius: 50%; background: rgba(232, 193, 112, .55); }
 .hud-look { position: absolute; left: 45%; right: 0; top: 30%; bottom: 0; touch-action: none; pointer-events: auto; }
 .hud-tbtns { position: absolute; right: calc(14px + var(--safe-r)); bottom: calc(var(--tb-lift, 96px) + var(--safe-b)); display: grid; grid-template-columns: repeat(3, 60px); gap: 8px; }
 .hud-tb { min-height: 52px; border-radius: 12px; border: 1px solid var(--edge); background: rgba(26, 21, 15, .75); font-weight: 800; font-size: 14px; color: var(--ink); touch-action: none; }
-.hud-tb.big { grid-row: span 2; background: rgba(140, 50, 30, .8); font-size: 16px; }
+.hud-tb.big { grid-row: span 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border-radius: 30px; border: 2px solid rgba(232, 193, 112, .7); background: radial-gradient(circle at 50% 35%, rgba(176, 74, 44, .92), rgba(110, 36, 22, .9)); box-shadow: 0 2px 10px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 220, 180, .25); font-size: 15px; color: #fff3e0; }
+.hud-tb.big svg { width: 30px; height: 30px; }
+.hud-tb:active { transform: scale(.96); filter: brightness(1.15); }
+/* phones: no rows of empty dashed slots — only the spells you have (assign more in the Spellbook) */
+body.ow-touch .hud-slot.empty { display: none; }
 .hud-tb.on { border-color: var(--gold); color: var(--gold); }
 .hud-place { position: absolute; left: 50%; top: calc(70px + var(--safe-t)); transform: translateX(-50%); display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: rgba(26, 21, 15, .85); border: 1px solid var(--gold); border-radius: 10px; font-weight: 700; }
 body.ow-touch .hud-wins, body.ow-touch .hud-tracker, body.ow-touch .hud-cross { display: none; }

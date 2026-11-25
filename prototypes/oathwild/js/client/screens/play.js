@@ -2,6 +2,7 @@
 // and the crosshair, spells with their ground indicators, interaction (talk, loot, open, use, shrines, revive), the HUD
 // and the windows the server opens. Entered from the world list with the server's 'enter' message.
 import * as THREE from 'three';
+import { createAmbient } from '../render/ambient.js';
 import { createView } from '../render/view.js';
 import { createWorldView } from '../render/world.js';
 import { createActors } from '../render/actors.js';
@@ -42,6 +43,9 @@ export async function show(app, { enter = null } = {}) {
     }
   }
   const view = app.view, actors = app.actors, fx = app.fx;
+  view.tuning = app.tuning;          // the Look numbers (lighting, grade, bloom, mist, clouds) live from the ?tune panel
+  // ambient life round the camera (motes, leaves, chimney smoke, birds, butterflies) and the ambience bed for where you stand
+  const ambient = createAmbient(view, { T, trees: app.scattered.trees, chimneys: app.worldView.chimneys || [], quality: app.settings.quality, sound: () => (app.settings.sfxOn ? app.sound : null) });
   // a wand / tome / staff / sceptre's own attack: how each style looks (data/casters.json look)
   fx.looks = app.rules.data.casters?.look || {};
   const handV = new THREE.Vector3();
@@ -68,7 +72,7 @@ export async function show(app, { enter = null } = {}) {
   // ---------------------------------------------------------------- state
   const S = {
     meId: enter.you, units: new Map(), auras: new Map(), target: null, cooldowns: {}, interact: null, tags: [], npcs: [], questMarkers: [],
-    drawnMe: null, meFacing: 0, placeName: '', downLeft: 0, barrier: 0, aimingSlot: null, lootBoxes: [], zones: new Map(), lastSnap: 0,
+    drawnMe: null, meFacing: 0, goTo: null, autoRevive: null, placeName: '', downLeft: 0, barrier: 0, aimingSlot: null, lootBoxes: [], zones: new Map(), lastSnap: 0,
   };
   app.world = enter.world;
   app.me = { ...(app.me || {}), char: enter.char };
@@ -228,6 +232,8 @@ export async function show(app, { enter = null } = {}) {
     const me = meUnit(); if (!me) return;
     const hit = cam.aim({ units: aimUnits(), from: { x: pred.state.x, z: pred.state.z }, screen: { x: sx, y: sy } });
     if (placeSlot != null) { aim = hit; const s = placeSlot; placeSlot = null; stopAim(); app.play.touch?.placing(null); cast(s); return; }
+    const thing = pickAtScreen(x, y);
+    if (thing) { reach(thing); return; }
     if (hit.unit) S.target = hit.unit.id;
   }
 
@@ -250,21 +256,63 @@ export async function show(app, { enter = null } = {}) {
   // ---------------------------------------------------------------- interaction (E / Use)
   const LOOT_R = 4.5, NPC_R = 4.5, OBJ_R = 4, SHRINE_R = 6;
   function wsLike() { const c = app.me?.char; return { quests: app.ws?.quests || {}, flags: app.ws?.flags || [], playerFlags: c ? { [c.id]: app.ws?.my || [] } : {}, shrines: app.ws?.shrines || [], players: {} }; }
-  function findInteract() {
-    const me = pred.state, mu = meUnit();
-    if (!mu || mu.downed) return null;
-    const near = (x, z, r) => Math.hypot(x - me.x, z - me.z) <= r;
+  /** Everything near you can use, with where it stands on screen-height terms (feet `y`, height `h`) and its reach `r`.
+   *  One list for the E / Use prompt, a tap on a phone and a click with a free mouse. */
+  function interactables(maxD = 60) {
+    const me = pred.state, out = [];
     const R = app.tuning?.interactMetres || LOOT_R;
-    // a fallen friend first
-    for (const u of S.units.values()) if (u.info.k === 'player' && u.downed && u.id !== S.meId && near(u.x, u.z, app.rules.data.combat.death.reviveRange + 0.5)) return { kind: 'revive', id: u.id, text: `Hold to bring ${u.info.n} back`, progress: S.revive?.id === u.id ? S.revive.held / app.rules.data.combat.death.reviveSeconds : null };
+    const add = (o, x, z) => { const d = Math.hypot(x - me.x, z - me.z); if (d <= maxD) out.push({ ...o, x, z, d, y: heightAt(x, z) }); };
+    const D = app.rules.data.combat.death;
+    for (const u of S.units.values()) if (u.info.k === 'player' && u.downed && u.id !== S.meId) add({ kind: 'revive', id: u.id, name: u.info.n, r: D.reviveRange + 0.5, bias: -99, h: 0.6, text: `Hold to bring ${u.info.n} back`, progress: S.revive?.id === u.id ? S.revive.held / D.reviveSeconds : null }, u.x, u.z);
+    for (const b of S.lootBoxes) add({ kind: 'loot', id: b.id, name: b.name || 'the remains', r: R, bias: -1, h: 0.7, text: `Search ${b.name || 'the remains'}` }, b.x, b.z);
+    for (const n of S.npcs) add({ kind: 'talk', id: n.id, name: n.name, r: NPC_R, bias: 0, h: 1.85, text: `Talk to ${n.name}` }, n.x, n.z);
+    for (const c of placements.chests) add({ kind: 'chest', id: c.id, name: c.name || 'the chest', r: OBJ_R, bias: 0, h: 0.9, text: `Open ${c.name || 'the chest'}` }, c.at[0], c.at[1]);
+    for (const o of S.liveObjects || []) { const ob = book.objects[o.object]; if (ob) add({ kind: 'use', id: o.object, name: ob.name, r: OBJ_R + 0.5, bias: -0.5, h: 1.2, text: `${o.kind === 'use' ? 'Use' : 'Search'} ${ob.name}` }, ob.at[0], ob.at[1]); }
+    for (const sh of placements.shrines) add({ kind: 'shrine', id: sh.id, name: sh.name, r: SHRINE_R, bias: 0.5, h: 2.6, text: `${sh.name}: travel, enchant, change your path` }, sh.at[0], sh.at[1]);
+    return out;
+  }
+  function findInteract() {
+    const mu = meUnit();
+    if (!mu || mu.downed) return null;
     let best = null;
-    const consider = (d, o) => { if (!best || d < best.d) best = { ...o, d }; };
-    for (const b of S.lootBoxes) { const d = Math.hypot(b.x - me.x, b.z - me.z); if (d <= R) consider(d - 1, { kind: 'loot', id: b.id, text: `Search ${b.name || 'the remains'}` }); }
-    for (const n of S.npcs) { const d = Math.hypot(n.x - me.x, n.z - me.z); if (d <= NPC_R) consider(d, { kind: 'talk', id: n.id, text: `Talk to ${n.name}` }); }
-    for (const c of placements.chests) { const d = Math.hypot(c.at[0] - me.x, c.at[1] - me.z); if (d <= OBJ_R) consider(d, { kind: 'chest', id: c.id, text: `Open ${c.name || 'the chest'}` }); }
-    for (const o of S.liveObjects || []) { const ob = book.objects[o.object]; if (!ob) continue; const d = Math.hypot(ob.at[0] - me.x, ob.at[1] - me.z); if (d <= OBJ_R + 0.5) consider(d - 0.5, { kind: 'use', id: o.object, text: `${o.kind === 'use' ? 'Use' : 'Search'} ${ob.name}` }); }
-    for (const s of placements.shrines) { const d = Math.hypot(s.at[0] - me.x, s.at[1] - me.z); if (d <= SHRINE_R) consider(d + 0.5, { kind: 'shrine', id: s.id, name: s.name, text: `${s.name}: travel, enchant, change your path` }); }
+    for (const o of interactables(12)) {
+      if (o.d > o.r) continue;
+      if (o.kind === 'revive') return o;                  // a fallen friend first
+      if (!best || o.d + o.bias < best.d + best.bias) best = o;
+    }
     return best;
+  }
+  /** The usable thing under a screen point (css px): the one whose upright line (feet → head) passes nearest the point. */
+  function pickAtScreen(x, y) {
+    let best = null;
+    for (const o of interactables(45)) {
+      let px = Infinity;
+      for (const k of [0.15, 0.5, 0.9]) { const p = project(o.x, o.y + o.h * k, o.z); if (p) px = Math.min(px, Math.hypot(p.x - x, p.y - y)); }
+      const near = Math.max(44, 260 / Math.max(2, o.d));   // closer things are bigger on screen
+      if (px <= near && (!best || px + o.d * 2 < best.px + best.d * 2)) best = { ...o, px };
+    }
+    return best;
+  }
+  /** Use a thing you tapped or clicked: in reach → use it now; further → walk there first (any move input cancels). */
+  function reach(o) {
+    if (!o || meUnit()?.downed) return;
+    if (o.d <= o.r) { useThing(o); return; }
+    S.goTo = { kind: o.kind, id: o.id, lastD: o.d, stuck: 0 };
+  }
+  function useThing(o) {
+    if (o.kind === 'revive') { S.autoRevive = o.id; return; }
+    interact(o);
+  }
+  /** One step of walking to a tapped thing: the world direction to it, or null (arrived, stuck, gone or cancelled). */
+  function goToStep(manual) {
+    const g = S.goTo; if (!g) return null;
+    if (manual || meUnit()?.downed) { S.goTo = null; return null; }
+    const o = interactables(60).find(t => t.kind === g.kind && t.id === g.id);
+    if (!o) { S.goTo = null; return null; }
+    if (o.d <= o.r - 0.6) { S.goTo = null; useThing(o); return null; }
+    g.stuck = o.d > g.lastD - 0.03 ? g.stuck + STEP : 0; g.lastD = o.d;
+    if (g.stuck > 1.2) { S.goTo = null; app.toast(`You can't reach ${o.name} from here.`, 'info'); return null; }
+    return { x: (o.x - pred.state.x) / o.d, z: (o.z - pred.state.z) / o.d };
   }
   function interact(it) {
     if (!it) return;
@@ -277,7 +325,9 @@ export async function show(app, { enter = null } = {}) {
 
   // ---------------------------------------------------------------- the HUD
   app.play = {
-    S, cam, slotDown, slotUp, cancelPlace, tapAt,
+    S, cam, slotDown, slotUp, cancelPlace, tapAt, ambient,
+    /** Where a world point is on screen (css px) or null — tests and game-eye aim taps with it. */
+    screenOf(x, z, h = 1) { return project(x, heightAt(x, z) + h, z); },
     get target() { return S.target; },
     auraUnit(id) {
       const list = S.auras.get(id) || [];
@@ -291,6 +341,8 @@ export async function show(app, { enter = null } = {}) {
     unitsState() { return [...S.units.values()].map(u => ({ id: u.id, k: u.info.k, name: u.info.n, x: u.x, z: u.z, hp: u.hp, hostile: u.hostile })); },
   };
   app.play.hud = createHud(app, app.play);
+  // a click with a free mouse (not looking around) on a person, corpse, chest or shrine uses it
+  input.onFreeClick = (x, y) => { const t = pickAtScreen(x, y); if (!t) return false; reach(t); return true; };
   const touchy = matchMedia('(pointer: coarse)').matches;
   app.play.touch = touchy ? createTouch(app, input, app.play) : null;
   document.body.classList.toggle('ow-touch', touchy);
@@ -301,6 +353,9 @@ export async function show(app, { enter = null } = {}) {
     const ax = input.moveAxis();
     const f = cam.forward(), r = cam.right();
     let dx = r.x * ax.x + f.x * ax.y, dz = r.z * ax.x + f.z * ax.y;
+    const manual = Math.hypot(ax.x, ax.y) > 0.1;
+    const walk = goToStep(manual);
+    if (walk) { dx = walk.x; dz = walk.z; }
     const l = Math.hypot(dx, dz); if (l > 1) { dx /= l; dz /= l; }
     if (input.take('sneak')) sneakOn = !sneakOn;
     const dodge = dodgePress; dodgePress = false;
@@ -319,7 +374,8 @@ export async function show(app, { enter = null } = {}) {
     const hero = { x: pred.state.x, z: pred.state.z };
     const d = aim?.dir || f;
     const it = S.interact;
-    const reviving = it?.kind === 'revive' && input.held('interact');
+    if (S.autoRevive && (manual || it?.kind !== 'revive' || it.id !== S.autoRevive)) S.autoRevive = null;
+    const reviving = it?.kind === 'revive' && (input.held('interact') || S.autoRevive === it.id);
     const msg = { t: 'in', q: pred.state.q, mx: round(dx), mz: round(dz), ax: round(hero.x), ay: round(heightAt(hero.x, hero.z) + 1.4), az: round(hero.z), dx: round(d.x), dy: 0, dz: round(d.z),
       b: packButtons({ attack: attack || power, power, block, sprint, sneak: sneakOn, dodge, mount, respawn, interact: reviving }), c: -1, h: channelSlot != null };
     if (pending) { msg.c = pending.slot; if (pending.at) msg.at = pending.at.map(round); msg.h = !!pending.held || channelSlot != null; pending = null; }
@@ -367,6 +423,7 @@ export async function show(app, { enter = null } = {}) {
     return { x: (ndc.x + 1) / 2 * view.size.w, y: (1 - ndc.y) / 2 * view.size.h };
   }
   let npcTick = 0, slowTick = 0, bodyTick = 0;
+  let watchT = 0, watchN = 0, watchSum = 0, slowChecked = !!navigator.webdriver;   // (automated checks run slow on purpose)
   function frame(t) {
     if (!alive) return;
     raf = requestAnimationFrame(frame);
@@ -492,6 +549,20 @@ export async function show(app, { enter = null } = {}) {
     actors.update(dt);
     fx.update(dt);
     app.worldView.update(dt, { x: pred.state.x, z: pred.state.z });
+    ambient.update(dt, { x: pred.state.x, z: pred.state.z });
+    // an automatic graphics pick that runs slow steps down once (from 8 s in, over 6 s: under ~24 frames a second)
+    if (app.settings.qualityAuto !== false && !slowChecked && app.settings.quality !== 'low') {
+      watchT += dt;
+      if (watchT > 8) { watchN++; watchSum += dt; }
+      if (watchT > 14) {
+        slowChecked = true;
+        if (watchSum / Math.max(1, watchN) > 1 / 24) {
+          const next = app.settings.quality === 'high' ? 'medium' : 'low';
+          app.settings.quality = next; app.saveSettings(); view.setQuality(next);
+          app.toast(`Graphics set to ${next === 'medium' ? 'Medium' : 'Low'} for smoother play. Change it in Settings.`, 'info', 5000);
+        }
+      }
+    }
     app.play.hud.update(dt, { ...S, meUnit: me, cooldowns: S.cooldowns }, project);
     view.render();
   }
@@ -531,11 +602,13 @@ export async function show(app, { enter = null } = {}) {
       for (const off of offs) off();
       stopAim();
       landFx?.stop(); landFx = null;
+      ambient.dispose();
       for (const id of [...S.units.keys()]) actors.drop(id);
       for (const n of S.npcs) actors.drop('npc:' + n.id);
       app.snapBuf = [];
       app.play.hud.destroy(); app.play.touch?.destroy();
       app.play = null;
+      input.onFreeClick = null;
       input.unlock();
       canvas.style.visibility = 'hidden';
     },

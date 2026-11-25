@@ -14,9 +14,10 @@ export function createInput({ canvas, bindings, blocked = () => false }) {
   let wheel = 0;
   let lastMove = 0, lockAt = 0, avg = 8;
   const I = {
-    device: 'keys', bindings, locked: false, pad: null, wheelZoom: 0,
+    // a phone starts as 'touch' (hints say Tap, not E, before the first touch lands)
+    device: matchMedia('(pointer: coarse)').matches ? 'touch' : 'keys', bindings, locked: false, pad: null, wheelZoom: 0,
     touch: { move: { x: 0, y: 0 }, look: { dx: 0, dy: 0 }, held: new Set(), presses: new Set() },
-    onDevice: null,
+    onDevice: null, onFreeClick: null,
     held(action) {
       if (I.touch.held.has(action)) return true;
       const b = I.bindings[action]; if (!b) return false;
@@ -101,6 +102,9 @@ export function createInput({ canvas, bindings, blocked = () => false }) {
   addEventListener('blur', () => { down.clear(); });
   canvas.addEventListener('mousedown', e => {
     const code = 'Mouse' + e.button;
+    // a free mouse (or a phone tap's mouse echo) on a person / corpse / chest / shrine uses it instead of attacking
+    if (!I.locked && e.button === 0 && !blocked() && I.onFreeClick?.(e.clientX, e.clientY)) return;
+    if (e.sourceCapabilities?.firesTouchEvents) return;   // a phone tap is not an attack
     setDevice('keys');
     if (!blocked() && !I.locked && !I.held('freeMouse')) I.lock();
     down.add(code);

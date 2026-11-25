@@ -18,7 +18,7 @@
 // window.gameEye.state() → { screen, view, world, me, players, target, windows } for Claude's game-eye and the tests.
 import { bootRules } from '../rules/boot.js';
 import { bootWorld } from '../world/boot.js';
-import { scatter } from '../world/scatter.js';
+import { scatter, understory } from '../world/scatter.js';
 import { createGround } from '../game/ground.js';
 import { createNet } from './net.js';
 import { installTips } from './ui/tip.js';
@@ -32,15 +32,39 @@ import { loadTuning, tunePanel } from '../../../../shared/tune.js';
 
 const SETTINGS_KEY = 'oathwild.settings';
 const LITE = navigator.webdriver || new URLSearchParams(location.search).has('lite');   // automated checks draw the cheapest world
-const DEFAULTS = { quality: LITE || matchMedia('(pointer: coarse)').matches ? 'low' : 'medium', volume: 0.8, sfxOn: true, sens: 1, invertY: false, quickCast: false, names: true, numbers: true, shake: true, fov: 62, cameraDist: 4.6, hand: 'right' };
-const loadSettings = () => { let s = {}; try { s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch { s = {}; } return { ...DEFAULTS, ...s }; };
+// first visit: a graphics tier from the device (environment round 2026-11-24). The player's own pick in Settings always
+// wins (qualityAuto: false); an automatic pick may step down once if the game runs slow (play.js frame watch).
+function autoQuality() {
+  if (LITE) return 'low';
+  let gpu = '';
+  try { const gl = document.createElement('canvas').getContext('webgl2') || document.createElement('canvas').getContext('webgl'); const ext = gl?.getExtension('WEBGL_debug_renderer_info'); gpu = String(ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl?.getParameter(gl.RENDERER) || ''); gl?.getExtension('WEBGL_lose_context')?.loseContext(); } catch { /* no WebGL info */ }
+  if (/swiftshader|llvmpipe|software|basic render/i.test(gpu)) return 'low';
+  const cores = navigator.hardwareConcurrency || 4;
+  if (matchMedia('(pointer: coarse)').matches) {
+    const big = Math.min(screen.width, screen.height) >= 744;
+    if (/apple/i.test(gpu) && cores >= 6 && big) return 'medium';                           // a recent iPad
+    if (/adreno \(tm\) [7-9]\d\d|mali-g7[1-9]|mali-g[89]\d|immortalis|xclipse/i.test(gpu) && big) return 'medium';
+    return 'low';
+  }
+  if (/nvidia|geforce|rtx|gtx|radeon rx|radeon pro|apple m[1-9]/i.test(gpu) && cores >= 6) return 'high';
+  return 'medium';
+}
+const DEFAULTS = { quality: autoQuality(), qualityAuto: true, volume: 0.8, sfxOn: true, sens: 1, invertY: false, quickCast: false, names: true, numbers: true, shake: true, fov: 62, cameraDist: 4.6, hand: 'right' };
+const URL_QUALITY = new URLSearchParams(location.search).get('quality');   // ?quality=low|medium|high: this visit only (tests, comparisons)
+const loadSettings = () => {
+  let s = {}; try { s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch { s = {}; }
+  const out = { ...DEFAULTS, ...s };
+  if (out.qualityAuto !== false && !s.quality) out.quality = DEFAULTS.quality;
+  if (['low', 'medium', 'high'].includes(URL_QUALITY)) { out.quality = URL_QUALITY; out.qualityAuto = false; }
+  return out;
+};
 
 const bar = document.querySelector('#loading .ow-loading-bar i');
 const progress = (k, text) => { if (bar) bar.style.width = `${Math.round(k * 100)}%`; const p = document.querySelector('#loading p'); if (p && text) p.textContent = text; };
 
 const app = {
   build: 'r1', rules: null, W: null, art: null, scattered: null, ground: null, net: null, me: null, ws: null, world: null,
-  settings: loadSettings(), bindings: loadBindings(), input: null, device: 'keys', screen: null, screenName: null, view: null, play: null,
+  settings: loadSettings(), bindings: loadBindings(), input: null, device: matchMedia('(pointer: coarse)').matches ? 'touch' : 'keys', screen: null, screenName: null, view: null, play: null,
   tuning: null, lastWin: null, events: new Map(),
   saveSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(app.settings)); } catch { /* private window */ } app.emit('settings', app.settings); },
   on(type, fn) { if (!app.events.has(type)) app.events.set(type, new Set()); app.events.get(type).add(fn); return () => app.events.get(type)?.delete(fn); },
@@ -85,7 +109,7 @@ window.gameEye = {
   state() {
     const p = app.play;
     return {
-      screen: app.screenName, view: app.screen?.view || 'ready', world: app.world, connected: app.net?.state,
+      screen: app.screenName, view: app.screen?.view || 'ready', step: app.screen?.step || null, world: app.world, connected: app.net?.state,
       me: p?.meState?.() || null, players: p?.playersState?.() || [], target: p?.target || null,
       windows: [...document.querySelectorAll('.ow-win')].map(w => w.getAttribute('aria-label')),
       pending: app.me?.pending || 0, device: app.device,
@@ -108,6 +132,7 @@ async function boot() {
   progress(0.6, 'Planting the Hartwood…');
   await new Promise(r => setTimeout(r, 0));
   app.scattered = scatter(app.W.terrain, app.W.data.placements);
+  app.scattered.understory = understory(app.W.terrain, app.W.data.placements, app.scattered.trees);   // drawing only (no colliders)
   app.ground = createGround(app.W.terrain, app.W.data.placements, app.scattered);
   progress(0.85, 'Lighting the shrines…');
   try { app.tuning = await loadTuning(new URL('../../data/tuning.json', import.meta.url), { game: 'oathwild' }); tunePanel({ game: 'oathwild', tuning: app.tuning }); } catch (e) { console.warn('tuning', e); app.tuning = {}; }

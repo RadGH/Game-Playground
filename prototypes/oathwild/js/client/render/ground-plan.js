@@ -59,7 +59,7 @@ export function blockers(T, { placements, art }) {
 }
 
 // ------------------------------------------------------------------------------------------------ the splat
-export function paintGround(T, { placements, art, cfg, res = 1 }) {
+export function paintGround(T, { placements, art, cfg, res = 1, trees = [] }) {
   const L = layerIndex(cfg), B0 = T.bounds;
   const nx = Math.round((B0.maxX - B0.minX) / res), nz = Math.round((B0.maxZ - B0.minZ) / res);
   const W = new Float32Array(nx * nz * CH);
@@ -188,6 +188,21 @@ export function paintGround(T, { placements, art, cfg, res = 1 }) {
   over(L.dirt, wear);
   over(L.dirt, road);
   over(L.cobble, cobble);
+
+  // leaf litter under every crown (environment round 2026-11-24): where the ground is grass or wild grass, a soft disc
+  // of forest floor under each tree — the dark of a wood reaches the meadow trees too. Roads, fields and paving untouched.
+  if (L.forest != null) for (const t of trees) {
+    const r = Math.max(2, (t.crown || 4) * 0.8);
+    box(t.x - r, t.z - r, t.x + r, t.z + r, (j, x, z) => {
+      const k = (1 - smoothstep(0.45, 1, (Math.hypot(x - t.x, z - t.z) + wob(x, z) * 1.6) / r)) * 0.75;
+      if (k <= 0) return;
+      const o = j * CH, g = W[o + L.grass] + (L.wild != null ? W[o + L.wild] : 0);
+      if (g <= 0) return;
+      const move = g * k;
+      W[o + L.grass] *= 1 - k; if (L.wild != null) W[o + L.wild] *= 1 - k;
+      W[o + L.forest] += move;
+    });
+  }
 
   // pack: every texel's eight weights → bytes that add up to 255
   const A = new Uint8Array(nx * nz * 4), Bm = new Uint8Array(nx * nz * 4);

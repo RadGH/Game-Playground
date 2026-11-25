@@ -69,6 +69,7 @@ export function createKitDraw({ root, tileGroup, tileKey }) {
   const buckets = new Map();     // `${tile}|${kind}|${glow}` -> [{ m, c }]
   const spinners = [];           // { pivot, axis, speed }
   const fires = [];              // { x, y, z, s }
+  const chimneys = [];           // { x, y, z } chimney tops (smoke)
   const halos = [];              // { x, y, z, color }
   const e = new THREE.Euler(), q = new THREE.Quaternion(), v = new THREE.Vector3(), s = new THREE.Vector3(), col = new THREE.Color();
   const partMatrix = (p, out = new THREE.Matrix4()) => { e.set(p.rx || 0, p.yaw || 0, p.rz || 0, 'YXZ'); q.setFromEuler(e); return out.compose(v.set(p.x, p.y, p.z), q, s.set(p.w, p.h, p.d)); };
@@ -87,7 +88,7 @@ export function createKitDraw({ root, tileGroup, tileKey }) {
   }
 
   return {
-    stats,
+    stats, chimneys,
     place(model, x, y, z, yaw = 0) {
       if (!model) return;
       const M = modelMatrix(x, y, z, yaw), tk = tileKey(x, z), pm = new THREE.Matrix4();
@@ -100,6 +101,10 @@ export function createKitDraw({ root, tileGroup, tileKey }) {
       const c = Math.cos(yaw), sn = Math.sin(yaw);
       const world = p => ({ x: x + p.x * c + p.z * sn, y: y + p.y, z: z - p.x * sn + p.z * c });
       for (const f of model.fires || []) fires.push({ ...world(f), s: f.s || 1 });
+      // chimney tops (the highest 'chimney' part of a model): where ambient.js lets smoke rise
+      let top = null;
+      for (const p of model.parts) if (p.tag === 'chimney' && (!top || p.y + p.h > top.y + top.h)) top = p;
+      if (top) chimneys.push(world({ x: top.x, y: top.y + top.h, z: top.z }));
       for (const g of model.glows || []) halos.push({ ...world(g), color: g.color });
       for (const g of model.spin || []) {
         // pivot at the group's spot, turned with the model; the parts turn about the model's own x or z

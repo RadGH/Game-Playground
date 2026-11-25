@@ -273,7 +273,8 @@ export function createTerrain(map, { seed = map.seed } = {}) {
         const deck = kind === 'ford' ? surface - 0.35 : Math.max(sampleH(pa.x, pa.z), sampleH(pb.x, pb.z), surface + 1.2) + 0.15;
         const ang = Math.atan2(pb.x - pa.x, pb.z - pa.z);
         bridges.push({ id: decl?.id || `undeclared_${r.id}_${rv.id}`, name: decl?.name || null, road: r.id, river: rv.id, kind, art: decl?.art || null, at: [round2(c.x), round2(c.z)], a: [round2(pa.x), round2(pa.z)], b: [round2(pb.x), round2(pb.z)], width: r.width + 1, deck: round2(deck), surface: round2(surface), facing: round2(ang), s: sAt, reach });
-        for (let q = 0; q < pts.length; q++) if (Math.abs(pts[q].s - sAt) <= reach) pinned[q] = deck;
+        // (1.5 m past each end too, so the road never rises through the last planks — owner #129 follow-up)
+        for (let q = 0; q < pts.length; q++) if (Math.abs(pts[q].s - sAt) <= reach + (kind === "ford" ? 0 : 1.5)) pinned[q] = deck;
       }
     }
     // the profile: ground along the line, kept above marsh water, smoothed, grade-limited
@@ -342,6 +343,10 @@ export function createTerrain(map, { seed = map.seed } = {}) {
   function deckAt(x, z) {
     for (const b of bridges) {
       if (b.kind !== 'bridge') continue;
+      // the deck is the rectangle between its two ends — not a rounded cap past them, which stood a metre below the
+      // road climbing away from the bridge and made an invisible ledge (owner report #131, 2026-11-25)
+      const dx = b.b[0] - b.a[0], dz = b.b[1] - b.a[1], L2 = dx * dx + dz * dz || 1, t = ((x - b.a[0]) * dx + (z - b.a[1]) * dz) / L2;
+      if (t < 0 || t > 1) continue;
       if (segDist(x, z, b.a[0], b.a[1], b.b[0], b.b[1]).d <= b.width / 2) return b;
     }
     return null;
@@ -353,7 +358,7 @@ export function createTerrain(map, { seed = map.seed } = {}) {
   }
   function walkHeightAt(x, z) {
     const b = deckAt(x, z);
-    if (b) return { y: b.deck, on: 'deck', bridge: b.id };
+    if (b) { const g = heightAt(x, z); if (g < b.deck) return { y: b.deck, on: 'deck', bridge: b.id }; }   // (at the ends the road is the higher one: walk on it)
     const w = waterAt(x, z), g = heightAt(x, z);
     // deeper than wading: swimming — the body floats at the same height a wader at the deepest wade has, so walking
     // into a river and swimming on is one smooth slope (no ledge at the edge); the client sinks the drawn body more

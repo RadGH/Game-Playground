@@ -72,9 +72,12 @@ function boxSamples(b, step = 1, grow = 0) {
 }
 
 const DEFAULTS = {
-  setback: 0.35, plinthMax: 2.6,
+  // roomier (owner 2026-11-25: "too crowded with incredibly narrow streets, and houses have no yards"): a front strip,
+  // gaps and alleys more often, a yard kept for every house beyond the core (`core` = share of the radius that may be
+  // solid terraces), detached houses beyond `outskirts`
+  setback: 1.0, plinthMax: 2.6,
   widths: [[2, 5], [3, 3], [4, 1]], depths: [[2, 3], [3, 2]], storeys: [[1, 1], [2, 5], [3, 2]],
-  gapEvery: [3, 6], alley: [2.4, 3.2], yard: [3, 7], outskirts: 0.86,
+  gapEvery: [2, 4], alley: [3, 4.5], yard: [4, 9], yardMin: 4, core: 0.45, outskirts: 0.62, detachedGap: [2, 5],
 };
 
 export function planTowns(T, towns = {}, { placements = null, npcs = null } = {}) {
@@ -165,6 +168,7 @@ function planOne(T, id, def, out, { placements, npcs }) {
       if (inPad(x, z, padPad)) return no('pad');
       if (inKeep(x, z, keepPad)) return no('keep');
       if (!T.walkable(x, z) || T.waterAt(x, z)?.depth > -0.3) return no('ground');
+      if (T.fieldAt?.(x, z)) return no('field');                    // a farm field is not a building plot (owner #125)
       const y = T.heightAt(x, z); lo = Math.min(lo, y); hi = Math.max(hi, y);
     }
     return { lo, hi };
@@ -208,8 +212,16 @@ function planOne(T, id, def, out, { placements, npcs }) {
         tag = '';
         if (!ok || ok.hi - ok.lo > rule.plinthMax) { s += 1; run = 0; continue; }
         const dist = Math.hypot(hx - cx, hz - cz);
+        // beyond the core every house keeps a yard behind it: reserve it now, or this plot is not a house
+        let yardBox = null;
+        if (dist > radius * rule.core && !rd.squareEdge) {
+          const Y = rule.yardMin, bx = Math.sin(facing), bz = Math.cos(facing);
+          yardBox = { x: hx + bx * (D / 2 + Y / 2 + 0.05), z: hz + bz * (D / 2 + Y / 2 + 0.05), hw: W / 2 - 0.1, hd: Y / 2, facing };
+          const yok = free(yardBox, { roadPad: 0.6, slack: 0.1 });
+          if (!yok || yok.hi - yok.lo > 1.6) { s += 1; run = 0; continue; }
+        }
         // outskirts: smaller, lower, detached; the middle: tall terraces
-        const storeys = dist > radius * cfg.outskirts ? Math.min(2, pickW(r, rule.storeys)) : pickW(r, rule.storeys);
+        const storeys = dist > radius * Math.max(cfg.outskirts, 0.8) ? Math.min(2, pickW(r, rule.storeys)) : pickW(r, rule.storeys);
         const roadY = T.heightAt(pm.x, pm.z);
         const floorY = r2(Math.max(ok.hi + 0.12, roadY + 0.12));
         const doorCell = wc <= 2 ? (r() < 0.5 ? 0 : 1) : 1 + Math.floor(r() * (wc - 2));
@@ -226,10 +238,11 @@ function planOne(T, id, def, out, { placements, npcs }) {
           shop: !!(rule.shops && r() < rule.shops), jetty: storeys > 1 && r() < 0.45, chimney: r() < 0.8, seed: Math.floor(r() * 1e6),
         };
         mine.push(box); out.houses.push(h); out.boxes.push({ ...box, house: h.id });
+        if (yardBox) { h.yardKept = yardBox; mine.push(yardBox); }
         s += W;
         run++;
         if (run >= nextGap) { s += cfg.alley[0] + r() * (cfg.alley[1] - cfg.alley[0]); run = 0; nextGap = Math.floor(cfg.gapEvery[0] + r() * (cfg.gapEvery[1] - cfg.gapEvery[0] + 1)); }
-        else if (dist > radius * cfg.outskirts) s += 1.5 + r() * 3;   // the very edge of town stands apart
+        else if (dist > radius * cfg.outskirts) s += cfg.detachedGap[0] + r() * (cfg.detachedGap[1] - cfg.detachedGap[0]);   // beyond the middle, houses stand apart
         void fwd; void rgt;
       }
     }
@@ -238,13 +251,24 @@ function planOne(T, id, def, out, { placements, npcs }) {
   // ---------------------------------------------------------------- 2. back yards (fence + clutter) behind each house
   const yardKinds = def.yardProps || [['woodpile', 2], ['barrel', 3], ['crate', 3], ['sacks', 2], ['cart', 1], ['washing', 2], ['garden', 3], ['coop', 1]];
   for (const h of out.houses) {
+    // (its own reserved strip is released while its yard is grown; a neighbour's stays taken)
+    if (h.yardKept) { const i = mine.indexOf(h.yardKept); if (i >= 0) mine.splice(i, 1); }
     const c = Math.cos(h.facing), sn = Math.sin(h.facing);
     const back = [sn, c];                                       // local +z (away from the street) in world
-    for (let Y = cfg.yard[1]; Y >= cfg.yard[0]; Y -= 1) {
-      const yx = h.at[0] + back[0] * (h.d / 2 + Y / 2 + 0.05), yz = h.at[1] + back[1] * (h.d / 2 + Y / 2 + 0.05);
-      const yb = { x: yx, z: yz, hw: h.w / 2 - 0.1, hd: Y / 2, facing: h.facing };
-      const ok = free(yb, { roadPad: 0.6, slack: 0.1 });
-      if (!ok || ok.hi - ok.lo > 1.6) continue;
+    // the deepest yard that fits; failing all, the strip reserved with the house (worked out before its numbers were
+    // rounded, so it is kept as it was)
+    const tries = [];
+    for (let Y = cfg.yard[1]; Y >= cfg.yard[0]; Y -= 1) tries.push(Y);
+    if (h.yardKept) tries.push('kept');
+    for (const T_ of tries) {
+      let Y, yx, yz, yb, ok;
+      if (T_ === 'kept') { yb = h.yardKept; Y = yb.hd * 2; yx = yb.x; yz = yb.z; ok = { lo: T.heightAt(yx, yz) }; }
+      else {
+        Y = T_; yx = h.at[0] + back[0] * (h.d / 2 + Y / 2 + 0.05); yz = h.at[1] + back[1] * (h.d / 2 + Y / 2 + 0.05);
+        yb = { x: yx, z: yz, hw: h.w / 2 - 0.1, hd: Y / 2, facing: h.facing };
+        ok = free(yb, { roadPad: 0.6, slack: 0.1 });
+        if (!ok || ok.hi - ok.lo > 1.6) continue;
+      }
       mine.push(yb);
       const yard = { at: [r2(yx), r2(yz)], w: h.w, d: Y, facing: h.facing, house: h.id, y: r2(ok.lo) };
       out.yards.push(yard);
@@ -268,6 +292,8 @@ function planOne(T, id, def, out, { placements, npcs }) {
       break;
     }
   }
+
+  for (const h of out.houses) delete h.yardKept;
 
   // ---------------------------------------------------------------- 3. street furniture: lamps, barrels by shop doors, the square
   for (const rd of streets) {

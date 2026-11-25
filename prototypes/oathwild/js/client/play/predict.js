@@ -15,7 +15,7 @@ export function createPredictor({ ground, combat }) {
   return {
     state: st,
     reset(x, z) { st.x = st.px = x; st.z = st.pz = z; st.ox = st.oz = 0; st.hist.length = 0; st.dash = null; },
-    /** One 50 ms step. opts: speed (walk m/s), sprint, block, sneak, dodge, canMove, stamina, overloaded, mounted. */
+    /** One 50 ms step. opts: speed (walk m/s), sneak, dodge, canMove, stamina, mounted, facingDir. */
     step(dir, o, dt) {
       st.q++;
       st.px = st.x; st.pz = st.z;
@@ -26,8 +26,6 @@ export function createPredictor({ ground, combat }) {
         if (o.sneak) v *= 0.55;
         const swimming = ground.swimming?.(st.x, st.z);           // the server checks the same ground each step
         if (swimming) v *= swimMult;
-        if (o.sprint && !o.mounted && !swimming && !o.overloaded && o.stamina > 0) v *= S.sprintMult;
-        if (o.block) v *= 0.5;
         nx += dir.x * v * dt; nz += dir.z * v * dt;
       }
       // the dodge dash, step for step as the server runs it (js/rules/combat.js): the way you move, or the crosshair

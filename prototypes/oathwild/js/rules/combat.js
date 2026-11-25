@@ -15,7 +15,7 @@
 //   snapshot(world)                                   plain data for the network
 //
 // Input per player (all optional): { move:{x,z}, aim:{origin:[x,y,z],dir:[x,y,z]}, attack, power,
-//   block, sprint, sneak, dodge, cast:{ slot | spell, at:[x,y,z], held }, revive: playerId,
+//   sneak, dodge, cast:{ slot | spell, at:[x,y,z], held }, revive: playerId,
 //   respawn, mount }
 // Events: { t:'hit'|'heal'|'cast'|'aura'|'death'|'downed'|'revived'|'xp'|'level'|'loot'|'camp'|
 //   'skill'|'miss'|'refused'|'projectile'|'zone'|'summon'|'form'|'mount', … } — see docs/RULES.md.
@@ -91,7 +91,8 @@ export function refreshPlayer(world, id, { full = false } = {}) {
   if (full) u.stamina = s.maxStamina;
   u.stamina = Math.min(u.stamina, s.maxStamina);
   u.equipment = u.char.gear;      // Farhold's strike reads affix powers off this
-  u.derived = { ...s.farhold, damage: s.melee, critChance: s.critChance, critDamage: s.critDamage, dodge: s.dodge, armor: s.armor, magicResist: s.magicResist, blockChance: s.blockChance, blockPower: s.blockPower, resistAll: s.resistAll, lifeSteal: s.lifeSteal, thorns: s.thorns, spellPower: 0 };
+  // blockChance 0: a shield's block is rolled in hit() (blockRoll, data/combat.json block), never a second time by rpg.strike
+  u.derived = { ...s.farhold, damage: s.melee, critChance: s.critChance, critDamage: s.critDamage, dodge: s.dodge, armor: s.armor, magicResist: s.magicResist, blockChance: 0, blockPower: 0, resistAll: s.resistAll, lifeSteal: s.lifeSteal, thorns: s.thorns, spellPower: 0 };
   u.threatMult = 1 + (s.threatPct || 0) / 100;
 }
 
@@ -217,7 +218,6 @@ function stepPlayer(world, u, input, dt) {
   const ctl = control(u);
   if (input.aim?.dir) u.facing = Math.atan2(input.aim.dir[0], input.aim.dir[2]);
   u.sneaking = !!input.sneak && !u.mounted;
-  u.blocking = !!input.block && u.stamina > 0;
 
   // the horse
   if (input.mount) toggleMount(world, u, input);
@@ -231,11 +231,6 @@ function stepPlayer(world, u, input, dt) {
     if (u.sneaking) speed *= hasPerk(rules, u.char, 'soft_soles') ? 0.75 : 0.55;
     if (u.mounted) speed *= rules.data.inventory.mount.speedMult;
     if (u.swimming) speed *= C.swimMult ?? 0.6;              // u.swimming: set by the host from the ground each step
-    if (input.sprint && !u.mounted && !u.swimming && !s.overloaded && u.stamina > 0) {
-      speed *= C.stamina.sprintMult;
-      spendStamina(world, u, C.stamina.sprintPerSecond * dt);
-    }
-    if (u.blocking) speed *= 0.5;
     u.x += dir.x * speed * dt; u.z += dir.z * speed * dt;
     if (u.channel) endChannel(world, u);
   }
@@ -595,6 +590,24 @@ function stepProjectiles(world, dt) {
   world.projectiles = keep;
 }
 
+/**
+ * A shield's block (data/combat.json `block`; owner 2026-11-25: "block should be auto chance, more like WoW"): a
+ * player with a shield in the off hand (sheet.blockChance > 0) blocks a blow of a blocking element from the front
+ * half at that chance. Returns the share of the blow stopped (sheet.blockStops) or 0. One roll of the world rng.
+ */
+export function blockRoll(world, t, from, element) {
+  const s = t.sheet;
+  if (!s?.blockChance || !s.blockStops || t.downed) return 0;
+  const B = CF(world.rules).block;
+  if (!(B.elements || ['physical']).includes(element || 'physical')) return 0;
+  const dx = from.x - t.x, dz = from.z - t.z, l = Math.hypot(dx, dz);
+  if (l > 1e-3) {
+    const cos = (Math.sin(t.facing || 0) * dx + Math.cos(t.facing || 0) * dz) / l;
+    if (cos < Math.cos(((B.frontDegrees ?? 180) / 2) * Math.PI / 180) - 1e-9) return 0;   // from behind: no block
+  }
+  return world.rng() * 100 < s.blockChance ? s.blockStops : 0;
+}
+
 /** The world sim's shapes, lent to a magic weapon's attack (js/rules/caster-attack.js). */
 const CASTER_OPS = { fireBolt, coneHit, lineHit, aroundHit, schedule, emit: (w, e) => emit(w, e), hit: (...a) => hit(...a), foesNear };
 
@@ -631,12 +644,17 @@ export function hit(world, u, t, row, ctx = {}) {
     // only when a pet hits a monster; every other pairing gets them here, once (lessons rule 33)
     const farholdApplies = !!(u.owner && !t.equipment);
     let k = (farholdApplies ? 1 : outgoingFrom(u) * incomingFrom(t)) * mult;
-    if (t.kind === 'player' && t.blocking && t.stamina >= CF(rules).stamina.blockHit) {
-      k *= 1 - (t.sheet.weapon && !t.char.gear?.offhand?.isShield ? CF(rules).stamina.blockWeapon : CF(rules).stamina.blockShield);
-      spendStamina(world, t, CF(rules).stamina.blockHit);
-    }
+    const element = row.element || u.ranged?.element || 'physical';
+    // a shield blocks by itself: a physical blow from the front, at the shield's chance (blockRoll below)
+    const blockK = t.kind === 'player' ? blockRoll(world, t, u, element) : 0;
+    if (blockK) k *= 1 - blockK;
     if (u.owner) k *= 1 + ((world.units.get(u.owner)?.sheet?.petPct || 0) / 100);
-    res = rules.rpg.strike(u, t, world.rng, { multiplier: k, element: row.element || u.ranged?.element || 'physical', ranged: !!row.ranged });
+    if (blockK && t.sheet.blockPower) { t.derived.blockChance = 100; t.derived.blockPower = t.sheet.blockPower; }   // gear's flat block on top
+    res = rules.rpg.strike(u, t, world.rng, { multiplier: k, element, ranged: !!row.ranged });
+    if (blockK) {
+      t.derived.blockChance = 0; t.derived.blockPower = 0;
+      if (res && !res.dodged) res.blocked = Math.max(1, Math.round((res.amount / Math.max(0.01, 1 - blockK)) * blockK + (res.blocked || 0)));
+    }
   }
   if (!res || res.dodged) { emit(world, { t: 'miss', who: u.id, to: t.id, dodged: true }); return res; }
   u.lastFight = t.lastFight = world.t;

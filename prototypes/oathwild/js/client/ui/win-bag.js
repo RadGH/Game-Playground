@@ -101,7 +101,7 @@ function render(app, body, w) {
         <span class="bag-gold">${glyph('coin', 20)}<b>${fmt(c.gold || 0)}</b> gold</span>
         <span class="bag-weight ${over ? 'is-over' : ''}" ${tipAttrs('text', { title: 'Carry weight', text: `You carry ${mat(carried)} of ${fmt(carry)} kg. Strength and Constitution raise the limit.` })}>${glyph('weight', 20)}<span>${mat(carried)} / ${fmt(carry)} kg</span><i class="bag-meter"><i style="width:${Math.round(pct)}%"></i></i></span>
       </div>
-      ${over ? '<p class="bag-warn">Over your carry weight: you walk slowly and cannot sprint.</p>' : ''}
+      ${over ? '<p class="bag-warn">Over your carry weight: you walk at half speed.</p>' : ''}
       ${broken.length ? `<p class="bag-warn">${esc(broken.map(b => b.name).join(', '))} ${broken.length > 1 ? 'are' : 'is'} broken and give${broken.length > 1 ? '' : 's'} nothing until repaired by a smith.</p>` : ''}
       <h3>Carried <span class="ow-dim">(${fmt(bag.length)})</span></h3>
       <div class="bag-grid">${cells}</div>

@@ -42,7 +42,7 @@ Independent project by Radley Sustaire. Working name "Oathwild" (Guessed — own
 | Skill trees | Titan Quest-style ranked spells + modifiers bought with class points, gated by class level; Pathfinder choices at class levels. |
 | Druid | Shapeshifts into **real animals** (wolf, bear, …), never made-up creatures; can choose **summoner** or **caster** directions instead. |
 | Use-skills | **Non-combat only** (Sneak, Lockpicking, Pickpocket, Speech, Smithing, Alchemy, Enchanting…). Combat power comes from classes, attributes, gear, talents. |
-| Resources | **Health, mana, stamina** (stamina: sprint, dodge roll, power attacks, blocking hits). |
+| Resources | **Health, mana, stamina** (stamina: dodge roll, power attacks). 2026-11-25 (owner, #126/#127): no Run and no Block button — walking is faster (6.2 m/s) and a shield blocks by itself, WoW-style. |
 | Inventory | **Carry-weight limit** (Strength/Constitution), over it you walk slowly; no bag slots. |
 | Races | **Humans in round 1** (cultures/backgrounds as looks + small bonuses); races (elf, dwarf, orc…) later as new Tabard bodies. |
 | Story | **Main story thread** (Brightwater Vale → Thornmere Wilds, a boss, a hook onward) + **6–8 side quests per region**; quest progress belongs to the world, rewards to each player. |

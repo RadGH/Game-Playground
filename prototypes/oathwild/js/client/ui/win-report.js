@@ -2,7 +2,7 @@
 // game (screen, world, position, build, device) go to the playground report box — games.radgh.com's rgs-api
 // `/api/report/oathwild`, or the LAN dev server's inbox. Saved on this device BEFORE sending; every try gives up after
 // 8 s so it never hangs on "Sending…" (lessons rule 66); reports that could not go are sent next time.
-// Same pattern as Wyrmroad's js/ui/report.js. Ratings (win-rate.js) use the same road outside a world.
+// Same pattern as Wyrmroad's js/ui/report.js. (No "Rate the game": owner 2026-11-25, ratings are for party minigames only.)
 import { openWin, esc } from './kit.js';
 import { glyph } from './icons.js';
 

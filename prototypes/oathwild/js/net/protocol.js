@@ -39,13 +39,15 @@ export const newCode = rand => { let c = ''; for (let i = 0; i < CODE_LENGTH; i+
 /** A name: 1-18 visible characters, no control characters or markup, spaces collapsed. */
 export const cleanName = (s, max = 18) => { const n = String(s ?? '').replace(/[\u0000-\u001f\u007f<>&"'`\\]/g, '').replace(/\s+/g, ' ').trim().slice(0, max); return n.length ? n : null; };
 
-// Input buttons (in.b bit field)
-export const BTN = Object.freeze({ attack: 1, power: 2, block: 4, sprint: 8, sneak: 16, dodge: 32, mount: 64, respawn: 128, interact: 256 });
+// Input buttons (in.b bit field). Bits 4 (block) and 8 (sprint) are retired (2026-11-25: a shield blocks by itself and
+// there is no run button): an older client may still set them and unpackButtons simply ignores them. Never reuse them.
+export const BTN = Object.freeze({ attack: 1, power: 2, sneak: 16, dodge: 32, mount: 64, respawn: 128, interact: 256 });
 export const packButtons = o => Object.entries(BTN).reduce((b, [k, bit]) => b | (o[k] ? bit : 0), 0);
 export const unpackButtons = b => Object.fromEntries(Object.entries(BTN).map(([k, bit]) => [k, !!(b & bit)]));
 
 // Unit flags in a snapshot row
-export const UF = Object.freeze({ downed: 1, mounted: 2, blocking: 4, sneaking: 8, channel: 16, returning: 32, safe: 64, casting: 128 });
+// (bit 4 was `blocking`, retired 2026-11-25 with the block button)
+export const UF = Object.freeze({ downed: 1, mounted: 2, sneaking: 8, channel: 16, returning: 32, safe: 64, casting: 128 });
 
 // Window actions (act.a) and the fields each may carry: [name, type, max]
 const S = 'string', N = 'number', B = 'boolean', A = 'array', O = 'object';
@@ -60,7 +62,7 @@ export const ACTS = {
   buy: [['npc', S, 64], ['item', S, 64]], sell: [['npc', S, 64], ['item', S, 64]], repair: [['npc', S, 64], ['item', S, 64]],
   horse: [['npc', S, 64]], respec: [['kind', S, 16]], enchant: [['item', S, 64], ['affix', S, 64]], disenchant: [['item', S, 64]],
   travel: [['shrine', S, 64]], home: [['shrine', S, 64]], respawn: [], train: [['npc', S, 64], ['cls', S, 32]],
-  rate: [['up', B], ['why', A, 6], ['text', S, 600]], chat: [['text', S, 200]],
+  chat: [['text', S, 200]],
 };
 
 const MSGS = {
@@ -72,6 +74,7 @@ const MSGS = {
   devGear: [['base', S, 24], ['style', S, 24], ['el', S, 12], ['slot', S, 8]],   // dev builds only: hold a styled magic weapon
   devDown: [],                              // dev builds only: fall where you stand (death / shrine checks)
   devGold: [['n', N], ['magic', N]],        // dev builds only: set your gold, add `magic` magic items to the bag (shop / trade checks)
+  devXp: [['levels', N]],                   // dev builds only: the experience for 1-5 more levels (level-up window checks)
   devDummy: [['n', N], ['hp', N]],          // dev builds only: still target dummies ahead (hp: a weak one, for a corpse)
   in: [['q', N], ['mx', N], ['mz', N], ['ax', N], ['ay', N], ['az', N], ['dx', N], ['dy', N], ['dz', N], ['at', A, 3], ['b', N], ['c', N], ['h', B], ['rv', S, 64], ['tg', S, 64]],
   act: [['a', S, 24]],                       // + the fields of that action (ACTS[a])
@@ -104,7 +107,7 @@ export function parseFrame(text) {
 }
 
 /** Per-type rate limits: tokens per second and a burst. Inputs come 20 a second (+ slack for a catch-up burst). */
-const RATES = { in: [30, 60], act: [12, 30], ping: [2, 4], hello: [1, 3], chars: [2, 5], charNew: [1, 3], charDel: [1, 3], worlds: [2, 5], worldNew: [0.2, 2], worldDel: [0.5, 2], join: [1, 4], leave: [1, 3], devTp: [2, 4], devGear: [4, 8], devDummy: [1, 3], devDown: [1, 3], devGold: [1, 3] };
+const RATES = { in: [30, 60], act: [12, 30], ping: [2, 4], hello: [1, 3], chars: [2, 5], charNew: [1, 3], charDel: [1, 3], worlds: [2, 5], worldNew: [0.2, 2], worldDel: [0.5, 2], join: [1, 4], leave: [1, 3], devTp: [2, 4], devGear: [4, 8], devDummy: [1, 3], devDown: [1, 3], devGold: [1, 3], devXp: [1, 3] };
 export function createBuckets(now = () => Date.now()) {
   const B = new Map();
   return {

@@ -113,7 +113,7 @@ export function createHub({ rules, W, ground, store, now = () => Date.now(), bui
       if (msg.t === 'hello') { S.helloing = hello(msg).finally(() => { S.helloing = null; }); return S.helloing; }
       if (S.helloing) await S.helloing;            // only while a hello (an account ticket) is still being checked
       if (!S.key) return fail('hello', 'Say hello first.');
-      if (S.room && (msg.t === 'in' || msg.t === 'act' || msg.t === 'devTp' || msg.t === 'devGear' || msg.t === 'devDummy' || msg.t === 'devDown' || msg.t === 'devGold')) return S.room.message(S.key, msg);   // devTp / devGear: the room ignores them outside dev builds
+      if (S.room && (msg.t === 'in' || msg.t === 'act' || msg.t === 'devTp' || msg.t === 'devGear' || msg.t === 'devDummy' || msg.t === 'devDown' || msg.t === 'devGold' || msg.t === 'devXp')) return S.room.message(S.key, msg);   // devTp / devGear: the room ignores them outside dev builds
       switch (msg.t) {
         case 'chars': return send({ t: 'chars', list: profile(S.key).chars.map(summary) });
         case 'charNew': {

@@ -13,9 +13,7 @@
     "degrees": 8
   },
   "stamina": {
-    "_doc": "Stamina pays for sprint (per second), a dodge roll, a power attack (a held swing) and every hit you block.",
-    "sprintPerSecond": 12,
-    "sprintMult": 1.55,
+    "_doc": "Stamina pays for a dodge roll and a power attack (a held swing). There is no run button and no block button (owner 2026-11-25): walking is simply faster (attributes.json base.moveSpeed) and a shield blocks on its own (`block` below).",
     "dodge": 25,
     "dodgeMetres": 4,
     "dodgeSeconds": 0.25,
@@ -23,10 +21,22 @@
     "powerAttack": 20,
     "powerHold": 0.6,
     "powerMult": 1.8,
-    "blockHit": 10,
-    "blockShield": 0.6,
-    "blockWeapon": 0.3,
     "regenDelay": 1
+  },
+  "block": {
+    "_doc": "A shield in the off hand blocks by itself, no button (owner 2026-11-25: 'block should be auto chance, more like WoW'). Each physical blow from the front half (`frontDegrees` wide, centred on where the hero faces) has the shield's `chance` (percent) to be blocked; a block stops `stops` of the blow, plus any flat blockPower from gear. Block chance from passives, talents and gear adds to the shield's own, but only while a shield is held. A quiver and a magic ward are not shields here. Guessed numbers.",
+    "frontDegrees": 180,
+    "elements": ["physical"],
+    "shields": {
+      "buckler": { "chance": 10, "stops": 0.4 },
+      "shield": { "chance": 14, "stops": 0.5 },
+      "kite_shield": { "chance": 16, "stops": 0.55 },
+      "tower_shield": { "chance": 20, "stops": 0.65 },
+      "aegis_shield": { "chance": 20, "stops": 0.7 },
+      "rune_aegis": { "chance": 22, "stops": 0.7 }
+    },
+    "fallback": "shield",
+    "maxChance": 75
   },
   "combatState": {
     "_doc": "A body is 'in combat' while a monster has it on its threat list or it hit or was hit in the last `seconds`.",

@@ -13,7 +13,7 @@ import {
 } from '../js/rules/combat.js';
 import { createWorldState, fromJSON, toJSON, flagsFor, discoverShrine, setHomeShrine, homeShrine, clearCamp, campsToRespawn, note } from '../js/rules/world-state.js';
 import { openFor, takeItem, takeGold, takeAll, chestOpenFor, chestDef, isEmptyFor, createContainer } from '../js/rules/loot.js';
-import { levelUp, pendingLevels, respec, respecPrice } from '../js/rules/levels.js';
+import { levelUp, pendingLevels, respec, respecPrice, addXp, xpToReach } from '../js/rules/levels.js';
 import { buyNode, choosePath, classDef, addToBar, spellSources } from '../js/rules/classes.js';
 import { takeTalent } from '../js/rules/talents.js';
 import { spendAttrPoint } from '../js/rules/attributes.js';
@@ -181,6 +181,13 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
         const it = rules.rpg.loot.generate(bases[i % bases.length], 'magic', 'medium', { rng: makeRng(hashStr(`${c.id}:dev:${i}:${world.t}`)), ilvl: c.level || 1, level: c.level || 1 });
         if (it) { it.id = `i${Math.floor(rng() * 1e9).toString(36)}`; c.bag.push(it); }
       }
+      changed(P);
+      return;
+    }
+    // dev builds only: the experience for `levels` more levels (the level-up window on a phone: tests/ui/levelup-look.mjs)
+    if (msg.t === 'devXp' && dev) {
+      const c = P.char, n = Math.max(1, Math.min(5, msg.levels | 0 || 1));
+      addXp(rules, c, xpToReach(rules, (c.level || 1) + pendingLevels(rules, c) + n) - (c.xp || 0));
       changed(P);
       return;
     }
@@ -422,7 +429,6 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
         if (r) { u.safeUntil = world.t + 5; P.teleport = true; say(P, `You wake at the shrine. It cost ${r.gold} gold and some wear on your gear.`, 'bad'); changed(P, { refresh: false }); }
         return;
       }
-      case 'rate': log('world.rate', { code: meta.code, char: c.name, up: !!m.up, why: (m.why || []).slice(0, 6), text: String(m.text || '').slice(0, 600) }); return say(P, 'Thank you!');
       case 'chat': { const text = String(m.text || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 200); if (text) broadcast({ t: 'say', text: `${c.name}: ${text}`, kind: 'chat' }); return; }
       default: return;
     }
@@ -513,7 +519,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     const dir = [m.dx || 0, m.dy || 0, m.dz || 0];
     const input = {
       move: { x: mx, z: mz }, aim: { origin: [m.ax || u.x, m.ay || 0, m.az || u.z], dir },
-      attack: b.attack, power: b.power, block: b.block, sprint: b.sprint, sneak: b.sneak, dodge: b.dodge, mount: b.mount,
+      attack: b.attack, power: b.power, sneak: b.sneak, dodge: b.dodge, mount: b.mount,
     };
     if (b.respawn) act(P, { a: 'respawn' });
     if (m.tg) P.target = m.tg;
@@ -534,7 +540,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     const before = new Map();
     for (const u of world.units.values()) before.set(u.id, { x: u.x, z: u.z });
     for (const P of players.values()) { const u = unitOf(P); if (u) inputs[u.id] = inputFor(P, u); }
-    // deep water: everyone in it swims (slower, no sprint or dodge); a rider slips off the horse
+    // deep water: everyone in it swims (slower, no dodge); a rider slips off the horse
     for (const u of world.units.values()) {
       u.swimming = ground.swimming(u.x, u.z);
       if (u.swimming && u.mounted) { u.mounted = false; const P = byUnit(u.id); if (P) { P.meDirty = true; say(P, 'Your horse will not swim. You slide off.', 'info'); } }
@@ -626,7 +632,6 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     let f = 0;
     if (u.downed) f |= UF.downed;
     if (u.mounted) f |= UF.mounted;
-    if (u.blocking) f |= UF.blocking;
     if (u.sneaking) f |= UF.sneaking;
     if (u.channel) f |= UF.channel;
     if (u.returning) f |= UF.returning;
@@ -707,7 +712,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
       speed: u ? speedOf(u) : s.moveSpeed, home: homeShrine(ws, P.char.id),
     }));
   }
-  /** The walking speed the sim would use now without sprint (the browser predicts its own hero with it). */
+  /** The walking speed the sim would use now (the browser predicts its own hero with it). */
   function speedOf(u) {
     let k = 1;
     for (const st of Object.values(u.statuses || {})) k += st.move || 0;

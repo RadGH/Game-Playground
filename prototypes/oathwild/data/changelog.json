@@ -1,6 +1,21 @@
 {
   "entries": [
     {
+      "id": "2026-11-25-roomier",
+      "date": "2026-11-25",
+      "title": "Room to breathe",
+      "items": [
+        "Towns have wider streets, houses stand back a little from the road, every house outside the very middle has its own fenced yard, and the edge of town spreads out. No more houses standing in the corn.",
+        "Peaceful animals (deer, sheep, cows, horses, hens, raccoons) show no name or health bar until you target or hurt them.",
+        "Shields block by themselves: a chance to stop part of a blow from the front, shown on your sheet and on the shield. The block button is gone.",
+        "No more run button: everyone walks about 15% faster. On phones the Attack, Dodge and Use buttons are bigger.",
+        "Levelling up: tap a skill to read everything about it first; a separate button spends the point.",
+        "Bridges are built properly now, and the invisible wall at the end of the Lark Bridge is gone.",
+        "Fixed: trees and rocks that blocked you but were not drawn on lower graphics settings; dark patches on the sides of timber houses.",
+        "The \"Rate this game\" option is gone."
+      ]
+    },
+    {
       "id": "2026-11-25-wildlife",
       "date": "2026-11-25",
       "title": "A wilder world",

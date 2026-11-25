@@ -27,7 +27,7 @@
   },
   "larkford": {
     "seed": 4127,
-    "radius": 62,
+    "radius": 74,
     "streets": ["lark_road", "north_track", "south_road"],
     "styles": [["timber", 4], ["stone", 2], ["plaster", 3]],
     "fences": [["wood", 4], ["hedge", 3], ["stone", 2]],

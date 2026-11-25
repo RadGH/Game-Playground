@@ -24,7 +24,7 @@
 //   modLine(rules, key, value)                   one stat change as a sentence piece ("+5% maximum health")
 
 import { fmt, fmtHp, fmtPctOf, fmtSign, fmtRange, fmtSecs, describeAffix, handText, cooldownPower, STATUS_POWER_SHARE, makeRng } from './farhold.js';
-import { sheetOf, attrTotals } from './sheet.js';
+import { sheetOf, attrTotals, shieldBlock, farholdShieldBlock } from './sheet.js';
 import { spellRow, targetKind } from './spells.js';
 import { castRow, spellSources, classDef, nodeOf, nodeKey, nodeName, nodeMaxRank, levelForRank, nodeRefusal, modsForSpell, classRefusal, classPower, rankCapAt, pointsLeft, classRules, requirementGaps } from './classes.js';
 import { talentDef, talentRefusal, rowLevel } from './talents.js';
@@ -55,7 +55,7 @@ const STAT_TEXT = {
   hpRegen: v => `${fmtSign(v)} health a second`, mpRegen: v => `${fmtSign(v)} mana a second`,
   armor: v => `${fmtSign(v)} armour`, armorPct: v => `${fmtSign(v)}% armour`, magicResist: v => `${fmtSign(v)} magic resistance`,
   dodge: v => `${fmtSign(v)}% dodge chance`, critChance: v => `${fmtSign(v)}% critical chance`, critDamage: v => `${fmtSign(v)}% critical damage`,
-  blockChance: v => `${fmtSign(v)}% block chance`, blockPower: v => `${fmtSign(v)} damage blocked`, resistAll: v => `${fmtSign(v)}% less damage taken`,
+  blockChance: v => `${fmtSign(v)}% block chance (with a shield)`, blockPower: v => `${fmtSign(v)} damage stopped by each shield block`, resistAll: v => `${fmtSign(v)}% less damage taken`,
   meleePct: v => `${fmtSign(v)}% melee damage`, rangedPct: v => `${fmtSign(v)}% bow and thrown damage`, spellPct: v => `${fmtSign(v)}% spell damage`,
   healPct: v => `${fmtSign(v)}% healing`, petPct: v => `${fmtSign(v)}% companion damage and health`,
   firePct: v => `${fmtSign(v)}% Fire damage`, icePct: v => `${fmtSign(v)}% Frost damage`, lightningPct: v => `${fmtSign(v)}% Lightning damage`,
@@ -279,7 +279,7 @@ const cap = s => String(s || '').replace(/^\w/, c => c.toUpperCase());
 function summedAffixLines(item) {
   const by = new Map();
   for (const a of item.affixes || []) {
-    if (a.stat === 'proficiency' || a.id === 'legendary_effect' || a.stat === 'castElement') continue;   // the element: casterLines says it with Oathwild's numbers
+    if (a.stat === 'proficiency' || a.id === 'legendary_effect' || a.stat === 'castElement' || farholdShieldBlock(a)) continue;   // a shield's built-in block: its Block rows say it   // the element: casterLines says it with Oathwild's numbers
     const k = a.stat;
     const cur = by.get(k);
     if (cur) cur.value += a.value; else by.set(k, { ...a });
@@ -323,6 +323,14 @@ export function describeItem(rules, char, item, { slot = null } = {}) {
     const extra = (item.affixes || []).filter(a => a.stat === 'armor').reduce((s, a) => s + a.value, 0);
     out.rows.push({ label: 'Armour', value: fmt(Math.round(item.armor + extra)) });
   }
+  const blk = shieldBlock(rules, item);
+  if (blk) {
+    // the shield blocks by itself (no button; data/combat.json block): its own chance, and this hero's with it held
+    const mine = sheetOf(rules, { ...char, gear: { ...char.gear, offhand: item } }).blockChance;
+    out.rows.push({ label: 'Block chance', value: `${fmtPctOf(blk.chance, 0)}${mine > blk.chance ? ` (${fmtPctOf(mine, 1)} for you)` : ''}` });
+    out.rows.push({ label: 'A block stops', value: `${fmtPctOf(blk.stops * 100, 0)} of the blow` });
+    out.lines.push('Blocks by itself: physical blows from the front can be blocked while it is in your off hand.');
+  }
   out.rows.push({ label: 'Weight', value: `${fmt(itemWeight(rules, item), { decimals: 1 })} kg` });
   const du = durabilityOf(rules, item);
   if (du != null) out.rows.push({ label: 'Durability', value: isBroken(rules, item) ? 'Broken — gives nothing until repaired' : `${fmt(du)} / ${fmt(rules.data.inventory.durability.max)}` });
@@ -346,7 +354,7 @@ export function describeItem(rules, char, item, { slot = null } = {}) {
     const then = sheetOf(rules, trial);
     const rows = [
       ['Health', 'maxHp', false], ['Mana', 'maxMp', false], ['Armour', 'armor', false], ['Dodge', 'dodge', false],
-      ['Critical chance', 'critChance', false], ['Weapon damage', 'melee', true], ['Bow damage', 'ranged', true],
+      ['Block chance', 'blockChance', false], ['Critical chance', 'critChance', false], ['Weapon damage', 'melee', true], ['Bow damage', 'ranged', true],
       ['Spell power', 'spellInt', true], ['Healing power', 'heal', true], ['Move speed', 'moveSpeed', false],
     ];
     const val = (s, key, isRange) => key === 'spellInt' ? avgOf(s.spell.int) : isRange ? (s[key] ? avgOf(s[key]) : null) : s[key];

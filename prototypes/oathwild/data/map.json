@@ -81,19 +81,19 @@
     { "id": "redtusk_trail", "name": "Redtusk Trail", "class": "trail", "width": 3,
       "points": [[410, -22], [416, -70], [422, -98]] },
     { "_doc": "Larkford's own streets (town round 2026-11-25): `town` marks them, `surface` is how the ground painter paves them, `shoulder` keeps the grading narrow so the hill between lanes keeps its shape. Houses line them (js/world/town.js).",
-      "id": "lark_west", "name": "West Street", "class": "road", "width": 5, "shoulder": 2, "surface": "cobble", "town": "larkford", "points": [[-277, -6], [-292, -8], [-306, -11], [-320, -14]] },
-    { "id": "lark_ring_ne", "name": "Bell Lane", "class": "road", "width": 3.6, "shoulder": 1.5, "surface": "cobble", "town": "larkford", "points": [[-275, -44], [-257, -43], [-240, -36], [-229, -22], [-225, -3]] },
-    { "id": "lark_ring_se", "name": "Well Lane", "class": "road", "width": 3.6, "shoulder": 1.5, "surface": "cobble", "town": "larkford", "points": [[-225, -3], [-227, 14], [-238, 29], [-261, 35]] },
-    { "id": "lark_ring_sw", "name": "Fiddle Lane", "class": "road", "width": 3.6, "shoulder": 1.5, "surface": "cobble", "town": "larkford", "points": [[-261, 35], [-283, 33], [-299, 20], [-305, -10]] },
-    { "id": "lark_ring_nw", "name": "Tower Lane", "class": "road", "width": 3.6, "shoulder": 1.5, "surface": "cobble", "town": "larkford", "points": [[-305, -10], [-301, -29], [-290, -41], [-275, -44]] },
-    { "id": "lark_alley_ne", "name": "", "class": "trail", "width": 2.4, "shoulder": 1, "surface": "dirt", "town": "larkford", "points": [[-249, -15], [-244, -24], [-241, -35]] },
-    { "id": "lark_alley_sw", "name": "", "class": "trail", "width": 2.4, "shoulder": 1, "surface": "dirt", "town": "larkford", "points": [[-277, 8], [-283, 15], [-292, 26]] },
-    { "id": "lark_mill_lane", "name": "Mill Lane", "class": "trail", "width": 3, "shoulder": 1.5, "surface": "dirt", "town": "larkford", "points": [[-205, -3], [-203, -22], [-207, -42]] },
-    { "id": "tw_cross", "name": "Ranger Row", "class": "trail", "width": 3.4, "shoulder": 1.5, "surface": "dirt", "town": "thornwatch", "points": [[142, -50], [158, -54], [176, -56], [196, -55]] },
-    { "id": "tw_east", "name": "", "class": "trail", "width": 3, "shoulder": 1.5, "surface": "dirt", "town": "thornwatch", "points": [[176, -56], [190, -47], [201, -36]] },
-    { "id": "crossbrook_lane", "name": "Brook Lane", "class": "trail", "width": 3.2, "shoulder": 1.5, "surface": "dirt", "town": "crossbrook", "points": [[-110, 4], [-112, 18], [-118, 30]] },
-    { "id": "crossbrook_back", "name": "", "class": "trail", "width": 3, "shoulder": 1.5, "surface": "dirt", "town": "crossbrook", "points": [[-96, 6], [-94, -8], [-100, -20]] },
-    { "id": "fernstead_lane", "name": "Sawyer's Lane", "class": "trail", "width": 3, "shoulder": 1.5, "surface": "dirt", "town": "fernstead", "points": [[270, -30], [266, -44], [258, -54]] }
+      "id": "lark_west", "name": "West Street", "class": "road", "width": 6, "shoulder": 2, "surface": "cobble", "town": "larkford", "points": [[-277, -6], [-292, -8], [-306, -11], [-320, -14]] },
+    { "id": "lark_ring_ne", "name": "Bell Lane", "class": "road", "width": 5, "shoulder": 1.5, "surface": "cobble", "town": "larkford", "points": [[-275, -44], [-257, -43], [-240, -36], [-229, -22], [-225, -3]] },
+    { "id": "lark_ring_se", "name": "Well Lane", "class": "road", "width": 5, "shoulder": 1.5, "surface": "cobble", "town": "larkford", "points": [[-225, -3], [-227, 14], [-238, 29], [-261, 35]] },
+    { "id": "lark_ring_sw", "name": "Fiddle Lane", "class": "road", "width": 5, "shoulder": 1.5, "surface": "cobble", "town": "larkford", "points": [[-261, 35], [-283, 33], [-299, 20], [-305, -10]] },
+    { "id": "lark_ring_nw", "name": "Tower Lane", "class": "road", "width": 5, "shoulder": 1.5, "surface": "cobble", "town": "larkford", "points": [[-305, -10], [-301, -29], [-290, -41], [-275, -44]] },
+    { "id": "lark_alley_ne", "name": "", "class": "trail", "width": 3.2, "shoulder": 1, "surface": "dirt", "town": "larkford", "points": [[-249, -15], [-244, -24], [-241, -35]] },
+    { "id": "lark_alley_sw", "name": "", "class": "trail", "width": 3.2, "shoulder": 1, "surface": "dirt", "town": "larkford", "points": [[-277, 8], [-283, 15], [-292, 26]] },
+    { "id": "lark_mill_lane", "name": "Mill Lane", "class": "trail", "width": 4, "shoulder": 1.5, "surface": "dirt", "town": "larkford", "points": [[-205, -3], [-203, -22], [-207, -42]] },
+    { "id": "tw_cross", "name": "Ranger Row", "class": "trail", "width": 4.5, "shoulder": 1.5, "surface": "dirt", "town": "thornwatch", "points": [[142, -50], [158, -54], [176, -56], [196, -55]] },
+    { "id": "tw_east", "name": "", "class": "trail", "width": 4, "shoulder": 1.5, "surface": "dirt", "town": "thornwatch", "points": [[176, -56], [190, -47], [201, -36]] },
+    { "id": "crossbrook_lane", "name": "Brook Lane", "class": "trail", "width": 4.5, "shoulder": 1.5, "surface": "dirt", "town": "crossbrook", "points": [[-110, 4], [-112, 18], [-118, 30]] },
+    { "id": "crossbrook_back", "name": "", "class": "trail", "width": 4.5, "shoulder": 1.5, "surface": "dirt", "town": "crossbrook", "points": [[-96, 6], [-94, -8], [-100, -20]] },
+    { "id": "fernstead_lane", "name": "Sawyer's Lane", "class": "trail", "width": 4.5, "shoulder": 1.5, "surface": "dirt", "town": "fernstead", "points": [[270, -30], [266, -44], [258, -54]] }
   ],
   "crossings": [
     { "id": "lark_bridge", "name": "Lark Bridge", "road": "lark_road", "river": "brightwater", "kind": "bridge", "art": "bridge-wood" },
@@ -104,7 +104,7 @@
 
   "places": {
     "_doc": "Every named place. `flat` = radius of ground levelled for it (`lift` raises it above marsh water). `kind`: town, landmark, camp, shrine, pass, lair. Camps and shrines share ids with data/regions.json.",
-    "larkford": { "name": "Larkford", "kind": "town", "region": "brightwater_vale", "at": [-265, -5], "radius": 60, "flat": 66, "relief": 0.6,
+    "larkford": { "name": "Larkford", "kind": "town", "region": "brightwater_vale", "at": [-265, -5], "radius": 66, "flat": 70, "relief": 0.6,
       "_pads": "level terraces (terrain.js step 3): the square, the shrine yard, the inn yard, the tower terrace; the client draws a retaining wall where a pad stands above the ground round it",
       "pads": [
         { "_doc": "the market square (fountain, stalls); `front` = houses face it", "at": [-263, -4], "size": [30, 22], "angle": 0.03, "soft": 2.5, "front": true },

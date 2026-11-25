@@ -11,7 +11,7 @@
 //   app.go(screen, opts)  'title' | 'chars' | 'creator' | 'worlds' | 'play'  (js/client/screens/<name>.js show(app, opts))
 //   app.openWindow(name, opts) → a window from js/client/ui/win-<name>.js open(app, opts) (bag, sheet, levelup, classes,
 //                         talents, spellbook, quests, trade, map, loot, talk, shop, trainer, stable, respec, travel, repair,
-//                         locked, shrine, menu, settings, report, rate, death …)
+//                         locked, shrine, menu, settings, report, death …)
 //   app.on(type, fn)      server messages and app events ('me', 'wstate', 'win', 'say', 'err', 'enter', 'leveled', 'units')
 //   app.itemRef(ref)      'bag:<id>' | 'gear:<slot>' | 'loot:<cid>:<id>' | 'shop:<id>' → an item (tooltips)
 //   app.auraUnit(id)      a unit with .statuses for describeAura · app.toast(text, kind) · app.sfx(id)

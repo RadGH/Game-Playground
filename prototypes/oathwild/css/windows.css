@@ -182,16 +182,24 @@
 .lu-left { margin-left: 8px; padding: 1px 10px; border-radius: 12px; border: 1px solid var(--edge-soft); font-family: var(--font); font-size: 13px; color: var(--ink-dim); }
 .lu-tip { margin: -4px 0 10px; font-size: 13px; }
 .lu-nodes { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px; }
-.lu-node { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 8px; padding: 6px 8px 6px 6px; border-radius: 9px; border: 1px solid var(--edge-soft); background: rgba(0, 0, 0, .2); }
+/* a node is one big button: pick it to read its card (opens under it, full width) before spending */
+.lu-node { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 10px; min-height: 52px; padding: 6px 10px 6px 6px; border-radius: 9px; border: 1px solid var(--edge-soft); background: rgba(0, 0, 0, .2); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.lu-node:hover, .lu-node.pad-focus { border-color: var(--gold); }
 .lu-node.is-added { border-color: var(--gold); background: rgba(232, 193, 112, .1); }
-.lu-node.is-locked { opacity: .7; }
-.lu-node-main { display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer; min-width: 0; }
-.lu-node-main > span { display: flex; flex-direction: column; min-width: 0; }
-.lu-node-main small { color: var(--ink-dim); font-size: 13px; }
-.lu-node-main .cls-glyph { width: 34px; height: 34px; }
-.lu-node-acts { display: flex; gap: 4px; }
-.lu-node-acts .ow-btn { min-width: 40px; padding: 0; }
-.lu-why { grid-column: 1 / -1; font-weight: 600; }
+.lu-node.is-locked { opacity: .75; }
+.lu-node.is-sel { border-color: var(--gold); outline: 1px solid var(--gold); background: rgba(232, 193, 112, .14); }
+.lu-node > .ow-icon { color: var(--gold); }
+.lu-node-text { display: flex; flex-direction: column; min-width: 0; }
+.lu-node-text small { color: var(--ink-dim); font-size: 13px; }
+.lu-node .cls-glyph { width: 34px; height: 34px; }
+.lu-why { font-weight: 600; }
+.lu-node-text .lu-why { color: var(--bad); }
+.lu-detail { grid-column: 1 / -1; padding: 0; margin: 2px 0 6px; }
+.lu-detail .tt { padding: 12px 14px; }
+.lu-detail-acts { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; padding: 0 14px 12px; }
+.lu-detail-acts .ow-btn { min-height: 46px; }
+.lu-detail-acts .lu-why { margin: 0; color: var(--bad); }
+.lu-blurb { margin: 6px 0 0; font-size: 14px; color: var(--ink-dim); }
 .lu-attrs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
 .lu-attr { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 56px; padding: 6px 4px; border-radius: 9px; border: 1px solid var(--edge-soft); background: rgba(0, 0, 0, .2); color: var(--ink); font: inherit; cursor: pointer; }
 .lu-attr small { color: var(--ink-dim); font-size: 12px; }

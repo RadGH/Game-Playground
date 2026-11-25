@@ -106,7 +106,7 @@
     ],
     "spellPerLevel": 0.11,
     "magicWeaponShare": 0.5,
-    "moveSpeed": 5.4,
+    "moveSpeed": 6.2,
     "stamina": 80,
     "staminaRegen": 14
   },

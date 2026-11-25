@@ -33,14 +33,32 @@ export const GEAR_SLOTS = Object.freeze(['weapon', 'offhand', 'head', 'chest', '
 const r2 = v => Math.round(v * 100) / 100;
 
 /** Gear Farhold should see: no broken pieces, and Oathwild-only affixes (proficiency grants) left out. */
+/** A shield's built-in Farhold block affix (Oathwild uses its own shield numbers instead). */
+export const farholdShieldBlock = a => !!a?.baseIntrinsic && (a.stat === 'block_chance' || a.stat === 'block_power');
+
 function farholdGear(rules, char) {
   const eq = {};
   for (const slot of GEAR_SLOTS) {
     const it = char.gear?.[slot];
     if (!it || isBroken(rules, it)) continue;
-    eq[slot] = it.affixes?.some(a => a.oathwild) ? { ...it, affixes: it.affixes.filter(a => !a.oathwild) } : it;
+    // a shield's built-in Farhold block ("Base Block" / "Base Block Power") is replaced by Oathwild's own shield numbers
+    // (data/combat.json block, read by shieldBlock): only rolled block affixes still add
+    eq[slot] = it.affixes?.some(a => a.oathwild || farholdShieldBlock(a)) ? { ...it, affixes: it.affixes.filter(a => !a.oathwild && !farholdShieldBlock(a)) } : it;
   }
   return eq;
+}
+
+/**
+ * A shield's own block (data/combat.json `block`): { chance, stops } for a shield, null for anything else (a quiver,
+ * a magic ward, a weapon, nothing). The one place the shield numbers are read — the sheet, the item card and the
+ * world sim all ask here.
+ */
+export function shieldBlock(rules, item) {
+  if (!item || !item.isShield || item.isMagicShield || item.baseKey === 'quiver') return null;
+  const B = rules.data.combat.block;
+  if (!B) return null;
+  const row = B.shields[item.baseKey] || B.shields[B.fallback];
+  return row ? { chance: row.chance, stops: row.stops } : null;
 }
 
 /** Sum every mods source into one bag, remembering where each part came from. */
@@ -183,6 +201,9 @@ export function sheetOf(rules, char, { form = null } = {}) {
     spell: { base: spellBase, levelK: lvlK, gear: gearSpell, pct: m('spellPct') },
   };
 
+  const shield = shieldBlock(rules, unit.equipment.offhand || null);
+  const gearAffix = stat => Object.values(unit.equipment).reduce((t, it) => t + (it.affixes || []).filter(a => a.stat === stat).reduce((u, a) => u + (Number(a.value) || 0), 0), 0);
+  const blockBonus = r2(gearAffix('block_chance') + m('blockChance'));
   const out = {
     level, attrs, A,
     maxHp, maxMp, maxStamina,
@@ -190,7 +211,12 @@ export function sheetOf(rules, char, { form = null } = {}) {
     mpRegen: r2(base.mpRegen + pp('wis', 'mpRegen') + m('mpRegen') + Math.max(0, (d.mpRegen || 1) - 1)),
     staminaRegen: r2(base.staminaRegen + m('staminaRegen')),
     armor, magicResist, dodge, critChance, critDamage,
-    blockChance: r2(d.blockChance + m('blockChance')), blockPower: Math.round(d.blockPower || 0),
+    // block: only with a shield in the off hand (owner 2026-11-25: a passive chance like WoW, no button); gear and
+    // passives add to the shield's own chance. blockBonus = what would add if a shield were held (for the sheet).
+    // (Farhold's own weapon parry, `guard`, is not a block here: only a shield blocks)
+    blockChance: shield ? Math.min(rules.data.combat.block.maxChance ?? 75, r2(shield.chance + blockBonus)) : 0,
+    blockStops: shield ? shield.stops : 0, blockBonus,
+    blockPower: shield ? Math.round(gearAffix('block_power')) : 0,
     resistAll: r2((d.resistAll || 0) + m('resistAll')),
     lifeSteal: r2((d.lifeSteal || 0) + m('lifeSteal')), thorns: r2((d.thorns || 0) + m('thorns')),
     melee, ranged: rangedRange, offhand, spell, heal, school,

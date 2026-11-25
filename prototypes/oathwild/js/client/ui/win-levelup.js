@@ -2,18 +2,19 @@
 // already have, a new base class, or an advanced / specialty class whose requirements you meet (the ones you don't
 // say what is missing on their card). Step 2: that class's path (when this level reaches it), its points on its tree,
 // and the attribute point every even level gives, with the result previewed (health, mana, stamina, new spells)
-// before Confirm. The preview runs the rules' own levelUp on a copy of the character, so what you see is what you get.
+// before Confirm. Look first, then spend (2026-11-25, #128): picking a node opens its full card under it with a
+// separate "Spend a point"; picking an attribute shows what it gives. The preview runs the rules' own levelUp on a copy of the character, so what you see is what you get.
 //
 //   app.openWindow('levelup') → .win-levelup  (step 1: .lu-class[data-cls]; step 2: .lu-node[data-node], .lu-attr[data-attr], [data-act="confirm"])
 import { openWin, esc } from './kit.js';
-import { tipAttrs } from './tip.js';
+import { tipAttrs, tipCard, describeAttr } from './tip.js';
 import { glyph } from './icons.js';
 import { nodeIcon } from './win-classes.js';
 import { classDef, classIds, classRefusal, classRules, nodeKey, nodeMaxRank, nodeRefusal, nodeName, pointsLeft, spellSources } from '../../rules/classes.js';
 import { levelUp, levelRefusal, xpToReach, levelCap } from '../../rules/levels.js';
 import { ATTRS } from '../../rules/attributes.js';
 import { sheetOf, attrTotals } from '../../rules/sheet.js';
-import { describeRequires } from '../../rules/describe.js';
+import { describeRequires, describeNode } from '../../rules/describe.js';
 import { fmt, sign, hp } from '../../../../../shared/format.js';
 
 const TIER = { base: 'Base classes', advanced: 'Advanced classes', specialty: 'Specialty classes' };
@@ -85,21 +86,34 @@ function step2(app, c, w) {
   const newSpells = Object.keys(spellSources(rules, after)).filter(id => !spellSources(rules, c)[id]);
   const delta = (label, a, b) => (b !== a ? `<div class="lu-delta"><span>${esc(label)}</span><b>${hp(a)} → ${hp(b)}</b><em class="${b > a ? 'ow-good' : 'ow-bad'}">${sign(b - a, { decimals: 0 })}</em></div>` : '');
   const paths = needPath ? `<section class="ow-section"><h3>Choose your ${esc(d.name)} path</h3><div class="lu-paths">${Object.entries(d.paths).map(([id, p]) => `<button type="button" class="lu-path ${sel.path === id ? 'is-sel' : ''}" data-path="${esc(id)}"><b>${esc(p.name)}</b><small>${esc(p.blurb || '')}</small></button>`).join('')}</div></section>` : '';
+  // READ BEFORE YOU SPEND (owner 2026-11-25, live report #128: "cannot click skills when leveling up so I have no idea
+  // what they do"): a tap / click / the pad's A on a node only picks it; its full card (the one tooltip card,
+  // describe.js describeNode on the character as it would be) opens right under it with "Spend a point" — the same
+  // look-then-commit the shop uses. Nothing is spent by picking.
+  const look = w.data.look?.cls === sel.cls ? w.data.look.id : null;
   const nodes = d.nodes.filter(n => n.level <= lvl && (!n.path || (now.paths?.[sel.cls] || sel.path) === n.path)).map(n => {
     const have = now.nodes?.[nodeKey(sel.cls, n.id)] || 0, mx = nodeMaxRank(rules, n);
     const added = (sel.spend || []).filter(x => x === n.id).length;
     const why = have < mx ? nodeRefusal(rules, now, sel.cls, n.id) : null;
-    return `<div class="lu-node ${added ? 'is-added' : ''} ${why && !added ? 'is-locked' : ''}" data-node="${esc(n.id)}">
-      <button type="button" class="lu-node-main" ${tipAttrs('node', { cls: sel.cls, id: n.id })}>${nodeIcon(n, sel.cls, 34)}<span><b>${esc(nodeName(rules, n))}</b><small>Rank ${fmt(have)} of ${fmt(mx)}${added ? ` · +${fmt(added)} now` : ''}</small></span></button>
-      <span class="lu-node-acts">${added ? `<button type="button" class="ow-btn ow-small ow-ghost" data-act="unspend" data-node="${esc(n.id)}" aria-label="Undo">${glyph('minus', 16)}</button>` : ''}${have < mx && !why ? `<button type="button" class="ow-btn ow-small" data-act="spend" data-node="${esc(n.id)}" aria-label="Add a rank">${glyph('plus', 16)}</button>` : ''}</span>
-      ${why && have < mx && !added ? `<small class="lu-why">${esc(why)}</small>` : ''}</div>`;
+    const row = `<button type="button" class="lu-node ${added ? 'is-added' : ''} ${why && !added ? 'is-locked' : ''} ${look === n.id ? 'is-sel' : ''}" data-node="${esc(n.id)}" aria-expanded="${look === n.id}">
+      ${nodeIcon(n, sel.cls, 34)}<span class="lu-node-text"><b>${esc(nodeName(rules, n))}</b><small>Rank ${fmt(have)} of ${fmt(mx)}${added ? ` · +${fmt(added)} now` : ''}${have >= mx ? ' · highest rank' : ''}</small>
+      ${why && have < mx && !added ? `<small class="lu-why">${esc(why)}</small>` : ''}</span>${glyph(look === n.id ? 'up' : 'down', 18)}</button>`;
+    if (look !== n.id) return row;
+    const cost = n.free && !have ? 0 : n.cost || 1;
+    const model = describeNode(rules, now, sel.cls, n.id);
+    const spend = have >= mx ? '<span class="ow-good">Highest rank</span>'
+      : why ? ((model.needs || []).includes(why) || JSON.stringify(model.next || '').includes(why) ? '' : `<p class="lu-why">${esc(why)}</p>`)   // said once: the card already says it
+      : `<button type="button" class="ow-btn ow-primary" data-act="spend" data-node="${esc(n.id)}">${glyph('plus', 18)}${cost === 1 ? 'Spend a point' : cost === 0 ? 'Learn (free)' : `Spend ${fmt(cost)} points`}</button>`;
+    const undo = added ? `<button type="button" class="ow-btn ow-ghost" data-act="unspend" data-node="${esc(n.id)}">${glyph('minus', 18)}Take a point back</button>` : '';
+    return `${row}<div class="lu-detail ow-card">${tipCard(model)}<div class="lu-detail-acts">${undo}${spend}</div></div>`;
   }).join('');
-  const attrs = base.gained.attrPoint ? `<section class="ow-section"><h3>Attribute point <span class="ow-dim">(every even level)</span></h3><div class="lu-attrs">${ATTRS.map(k => `<button type="button" class="lu-attr ${sel.attr === k ? 'is-sel' : ''}" data-attr="${k}" ${tipAttrs('attr', { id: k })}><small>${esc(rules.data.attributes.names[k])}</small><b>${fmt(sb.attrs[k].total)}${sel.attr === k ? ' → ' + fmt(sb.attrs[k].total + 1) : ''}</b></button>`).join('')}</div></section>` : '';
+  const attrs = base.gained.attrPoint ? `<section class="ow-section"><h3>Attribute point <span class="ow-dim">(every even level)</span></h3><div class="lu-attrs">${ATTRS.map(k => `<button type="button" class="lu-attr ${sel.attr === k ? 'is-sel' : ''}" data-attr="${k}"><small>${esc(rules.data.attributes.names[k])}</small><b>${fmt(sb.attrs[k].total)}${sel.attr === k ? ' → ' + fmt(sb.attrs[k].total + 1) : ''}</b></button>`).join('')}</div>
+    ${sel.attr ? `<div class="lu-detail ow-card">${tipCard(describeAttr(rules, after, sel.attr))}</div>` : '<p class="ow-dim lu-tip">Tap one to see what it gives; you can change your mind until you confirm.</p>'}</section>` : '';
   return `<div class="lu-step2">
-    <div class="lu-head ow-card"><div><h3>${esc(d.name)} ${fmt(lvl)}</h3><small class="ow-dim">Character level ${fmt(c.level)} → ${fmt(c.level + 1)}</small></div>
+    <div class="lu-head ow-card"><div><h3>${esc(d.name)} ${fmt(lvl)}</h3><small class="ow-dim">Character level ${fmt(c.level)} → ${fmt(c.level + 1)}</small>${d.blurb ? `<p class="lu-blurb">${esc(d.blurb)}</p>` : ''}</div>
       <button type="button" class="ow-btn ow-ghost ow-small" data-act="back">${glyph('back', 16)}Another class</button></div>
     ${paths}
-    <section class="ow-section"><h3>${esc(d.name)} points <span class="lu-left ${left ? 'has' : ''}">${fmt(left)} left</span></h3><p class="ow-dim lu-tip">Points left over stay for later (the Classes window).</p><div class="lu-nodes">${nodes || '<p class="ow-dim">Nothing to buy at this level.</p>'}</div></section>
+    <section class="ow-section"><h3>${esc(d.name)} points <span class="lu-left ${left ? 'has' : ''}">${fmt(left)} left</span></h3><p class="ow-dim lu-tip">Tap one to read what it does, then spend. Points left over stay for later (the Classes window).</p><div class="lu-nodes">${nodes || '<p class="ow-dim">Nothing to buy at this level.</p>'}</div></section>
     ${attrs}
     <section class="ow-section lu-preview"><h3>After this level</h3>
       ${delta('Health', sb.maxHp, sa.maxHp)}${delta('Mana', sb.maxMp, sa.maxMp)}${delta('Stamina', sb.maxStamina, sa.maxStamina)}
@@ -132,9 +146,16 @@ function foot(app, el, w) {
     w.render();
   });
   const B = w.body;
-  B.querySelectorAll('.lu-class').forEach(b => { b.onclick = () => { if (b.getAttribute('aria-disabled')) return; w.data.pick = { cls: b.dataset.cls, path: null, spend: [], attr: null }; w.render(); }; });
-  B.querySelector('[data-act="back"]')?.addEventListener('click', () => { w.data.pick = null; w.render(); });
-  B.querySelectorAll('.lu-path').forEach(b => { b.onclick = () => { sel.path = b.dataset.path; sel.spend = []; w.render(); }; });
+  B.querySelectorAll('.lu-class').forEach(b => { b.onclick = () => { if (b.getAttribute('aria-disabled')) return; w.data.pick = { cls: b.dataset.cls, path: null, spend: [], attr: null }; w.data.look = null; w.render(); }; });
+  B.querySelector('[data-act="back"]')?.addEventListener('click', () => { w.data.pick = null; w.data.look = null; w.render(); });
+  B.querySelectorAll('.lu-path').forEach(b => { b.onclick = () => { sel.path = b.dataset.path; sel.spend = []; w.data.look = null; w.render(); }; });
+  // pick a node to read it (again to close it); its card opens under it with the spend button
+  B.querySelectorAll('.lu-node').forEach(b => { b.onclick = () => {
+    const open = w.data.look?.cls === sel.cls && w.data.look.id === b.dataset.node;
+    w.data.look = open ? null : { cls: sel.cls, id: b.dataset.node };
+    w.render();
+    if (!open) w.body.querySelector('.lu-detail')?.scrollIntoView({ block: 'nearest' });
+  }; });
   B.querySelectorAll('[data-act="spend"]').forEach(b => { b.onclick = () => { sel.spend = [...(sel.spend || []), b.dataset.node]; w.render(); }; });
   B.querySelectorAll('[data-act="unspend"]').forEach(b => { b.onclick = () => { const i = sel.spend.lastIndexOf(b.dataset.node); if (i >= 0) sel.spend.splice(i, 1); w.render(); }; });
   B.querySelectorAll('.lu-attr').forEach(b => { b.onclick = () => { sel.attr = sel.attr === b.dataset.attr ? null : b.dataset.attr; w.render(); }; });

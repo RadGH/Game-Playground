@@ -1,5 +1,5 @@
 // The ☰ menu (Esc / Start / the ☰ button in the world; also on the title): back to the game, your character's
-// windows, settings and controls, What's new, report a bug, rate the game, credits, sign in or out, leave the world.
+// windows, settings and controls, What's new, report a bug, credits, sign in or out, leave the world.
 // opts.where = 'play' (in a world) | 'title' — the world-only rows are left out on the title.
 import { openWin, esc, ask, closeAll } from './kit.js';
 import { glyph, uiIcon } from './icons.js';
@@ -31,7 +31,6 @@ export function open(app, opts = {}) {
           ${row('controls', glyph(dev === 'pad' ? 'pad' : 'keyboard', 20), 'Controls')}
           ${row('news', glyph('news', 20), "What's new", app.news?.unread ? '<span class="ow-menu-dot"></span>' : '')}
           ${row('report', uiIcon('feedback', 20), 'Report a bug')}
-          ${row('rate', glyph('star', 20), 'Rate the game')}
           ${row('credits', glyph('info', 20), 'Credits')}
           ${row('account', glyph('people', 20), user ? `Signed in as ${user.username || user.name || 'you'} — sign out` : 'Sign in (optional)')}
           ${where === 'play' ? row('leave', glyph('door', 20), 'Leave the world') : ''}
@@ -46,7 +45,6 @@ export function open(app, opts = {}) {
     if (m === 'controls') return app.openWindow('controls');
     if (m === 'news') return app.news?.open();
     if (m === 'report') { w.close(); return app.openWindow('report'); }
-    if (m === 'rate') return app.openWindow('rate');
     if (m === 'credits') { credits = credits || createCredits({ game: 'oathwild', made: 'Oathwild by Radley Sustaire.' }); return credits.open(); }
     if (m === 'account') {
       const user = await account.user().catch(() => null);

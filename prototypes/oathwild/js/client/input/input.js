@@ -1,6 +1,6 @@
 // One input layer for keyboard + mouse, controller and touch, read through the binding table (bindings.js).
 //   const I = createInput({ canvas, bindings, blocked })   blocked() = true while a window/menu has the input
-//   I.held('sprint')  I.take('dodge') (a press, once)  I.moveAxis() → {x, y}  I.takeLook() → {dx, dy} (mouse px / pad)
+//   I.held('attack')  I.take('dodge') (a press, once)  I.moveAxis() → {x, y}  I.takeLook() → {dx, dy} (mouse px / pad)
 //   I.device  'keys' | 'pad' | 'touch' (the last one used: hints follow it)   I.lock() / I.unlock() pointer lock
 //   I.touch   filled by the on-screen controls (ui/touch.js): { move:{x,y}, look:{dx,dy}, held:Set, presses:Set }
 // The mouse pointer hides while keys or a pad are in use and shows again on mouse move (lessons rule 71).

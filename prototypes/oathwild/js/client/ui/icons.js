@@ -40,6 +40,8 @@ const LINE = {
   horse: '<path d="M6 19v-5c0-3 2-6 5-7l2-3 1 3c2 1 4 3 4 6v1h-3l-1-2-2 1v6M10 19v-4"/>',
   info: '<circle cx="12" cy="12" r="8"/><path d="M12 11v5M12 8v.5"/>',
   door: '<path d="M6 20V5a1 1 0 0 1 1-1h8v16M4 20h16M12 12v.5"/>',
+  dodge: '<path d="M4 17c5 0 7-9 13-9M14 5l3 3-3 3M4 12.5h3.5M4 8.5h2"/>',
+  hand: '<path d="M8 13V6.5a1.5 1.5 0 0 1 3 0V11M11 10V5a1.5 1.5 0 0 1 3 0v6M14 10.5V7a1.5 1.5 0 0 1 3 0v6c0 4-2.5 7-6 7-3 0-4.6-1.8-6-4.6L3.5 12a1.4 1.4 0 0 1 2.4-1.4L8 13"/>',
 };
 
 /** A small line glyph (24 viewBox, currentColor). */

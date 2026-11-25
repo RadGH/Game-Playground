@@ -1,6 +1,6 @@
 /* Oathwild — world windows: talk, shop, services + shrine, quests, map, menu, settings, report, rate.
    Base kit and tokens: css/oathwild.css. Every class here is named after its window (ow-talk-, ow-shop-, ow-svc-,
-   ow-q-, ow-map-, ow-menu-, ow-set-, ow-rep-, ow-rate-) so nothing collides with another stylesheet. */
+   ow-q-, ow-map-, ow-menu-, ow-set-, ow-rep-) so nothing collides with another stylesheet. */
 
 /* ---- item cells (shop, repair, enchanting) ---- */
 .ow-shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
@@ -207,18 +207,11 @@
 .ow-set-wait { color: var(--ink); border-style: dashed; }
 .ow-set-fixed { color: var(--ink-dim); font-weight: 700; }
 
-/* ---- report and rate ---- */
-.ow-rep-label, .ow-rate-h { display: block; font-weight: 800; margin: 0 0 8px; color: var(--gold); font-size: 15px; font-family: var(--font); }
-.ow-rep-text, .ow-rate-text { min-height: 120px; padding: 10px 12px; resize: vertical; }
-.ow-rate-text { min-height: 80px; }
+/* ---- report a bug ---- */
+.ow-rep-label { display: block; font-weight: 800; margin: 0 0 8px; color: var(--gold); font-size: 15px; font-family: var(--font); }
+.ow-rep-text { min-height: 120px; padding: 10px 12px; resize: vertical; }
 .ow-rep-note { font-size: 14px; }
-.ow-rep-msg, .ow-rate-msg { min-height: 1.3em; font-weight: 700; color: var(--gold); margin: 8px 0 0; }
-.ow-rate-thumbs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-.ow-rate-thumb { display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 96px; justify-content: center; border-radius: 10px; border: 1px solid var(--edge-soft); background: rgba(0, 0, 0, .2); color: var(--ink); font-weight: 800; cursor: pointer; }
-.ow-rate-thumb:hover, .ow-rate-thumb.pad-focus { border-color: var(--gold); }
-.ow-rate-why { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-.ow-rate-chip { min-height: 44px; padding: 0 14px; border-radius: 22px; border: 1px solid var(--edge); background: rgba(0, 0, 0, .2); color: var(--ink); font-weight: 700; cursor: pointer; }
-.ow-rate-on { border-color: var(--gold); background: rgba(232, 193, 112, .14); color: var(--gold); }
+.ow-rep-msg { min-height: 1.3em; font-weight: 700; color: var(--gold); margin: 8px 0 0; }
 
 /* ---- phones ---- */
 @media (max-width: 720px) {

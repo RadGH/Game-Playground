@@ -94,11 +94,18 @@ Honeyed Words (Speech 25), Runic Hand (Enchanting 50), the elemental Affinities,
 
 - **Health**: 46 + each class level's growth + Constitution + gear. **Mana**: 20 + class growth + your best casting
   attribute + gear. Out of a fight both come back at 4% a second.
-- **Stamina** (Guessed numbers, `data/combat.json`): 80 + Constitution + Dexterity; sprinting costs 12 a second,
-  a dodge roll 25 (4 m, a third of a second where nothing hits you), a power attack 20 (×1.8 damage), each blocked
-  hit 10 (a shield takes 60% off, a weapon parry 30%). It comes back 1 second after you last spent it.
+- **Walking**: 6.2 m/s (`data/attributes.json` base.moveSpeed; was 5.4 with a Run button until 2026-11-25 — owner
+  #127: no run, a bit faster). A horse is ×1.65 (about 10.2 m/s, the same as before).
+- **Stamina** (Guessed numbers, `data/combat.json`): 80 + Constitution + Dexterity; a dodge roll 25 (4 m, a third of
+  a second where nothing hits you), a power attack 20 (×1.8 damage). It comes back 1 second after you last spent it.
+- **Block** (owner #126, 2026-11-25: "block should be auto chance, more like WoW"; `data/combat.json` block): no
+  button. A shield in the off hand blocks a physical blow from the front half by itself: buckler 10% (stops 40% of
+  the blow), shield 14% (50%), kite shield 16% (55%), tower shield 20% (65%), aegis 20% (70%), rune aegis 22% (70%).
+  Block chance from passives (Shield Wall…), talents and rolled gear adds to the shield's own (at most 75%) and only
+  counts while a shield is held; rolled "blocks N damage" gear stops that much more. Shows on the character sheet and
+  the shield's card; a block shows "Blocked N" over you, a guard pose and a shield sound.
 - **Carry weight**: 70 kg + Strength + Constitution. Every item has a weight (`data/inventory.json`). Over the limit
-  you walk at half speed and cannot sprint. No bag slots.
+  you walk at half speed. No bag slots.
 
 ## Damage, the numbers on a tooltip
 

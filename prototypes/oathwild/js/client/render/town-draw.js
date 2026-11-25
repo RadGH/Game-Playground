@@ -30,7 +30,7 @@ export const SWATCH = {
   roof: ['#9c4f39', '#6b7584', '#71503a', '#b39457'],      // terracotta, slate, shingle, straw thatch
   stone: 8, stoneDark: 9, timberDark: 10, timber: 11, soil: 12, leaf: 13, cloth: 14, water: 15,
 };
-const EXTRA = { 8: '#9b9285', 9: '#6e675e', 10: '#5c3f29', 11: '#86603f', 12: '#5e4631', 13: '#5d7c39', 14: '#9b3b33', 15: '#5f93b4' };
+const EXTRA = { 8: '#9b9285', 9: '#6e675e', 10: '#7a5638', 11: '#936c47', 12: '#5e4631', 13: '#5d7c39', 14: '#9b3b33', 15: '#5f93b4' };
 function paintPalette(img) {
   const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
   const x = c.getContext('2d'); x.drawImage(img, 0, 0);
@@ -84,7 +84,7 @@ async function paletteImage(kit) {
 
 // ---------------------------------------------------------------- wall families per style
 const FAMILY = {
-  timber: { ground: ['wall', 'wall-window-shutters', 'wall-window-glass', 'wall'], upper: ['wall-detail-cross', 'wall-window-shutters', 'wall-detail-diagonal', 'wall-window-shutters', 'wall-detail-horizontal'], door: 'wall-door', plain: 'wall-detail-horizontal', small: 'wall-window-small' },
+  timber: { ground: ['wall', 'wall-window-shutters', 'wall-window-glass', 'wall'], upper: ['wall-detail-cross', 'wall-window-shutters', 'wall-detail-diagonal', 'wall-window-shutters', 'wall-detail-horizontal'], door: 'wall-door', plain: 'wall', small: 'wall-window-small' },   // (plain sides are plaster: the dark wood-panel piece read as black squares, owner #135)
   stone: { ground: ['wall', 'wall-window-stone', 'wall', 'wall-window-small'], upper: ['wall-window-stone', 'wall', 'wall-window-round', 'wall-window-stone'], door: 'wall-door', plain: 'wall', small: 'wall-window-small' },
   plaster: { ground: ['wall-window-glass', 'wall', 'wall-window-shutters'], upper: ['wall-window-shutters', 'wall', 'wall-window-glass', 'wall-window-shutters'], door: 'wall-door', plain: 'wall', small: 'wall-window-small' },
   wood: { ground: ['wall-wood', 'wall-wood-window-small', 'wall-wood-window-shutters'], upper: ['wall-wood-window-shutters', 'wall-wood-detail-cross', 'wall-wood'], door: 'wall-wood-door', plain: 'wall-wood', small: 'wall-wood-window-small' },
@@ -292,3 +292,6 @@ export async function createTownView({ T, plan, quality = 'medium', tileGroup, c
   }
   return { stats: { houses, chunks: chunks.size, triangles: Math.round(triangles), drawCalls }, leftovers, meshes, materials: mats };
 }
+
+// Shared with js/client/render/bridge-draw.js (bridge newels and lantern posts): the same piece loader and painted palette.
+export { piece as kenneyPiece, paletteImage as kenneyPaletteImage, paintPalette as kenneyPalette };

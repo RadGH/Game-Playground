@@ -66,7 +66,7 @@ prototypes/oathwild/
   Training talent or an item of the Bulwark) and 15 Strength (you have 11).").
 - **World sim** (`js/rules/combat.js`, server at 20 Hz): `createWorld(rules, { seed })`, `addPlayer(world, char)`,
   `spawnCamp / spawnRoamers / spawnMonster`, `events = step(world, dt, inputs)` with input per player `{ move:{x,z},
-  aim:{origin,dir}, attack, power, block, sprint, sneak, dodge, cast:{ slot | spell, at, held }, revive, respawn, mount
+  aim:{origin,dir}, attack, power, sneak, dodge, cast:{ slot | spell, at, held }, revive, respawn, mount
   }`; `snapshot(world)` for the network; `respawnPlayer`, `refreshPlayer` after gear/points change. Event kinds are
   listed at the top of combat.js. Loot containers land in `world.containers` (`loot.openFor / takeItem / takeGold`).
 - **Tooltip model**: `describe.describeSpell / describeItem / describeAura / describeTalent / describeNode /

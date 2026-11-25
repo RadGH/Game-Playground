@@ -131,7 +131,9 @@ export async function show(app, { enter = null } = {}) {
       case 'hit': {
         const p = posOf(e.to);
         if (p) app.play.hud.number(p[0], p[1], p[2], `${e.crit ? '' : ''}${fmt(e.amount)}${e.crit ? '!' : ''}`, e.to === me ? 'hurt' : e.from === me ? (e.crit ? 'crit' : 'mine') : 'other');
-        actors.get(e.to)?.act('hit');
+        // a shield took part of it (blocks by itself: js/rules/combat.js blockRoll): a "Blocked" word over the hero
+        if (p && e.blocked > 0 && e.to === me) { app.play.hud.number(p[0], p[1] + 0.5, p[2], `Blocked ${fmt(e.blocked)}`, 'block'); app.sfx('status.block.apply'); }
+        actors.get(e.to)?.act(e.blocked > 0 && S.units.get(e.to)?.info.k === 'player' ? 'block' : 'hit');
         const from = S.units.get(e.from);
         if (from && !e.spell && !e.vis && performance.now() / 1000 - (from.swungAt || 0) > 0.35) { from.swungAt = performance.now() / 1000; from.actedAt = from.swungAt; actors.get(e.from)?.act('attack'); }
         if (p && e.spell) fx.impact(p.map((v, i) => (i === 1 ? v + 1.1 : v)), e.spell, e.element, 1);
@@ -368,10 +370,8 @@ export async function show(app, { enter = null } = {}) {
     const auras = S.auras.get(S.meId) || [];
     const held = auras.some(a => ['root', 'sleep', 'stagger', 'stasis', 'transmuted'].includes(a.id));
     const attack = (input.held('attack') || input.take('attackTap')) && !S.aimingSlot && placeSlot == null;
-    const block = input.held('block') && S.aimingSlot == null;
-    const sprint = input.held('sprint');
     pred.step({ x: dx, z: dz }, {
-      canMove: !me.downed && !held, speed: app.me?.speed || 5, sprint, block, sneak: sneakOn, dodge, stamina: me.st, overloaded: !!app.me?.sheet?.overloaded,
+      canMove: !me.downed && !held, speed: app.me?.speed || 5, sneak: sneakOn, dodge, stamina: me.st,
       mounted: !!(me.fl & UF.mounted), facingDir: aim?.dir || f,
     }, STEP);
     const hero = { x: pred.state.x, z: pred.state.z };
@@ -380,7 +380,7 @@ export async function show(app, { enter = null } = {}) {
     if (S.autoRevive && (manual || it?.kind !== 'revive' || it.id !== S.autoRevive)) S.autoRevive = null;
     const reviving = it?.kind === 'revive' && (input.held('interact') || S.autoRevive === it.id);
     const msg = { t: 'in', q: pred.state.q, mx: round(dx), mz: round(dz), ax: round(hero.x), ay: round(heightAt(hero.x, hero.z) + 1.4), az: round(hero.z), dx: round(d.x), dy: 0, dz: round(d.z),
-      b: packButtons({ attack: attack || power, power, block, sprint, sneak: sneakOn, dodge, mount, respawn, interact: reviving }), c: -1, h: channelSlot != null };
+      b: packButtons({ attack: attack || power, power, sneak: sneakOn, dodge, mount, respawn, interact: reviving }), c: -1, h: channelSlot != null };
     if (pending) { msg.c = pending.slot; if (pending.at) msg.at = pending.at.map(round); msg.h = !!pending.held || channelSlot != null; pending = null; }
     else if ((attack || power) && aim && LANDS.has(myPlan()?.shape)) msg.at = landAt().map(round);     // where a lobbed wand / tome / staff attack lands
     if (reviving) msg.rv = it.id;
@@ -494,7 +494,7 @@ export async function show(app, { enter = null } = {}) {
       let face = u.facing;
       if (u.id === S.meId) {
         const moving = u.speed > 0.6;
-        const fighting = nowS - lastAttackAt < 1.2 || nowS - lastCastAt < 1.2 || S.aimingSlot != null || input.held('block');
+        const fighting = nowS - lastAttackAt < 1.2 || nowS - lastCastAt < 1.2 || S.aimingSlot != null;
         if (fighting && aim) face = Math.atan2(aim.dir.x, aim.dir.z);
         else if (moving) face = Math.atan2(u.x - (u.prevDrawX ?? u.x), u.z - (u.prevDrawZ ?? u.z)) || u.drawFacing || 0;
         else face = u.drawFacing ?? face;
@@ -543,7 +543,11 @@ export async function show(app, { enter = null } = {}) {
       if (d > tagR && u.info.k !== 'player') continue;
       if (!actors.shown(u.id)) continue;                 // no floating name over a body that is still loading
       const cls = u.info.k === 'player' ? 'ally' : u.hostile ? `${u.info.tp ? 'calm' : 'foe'} ${u.info.rank || ''}${S.target === u.id ? ' tgt' : ''}` : 'pet';   // calm: an animal that will not start a fight
-      S.tags.push({ id: u.id, x: u.x, y: u.y, z: u.z, h: actors.get(u.id)?.height || 1.8, name: u.info.k === 'monster' ? `${u.info.n} · ${u.info.lv}` : u.info.n, cls, hp: u.hostile || u.info.k === 'player' ? u.hp / Math.max(1, u.mh) : null });
+      // a peaceful animal is scenery until you deal with it (owner 2026-11-25, "like wow … neutral, no healthbar"): no
+      // tag at all, its name only while targeted, its bar only once it is hurt
+      const calm = u.info.tp && u.hostile;
+      if (calm && S.target !== u.id && u.hp >= u.mh) continue;
+      S.tags.push({ id: u.id, x: u.x, y: u.y, z: u.z, h: actors.get(u.id)?.height || 1.8, name: u.info.k === 'monster' ? (calm ? u.info.n : `${u.info.n} · ${u.info.lv}`) : u.info.n, cls, hp: calm ? (u.hp < u.mh ? u.hp / Math.max(1, u.mh) : null) : u.hostile || u.info.k === 'player' ? u.hp / Math.max(1, u.mh) : null });
     }
     for (const n of S.npcs) if (Math.hypot(n.x - pred.state.x, n.z - pred.state.z) < 22 && actors.shown('npc:' + n.id)) S.tags.push({ id: 'npc:' + n.id, x: n.x, y: heightAt(n.x, n.z), z: n.z, h: 1.85, name: `${n.mark ? n.mark + ' ' : ''}${n.name}`, cls: `npc${n.mark ? ' quest' : ''}`, hp: null });
     if ((slowTick += dt) > 0.5) {

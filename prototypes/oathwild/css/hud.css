@@ -93,6 +93,7 @@ body[data-device="touch"] .hud-key:empty, .hud-key:empty { display: none; }
 .hud-num { position: absolute; left: 0; top: 0; font-weight: 800; font-size: 18px; color: #fff; text-shadow: 0 2px 3px #000; will-change: transform, opacity; }
 .hud-num.mine { color: #fff3c8; } .hud-num.crit { color: #ffcf4a; font-size: 24px; } .hud-num.hurt { color: #ff6a50; } .hud-num.heal { color: #8fe07a; }
 .hud-num.other { color: #d8d0c0; font-size: 14px; } .hud-num.miss { color: #c8c8d8; font-size: 14px; } .hud-num.tick { color: #ffa080; font-size: 14px; }
+.hud-num.block { color: #9fc8ff; font-size: 16px; }
 .hud-net { position: absolute; left: 50%; top: calc(60px + var(--safe-t)); transform: translateX(-50%); padding: 6px 12px; border-radius: 8px; background: rgba(60, 20, 10, .85); border: 1px solid #9a4a3a; font-weight: 700; }
 /* touch */
 .hud-touch { position: absolute; inset: 0; pointer-events: none; }
@@ -103,10 +104,12 @@ body.ow-touch .hud-prompt { min-height: 48px; padding: 8px 14px; font-size: 16px
 .hud-stick { position: absolute; left: calc(26px + var(--safe-l)); bottom: calc(var(--tb-lift, 96px) + var(--safe-b)); width: 132px; height: 132px; border-radius: 50%; background: rgba(26, 21, 15, .35); border: 2px solid rgba(232, 193, 112, .4); touch-action: none; }
 .hud-stick i { position: absolute; left: 41px; top: 41px; width: 50px; height: 50px; border-radius: 50%; background: rgba(232, 193, 112, .55); }
 .hud-look { position: absolute; left: 45%; right: 0; top: 30%; bottom: 0; touch-action: none; pointer-events: auto; }
-.hud-tbtns { position: absolute; right: calc(14px + var(--safe-r)); bottom: calc(var(--tb-lift, 96px) + var(--safe-b)); display: grid; grid-template-columns: repeat(3, 60px); gap: 8px; }
-.hud-tb { min-height: 52px; border-radius: 12px; border: 1px solid var(--edge); background: rgba(26, 21, 15, .75); font-weight: 800; font-size: 14px; color: var(--ink); touch-action: none; }
-.hud-tb.big { grid-row: span 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border-radius: 30px; border: 2px solid rgba(232, 193, 112, .7); background: radial-gradient(circle at 50% 35%, rgba(176, 74, 44, .92), rgba(110, 36, 22, .9)); box-shadow: 0 2px 10px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 220, 180, .25); font-size: 15px; color: #fff3e0; }
-.hud-tb.big svg { width: 30px; height: 30px; }
+/* Dodge and Use stacked on the left of one big round Attack under the right thumb (Block and Run went 2026-11-25) */
+.hud-tbtns { position: absolute; right: calc(14px + var(--safe-r)); bottom: calc(var(--tb-lift, 96px) + var(--safe-b)); display: grid; grid-template-columns: 76px 100px; grid-template-rows: 60px 60px; gap: 10px; align-items: stretch; }
+.hud-tb { min-height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 14px; border: 1px solid var(--edge); background: rgba(26, 21, 15, .75); font-weight: 800; font-size: 14px; color: var(--ink); touch-action: none; }
+.hud-tb svg { width: 22px; height: 22px; }
+.hud-tb.big { grid-column: 2; grid-row: 1 / span 2; align-self: center; height: 100px; gap: 4px; border-radius: 50%; border: 2px solid rgba(232, 193, 112, .7); background: radial-gradient(circle at 50% 35%, rgba(176, 74, 44, .92), rgba(110, 36, 22, .9)); box-shadow: 0 2px 10px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 220, 180, .25); font-size: 15px; color: #fff3e0; }
+.hud-tb.big svg { width: 34px; height: 34px; }
 .hud-tb:active { transform: scale(.96); filter: brightness(1.15); }
 /* phones: no rows of empty dashed slots — only the spells you have (assign more in the Spellbook) */
 body.ow-touch .hud-slot.empty { display: none; }

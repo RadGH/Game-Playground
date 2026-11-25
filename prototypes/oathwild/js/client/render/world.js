@@ -1,5 +1,5 @@
 // The world drawn from the same data the server walks (lessons rule 22): the ground, water, worn roads, town paving and
-// fields come from ground.js (grass tufts: grass.js), bridge decks at their deck height, props from data/placements.json, trees and decor from js/world/scatter.js.
+// fields come from ground.js (grass tufts: grass.js), bridges from bridge-draw.js (decks at their deck height), props from data/placements.json, trees and decor from js/world/scatter.js.
 // Everything is cut into 128 m tiles so the camera only draws what is near (fog hides the edge).
 //
 // Art: data/art.json. A "ready" scenery piece loads its GLB (avatar-3d/fal models); a "kit" piece is built from unit
@@ -15,6 +15,7 @@ import { kitModel } from './kit-props.js';
 import { createKitDraw } from './kit-draw.js';
 import { createTrees } from './trees.js';
 import { createTownView } from './town-draw.js';
+import { createBridgeView } from './bridge-draw.js';
 import { addContactShade } from './contact.js';
 import { findChimney } from './chimney.js';
 import { ATMOS } from './atmos.js';
@@ -44,28 +45,9 @@ export function createWorldView(view, { T, placements, art, scattered, book, tow
   const ground = createGround(view, { T, placements, art, cfg: GROUND_CFG, quality, tileGroup, scattered });
   const grass = createGrass(view, ground, GROUND_CFG.grass[quality] || GROUND_CFG.grass.medium, { quality });
 
-  // ---------------------------------------------------------------- bridges (decks at their deck height)
-  const deckMat = new THREE.MeshLambertMaterial({ color: '#8e6440' }), stoneMat = new THREE.MeshLambertMaterial({ color: '#8a8478' });
-  for (const b of T.bridges) {
-    if (b.kind !== 'bridge') continue;
-    const len = Math.hypot(b.b[0] - b.a[0], b.b[1] - b.a[1]) + 1.5;
-    const stone = /stone/.test(b.art || b.id);
-    const g = new THREE.Group();
-    const deck = new THREE.Mesh(new THREE.BoxGeometry(b.width, 0.35, len), stone ? stoneMat : deckMat);
-    deck.position.y = -0.18; deck.castShadow = deck.receiveShadow = true; g.add(deck);
-    for (const s of [-1, 1]) {
-      const rail = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.9, len), stone ? stoneMat : deckMat);
-      rail.position.set(s * (b.width / 2 - 0.1), 0.45, 0); rail.castShadow = true; g.add(rail);
-      for (let p = -len / 2 + 0.5; p <= len / 2 - 0.4; p += stone ? len : 2.2) {
-        const post = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.2, 0.3), stone ? stoneMat : deckMat); post.position.set(s * (b.width / 2 - 0.1), 0.3, p); g.add(post);
-      }
-    }
-    const mid = [(b.a[0] + b.b[0]) / 2, (b.a[1] + b.b[1]) / 2];
-    g.position.set(mid[0], b.deck, mid[1]);
-    g.rotation.y = Math.atan2(b.b[0] - b.a[0], b.b[1] - b.a[1]);
-    g.name = b.name;
-    tileGroup(mid[0], mid[1]).add(g);
-  }
+  // ---------------------------------------------------------------- bridges: built from js/world/bridge-plan.js (the deck drawn
+  // is the deck walked, tests/world/bridges.test.mjs) by bridge-draw.js — planks, railings, trestles; arches, parapets
+  createBridgeView({ T, tileGroup });
 
   // ---------------------------------------------------------------- props (placements) and the shapes for placeholders
   const matCache = new Map();
@@ -218,8 +200,13 @@ export function createWorldView(view, { T, placements, art, scattered, book, tow
   const bushes = (scattered.decor || []).filter(d => BUSH_AS[d.art]).map(d => ({ ...d, art: BUSH_AS[d.art], h: UNDERSTORY_SPECIES[BUSH_AS[d.art]].h * (d.scale || 1) }));
   const under = [...bushes, ...(scattered.understory || [])].filter((t, n) => (n % 100) / 100 < keepU);
   pending.push(createTrees({ trees: [...(scattered.trees || []).filter((t, n) => (n % 100) / 100 < Q[0]), ...under], tileGroup: quality === 'low' ? () => root : tileGroup, cell: TILE * (quality === 'low' ? 4 : 2), quality }).then(v => { treeView = v; }));
+  // every tree is solid on the server, so the ones the full renderer leaves out on lower settings are still drawn — as
+  // the cheap kit tree at their own height (owner report #132, 2026-11-25: "invisible collision here")
+  instance((scattered.trees || []).filter((t, n) => (n % 100) / 100 >= Q[0]).map(t => { const a = artById.get(t.art); const sz = a?.size || a?.placeholder?.size || [5, 9, 4]; return { ...t, scale: (t.h || sz[1]) / sz[1] }; }), () => true);
   // (Low: 512 m blocks hang on the root — a far tile's hiding must not take a block whose near edge is beside you)
-  instance((scattered.decor || []).filter(d => !BUSH_AS[d.art]), n => (n % 100) / 100 < Q[1]);
+  // (anything solid is always drawn: a rock you bump into is never thinned away)
+  const decorList = (scattered.decor || []).filter(d => !BUSH_AS[d.art]);
+  instance(decorList, n => decorList[n].solid || (n % 100) / 100 < Q[1]);
 
   // ---------------------------------------------------------------- per frame
   let wt = 0;

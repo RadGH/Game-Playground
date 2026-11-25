@@ -31,8 +31,9 @@ export function itemCell(it, { ref, price = null, sell = false, act = '', disabl
   const rar = it.rarity && it.rarity !== 'normal' ? it.rarity : 'normal';
   const g = KIND_GLYPH[it.type] || (it.isShield ? 'shield' : 'info');
   // `pick`: the look-then-commit windows (a tap picks it; the pane commits). `sel` = the picked one ('is-' classes are
-  // left out of kit.js keepView's keys, so the focus and scroll survive picking)
-  return `<button type="button" class="ow-wcell rar-${esc(rar)}${disabled ? ' ow-wcell-off' : ''}${sel ? ' is-sel' : ''}" ${act} ${pick ? `data-pick="${esc(pick)}" aria-pressed="${sel}"` : ''} ${tip ? tipAttrs('item', { ref, price, sell: sell ? 1 : null }) : ''}>
+  // left out of kit.js keepView's keys, so the focus and scroll survive picking); the picked one has no hover card —
+  // its pane already shows it (two copies of one card, and the late hover counted as the window changing by itself)
+  return `<button type="button" class="ow-wcell rar-${esc(rar)}${disabled ? ' ow-wcell-off' : ''}${sel ? ' is-sel' : ''}" ${act} ${pick ? `data-pick="${esc(pick)}" aria-pressed="${sel}"` : ''} ${tip && !sel ? tipAttrs('item', { ref, price, sell: sell ? 1 : null }) : ''}>
     <span class="ow-wcell-ico">${glyph(it.isShield ? 'shield' : g, 22)}</span>
     <span class="ow-wcell-name">${esc(it.name)}</span>
     ${price != null ? `<span class="ow-wcell-price${disabled ? ' ow-bad' : ''}">${glyph('coin', 14)}${fmt(price)}</span>` : ''}

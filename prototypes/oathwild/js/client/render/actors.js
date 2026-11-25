@@ -5,7 +5,7 @@
 //
 //   const A = createActors(view, { rules, art, T, ground, quality })
 //   A.unit(id, info)  → actor (made the first time; info = the server's unit info)   A.drop(id, { die })
-//   actor.place(x, y, z, facing, dt, speed)   actor.act('attack'|'cast'|'hit'|'death'|'channel')   A.update(dt)
+//   actor.place(x, y, z, facing, dt, speed)   actor.act('attack'|'cast'|'hit'|'block'|'death'|'channel')   A.update(dt)
 //   A.npc(npc) — a person from data/npcs.json (drawn while near)
 // Bodies load in the background; until then a simple 3D figure of the right size stands in (no 2D anything).
 import * as THREE from 'three';
@@ -109,12 +109,12 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
       act(kind) {
         const b = a.formBody || a.body;
         if (!b) return;
-        const map = { attack: 'attack', cast: 'cast', hit: 'hit', death: 'death', channel: 'channel', dodge: 'roll' };
+        const map = { attack: 'attack', cast: 'cast', hit: 'hit', death: 'death', channel: 'channel', dodge: 'roll', block: 'ready' };   // a shield block: a snap into guard
         const clip = map[kind] || kind;
         if (kind === 'death') { a.dead = true; a.once = 'death'; b.play('death', 0.15); a.clip = 'death'; return; }
         if (a.dead) return;
-        if (kind === 'hit' && a.once && performance.now() < a.onceUntil) return;   // a hit never cuts off a swing
-        b.play(clip, 0.12); a.clip = clip; a.once = clip; a.onceUntil = performance.now() + (kind === 'hit' ? 350 : 650);
+        if ((kind === 'hit' || kind === 'block') && a.once && performance.now() < a.onceUntil) return;   // a hit never cuts off a swing
+        b.play(clip, 0.12); a.clip = clip; a.once = clip; a.onceUntil = performance.now() + (kind === 'hit' || kind === 'block' ? 350 : 650);
       },
       revive() { a.dead = false; a.once = null; a.clip = null; },
       dispose() { scene.remove(root); if (a.body?.isTabard) { tabardsLive--; a.body.dispose?.(); } },

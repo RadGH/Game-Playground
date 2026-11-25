@@ -63,13 +63,13 @@ function render(app, body, w) {
         <h3 class="sheet-sub">Classes</h3><div class="sheet-classes">${classes || '<p class="ow-dim">None yet.</p>'}</div>
         <h3 class="sheet-sub">Skills</h3><div class="sheet-skills">${skills}</div></section>
       <section class="ow-section"><h3>Body</h3><div class="sheet-stats">
-        ${stat('Health', hp(s.maxHp))}${stat('Mana', hp(s.maxMp))}${stat('Stamina', hp(s.maxStamina), 'Sprinting, dodging, power attacks and blocking use stamina.')}
+        ${stat('Health', hp(s.maxHp))}${stat('Mana', hp(s.maxMp))}${stat('Stamina', hp(s.maxStamina), 'Dodging and power attacks use stamina.')}
         ${stat('Health back', `${fmt(s.hpRegen, { decimals: 1 })}/s`)}${stat('Mana back', `${fmt(s.mpRegen, { decimals: 1 })}/s`)}${stat('Stamina back', `${fmt(s.staminaRegen, { decimals: 1 })}/s`)}
         ${stat('Move speed', `${fmt(s.moveSpeed, { decimals: 1 })} m/s`)}${stat('Carry', `${fmt(s.carried, { decimals: 1 })} / ${fmt(s.carry)} kg`)}
       </div>
       <h3 class="sheet-sub">Defence</h3><div class="sheet-stats">
         ${stat('Armour', fmt(s.armor), 'Takes a share off every physical hit.')}${stat('Magic resistance', fmt(s.magicResist), 'Takes a share off every spell that hits you.')}
-        ${stat('Dodge', pctOf(s.dodge, 1))}${stat('Block chance', pctOf(s.blockChance, 1))}${s.resistAll ? stat('All resistances', `${sign(s.resistAll, { decimals: 1 })}%`) : ''}${s.thorns ? stat('Thorns', fmt(s.thorns)) : ''}
+        ${stat('Dodge', pctOf(s.dodge, 1))}${s.blockChance > 0 ? stat('Block chance', pctOf(s.blockChance, 1), `Your shield blocks by itself: a physical blow from the front is stopped by ${pctOf(s.blockStops * 100, 0)}${s.blockPower ? ` plus ${fmt(s.blockPower)}` : ''}.`) : stat('Block chance', 'Needs a shield', `Hold a shield in your off hand and it blocks physical blows from the front by itself${s.blockBonus > 0 ? ` (you would add ${pctOf(s.blockBonus, 1)} to its chance)` : ''}.`)}${s.resistAll ? stat('All resistances', `${sign(s.resistAll, { decimals: 1 })}%`) : ''}${s.thorns ? stat('Thorns', fmt(s.thorns)) : ''}
       </div>
       <h3 class="sheet-sub">Attack</h3><div class="sheet-stats">
         ${stat('Weapon damage', range(s.melee[0], s.melee[1]))}${s.ranged ? stat('Bow damage', range(s.ranged[0], s.ranged[1])) : ''}${s.offhand ? stat('Off-hand damage', range(s.offhand[0], s.offhand[1])) : ''}

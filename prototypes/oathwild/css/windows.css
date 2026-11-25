@@ -51,6 +51,7 @@
 .ow-win.win-loot { margin-left: auto; margin-right: 4vw; width: min(400px, 100%); max-height: min(560px, 100%); }
 .loot-list { display: flex; flex-direction: column; gap: 6px; }
 .loot-row { display: flex; align-items: center; gap: 8px; }
+.loot-from { margin-left: auto; padding: 2px 8px; border-radius: 6px; background: rgba(0, 0, 0, .3); color: var(--ink-dim); font-size: 13px; white-space: nowrap; }   /* which body, when several are open */
 .loot-row .loot-cell { flex: 1; }
 .loot-gold { padding: 6px 6px; border-radius: 8px; border: 1px solid var(--gold-deep); background: rgba(232, 193, 112, .07); }
 .loot-gold .bag-txt { flex: 1; }

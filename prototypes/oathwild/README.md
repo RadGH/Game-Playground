@@ -159,6 +159,20 @@ smithy hammering and market chatter in the town's sound; a tall landmark (a temp
 
 ## History
 
+- 2026-11-25 — wildlife round (owner: "Rings should be easier to equip … When everything is looted, automatically close
+  the popup. Include group/aoe looting like thousand vale. There is too few enemies in the world, except for large packs
+  of goblins I cannot kill. Where are all the wild life? … Keep filling out the world"). Jewellery never asks a level
+  (`proficiency.js levelGate`). Area looting: one window for every body of yours within 10 m (`server/world.js
+  lootGroup`), Take all / Take gold sweep them, emptied bodies cleared, the window closes itself (`win-loot.js`;
+  `tests/net/world.test.mjs` area looting). Wildlife: Quaternius CC0 animated animals (`playground/assets/quaternius/
+  animals`, `data/critters.json`, `js/client/render/critters.js`) as red deer, wild horses, raccoons, sheep, hens, cows,
+  a field bull, barn rats, cave bats (`data/monsters.json`, `temper` skittish / defensive / hostile); every creature with
+  nobody to fight wanders and grazes round its home (`combat.js wanderStep`, combat.json monsters.wander*); 23 new roam
+  zones (40 in all). Camps of 5+ split into pairs on a ring with the boss in the middle and a shorter notice
+  (combat.json `campGroups`); the Goblin Warren laid out by hand (pickets, shamans, warchief). Hamlets Crossbrook and
+  Fernstead (map.json places + towns.json, the town planner); travellers on the long roads (`town.js planTravellers`).
+  Checks: `tests/ui/wildlife-shots.mjs`.
+
 - 2026-11-25 — town round (owner: shops buy on a tap on phones; names → jobs; "the town is still very empty"; enchanting
   as the player's trade skill; motionless town; shopkeepers' spots + idles; "brainstorm … detailed terrain, realistic
   paths and alley ways"). See "Towns" above. Shops and repairs: tap = look (the one item card) + a separate Buy / Sell /

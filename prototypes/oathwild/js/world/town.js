@@ -80,7 +80,33 @@ const DEFAULTS = {
 export function planTowns(T, towns = {}, { placements = null, npcs = null } = {}) {
   const out = { houses: [], yards: [], fences: [], walls: [], props: [], boxes: [], circles: [], trees: [], spots: {}, graph: { nodes: [], edges: [] }, villagers: [], trace: globalThis.__townTrace ? {} : null };
   for (const [id, def] of Object.entries(towns)) if (!id.startsWith('_')) planOne(T, id, def, out, { placements, npcs });
+  if (towns._travellers) planTravellers(T, towns._travellers, out);
   return out;
+}
+
+/**
+ * Travellers on the long roads (owner 2026-11-25: "The world still feels empty"): nameless walkers like the villagers,
+ * going out along a road and back, a rest at each end, kept to one side. Same plan everywhere (villagers.js draws them
+ * near the camera on the world clock).
+ */
+function planTravellers(T, cfg, out) {
+  const r = rng32(cfg.seed || 77);
+  for (const [li, leg] of (cfg.roads || []).entries()) {
+    const rd = T.roads.find(x => x.id === leg.road); if (!rd) continue;
+    const len = rd.pts[rd.pts.length - 1].s, from = leg.from ?? 0, to = Math.min(len, leg.to ?? len);
+    for (let n = 0; n < (leg.count || 2); n++) {
+      const side = (r() < 0.5 ? 1 : -1) * (rd.width / 2 - 0.7), route = [];
+      const step = 8, there = [];
+      for (let s = from; s <= to; s += step) { const p = along(rd.pts, s); there.push({ x: r2(p.x - p.tz * side), z: r2(p.z + p.tx * side), wait: 0 }); }
+      const back = [];
+      for (let s = to; s >= from; s -= step) { const p = along(rd.pts, s); back.push({ x: r2(p.x + p.tz * side), z: r2(p.z - p.tx * side), wait: 0 }); }
+      if (there.length < 2) continue;
+      there[there.length - 1].wait = r2(15 + r() * 30); there[there.length - 1].act = 'talk';
+      back[back.length - 1].wait = r2(15 + r() * 30); back[back.length - 1].act = 'idle';
+      route.push(...there, ...back);
+      out.villagers.push({ id: `road${li + 1}_${leg.road}_${n + 1}`, town: 'road', seed: Math.floor(r() * 1e9), speed: r2(1.2 + r() * 0.3), route, traveller: true });
+    }
+  }
 }
 
 function planOne(T, id, def, out, { placements, npcs }) {

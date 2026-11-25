@@ -139,6 +139,12 @@ export function spawnMonster(world, monsterId, level, at, { rank = 'normal', cam
   if (side !== 'monsters') u.dmg = u.dmg.map(v => Math.max(1, Math.round(v * power)));
   else u.dmg = u.dmg.map(v => Math.max(1, Math.round(v * MS.dmg * (rank === 'boss' ? 1.2 : 1))));
   u.aggroRange = def.aggroRange ?? CF(rules).monsters.noticeDefault;
+  // temperament (owner 2026-11-25, "where are all the wild life?"): hostile hunts you; defensive never starts a fight
+  // but answers a blow (cattle, boars); skittish never fights and runs from a hero who comes close (deer, raccoons)
+  u.temper = def.temper || 'hostile';
+  if (u.temper !== 'hostile') u.aggroRange = 0;
+  u.fleeRange = def.fleeRange ?? CF(rules).monsters.fleeDefault ?? 10;
+  u.wander = side === 'monsters' ? (def.wander ?? (camp ? CF(rules).monsters.wanderCamp ?? 3 : CF(rules).monsters.wanderDefault ?? 9)) : 0;
   world.units.set(id, u);
   if (camp) world.camps[camp] = (world.camps[camp] || 0) + 1;
   return u;
@@ -887,10 +893,30 @@ function stepMonster(world, m, dt) {
   }
   const lookup = id => world.units.get(id);
   const usable = e => e && e.alive && !e.downed && e.side !== m.side;
+  // a skittish animal never fights: a hero close by (or a blow) sends it running, away from them and back toward home
+  if (m.temper === 'skittish') {
+    const near = players.filter(p => dist(p, m) < (p.sneaking ? m.fleeRange * 0.5 : m.fleeRange)).sort((a, b) => dist(a, m) - dist(b, m))[0];
+    if (near || (m.threat?.size && world.t < (m.fleeUntil || 0) + 4)) {
+      if (near || m.threat?.size) m.fleeUntil = world.t + 3;
+      const from = near || [...(m.threat?.keys() || [])].map(lookup).find(Boolean);
+      if (from && ctl.move) {
+        let ax = m.x - from.x, az = m.z - from.z; const L = Math.hypot(ax, az) || 1; ax /= L; az /= L;
+        if (dist(m, m.home) > m.wander * 2) { const hx = m.home.x - m.x, hz = m.home.z - m.z, H = Math.hypot(hx, hz) || 1; ax = ax * 0.4 + hx / H * 0.6; az = az * 0.4 + hz / H * 0.6; }
+        m.facing = Math.atan2(ax, az);
+        m.x += ax * m.speed * dt; m.z += az * m.speed * dt;
+        if (dist(m, m.home) > C.leashMetres) { clearThreat(m); m.returning = true; }
+      }
+      return;
+    }
+    if (m.threat?.size) clearThreat(m);
+    wanderStep(world, m, dt, ctl);
+    return;
+  }
   const target = m.threat?.size ? pickTarget(m, lookup, usable, dt) : null;
   if (!target) {
-    if (dist(m, m.home) > 1 && ctl.move) moveToward(m, m.home, m.speed * 1.4 * dt);
-    else if (m.threat?.size) clearThreat(m);
+    if (m.threat?.size) { clearThreat(m); m.wanderTo = null; }
+    if (m.wander > 0) wanderStep(world, m, dt, ctl);
+    else if (dist(m, m.home) > 1 && ctl.move) moveToward(m, m.home, m.speed * 1.4 * dt);
     return;
   }
   m.lastFight = world.t;
@@ -917,6 +943,28 @@ function stepMonster(world, m, dt) {
   } else {
     hit(world, m, target, { mult: 1, element: 'physical', applies: m.onHit ? m.onHit.map(id => ({ id, over: {} })) : [] }, { basic: true });
   }
+}
+
+/**
+ * Idle life: a creature with nobody to fight ambles to a spot within `wander` metres of home, stands there a while
+ * (grazing, sniffing), and picks another. Walk pace (the client draws the walk clip). Same world seed = same walk.
+ */
+function wanderStep(world, m, dt, ctl) {
+  if (!ctl.move) return;
+  if (m.wanderWait > 0) { m.wanderWait -= dt; return; }
+  if (!m.wanderTo) {
+    const a = world.rng() * Math.PI * 2, r = m.wander * Math.sqrt(world.rng());
+    m.wanderTo = { x: m.home.x + Math.cos(a) * r, z: m.home.z + Math.sin(a) * r };
+  }
+  // the server's ground check refused the last step (a wall, a river, a cliff): give that spot up after a moment
+  if (m.wanderFrom && Math.hypot(m.x - m.wanderFrom.x, m.z - m.wanderFrom.z) < 0.01) m.wanderStuck = (m.wanderStuck || 0) + dt; else m.wanderStuck = 0;
+  const d = dist(m, m.wanderTo);
+  if (d < 0.4 || m.wanderStuck > 1) { m.wanderTo = null; m.wanderStuck = 0; m.wanderFrom = null; m.wanderWait = 3 + world.rng() * 8; return; }
+  m.facing = Math.atan2(m.wanderTo.x - m.x, m.wanderTo.z - m.z);
+  const before = { x: m.x, z: m.z };
+  moveToward(m, m.wanderTo, Math.min(1.4, m.speed * 0.32) * dt);
+  // (the server's ground check may refuse the step — a wall, a river: give that spot up)
+  m.wanderFrom = before;
 }
 
 function moveToward(u, p, len) {
@@ -983,10 +1031,33 @@ export function spawnCamp(world, campId) {
   const [lo, hi] = c.levels;
   const out = [];
   let i = 0;
-  for (const sp of c.spawns) for (let n = 0; n < sp.count; n++, i++) {
-    const level = sp.rank === 'boss' ? hi : lo + Math.floor(world.rng() * (hi - lo + 1));
-    const ang = (i / 6) * Math.PI * 2, r = sp.rank === 'boss' ? 0 : 4 + (i % 2) * 2;
-    out.push(spawnMonster(world, sp.id, level, [c.at[0] + Math.cos(ang) * r, c.at[1] + Math.sin(ang) * r], { rank: sp.rank || 'normal', camp: campId, home: [c.at[0] + Math.cos(ang) * r, c.at[1] + Math.sin(ang) * r] }));
+  // a spawn row may stand apart (`at` = [dx, dz] from the camp's middle) with its own `levels`: a camp of small groups
+  // a hero can take one at a time (owner 2026-11-25: "large packs of goblins I cannot kill"); `notice` = the camp's
+  // own noticing distance (shorter, so the groups do not all come at once)
+  // a big camp with no hand layout splits itself (combat.json campGroups): pairs on a ring round the middle, the boss
+  // in it, a shorter noticing distance — five or more at one spot all came at once
+  const G = CF(world.rules).campGroups || {};
+  const total = c.spawns.reduce((t, sp) => t + sp.count, 0);
+  let spawns = c.spawns, notice = c.notice;
+  if (!c.spawns.some(sp => sp.at) && G.from && total >= G.from) {
+    const flat = []; for (const sp of c.spawns) for (let n = 0; n < sp.count; n++) flat.push({ ...sp, count: 1 });
+    const minions = flat.filter(sp => sp.rank !== 'boss'), groups = Math.ceil(minions.length / (G.size || 2));
+    spawns = [
+      ...minions.map((sp, k) => { const g = Math.floor(k / (G.size || 2)), a = (g / groups) * Math.PI * 2 + 0.4; return { ...sp, at: [Math.cos(a) * (G.ring || 16) + (k % 2) * 1.8, Math.sin(a) * (G.ring || 16)] }; }),
+      ...flat.filter(sp => sp.rank === 'boss').map(sp => ({ ...sp, at: [0, 0] })),
+    ];
+    notice = notice ?? G.notice;
+  }
+  for (const sp of spawns) for (let n = 0; n < sp.count; n++, i++) {
+    const [l0, l1] = sp.levels || [lo, hi];
+    const level = sp.rank === 'boss' ? l1 : l0 + Math.floor(world.rng() * (l1 - l0 + 1));
+    const ang = sp.at ? (n / Math.max(1, sp.count)) * Math.PI * 2 : (i / 6) * Math.PI * 2;
+    const r = sp.at ? (sp.count > 1 ? 1.8 : 0) : sp.rank === 'boss' ? 0 : 4 + (i % 2) * 2;
+    const cx = c.at[0] + (sp.at?.[0] || 0), cz = c.at[1] + (sp.at?.[1] || 0);
+    const at = [cx + Math.cos(ang) * r, cz + Math.sin(ang) * r];
+    const u = spawnMonster(world, sp.id, level, at, { rank: sp.rank || 'normal', camp: campId, home: at });
+    if (u && notice) u.aggroRange = notice;
+    out.push(u);
   }
   return out.filter(Boolean);
 }

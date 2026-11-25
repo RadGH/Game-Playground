@@ -95,7 +95,7 @@ const app = {
     const [kind, a, b] = String(ref).split(':');
     if (kind === 'bag') return (c.bag || []).find(it => it.id === a) || null;
     if (kind === 'gear') return c.gear?.[a] || null;
-    if (kind === 'loot') { const w = app.lastLoot; return w && w.id === a ? (w.items || []).find(it => it.id === b) || null : null; }
+    if (kind === 'loot') { const w = app.lastLoot; return w ? (w.items || []).find(it => it.id === b) || null : null; }   // (area loot: items of several bodies)
     if (kind === 'shop') return (app.lastShop?.stock || []).map(s => s.item).find(it => it.id === a) || null;
     if (kind === 'item') return app.itemCache?.get(a) || null;
     return null;
@@ -121,10 +121,12 @@ window.gameEye = {
 async function boot() {
   stopPageZoom();
   progress(0.05, 'Reading the old oaths…');
-  const [rules, art] = await Promise.all([
+  const [rules, art, critters] = await Promise.all([
     bootRules({ seed: 7 }),
     fetch(new URL('../../data/art.json', import.meta.url)).then(r => r.json()),
+    fetch(new URL('../../data/critters.json', import.meta.url)).then(r => r.json()).catch(() => ({ critters: {} })),
   ]);
+  art.critters = critters.critters;                  // Quaternius animals (render/critters.js) beside the fal bodies
   app.rules = rules; app.art = art;
   progress(0.3, 'Raising the hills…');
   await new Promise(r => setTimeout(r, 0));

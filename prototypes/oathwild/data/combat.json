@@ -39,6 +39,9 @@
   "monsters": {
     "leashMetres": 45,
     "noticeDefault": 18,
+    "wanderDefault": 9,
+    "wanderCamp": 3,
+    "fleeDefault": 10,
     "thinkRadius": 90,
     "corpseSeconds": 300,
     "rangedKeep": 0.8
@@ -80,5 +83,6 @@
   "formSwing": {
     "_doc": "Seconds between a shape's basic attacks (a wolf's bite, a bear's swipe) before haste; each attack lands the shape's `hits`.",
     "every": 1.1
-  }
+  },
+  "campGroups": { "_doc": "A camp of `from` or more monsters with no hand layout (regions.json spawn `at`) splits itself: groups of `size` on a ring `ring` metres round the middle, the boss in the middle, noticing at `notice` metres (owner 2026-11-25: large packs a hero cannot kill). js/rules/combat.js spawnCamp is the reader.", "from": 5, "size": 2, "ring": 16, "notice": 13 }
 }

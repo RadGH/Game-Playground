@@ -15,6 +15,16 @@
     "crafter": [["Fixing_Kneeling", 5, 8], ["idle", 3, 4], ["PickUp_Table", 2.2, 2.2], ["idle", 2, 3]],
     "watcher": [["idle", 6, 10], ["talk", 2, 4]]
   },
+  "_travellers": {
+    "_doc": "Nameless travellers walking the long roads out and back (js/world/town.js planTravellers): `from` / `to` = metres along the road. Drawn near the camera only.",
+    "seed": 77,
+    "roads": [
+      { "road": "lark_road", "from": 70, "to": 470, "count": 4 },
+      { "road": "lark_road", "from": 470, "to": 820, "count": 3 },
+      { "road": "south_road", "from": 60, "to": 300, "count": 2 },
+      { "road": "north_track", "from": 60, "to": 220, "count": 1 }
+    ]
+  },
   "larkford": {
     "seed": 4127,
     "radius": 62,
@@ -112,5 +122,24 @@
       { "at": [160, -61.5], "kind": "stall", "face": 3.14 },
       { "at": [186, -70], "kind": "square", "face": 1.57 }
     ]
+  },
+  "crossbrook": {
+    "seed": 3301, "radius": 30,
+    "streets": ["lark_road"],
+    "styles": [["timber", 3], ["plaster", 2], ["stone", 1]],
+    "fences": [["wood", 3], ["hedge", 2]],
+    "villagers": 4, "lampEvery": 22, "treeCount": 6,
+    "rules": { "widths": [[2, 4], [3, 2]], "depths": [[2, 2], [3, 1]], "storeys": [[1, 3], [2, 3]], "gapEvery": [2, 3], "outskirts": 0.8 },
+    "stops": [{ "at": [-104, -1], "kind": "square", "face": 3.14 }]
+  },
+  "fernstead": {
+    "seed": 919, "radius": 28,
+    "streets": ["lark_road"],
+    "styles": [["wood", 1]],
+    "fences": [["wood", 3]],
+    "villagers": 3, "lampEvery": 24, "treeCount": 8,
+    "rules": { "widths": [[2, 3], [3, 1]], "depths": [[2, 1]], "storeys": [[1, 3], [2, 1]], "gapEvery": [2, 3], "outskirts": 0.8 },
+    "yardProps": [["woodpile", 4], ["crate", 2], ["barrel", 2], ["workbench", 2]],
+    "stops": [{ "at": [276, -24], "kind": "square", "face": 0 }]
   }
 }

@@ -33,7 +33,7 @@
     "twoHandedStr": { "heavy": 13, "light": 0, "magic": 0 }
   },
   "attrNeeds": {
-    "_doc": "Owner 2026-11-25: gear is gated by attributes and training, hardly by level. need = base + floor(item level / perLevels), met by the HIGHER of the listed attributes (a hybrid wears its kind of gear: leather by Dexterity or Wisdom, a sword by Strength or Dexterity), counted WITHOUT the item being replaced. base 0 = no need. `levelGate`: only these rarities keep a level requirement, at item level minus the number (never below 1); every other item has none. js/rules/proficiency.js itemNeeds is the one reader. Numbers Guessed 2026-11-25 (tests/rules/combat.test.mjs: every class still wins its level-10 fight in its own kind of gear).",
+    "_doc": "Owner 2026-11-25: gear is gated by attributes and training, hardly by level. need = base + floor(item level / perLevels), met by the HIGHER of the listed attributes (a hybrid wears its kind of gear: leather by Dexterity or Wisdom, a sword by Strength or Dexterity), counted WITHOUT the item being replaced. base 0 = no need. `levelGate`: only these rarities keep a level requirement, at item level minus the number (never below 1); every other item has none, and rings and amulets never have one. js/rules/proficiency.js itemNeeds is the one reader. Numbers Guessed 2026-11-25 (tests/rules/combat.test.mjs: every class still wins its level-10 fight in its own kind of gear).",
     "perLevels": 4,
     "armour": { "cloth": { "stat": ["int", "wis"], "base": 0 }, "leather": { "stat": ["dex", "wis"], "base": 9 }, "mail": { "stat": ["str", "con"], "base": 11 }, "plate": { "stat": ["str"], "base": 13 } },
     "weapons": {

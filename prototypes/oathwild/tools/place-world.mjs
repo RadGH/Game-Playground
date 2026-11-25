@@ -146,6 +146,35 @@ const ROAM = [
   { id: 'barrow_dead', name: 'the restless dead', kind: 'roamer', at: [466, -212], radius: 24, levels: [7, 8], packs: 3, roster: [{ id: 'skeleton_warrior', weight: 3, pack: [1, 2] }, { id: 'hollowborn', weight: 1, pack: [1, 1] }] },
   { id: 'east_downs_stones', name: 'earth elementals', kind: 'roamer', at: [552, -140], radius: 30, levels: [8, 9], packs: 1, roster: [{ id: 'earth_elemental', weight: 1, pack: [1, 1] }] },
   { id: 'ogre_slopes', name: 'orcs below Ogre Hill', kind: 'roamer', at: [490, 96], radius: 26, levels: [8, 9], packs: 2, roster: [{ id: 'orc_grunt', weight: 1, pack: [1, 2] }] },
+  // ---- wildlife round 2026-11-25 (owner: "There is too few enemies in the world … Where are all the wild life?"):
+  // grazing and fleeing animals everywhere (temperament in data/monsters.json), farm animals and vermin round
+  // Larkford, more of the fighting kind in both regions, bats where the dead are
+  // Brightwater Vale: farmland and the town's edge (level 1)
+  { id: 'lark_pasture', name: 'the town pasture', kind: 'wildlife', at: [-350, -64], radius: 26, levels: [1, 1], packs: 3, roster: [{ id: 'cow', weight: 3, pack: [1, 2] }, { id: 'field_bull', weight: 1, pack: [1, 1] }] },
+  { id: 'fold_sheep', name: "the shepherd's flock", kind: 'wildlife', at: [-158, -126], radius: 22, levels: [1, 1], packs: 3, roster: [{ id: 'sheep', weight: 1, pack: [2, 4] }] },
+  { id: 'farm_hens', name: 'hens round the farmhouse', kind: 'wildlife', at: [-300, 84], radius: 12, levels: [1, 1], packs: 2, roster: [{ id: 'hen', weight: 1, pack: [2, 3] }] },
+  { id: 'mill_rats', name: 'rats at the mill', kind: 'roamer', at: [-198, -62], radius: 12, levels: [1, 1], packs: 2, roster: [{ id: 'barn_rat', weight: 1, pack: [1, 2] }] },
+  { id: 'field_rats', name: 'rats in the corn', kind: 'roamer', at: [-340, 30], radius: 18, levels: [1, 2], packs: 2, roster: [{ id: 'barn_rat', weight: 1, pack: [1, 3] }] },
+  // Brightwater Vale: the wild (levels 1-4)
+  { id: 'west_vale_deer', name: 'deer of the west vale', kind: 'wildlife', at: [-480, -110], radius: 45, levels: [1, 2], packs: 3, roster: [{ id: 'red_deer', weight: 1, pack: [1, 3] }] },
+  { id: 'hartwood_deer', name: 'Hartwood deer', kind: 'wildlife', at: [-40, -240], radius: 40, levels: [1, 2], packs: 3, roster: [{ id: 'red_deer', weight: 2, pack: [1, 3] }, { id: 'raccoon', weight: 1, pack: [1, 2] }] },
+  { id: 'riverbank_raccoons', name: 'raccoons on the riverbank', kind: 'wildlife', at: [-168, 40], radius: 30, levels: [1, 1], packs: 3, roster: [{ id: 'raccoon', weight: 1, pack: [1, 2] }] },
+  { id: 'downs_horses', name: 'wild horses on the downs', kind: 'wildlife', at: [-170, -300], radius: 45, levels: [2, 3], packs: 2, roster: [{ id: 'wild_horse', weight: 1, pack: [2, 4] }] },
+  { id: 'south_meadow_deer', name: 'deer of the south meadows', kind: 'wildlife', at: [-300, 190], radius: 40, levels: [2, 3], packs: 3, roster: [{ id: 'red_deer', weight: 2, pack: [1, 3] }, { id: 'bristleback', weight: 1, pack: [1, 1] }] },
+  { id: 'ford_meadow', name: 'the ford meadows', kind: 'wildlife', at: [-20, 130], radius: 36, levels: [2, 3], packs: 3, roster: [{ id: 'red_deer', weight: 2, pack: [1, 2] }, { id: 'vale_wolf', weight: 1, pack: [1, 2] }, { id: 'raccoon', weight: 1, pack: [1, 1] }] },
+  { id: 'north_hartwood_wolves', name: 'wolves of the north Hartwood', kind: 'wildlife', at: [10, -290], radius: 40, levels: [2, 3], packs: 3, roster: [{ id: 'vale_wolf', weight: 1, pack: [1, 3] }] },
+  { id: 'south_boars', name: 'boars of Bramble Rise', kind: 'wildlife', at: [-250, 280], radius: 40, levels: [2, 3], packs: 3, roster: [{ id: 'bristleback', weight: 2, pack: [1, 2] }, { id: 'red_deer', weight: 1, pack: [1, 2] }] },
+  { id: 'goblin_hills_wolves', name: 'wolves of the Gobbet Hills', kind: 'wildlife', at: [-470, -260], radius: 40, levels: [2, 4], packs: 2, roster: [{ id: 'vale_wolf', weight: 1, pack: [1, 2] }, { id: 'bristleback', weight: 1, pack: [1, 1] }] },
+  { id: 'old_hill_bats', name: 'bats of the Old Hill', kind: 'roamer', at: [-420, 250], radius: 22, levels: [4, 5], packs: 2, roster: [{ id: 'cave_bat', weight: 1, pack: [1, 3] }] },
+  // Thornmere Wilds (levels 5-9)
+  { id: 'wilds_deer', name: 'deer of the Wilds', kind: 'wildlife', at: [120, -200], radius: 45, levels: [5, 6], packs: 3, roster: [{ id: 'red_deer', weight: 2, pack: [1, 3] }, { id: 'raccoon', weight: 1, pack: [1, 2] }] },
+  { id: 'wilds_horses', name: 'wild horses of the Wilds', kind: 'wildlife', at: [300, -320], radius: 45, levels: [6, 7], packs: 2, roster: [{ id: 'wild_horse', weight: 1, pack: [2, 4] }] },
+  { id: 'east_glades', name: 'the east glades', kind: 'wildlife', at: [330, -60], radius: 40, levels: [6, 7], packs: 3, roster: [{ id: 'red_deer', weight: 2, pack: [1, 3] }, { id: 'thornmere_wolf', weight: 1, pack: [2, 3] }] },
+  { id: 'pinewood_wolves', name: 'pinewood wolves', kind: 'wildlife', at: [380, -190], radius: 40, levels: [7, 8], packs: 3, roster: [{ id: 'thornmere_wolf', weight: 2, pack: [2, 3] }, { id: 'brown_bear', weight: 1, pack: [1, 1] }] },
+  { id: 'mire_edge', name: 'the mire edge', kind: 'wildlife', at: [340, 210], radius: 40, levels: [7, 8], packs: 3, roster: [{ id: 'bristleback', weight: 2, pack: [1, 2] }, { id: 'red_deer', weight: 1, pack: [1, 2] }, { id: 'cave_bat', weight: 1, pack: [2, 3] }] },
+  { id: 'barrow_bats', name: 'barrow bats', kind: 'roamer', at: [476, -196], radius: 24, levels: [7, 8], packs: 2, roster: [{ id: 'cave_bat', weight: 1, pack: [2, 3] }] },
+  { id: 'ruin_bats', name: 'bats of the drowned ruins', kind: 'roamer', at: [470, 230], radius: 24, levels: [8, 9], packs: 2, roster: [{ id: 'cave_bat', weight: 1, pack: [2, 3] }] },
+  { id: 'gate_glade_deer', name: 'deer below the gate', kind: 'wildlife', at: [190, 40], radius: 34, levels: [5, 6], packs: 3, roster: [{ id: 'red_deer', weight: 2, pack: [1, 3] }, { id: 'wild_horse', weight: 1, pack: [1, 2] }] },
 ];
 
 const ENCOUNTERS = {
@@ -207,6 +236,41 @@ const objects = OBJECTS.map(o => {
   const at = settle(o.id, o.at, radiusOf(o.art, 0.8), {}, 14);
   return { ...o, at, y: Math.round(T.heightAt(...at) * 100) / 100 };
 });
+// roadside scenes (wildlife round 2026-11-25, owner: "The world still feels empty"): every 75-100 m of road outside
+// towns, camps and shrines, a little scene a few metres off the verge, alternating sides. Same map = same scenes.
+const WAYSIDE = [
+  [['cart', 0, 0], ['barrel', 2.4, 0.8], ['crate-stack', 2.2, -1.2]],
+  [['woodpile', 0, 0], ['log', 2.8, 1.5]],
+  [['road-marker', 0, 0]],
+  [['campfire', 0, 0], ['bedroll', 1.8, 0.6], ['bedroll', -1.6, 1], ['tent-small', 0, 3.4]],
+  [['log', 0, 0], ['stump-a', 2, 1]],
+  [['haystack', 0, 0], ['haystack', 2.6, 1.2], ['wheelbarrow', -2, 0.5]],
+  [['signpost', 0, 0], ['barrel', 1.4, 0.6]],
+];
+const wayRng = (() => { let a = 20251125; return () => { a ^= a << 13; a ^= a >>> 17; a ^= a << 5; return ((a >>> 0) % 100000) / 100000; }; })();
+const farFrom = (x, z) => Object.values(map.places).every(p => typeof p !== 'object' || !p.at || Math.hypot(x - p.at[0], z - p.at[1]) > (p.kind === 'town' ? (p.radius || 40) + 25 : p.kind === 'camp' ? 55 : 35));
+let wayN = 0; const wayWhy = { near: 0, bridge: 0, tries: 0 };
+for (const r of T.roads) {
+  if (r.town) continue;
+  const len = r.pts[r.pts.length - 1].s;
+  let side = 1;
+  for (let s0 = 50; s0 < len - 30; s0 += 75 + wayRng() * 25) {
+    wayWhy.tries++; const q = r.pts.findIndex(p => p.s >= s0); if (q < 1) continue;
+    const a = r.pts[q - 1], b = r.pts[q], L = Math.hypot(b.x - a.x, b.z - a.z) || 1, tx = (b.x - a.x) / L, tz = (b.z - a.z) / L;
+    const off = r.width / 2 + 4.5, x = a.x - tz * off * side, z = a.z + tx * off * side;
+    side = -side;
+    if (!farFrom(x, z)) { wayWhy.near++; continue; } if (!T.bridges.every(br => Math.hypot(x - br.at[0], z - br.at[1]) > 30)) { wayWhy.bridge++; continue; }
+    const scene = WAYSIDE[Math.floor(wayRng() * WAYSIDE.length)], face = [a.x, a.z];
+    const yaw = Math.atan2(tx, tz);
+    for (const [art, dx, dz] of scene) {
+      // scene-local (dx along the road, dz away from it)
+      const px = x + tx * dx - tz * dz * -side, pz = z + tz * dx + tx * dz * -side;
+      PROPS.push([art, [Math.round(px * 10) / 10, Math.round(pz * 10) / 10], face]);
+    }
+    void yaw; wayN++;
+  }
+}
+console.log(`${wayN} roadside scenes`, JSON.stringify(wayWhy));
 const props = PROPS.map(([artId, at0, face], i) => {
   const r = radiusOf(artId, 0.6);
   const roadside = ['signpost', 'road-marker', 'lamp-post', 'banner-village'].includes(artId);

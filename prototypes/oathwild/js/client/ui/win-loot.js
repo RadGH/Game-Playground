@@ -2,7 +2,9 @@
 // gold must be taken). Every player sees only their OWN share, rolled for them. The world stays visible behind it
 // (right side on a desktop, a bottom sheet on a phone). Opened by the play screen with the server's 'win' message.
 //
-//   app.openWindow('loot', { id, name, allowed, why, gold, items, quest })   → .win-loot  (.loot-row[data-item], [data-act="all"])
+//   app.openWindow('loot', { id, name, allowed, why, gold, items, quest, boxes })   → .win-loot  (.loot-row[data-item], [data-act="all"])
+// Area looting: the server puts every body of yours within 10 m into one window (items carry `box` + `from`); Take all
+// and Take gold sweep them all; an emptied window closes itself.
 import { openWin, esc } from './kit.js';
 import { glyph } from './icons.js';
 import { itemCell } from './win-bag.js';
@@ -31,9 +33,11 @@ function render(app, body, w) {
   const rows = [];
   if (L.gold) rows.push(`<div class="loot-row loot-gold"><span class="bag-ico">${glyph('coin', 26)}</span><span class="bag-txt"><b class="ow-gold">${fmt(L.gold)} gold</b><small>Gold has to be picked up</small></span><button type="button" class="ow-btn ow-small" data-act="gold">Take gold</button></div>`);
   for (const it of L.items || []) {
-    rows.push(`<div class="loot-row" data-item="${esc(it.id)}">${itemCell(it, `loot:${L.id}:${it.id}`, { cls: 'loot-cell' })}<button type="button" class="ow-btn ow-small" data-act="take" data-id="${esc(it.id)}">Take</button></div>`);
+    const from = it.from ? `<span class="loot-from">${esc(it.from)}</span>` : '';
+    rows.push(`<div class="loot-row" data-item="${esc(it.id)}">${itemCell(it, `loot:${L.id}:${it.id}`, { cls: 'loot-cell', extra: from })}<button type="button" class="ow-btn ow-small" data-act="take" data-id="${esc(it.id)}" data-from="${esc(it.box || L.id)}">Take</button></div>`);
   }
-  if (!rows.length) return `<p class="ow-empty">${L.quest ? 'Taken.' : 'Empty — you took everything that was yours.'}</p>`;
+  // everything taken: the window goes away by itself (owner 2026-11-25)
+  if (!rows.length) { if (!L.quest) setTimeout(() => { if (w.open && w.data.box === L) w.close(); }, 250); return `<p class="ow-empty">${L.quest ? 'Taken.' : 'You took everything.'}</p>`; }
   return `<div class="loot-list">${rows.join('')}</div>`;
 }
 
@@ -45,7 +49,7 @@ function foot(app, el, w) {
   el.querySelector('[data-act="all"]')?.addEventListener('click', () => { go('loot-all'); app.sfx('loot.normal'); });
   el.querySelector('[data-act="close"]').onclick = () => w.close();
   w.body.querySelector('[data-act="gold"]')?.addEventListener('click', () => { go('loot-gold'); app.sfx('coin'); });
-  w.body.querySelectorAll('[data-act="take"]').forEach(b => { b.onclick = () => { go('loot-take', { item: b.dataset.id }); app.sfx('loot.common'); }; });
+  w.body.querySelectorAll('[data-act="take"]').forEach(b => { b.onclick = () => { go('loot-take', { item: b.dataset.id, from: b.dataset.from }); app.sfx('loot.common'); }; });
   // a click on the item itself takes it too (one step less with a mouse)
   w.body.querySelectorAll('.loot-cell').forEach(b => { b.onclick = () => b.parentElement.querySelector('[data-act="take"]')?.click(); });
 }

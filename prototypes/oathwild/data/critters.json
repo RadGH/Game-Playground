@@ -1,0 +1,14 @@
+{
+  "_doc": "Animal bodies that are not fal.ai models (wildlife round 2026-11-25): Quaternius's CC0 animated animals in playground/assets/quaternius/animals. js/client/render/critters.js loads them; js/client/render/actors.js bodyFor() finds an art id here first. `height` = real metres to the top of the body (the model is scaled to it), `lift` = metres above the ground it is drawn (a bat flies), `clips` = game clip → the model's clip (matched on the name after the last '|').",
+  "critters": {
+    "stag": { "file": "assets/quaternius/animals/stag.glb", "height": 1.75, "clips": { "idle": "Idle", "idle2": "Eating", "walk": "Walk", "run": "Gallop", "sprint": "Gallop", "attack": "Attack_Headbutt", "hit": "Idle_HitReact_Left", "death": "Death" } },
+    "cow": { "file": "assets/quaternius/animals/cow.glb", "height": 1.45, "clips": { "idle": "Idle", "idle2": "Eating", "walk": "Walk", "run": "Gallop", "sprint": "Gallop", "attack": "Attack_Headbutt", "hit": "Idle_HitReact_Left", "death": "Death" } },
+    "bull": { "file": "assets/quaternius/animals/bull.glb", "height": 1.6, "clips": { "idle": "Idle", "idle2": "Eating", "walk": "Walk", "run": "Gallop", "sprint": "Gallop", "attack": "Attack_Headbutt", "hit": "Idle_HitReact_Left", "death": "Death" } },
+    "sheep": { "file": "assets/quaternius/animals/sheep.glb", "height": 1.0, "clips": { "idle": "Idle", "idle2": "Idle_Eating", "walk": "Walk", "run": "Run", "sprint": "Run", "attack": "Headbutt", "hit": "Headbutt", "death": "Death" } },
+    "horse": { "file": "assets/quaternius/animals/horse.glb", "height": 1.75, "clips": { "idle": "Idle", "idle2": "Idle_Eating", "walk": "Walk", "run": "Run", "sprint": "Run", "attack": "Headbutt", "hit": "Headbutt", "death": "Death" } },
+    "raccoon": { "file": "assets/quaternius/animals/raccoon.glb", "height": 0.5, "clips": { "idle": "Idle", "idle2": "Idle_Eating", "walk": "Walk", "run": "Run", "sprint": "Run", "attack": "Headbutt", "hit": "Headbutt", "death": "Death" } },
+    "chicken": { "file": "assets/quaternius/animals/chicken.glb", "height": 0.45, "clips": { "idle": "Idle", "idle2": "Idle_Peck", "walk": "Run", "run": "Run", "sprint": "Run", "attack": "Attack", "hit": "Attack", "death": "Death" } },
+    "rat": { "file": "assets/quaternius/animals/rat.glb", "height": 0.45, "clips": { "idle": "Rat_Idle", "walk": "Rat_Walk", "run": "Rat_Run", "sprint": "Rat_Run", "attack": "Rat_Attack", "hit": "Rat_Attack", "death": "Rat_Death" } },
+    "bat": { "file": "assets/quaternius/animals/bat.glb", "height": 0.55, "lift": 1.5, "clips": { "idle": "Bat_Flying", "walk": "Bat_Flying", "run": "Bat_Flying", "sprint": "Bat_Flying", "attack": "Bat_Attack", "hit": "Bat_Hit", "death": "Bat_Death" } }
+  }
+}

@@ -30,7 +30,7 @@ import { STEP, MAX_PLAYERS, VIEW_METRES, EVENT_METRES, UF, unpackButtons } from 
 
 const R2 = v => Math.round(v * 100) / 100;
 const dist2 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
-const TALK_METRES = 7, LOOT_METRES = 6, USE_METRES = 5, SHRINE_METRES = 10, FIND_METRES = 30;
+const TALK_METRES = 7, LOOT_METRES = 6, AREA_LOOT = 10, USE_METRES = 5, SHRINE_METRES = 10, FIND_METRES = 30;
 const ZONE_RESPAWN_S = 90, CAMP_CLEAR_METRES = 45, SPAWN_SAFE_METRES = 35;
 
 export function createWorldRoom({ rules, W, ground, meta, state = null, log = () => {}, persist = () => {}, seed = 1, dev = false }) {
@@ -208,10 +208,34 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
   function itemIn(P, id) { return (P.char.bag || []).find(it => it.id === id) || null; }
 
   function containerOf(id) { return world.containers.get(id) || extra.get(id) || null; }
-  function lootView(P, c) {
-    const v = openFor(rules, c, P.char.id, { char: P.char });
-    return { t: 'win', kind: 'loot', id: c.id, name: c.name || 'Remains', at: c.at, allowed: v.allowed, why: v.why, gold: v.gold, items: v.items, quest: c.quest || null };
+  /**
+   * Area looting (owner 2026-11-25, "like Thousandvale"): opening one body opens every body of yours within AREA_LOOT
+   * metres in the same window; Take all / Take gold sweep them all. Quest boxes and chests stay one at a time.
+   */
+  function lootGroup(P, box) {
+    const u = unitOf(P);
+    if (!box || box.kind !== 'corpse' || box.quest || !u) return [box];
+    const out = [box];
+    for (const c of world.containers.values()) {
+      if (c === box || c.kind !== 'corpse' || c.quest || !c.eligible?.includes(P.char.id) || isEmptyFor(c, P.char.id)) continue;
+      if (near(u, c.at, AREA_LOOT)) out.push(c);
+    }
+    return out;
   }
+  function lootView(P, c) {
+    const group = lootGroup(P, c).filter(Boolean);
+    let gold = 0, allowed = false, why = null;
+    const items = [];
+    for (const b of group) {
+      const v = openFor(rules, b, P.char.id, { char: P.char });
+      if (!v.allowed) { if (b === c) why = v.why; continue; }
+      allowed = true; gold += v.gold || 0;
+      for (const it of v.items || []) items.push({ ...it, box: b.id, from: group.length > 1 ? (b.name || 'Remains') : null });
+    }
+    const name = group.length > 1 ? `${group.length} bodies` : (c.name || 'Remains');
+    return { t: 'win', kind: 'loot', id: c.id, name, at: c.at, allowed, why: allowed ? null : why, gold, items, quest: c.quest || null, boxes: group.map(b => b.id) };
+  }
+  function sweep(group) { for (const b of group) if (b.kind === 'corpse' && b.eligible.every(id => isEmptyFor(b, id))) world.containers.delete(b.id); }
 
   function act(P, m) {
     const u = unitOf(P);
@@ -219,15 +243,35 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     switch (m.a) {
       // ---- loot windows (individual loot: every player has their own contents)
       case 'loot-open': case 'loot-take': case 'loot-gold': case 'loot-all': {
-        const box = containerOf(m.id);
+        let box = containerOf(m.id);
+        // (area loot: the body the window names may have been emptied and cleared — sweep from the nearest one left)
+        if (!box && (m.a === 'loot-all' || m.a === 'loot-gold') && u) box = [...world.containers.values()].filter(b => b.kind === 'corpse' && b.eligible?.includes(c.id) && near(u, b.at, AREA_LOOT)).sort((a, b) => Math.hypot(a.at[0] - u.x, a.at[1] - u.z) - Math.hypot(b.at[0] - u.x, b.at[1] - u.z))[0] || null;
         if (!box) return err(P, 'That is gone.');
         if (!near(u, box.at, LOOT_METRES + 2)) return err(P, 'Too far away.');
-        if (m.a === 'loot-take') { const r = takeItem(rules, box, c.id, c, m.item); if (!r.ok) return err(P, r.why); questTake(P, box, r.item); changed(P); }
-        if (m.a === 'loot-gold') { const r = takeGold(box, c.id, c); if (!r.ok) return err(P, r.why); say(P, `+${r.gold} gold`, 'gold'); changed(P, { refresh: false }); }
-        if (m.a === 'loot-all') { const r = takeAll(rules, box, c.id, c); if (!r.ok) return err(P, r.why); if (r.gold) say(P, `+${r.gold} gold`, 'gold'); for (const it of r.items) questTake(P, box, it); changed(P); }
-        P.loot.add(box.id);
-        P.send(JSON.stringify(lootView(P, box)));
-        if (box.kind === 'corpse' && box.eligible.every(id => isEmptyFor(box, id))) world.containers.delete(box.id);
+        const group = lootGroup(P, box);
+        if (m.a === 'loot-take') {
+          const from = (m.from && group.find(b => b.id === m.from)) || box;
+          const r = takeItem(rules, from, c.id, c, m.item); if (!r.ok) return err(P, r.why); questTake(P, from, r.item); changed(P);
+        }
+        if (m.a === 'loot-gold') {
+          let g = 0; for (const b of group) { const r = takeGold(b, c.id, c); if (r.ok) g += r.gold; }
+          if (!g) return err(P, 'There is no gold here.');
+          say(P, `+${g} gold`, 'gold'); changed(P, { refresh: false });
+        }
+        if (m.a === 'loot-all') {
+          let g = 0, n = 0, why = null;
+          for (const b of group) { const r = takeAll(rules, b, c.id, c); if (!r.ok) { why = why || r.why; continue; } g += r.gold || 0; n += r.items.length; for (const it of r.items) questTake(P, b, it); }
+          if (!g && !n && why) return err(P, why);
+          if (g) say(P, `+${g} gold`, 'gold');
+          changed(P);
+        }
+        // the window follows what is left: a body of the group that still holds something (every share rolled first,
+        // so a body that turns out empty is not the one the window points at once it is swept away)
+        for (const b of group) openFor(rules, b, c.id, { char: c });
+        const left = group.find(b => b.eligible.includes(c.id) && !isEmptyFor(b, c.id)) || box;
+        P.loot.add(left.id);
+        P.send(JSON.stringify(lootView(P, left)));
+        sweep(group);
         return;
       }
       case 'loot-close': P.loot.delete(m.id); return;

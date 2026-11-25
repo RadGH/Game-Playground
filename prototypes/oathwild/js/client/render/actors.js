@@ -11,6 +11,7 @@
 import * as THREE from 'three';
 import { createTabard } from '../../../../../avatar-3d/tabard/js/tabard.js';
 import { createFalCharacter } from '../../../../../avatar-3d/fal/js/fal.js';
+import { createCritter } from './critters.js';
 import { tabardItems } from '../../game/gear.js';
 import { FACE_OPTIONS } from '../../../../../avatar-3d/tabard/js/face.js';
 
@@ -21,6 +22,8 @@ const hashStr = s => { let h = 2166136261; for (const c of String(s)) { h ^= c.c
 /** A body, an art row and a size for any monster / companion / summon art id (data/art.json). */
 export function bodyFor(art, id) {
   if (!id) return null;
+  const cr = art.critters?.[id];                     // a Quaternius animal (data/critters.json)
+  if (cr) return { body: id, critter: cr, height: cr.height, tint: null };
   for (const r of Object.values(art.regions || {})) for (const list of Object.values(r.enemies || {})) for (const e of list) {
     if (e.id !== id) continue;
     if (e.status === 'ready') return { body: e.id, height: e.height || 1.8, tint: null };
@@ -80,7 +83,7 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
   const later = job => { queue.push(job); pump(); };
 
   async function falBody(spec) {
-    const c = await createFalCharacter(spec.body);
+    const c = spec.critter ? await createCritter(spec.critter) : await createFalCharacter(spec.body);
     if (!falCache.has(spec.body)) {
       c.group.updateMatrixWorld(true);
       const box = new THREE.Box3().setFromObject(c.group);
@@ -88,6 +91,7 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
     }
     const k = (spec.height || 1.8) / falCache.get(spec.body);
     c.group.scale.setScalar(k);
+    if (spec.critter?.lift) c.group.children[0].position.y = spec.critter.lift / k;   // a bat flies (after the size is measured)
     if (spec.tint || spec.opacity) {
       const tint = spec.tint ? new THREE.Color(spec.tint) : null;
       c.group.traverse(o => { if (o.isMesh && o.material) { o.material = o.material.clone(); if (tint) o.material.color.lerp(tint, 0.55); if (spec.opacity) { o.material.transparent = true; o.material.opacity = spec.opacity; } } });

@@ -1,6 +1,20 @@
 {
   "entries": [
     {
+      "id": "2026-11-25-wildlife",
+      "date": "2026-11-25",
+      "title": "A wilder world",
+      "items": [
+        "Wildlife everywhere: deer herds in the meadows and woods, wild horses on the downs, raccoons on the riverbanks, bats round the haunted places, more wolves and boars, and cows, a bull, sheep and hens round Larkford.",
+        "Animals and monsters no longer stand still: they wander and graze round their home until something catches their eye. Deer, horses, sheep, hens and raccoons run from you; cows and the bull only fight if you hit them.",
+        "Rats in the mill and the corn fields, for a first easy fight.",
+        "Big camps are split into small groups you can take one at a time; the Goblin Warren now has two outer pickets, the shamans' fire and the warchief at the back, and they notice you from closer.",
+        "Two new hamlets on the Lark Road, Crossbrook in the vale and Fernstead in the Wilds, and travellers walking the roads between them.",
+        "Looting: opening one body opens every body of yours close by in the same window; Take all and Take gold sweep them all, and the window closes itself when everything is taken.",
+        "Rings and amulets never ask for a level."
+      ]
+    },
+    {
       "id": "2026-11-25-towns",
       "date": "2026-11-25",
       "title": "Living towns",

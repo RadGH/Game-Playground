@@ -97,22 +97,68 @@
      "spawns": [
       {
        "id": "goblin_warrior",
-       "count": 3
+       "count": 2,
+       "at": [
+        22,
+        16
+       ],
+       "levels": [
+        2,
+        3
+       ]
       },
       {
        "id": "goblin_sneak",
-       "count": 1
+       "count": 1,
+       "at": [
+        -24,
+        14
+       ],
+       "levels": [
+        2,
+        3
+       ]
+      },
+      {
+       "id": "goblin_warrior",
+       "count": 1,
+       "at": [
+        -24,
+        14
+       ],
+       "levels": [
+        2,
+        3
+       ]
       },
       {
        "id": "goblin_shaman",
-       "count": 2
+       "count": 2,
+       "at": [
+        -4,
+        -6
+       ],
+       "levels": [
+        3,
+        4
+       ]
       },
       {
        "id": "goblin_warchief",
        "count": 1,
-       "rank": "boss"
+       "rank": "boss",
+       "at": [
+        6,
+        -22
+       ],
+       "levels": [
+        4,
+        5
+       ]
       }
-     ]
+     ],
+     "notice": 12,
+     "_spawns": "Small groups a hero takes one at a time (owner 2026-11-25: 'large packs of goblins I cannot kill'): two outer pickets, the shamans' fire, the warchief at the back. `at` = metres from the camp's middle, `notice` = the camp's noticing distance."
     },
     "old_shrine_cult": {
      "name": "Cult at the Old Shrine",

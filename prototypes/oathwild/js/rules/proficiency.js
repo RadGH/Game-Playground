@@ -19,6 +19,9 @@ const baseOf = (rules, item) => rules.data.items.weaponBases[item?.baseKey] || r
 const ATTR_NAME = { str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' };
 /** The level an item still asks for (owner 2026-11-25: hardly any — only rare and better, well below their item level). */
 export function levelGate(rules, item) {
+  // rings and amulets never ask for a level (owner 2026-11-25: "Rings should be easier to equip, especially this one
+  // from my first kill")
+  if (item?.type === 'accessory' || item?.slot === 'ring' || item?.slot === 'necklace') return 1;
   const g = P(rules).attrNeeds?.levelGate || {};
   const rarity = item?.setId ? 'set' : item?.isUnique ? 'unique' : item?.rarity || 'normal';
   if (g[rarity] == null) return 1;

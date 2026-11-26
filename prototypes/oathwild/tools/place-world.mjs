@@ -129,18 +129,18 @@ const OBJECTS = [
 
 // roam zones: monsters (and wildlife) that wander a circle; `packs` live at once; levels inside the area's band
 const ROAM = [
-  { id: 'hartwood_wolves', name: 'Hartwood wolves', kind: 'wildlife', at: [-108, -186], radius: 45, levels: [1, 2], packs: 4, roster: [{ id: 'vale_wolf', weight: 1, pack: [1, 3] }] },
+  { id: 'hartwood_wolves', name: 'Hartwood wolves', kind: 'wildlife', at: [-108, -186], radius: 45, levels: [1, 2], packs: 5, roster: [{ id: 'vale_wolf', weight: 1, pack: [1, 3] }] },   // 5 packs of mostly one: the wolf hunt (6) stays quick
   { id: 'fold_boars', name: 'boars by the fold', kind: 'wildlife', at: [-176, -152], radius: 26, levels: [1, 2], packs: 2, roster: [{ id: 'bristleback', weight: 1, pack: [1, 1] }] },
   { id: 'west_meadow_boars', name: 'west meadow boars', kind: 'wildlife', at: [-420, -40], radius: 45, levels: [1, 2], packs: 2, roster: [{ id: 'bristleback', weight: 2, pack: [1, 1] }, { id: 'vale_wolf', weight: 1, pack: [1, 2] }] },
   { id: 'tansy_scarecrows', name: 'the walking scarecrows', kind: 'roamer', at: [-205, 104], radius: 22, levels: [2, 3], packs: 2, roster: [{ id: 'field_scarecrow', weight: 1, pack: [1, 2] }] },
   { id: 'ford_road_thugs', name: 'thugs on the Ford Road', kind: 'roamer', at: [-205, 160], radius: 26, levels: [2, 3], packs: 2, roster: [{ id: 'road_thug', weight: 2, pack: [1, 2] }, { id: 'cutpurse', weight: 1, pack: [1, 1] }] },
   { id: 'gobbet_scouts', name: 'goblin scouts', kind: 'roamer', at: [-352, -186], radius: 26, levels: [2, 3], packs: 2, roster: [{ id: 'goblin_sneak', weight: 1, pack: [1, 1] }, { id: 'goblin_warrior', weight: 2, pack: [1, 2] }] },
-  { id: 'knoll_wildlife', name: 'Watch Knoll wolves and boars', kind: 'wildlife', at: [30, 150], radius: 40, levels: [3, 4], packs: 2, roster: [{ id: 'vale_wolf', weight: 1, pack: [2, 3] }, { id: 'bristleback', weight: 1, pack: [1, 1] }] },
+  { id: 'knoll_wildlife', name: 'Watch Knoll wolves and boars', kind: 'wildlife', at: [30, 150], radius: 40, levels: [3, 4], packs: 2, roster: [{ id: 'vale_wolf', weight: 1, pack: [1, 2] }, { id: 'bristleback', weight: 1, pack: [1, 1] }] },
   { id: 'old_hill_slopes', name: 'Choir sentries', kind: 'roamer', at: [-456, 184], radius: 18, levels: [4, 5], packs: 1, roster: [{ id: 'shrine_cultist', weight: 2, pack: [1, 1] }, { id: 'bounty_hunter', weight: 1, pack: [1, 1] }] },
-  { id: 'gate_wolves', name: 'Thornmere wolves', kind: 'wildlife', at: [132, 70], radius: 38, levels: [5, 6], packs: 2, roster: [{ id: 'thornmere_wolf', weight: 1, pack: [2, 3] }] },
-  { id: 'grove_wilds', name: 'Greenhollow thornlings', kind: 'roamer', at: [214, -122], radius: 30, levels: [6, 7], packs: 2, roster: [{ id: 'thornling', weight: 2, pack: [1, 2] }, { id: 'thornmere_wolf', weight: 1, pack: [2, 2] }] },
+  { id: 'gate_wolves', name: 'Thornmere wolves', kind: 'wildlife', at: [132, 70], radius: 38, levels: [5, 6], packs: 2, roster: [{ id: 'thornmere_wolf', weight: 1, pack: [1, 2] }] },
+  { id: 'grove_wilds', name: 'Greenhollow thornlings', kind: 'roamer', at: [214, -122], radius: 30, levels: [6, 7], packs: 2, roster: [{ id: 'thornling', weight: 2, pack: [1, 2] }, { id: 'thornmere_wolf', weight: 1, pack: [1, 2] }] },
   { id: 'heights_lions', name: 'Greenhollow mountain lions', kind: 'wildlife', at: [190, -290], radius: 35, levels: [6, 7], packs: 2, roster: [{ id: 'mountain_lion', weight: 1, pack: [1, 1] }] },
-  { id: 'bearwood', name: 'Bearwood bears and lions', kind: 'wildlife', at: [262, 110], radius: 45, levels: [6, 7], packs: 3, roster: [{ id: 'brown_bear', weight: 2, pack: [1, 1] }, { id: 'mountain_lion', weight: 1, pack: [1, 1] }, { id: 'thornmere_wolf', weight: 1, pack: [2, 3] }] },
+  { id: 'bearwood', name: 'Bearwood bears and lions', kind: 'wildlife', at: [262, 110], radius: 45, levels: [6, 7], packs: 3, roster: [{ id: 'brown_bear', weight: 2, pack: [1, 1] }, { id: 'mountain_lion', weight: 1, pack: [1, 1] }, { id: 'thornmere_wolf', weight: 1, pack: [1, 2] }] },
   { id: 'troll_road_orcs', name: 'orc raiders on the road', kind: 'roamer', at: [300, 30], radius: 30, levels: [6, 7], packs: 2, roster: [{ id: 'orc_grunt', weight: 1, pack: [1, 2] }] },
   { id: 'mire_drowned', name: 'drowned things of the mire', kind: 'roamer', at: [444, 178], radius: 34, levels: [8, 9], packs: 2, roster: [{ id: 'drowned_brute', weight: 2, pack: [1, 1] }, { id: 'water_elemental', weight: 1, pack: [1, 1] }] },
   { id: 'barrow_dead', name: 'the restless dead', kind: 'roamer', at: [466, -212], radius: 24, levels: [7, 8], packs: 3, roster: [{ id: 'skeleton_warrior', weight: 3, pack: [1, 2] }, { id: 'hollowborn', weight: 1, pack: [1, 1] }] },
@@ -169,11 +169,11 @@ const ROAM = [
   // Thornmere Wilds (levels 5-9)
   { id: 'wilds_deer', name: 'deer of the Wilds', kind: 'wildlife', at: [120, -200], radius: 45, levels: [5, 6], packs: 3, roster: [{ id: 'red_deer', weight: 2, pack: [1, 3] }, { id: 'raccoon', weight: 1, pack: [1, 2] }] },
   { id: 'wilds_horses', name: 'wild horses of the Wilds', kind: 'wildlife', at: [300, -320], radius: 45, levels: [6, 7], packs: 2, roster: [{ id: 'wild_horse', weight: 1, pack: [2, 4] }] },
-  { id: 'east_glades', name: 'the east glades', kind: 'wildlife', at: [330, -60], radius: 40, levels: [6, 7], packs: 3, roster: [{ id: 'red_deer', weight: 2, pack: [1, 3] }, { id: 'thornmere_wolf', weight: 1, pack: [2, 3] }] },
-  { id: 'pinewood_wolves', name: 'pinewood wolves', kind: 'wildlife', at: [380, -190], radius: 40, levels: [7, 8], packs: 3, roster: [{ id: 'thornmere_wolf', weight: 2, pack: [2, 3] }, { id: 'brown_bear', weight: 1, pack: [1, 1] }] },
-  { id: 'mire_edge', name: 'the mire edge', kind: 'wildlife', at: [340, 210], radius: 40, levels: [7, 8], packs: 3, roster: [{ id: 'bristleback', weight: 2, pack: [1, 2] }, { id: 'red_deer', weight: 1, pack: [1, 2] }, { id: 'cave_bat', weight: 1, pack: [2, 3] }] },
-  { id: 'barrow_bats', name: 'barrow bats', kind: 'roamer', at: [476, -196], radius: 24, levels: [7, 8], packs: 2, roster: [{ id: 'cave_bat', weight: 1, pack: [2, 3] }] },
-  { id: 'ruin_bats', name: 'bats of the drowned ruins', kind: 'roamer', at: [470, 230], radius: 24, levels: [8, 9], packs: 2, roster: [{ id: 'cave_bat', weight: 1, pack: [2, 3] }] },
+  { id: 'east_glades', name: 'the east glades', kind: 'wildlife', at: [330, -60], radius: 40, levels: [6, 7], packs: 3, roster: [{ id: 'red_deer', weight: 2, pack: [1, 3] }, { id: 'thornmere_wolf', weight: 1, pack: [1, 2] }] },
+  { id: 'pinewood_wolves', name: 'pinewood wolves', kind: 'wildlife', at: [380, -190], radius: 40, levels: [7, 8], packs: 3, roster: [{ id: 'thornmere_wolf', weight: 2, pack: [1, 2] }, { id: 'brown_bear', weight: 1, pack: [1, 1] }] },
+  { id: 'mire_edge', name: 'the mire edge', kind: 'wildlife', at: [340, 210], radius: 40, levels: [7, 8], packs: 3, roster: [{ id: 'bristleback', weight: 2, pack: [1, 2] }, { id: 'red_deer', weight: 1, pack: [1, 2] }, { id: 'cave_bat', weight: 1, pack: [1, 2] }] },
+  { id: 'barrow_bats', name: 'barrow bats', kind: 'roamer', at: [476, -196], radius: 24, levels: [7, 8], packs: 2, roster: [{ id: 'cave_bat', weight: 1, pack: [1, 2] }] },
+  { id: 'ruin_bats', name: 'bats of the drowned ruins', kind: 'roamer', at: [470, 230], radius: 24, levels: [8, 9], packs: 2, roster: [{ id: 'cave_bat', weight: 1, pack: [1, 2] }] },
   { id: 'gate_glade_deer', name: 'deer below the gate', kind: 'wildlife', at: [190, 40], radius: 34, levels: [5, 6], packs: 3, roster: [{ id: 'red_deer', weight: 2, pack: [1, 3] }, { id: 'wild_horse', weight: 1, pack: [1, 2] }] },
 ];
 
@@ -287,15 +287,94 @@ const CHEST_ART = { chest_common: 'chest-common', chest_camp: 'chest-rare', ches
 const chests = chestSpots.map(c => ({ id: c.id, name: c.name, art: CHEST_ART[c.table] || 'chest-common', at: c.at, y: Math.round(T.heightAt(...c.at) * 100) / 100, table: c.table, facing: facingTo(c.at, null) }));
 const camps = [];
 for (const [rid, r] of Object.entries(regions.regions)) for (const [id, c] of Object.entries(r.camps)) camps.push({ id, name: c.name, region: rid, at: c.at, levels: c.levels, clear: 10 });
-// roam zones: pack spots on good ground inside the circle (the server spawns a pack at each spot)
+// ---------------------------------------------------------------- monsters: one at a time
+// Owner 2026-11-26: "every enemy I have seen has been in a pack of 5 or more … get rid of it. I can barely fight 1v1."
+// Packs used to be 1-3 and roam spots 8 m apart inside an 18 m noticing distance, so a hero pulled every pack in a zone
+// at once (tools/pack-sizes.mjs: 19% of encounters were 5+, the barrow 18). Now: every camp is laid out as small groups
+// (mostly one monster, some two, a boss alone or with one guard), every hostile group stands SPACE metres from every
+// other (camps and zones together) — more than a monster's noticing distance + both wander circles — and the camp's own
+// `notice` is shorter. Pack sizes in a zone roll mostly 1 (combat.json packOdds, js/world/encounters.js).
+// tests/world/packs.test.mjs holds it.
+const MONSTERS = J('../data/monsters.json').monsters;
+const COMBAT = J('../data/combat.json');
+const hostile = id => (MONSTERS[id]?.temper || 'hostile') === 'hostile';
+const ROAM_NOTICE = 16;                      // a roaming fighter notices you at 16 m at most (zone `notice`; encounters.js applies it)
+const noticeOf = id => Math.min(ROAM_NOTICE, MONSTERS[id]?.aggroRange ?? COMBAT.monsters.noticeDefault);
+const CAMP_NOTICE = 12, CAMP_SPACE = 28;        // a camp group notices you at 12 m; groups 28 m apart (12 + 2 × 3 m wander + slack)
+const ROAM_SLACK = (COMBAT.monsters.wanderDefault ?? 9) + 3;   // one wander circle (they rarely both lean in) + the fight drifting
+// each camp's groups, boss group first (it stands in the middle); every other group finds its own spot round it
+const CAMP_GROUPS = {
+  bandit_camp: [['bandit_chief', 'bandit_crossbow'], ['road_thug'], ['road_thug'], ['cutpurse'], ['bandit_crossbow']],
+  goblin_warren: [['goblin_warchief'], ['goblin_warrior', 'goblin_warrior'], ['goblin_warrior'], ['goblin_sneak'], ['goblin_shaman'], ['goblin_shaman']],
+  old_shrine_cult: [['choir_speaker'], ['shrine_cultist'], ['shrine_cultist'], ['shrine_cultist'], ['bounty_hunter']],
+  rook_hideout: [['rook_varrow'], ['cutpurse'], ['cutpurse']],
+  barrow: [['barrow_king', 'wraith_knight'], ['skeleton_warrior'], ['skeleton_warrior', 'hollowborn'], ['skeleton_warrior'], ['hollowborn'], ['barrow_ghoul']],
+  troll_bridge: [['bridge_troll'], ['drowned_brute'], ['drowned_brute']],
+  ruins: [['marsh_hag'], ['drowned_brute'], ['drowned_brute'], ['water_elemental'], ['water_elemental'], ['root_caller'], ['root_caller']],
+  ogre_hill: [['hill_ogre'], ['orc_grunt'], ['orc_grunt'], ['orc_grunt']],
+  blighted_grove: [['thornling'], ['thornling', 'root_caller'], ['thornling'], ['root_caller']],
+  scarback_den: [['scarback']],
+  redtusk_camp: [['redtusk'], ['orc_grunt'], ['orc_grunt', 'orc_grunt']],
+};
+const hostileSpots = [];   // [x, z, space] every hostile group so far (camps, then zones)
+const arrivals = [...shrineSpots.map(s => s.at), map.spawn.at];
+const farFromArrivals = (x, z) => arrivals.every(a => Math.hypot(a[0] - x, a[1] - z) >= 42);
+const spaced = (x, z, space) => hostileSpots.every(([hx, hz, hs]) => Math.hypot(hx - x, hz - z) >= Math.max(space, hs));
+const campLog = [];
+for (const [rid, r] of Object.entries(regions.regions)) for (const [id, c] of Object.entries(r.camps)) {
+  const groups = CAMP_GROUPS[id];
+  if (!groups) throw new Error(`camp ${id} has no CAMP_GROUPS layout`);
+  // keep each monster's own row data (rank, levels) from the camp's current rows, matched by id
+  const rows = c.spawns.flatMap(sp => Array.from({ length: sp.count }, () => ({ id: sp.id, rank: sp.rank, levels: sp.levels })));
+  const want = groups.flat().slice().sort().join(), have = rows.map(x => x.id).sort().join();
+  if (want !== have) throw new Error(`camp ${id}: CAMP_GROUPS ${want} vs regions.json ${have} (same monsters, new layout only)`);
+  const take = mid => rows.splice(rows.findIndex(x => x.id === mid), 1)[0];
+  const spawns = [];
+  groups.forEach((g, gi) => {
+    let at = null;
+    if (gi === 0) at = [0, 0];
+    else {
+      for (const d of [CAMP_SPACE, CAMP_SPACE + 8, CAMP_SPACE + 16, CAMP_SPACE + 24, CAMP_SPACE + 32]) {
+        for (let k = 0; k < 24 && !at; k++) {
+          const a = gi * 2.4 + k * (Math.PI * 2 / 24), x = c.at[0] + Math.cos(a) * d, z = c.at[1] + Math.sin(a) * d;
+          if (okAt(x, z, 2.5, {}) && spaced(x, z, CAMP_SPACE) && farFromArrivals(x, z)) at = [round(x - c.at[0]), round(z - c.at[1])];
+        }
+        if (at) break;
+      }
+      if (!at) throw new Error(`camp ${id}: no spot for group ${gi} (${g.join(', ')})`);
+    }
+    hostileSpots.push([c.at[0] + at[0], c.at[1] + at[1], CAMP_SPACE]);
+    // two in a group stand 2.5 m apart (two rows at one spot would stand inside each other)
+    g.forEach((mid, k) => { const row = take(mid); spawns.push({ id: mid, count: 1, ...(row.rank ? { rank: row.rank } : {}), at: [round(at[0] + k * 2.5), at[1]], ...(row.levels ? { levels: row.levels } : {}) }); });
+  });
+  c.spawns = spawns; c.notice = CAMP_NOTICE;
+  c._spawns = 'Small groups a hero takes one at a time (owner 2026-11-25 "large packs of goblins I cannot kill", 2026-11-26 "I can barely fight 1v1"): GENERATED by tools/place-world.mjs CAMP_GROUPS — `at` = metres from the camp\'s middle, groups 28 m apart, `notice` = the camp\'s noticing distance.';
+  campLog.push(`${id}: ${groups.map(g => g.length).join('+')}`);
+}
+console.log('camp groups', campLog.join(' · '));
+
+// roam zones: pack spots on good ground inside the circle (the server spawns a pack at each spot). A hostile zone's
+// spots stand apart from every other hostile group by its monsters' noticing distance + ROAM_SLACK; a zone that cannot
+// fit its packs gets fewer (logged). Peaceful herds (deer, sheep…) keep the old 8 m.
 const roam = ROAM.map(z => {
   const spots = [];
-  for (let k = 0; k < 24 && spots.length < z.packs + 2; k++) {
-    const a = k * 2.399, d = z.radius * Math.sqrt((k + 0.5) / 24);
-    const x = z.at[0] + Math.cos(a) * d, zz = z.at[1] + Math.sin(a) * d;
-    if (okAt(x, zz, 1.5, {}) && spots.every(s => Math.hypot(s[0] - x, s[1] - zz) > 8)) spots.push([round(x), round(zz)]);
+  const fighters = z.roster.filter(x => hostile(x.id));
+  const space = fighters.length ? Math.max(...fighters.map(x => noticeOf(x.id))) + ROAM_SLACK : 8;
+  const want = z.packs + (fighters.length ? 0 : 2);
+  for (const reach of fighters.length ? [1, 1.25, 1.5, 1.75] : [1]) {
+    for (let k = 0; k < 48 && spots.length < want; k++) {
+      const a = k * 2.399, d = z.radius * reach * Math.sqrt((k + 0.5) / 48);
+      const x = z.at[0] + Math.cos(a) * d, zz = z.at[1] + Math.sin(a) * d;
+      if (!okAt(x, zz, 1.5, {}) || !spots.every(s => Math.hypot(s[0] - x, s[1] - zz) > space)) continue;
+      if (fighters.length && (!spaced(x, zz, space) || !farFromArrivals(x, zz))) continue;
+      spots.push([round(x), round(zz)]);
+    }
+    if (spots.length >= want) break;
   }
-  return { ...z, region: T.regionAt(...z.at), spots };
+  if (fighters.length) for (const s of spots) hostileSpots.push([s[0], s[1], space]);
+  const packs = Math.min(z.packs, spots.length);
+  if (packs < z.packs) console.log(`roam ${z.id}: room for ${packs} of ${z.packs} packs ${space} m apart`);
+  return { ...z, packs, ...(fighters.length ? { notice: Math.max(...fighters.map(x => noticeOf(x.id))) } : {}), region: T.regionAt(...z.at), spots };
 });
 
 const out = {
@@ -311,6 +390,8 @@ if (process.argv.includes('--write')) {
   writeFileSync(here('../data/placements.json'), compact(out) + '\n');
   void lines;
   console.log('wrote data/placements.json');
+  writeFileSync(here('../data/regions.json'), JSON.stringify(regions, null, 1) + '\n');
+  console.log('wrote data/regions.json (camp groups)');
   // keep npcs.json in step with the work spots (text edit of each person's "at", so the file keeps its layout)
   let txt = readFileSync(here('../data/npcs.json'), 'utf8'), synced = 0;
   for (const t of Object.values(towns)) for (const sp of t.spots || []) {

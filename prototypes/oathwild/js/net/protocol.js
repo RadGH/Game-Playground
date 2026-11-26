@@ -76,6 +76,7 @@ const MSGS = {
   devGold: [['n', N], ['magic', N]],        // dev builds only: set your gold, add `magic` magic items to the bag (shop / trade checks)
   devXp: [['levels', N]],                   // dev builds only: the experience for 1-5 more levels (level-up window checks)
   devDummy: [['n', N], ['hp', N]],          // dev builds only: still target dummies ahead (hp: a weak one, for a corpse)
+  devKnock: [['push', N], ['down', N]],       // dev builds only: throw the monsters near you (tests/ui/knock-shot.mjs)
   in: [['q', N], ['mx', N], ['mz', N], ['ax', N], ['ay', N], ['az', N], ['dx', N], ['dy', N], ['dz', N], ['at', A, 3], ['b', N], ['c', N], ['h', B], ['rv', S, 64], ['tg', S, 64]],
   act: [['a', S, 24]],                       // + the fields of that action (ACTS[a])
   ping: [['at', N]],
@@ -107,7 +108,7 @@ export function parseFrame(text) {
 }
 
 /** Per-type rate limits: tokens per second and a burst. Inputs come 20 a second (+ slack for a catch-up burst). */
-const RATES = { in: [30, 60], act: [12, 30], ping: [2, 4], hello: [1, 3], chars: [2, 5], charNew: [1, 3], charDel: [1, 3], worlds: [2, 5], worldNew: [0.2, 2], worldDel: [0.5, 2], join: [1, 4], leave: [1, 3], devTp: [2, 4], devGear: [4, 8], devDummy: [1, 3], devDown: [1, 3], devGold: [1, 3], devXp: [1, 3] };
+const RATES = { in: [30, 60], act: [12, 30], ping: [2, 4], hello: [1, 3], chars: [2, 5], charNew: [1, 3], charDel: [1, 3], worlds: [2, 5], worldNew: [0.2, 2], worldDel: [0.5, 2], join: [1, 4], leave: [1, 3], devTp: [2, 4], devGear: [4, 8], devDummy: [1, 3], devKnock: [1, 3], devDown: [1, 3], devGold: [1, 3], devXp: [1, 3] };
 export function createBuckets(now = () => Date.now()) {
   const B = new Map();
   return {

@@ -9,7 +9,7 @@
 //   canWield = canWear (weapons use the same rule)
 //   profAffix(rules, id) / addProfAffix(item, def)   the "of the Bulwark"-style enchantments
 
-import { classProfs } from './classes.js';
+import { classProfs, nodeName } from './classes.js';
 import { talentProfs } from './talents.js';
 import { attrTotals } from './sheet.js';
 
@@ -42,7 +42,7 @@ export function itemNeeds(rules, item) {
   const pd = P(rules), A = pd.attrNeeds || {};
   const level = levelGate(rules, item);
   let prof = null, row = null;
-  if (item.type === 'weapon') { prof = pd.weapons.bySubtype[item.subtype] || 'martial'; row = A.weapons?.[item.subtype]; }
+  if (item.type === 'weapon') { prof = pd.weapons.bySubtype[item.subtype] || null; row = A.weapons?.[item.subtype]; }
   else if (item.isMagicShield) { prof = pd.shields.magic.prof; row = A.shields?.magic; }
   else if (item.isShield || item.baseKey === 'quiver') { prof = (pd.shields[item.baseKey] || pd.shields.shield).prof; row = A.shields?.[item.baseKey] || A.shields?.shield; }
   else if (item.type === 'armor') { prof = pd.tierOf[baseOf(rules, item)?.tier] || 'cloth'; row = A.armour?.[prof]; }
@@ -102,7 +102,7 @@ export function trainingText(rules, prof) {
   for (const [cls, def] of Object.entries(rules.data.classes.classes)) {
     if (def.round > 1) continue;
     const n = def.nodes.find(x => x.kind === 'prof' && x.grants.includes(prof));
-    if (n && ways.length < 2) ways.push(`the ${def.name}'s ${n.name}`);
+    if (n && ways.length < 2) ways.push(`the ${def.name}'s ${nodeName(rules, n)}`);
   }
   const t = Object.values(rules.data.talents.talents).find(x => x.grants?.prof?.includes(prof));
   if (t) ways.push(`the ${t.name} talent`);

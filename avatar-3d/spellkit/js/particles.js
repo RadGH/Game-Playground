@@ -150,7 +150,9 @@ export class Emitter {
     this.pool = L.blend === 'normal' ? kit.pools.normal : kit.pools.add;
     this.live = 0; this.t = -(L.delay || 0); this.acc = 0;
     this.dur = L.duration ?? (fx.oneShot ? 0.05 : fx.phaseLength ?? Infinity);
-    const q = kit.quality === 'low' ? 0.5 : 1;
+    // phones draw the SAME counts as desktops (Oathwild 2026-11-26: halving on 'low' left the owner's iPhone with one
+    // faint bullet per spell, and the budget was never near full). The global budget + pressure() keep storms in check.
+    const q = 1;
     this.q = q;
     this.max = Math.max(1, Math.round((L.max ?? 160) * q * (fx.density ?? 1)));
     this.texs = (L.texs || [L.tex || 'dot_soft']).map(id => kit.tex.sprite(fx.subst(id)));

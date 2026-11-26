@@ -7,7 +7,7 @@ import { fmt } from '../../../../../shared/format.js';
 import { ACTIONS, keyName, padName, rebind, saveBindings, resetBindings } from '../input/bindings.js';
 
 const TABS = [{ id: 'game', label: 'Game' }, { id: 'graphics', label: 'Graphics' }, { id: 'sound', label: 'Sound' }, { id: 'controls', label: 'Controls' }];
-const QUALITY = [['low', 'Low', 'Fewer trees and plants, no shadows or after-effects: smoothest on phones'], ['medium', 'Medium', 'Shadows near you, colour grading and a soft glow, most plants'], ['high', 'High', 'Every plant, longer sharper shadows, soft shade where things meet the ground']];
+const QUALITY = [['low', 'Low', 'Simpler trees, fewer plants and stones, no shadows or after-effects: smoothest on phones'], ['medium', 'Medium', 'Shadows near you, colour grading and a soft glow, most plants'], ['high', 'High', 'Every plant, longer sharper shadows, soft shade where things meet the ground']];
 
 export function open(app, opts = {}) {
   const S = app.settings;

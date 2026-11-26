@@ -1,185 +1,5812 @@
 {
-  "_doc": "Oathwild's spell catalogue. js/rules/spells.js is the ONE reader. An entry with no `from` and no `shape` is a REUSED row looked up by id in Farhold's skills.json, then Thousandvale's skills-tv.json `add`, then classes-tv.json `skills` (borrowed, never written). `from: \"<source>:<id>\"` reuses a row under a new id. `set` lays fields over the row (null removes one). An entry with `shape` is Oathwild's own. Fields the round-1 combat sim does not run are dropped when the row is read (js/rules/spells.js SUPPORTED) so nothing describes a rule that does nothing. `ranks` (WoW-style, bought with class points): rank 1 is the row; each later rank lists `power` (x on damage, heals, barriers, summons; buffs grow by half as much), `mp` (x on mana cost), optional `seconds` (added to what it applies), `cooldown` (x) and `add` (a new effect from that rank on). Missing `ranks` = `defaultRanks`. `school: song` makes a spell use Charisma; `powerFrom`: weapon | spell | heal | blend (average of weapon and spell power) | blendRanged.",
-  "defaultRanks": [
-    {},
-    { "power": 1.3, "mp": 1.15 },
-    { "power": 1.6, "mp": 1.3 }
-  ],
-  "spells": {
-    "cleave": { "ranks": [{}, { "power": 1.3, "mp": 1.15 }, { "power": 1.6, "mp": 1.3, "add": { "status": "bleed" } }] },
-    "warcry": { "set": { "allies": 12 }, "ranks": [{}, { "power": 1.3, "mp": 1.15, "seconds": 3 }, { "power": 1.6, "mp": 1.3, "seconds": 6 }] },
-    "breaching_shove": {},
-    "shield_bash": {},
-    "challenge": {},
-    "whirlwind": {},
-    "power_strike": {},
-    "iron_resolve": { "set": { "selfBuff": { "name": "Iron Resolve", "seconds": 10, "resist": 0.25 } } },
-    "groundbreaker": {},
-    "aimed_shot": { "ranks": [{}, { "power": 1.3, "mp": 1.15 }, { "power": 1.6, "mp": 1.3, "add": { "pierce": 2 } }] },
-    "multi_shot": {},
-    "trackers_leap": {},
-    "hunters_snare": {},
-    "caltrop_scatter": {},
-    "rain_of_arrows": {},
-    "eviscerate": { "ranks": [{}, { "power": 1.3, "mp": 1.15 }, { "power": 1.6, "mp": 1.3, "add": { "critBonus": 10 } }] },
-    "sucker_punch": {},
-    "smoke": {},
-    "grave_mark": {},
-    "poison_dart": {},
-    "toxic_cloud": {},
-    "knife_storm": {},
-    "frost_shard": { "ranks": [{}, { "power": 1.3, "mp": 1.15 }, { "power": 1.6, "mp": 1.3, "add": { "statuses": [{ "id": "chill", "seconds": 3 }] } }] },
-    "frost_nova": {},
-    "ice_lance": {},
-    "blizzard": {},
-    "wild_bolt": {},
-    "arcane_burst": {},
-    "mana_rend": {},
-    "overchannel": {},
-    "stillfrost": {},
-    "sunlance": {},
-    "dawn_prayer": { "set": { "allies": 10 } },
-    "sanctuary": {},
-    "shadow_lance": {},
-    "mark_the_killer": {},
-    "twinlight": {},
-    "judgement": {},
-    "thornlash": {},
-    "renew": { "set": { "allies": 10 } },
-    "call_wolf": { "ranks": [{}, { "power": 1.3, "mp": 1.15 }, { "power": 1.6, "mp": 1.3, "add": { "count": 1 } }] },
-    "discord_note": { "set": { "school": "song" } },
-    "ballad_of_valour": { "set": { "form": null, "cooldown": 30, "mp": 16, "allies": 12, "buffs": [{ "id": "haste", "name": "Valour", "haste": 0.2, "move": 0.1, "damage": 0.1, "seconds": 20 }], "school": "song" } },
-    "charge": {},
-    "rally": { "set": { "allies": 12, "school": "song" } },
-    "song_of_ruin": { "set": { "form": null, "shape": "around", "radius": 10, "mult": 0.8, "cooldown": 14, "mp": 14, "statuses": [{ "id": "curse", "name": "Ruin", "takeMore": 0.12, "dealLess": 0.1, "seconds": 8 }], "school": "song" } },
-    "grand_finale": { "set": { "school": "song" } },
-    "drowse": { "set": { "school": "song" } },
-    "lethargy": { "set": { "school": "song" } },
-    "spirit_bolt": {},
-    "mending_post": {},
-    "call_spirit": {},
-    "thunderclap": {},
-    "storm_beam": {},
-    "great_post": {},
-    "sanctified_blade": {},
-    "consecrate": {},
-    "martyrs_vow": {},
-    "daybreak_descent": {},
-    "stoneskin": { "set": { "selfBuff": { "name": "Runeskin", "seconds": 6, "resist": 0.4 } } },
-    "rune_hammer": {},
-    "great_anvil": {},
-    "sunder": {},
-    "gnawing_dark": {},
-    "drain": {},
-    "bind_imp": {},
-    "curse": {},
-    "void_rift": {},
-    "abyss_gate": {},
-    "open_palm": {},
-    "wind_step": {},
-    "sweeping_heel": {},
-    "mountain_fist": {},
-    "inner_stillness": {},
-    "ninefold_staff": {},
-    "firebolt": { "ranks": [{}, { "power": 1.3, "mp": 1.15 }, { "power": 1.6, "mp": 1.3, "add": { "splash": 2.5 } }] },
-    "fire_wall": {},
-    "flashover": {},
-    "meteor": {},
-    "flamethrower": { "set": { "repeats": 6, "repeatEvery": 0.25 } },
-    "ember_stride": {},
-    "chain_bolt": {},
-    "tempest_eye": {},
-    "bolt_step": {},
-    "marrow_lance": {},
-    "raise_thrall": {},
-    "buried_march": {},
-    "corpse_pyre": {},
-    "pinning_shot": {},
-    "silver_edge": {},
-    "iron_net": {},
-    "null_circle": {},
-    "hex_bolt": {},
-    "chain_hook": {},
-    "writ_of_guilt": {},
-    "purging_rite": {},
-    "flourish": {},
-    "lunge": {},
-    "pinning_thrust": {},
-    "masters_flurry": {},
-    "matadors_turn": {},
-    "shade_cut": {},
-    "shadowstep": {},
-    "cutting_waltz": {},
-    "execute": { "set": { "execute": { "below": 0.3, "mult": 1 } } },
-    "host_of_shades": {},
-    "sweeping_guard": {},
-    "scale_rend": {},
-    "dragonscale": {},
-    "wyrmfall": {},
-    "second_hand": {},
-    "quicken": { "set": { "allies": 12 } },
-    "stasis_lock": { "set": { "stasis": null, "statuses": [{ "id": "sleep", "name": "Held in Time", "seconds": 4 }] } },
-    "entropy_field": {},
-    "omen_bolt": {},
-    "prophecy": {},
-    "clockwork_bolt": {},
-    "flask_grenade": {},
-    "deploy_sentry": {},
-    "junk_toss": {},
-    "mending_verse": { "set": { "allies": 10 } },
-    "mercy_touch": { "set": { "target": "ally", "range": 8 } },
-    "kind_omen": { "set": { "target": "ally", "range": 20 } },
-    "star_dart": {},
-    "called_star": {},
-    "starcut": {},
-    "comet_rush": {},
-
-    "wolf_shape": { "from": "tv:moonpelt_shape", "set": { "name": "Wolf Shape", "form": { "id": "wolf", "name": "Wolf", "group": "shape", "toggle": true, "body": { "creature": "wolf", "scale": 1.25 }, "stats": { "movePct": 0.25, "hastePct": 0.2, "armorPct": -0.15 }, "basic": { "shape": "melee", "reach": 2.4, "arc": 1.8, "mult": 0.6, "hits": 2, "element": "physical", "status": "bleed" } } } },
-    "bear_shape": { "from": "farhold:briarback_shape", "set": { "name": "Bear Shape", "form": { "id": "bear", "name": "Bear", "group": "shape", "toggle": true, "body": { "creature": "bear", "scale": 1.3 }, "stats": { "armorPct": 0.6, "maxHpPct": 0.3, "thorns": 0.1 }, "basic": { "shape": "melee", "reach": 2.8, "arc": 2.4, "mult": 1.1, "element": "physical" } }, "taunt": { "radius": 6, "seconds": 3 } } },
-
-    "cat_shape": { "name": "Cat Shape", "shape": "self", "element": "nature", "cooldown": 1.5, "mp": 8, "form": { "id": "cat", "name": "Mountain Cat", "group": "shape", "toggle": true, "body": { "creature": "cat", "scale": 1.2 }, "stats": { "movePct": 0.35, "hastePct": 0.1, "armorPct": -0.1 }, "basic": { "shape": "melee", "reach": 2.6, "arc": 1.4, "mult": 1.3, "hits": 1, "element": "physical" } } },
-
-    "deadeye_shot": { "name": "Deadeye Shot", "shape": "bolt", "element": "physical", "mult": 2.6, "range": 50, "pierce": 3, "cooldown": 12, "mp": 10 },
-    "mana_shield": { "name": "Mana Shield", "shape": "self", "element": "arcane", "barrier": { "share": 0.2, "seconds": 10 }, "cooldown": 20, "mp": 14 },
-    "kindly_light": { "name": "Kindly Light", "shape": "bolt", "element": "holy", "target": "ally", "healPower": 1.4, "range": 30, "cooldown": 1.5, "mp": 8 },
-    "lift_the_fallen": { "name": "Lift the Fallen", "shape": "self", "element": "holy", "target": "ally", "range": 8, "revive": { "share": 0.35 }, "cooldown": 60, "mp": 30, "ranks": [{}, { "power": 1.3, "mp": 1.15, "cooldown": 0.8 }, { "power": 1.6, "mp": 1.3, "cooldown": 0.6 }] },
-    "hallowed_ground": { "name": "Ring of Dawn", "shape": "ground", "element": "holy", "range": 25, "radius": 6, "place": { "kind": "zone", "seconds": 8, "radius": 6, "every": 1, "strike": { "mult": 0.35, "targets": 8 }, "heal": 0.025 }, "cooldown": 18, "mp": 22, "ranks": [{}, { "power": 1.3, "mp": 1.15 }, { "power": 1.6, "mp": 1.3, "add": { "statuses": [{ "id": "weaken", "seconds": 2 }] } }] },
-    "dawnfall": { "name": "Dawnfall", "shape": "ground", "element": "holy", "mult": 3.2, "range": 30, "radius": 7, "delay": 1, "allies": 7, "heal": 0.25, "cooldown": 40, "mp": 40 },
-    "call_bear": { "name": "Call the Great Bear", "shape": "summon", "element": "nature", "pet": "grove_bear", "count": 1, "cooldown": 40, "mp": 26 },
-    "rootgrasp": { "name": "Rootgrasp", "shape": "ground", "element": "nature", "mult": 0.9, "range": 26, "radius": 4, "statuses": [{ "id": "root", "seconds": 3 }], "cooldown": 12, "mp": 12 },
-    "silver_moonlight": { "name": "Silver Moonlight", "shape": "beam", "element": "nature", "mult": 0.5, "range": 28, "width": 1.2, "channel": { "seconds": 3, "every": 0.5 }, "cooldown": 10, "mp": 14 },
-    "mending_rain": { "name": "Mending Rain", "shape": "ground", "element": "nature", "range": 25, "radius": 6, "place": { "kind": "zone", "seconds": 8, "radius": 6, "every": 1, "heal": 0.03 }, "cooldown": 24, "mp": 24 },
-    "elder_grove": { "name": "Elder Grove", "shape": "ground", "element": "nature", "mult": 2.2, "range": 26, "radius": 8, "statuses": [{ "id": "root", "seconds": 2 }], "place": { "kind": "zone", "seconds": 10, "radius": 8, "every": 1, "heal": 0.03 }, "cooldown": 45, "mp": 40 },
-    "anthem_of_heroes": { "name": "Anthem of Heroes", "shape": "self", "element": "holy", "school": "song", "allies": 15, "buffs": [{ "id": "might", "name": "Anthem", "damage": 0.25, "seconds": 15 }, { "id": "haste", "name": "Quickened Step", "haste": 0.2, "move": 0.1, "seconds": 15 }], "cooldown": 60, "mp": 30 },
-    "ancestors_ward": { "name": "Ancestors' Ward", "shape": "self", "element": "holy", "allies": 12, "barrier": { "share": 0.15, "seconds": 10 }, "cooldown": 30, "mp": 20 },
-    "shield_of_dawn": { "name": "Shield of Dawn", "shape": "self", "element": "holy", "allies": 10, "buffs": [{ "id": "guard", "name": "Shield of Dawn", "resist": 0.3, "seconds": 8 }], "cooldown": 40, "mp": 24 },
-    "avatar_of_dawn": { "name": "Avatar of Dawn", "shape": "self", "element": "holy", "heal": 0.2, "selfBuff": { "name": "Avatar of Dawn", "seconds": 15, "damage": 0.3, "resist": 0.2 }, "cooldown": 90, "mp": 40 },
-    "arc_edge": { "name": "Arc Edge", "shape": "melee", "element": "arcane", "powerFrom": "blend", "mult": 1.3, "reach": 3, "arc": 1.6, "cooldown": 3, "mp": 4, "ranks": [{}, { "power": 1.3, "mp": 1.15 }, { "power": 1.6, "mp": 1.3, "add": { "statuses": [{ "id": "marked", "seconds": 4 }] } }] },
-    "riftstep": { "name": "Riftstep", "shape": "dash", "element": "arcane", "powerFrom": "blend", "mult": 1.4, "range": 10, "splash": 2, "dash": { "range": 10 }, "cooldown": 9, "mp": 8 },
-    "flung_edge": { "name": "Flung Edge", "shape": "bolt", "element": "arcane", "powerFrom": "blend", "mult": 1.5, "range": 24, "pierce": 2, "cooldown": 6, "mp": 8 },
-    "flame_bound": { "name": "Flame-Bound Blade", "shape": "self", "element": "fire", "selfBuff": { "name": "Flame-Bound", "seconds": 12, "damage": 0.2 }, "cooldown": 24, "mp": 12 },
-    "spellstorm_blade": { "name": "Spellstorm Blade", "shape": "around", "element": "arcane", "powerFrom": "blend", "mult": 0.6, "radius": 5, "repeats": 6, "repeatEvery": 0.3, "cooldown": 40, "mp": 30 },
-    "blood_price": { "name": "Blood Price", "shape": "self", "element": "shadow", "hpCost": 0.1, "selfBuff": { "name": "Blood Price", "seconds": 10, "damage": 0.35 }, "cooldown": 30, "mp": 0 },
-    "hundred_steps": { "name": "Hundred Steps", "shape": "around", "element": "physical", "mult": 0.5, "radius": 6, "repeats": 8, "repeatEvery": 0.2, "selfBuff": { "name": "Hundred Steps", "seconds": 4, "move": 0.3 }, "cooldown": 40, "mp": 20 },
-    "scorch": { "name": "Scorch", "shape": "melee", "element": "fire", "mult": 1.2, "reach": 6, "arc": 1.2, "status": "burn", "cooldown": 6, "mp": 8 },
-    "static_lash": { "name": "Static Lash", "shape": "beam", "element": "lightning", "mult": 1.3, "range": 14, "width": 1.4, "status": "shock", "cooldown": 5, "mp": 7 },
-    "skybreaker": { "name": "Skybreaker", "shape": "ground", "element": "lightning", "mult": 3.4, "range": 34, "radius": 7, "delay": 0.8, "status": "shock", "knock": { "stagger": 1.5 }, "cooldown": 40, "mp": 40 },
-    "bone_armour": { "name": "Bone Armour", "shape": "self", "element": "shadow", "barrier": { "share": 0.25, "seconds": 12 }, "cooldown": 25, "mp": 16 },
-    "grave_tide": { "name": "Grave Tide", "shape": "around", "element": "shadow", "mult": 2.6, "radius": 10, "leech": 0.15, "status": "curse", "cooldown": 45, "mp": 40 },
-    "charged_arrow": { "name": "Charged Arrow", "shape": "bolt", "element": "arcane", "powerFrom": "blendRanged", "mult": 1.4, "range": 40, "splash": 2, "cooldown": 4, "mp": 6, "ranks": [{}, { "power": 1.3, "mp": 1.15 }, { "power": 1.6, "mp": 1.3, "add": { "statuses": [{ "id": "marked", "seconds": 4 }] } }] },
-    "frost_fletch": { "name": "Frost Fletching", "shape": "bolt", "element": "ice", "powerFrom": "blendRanged", "mult": 1.2, "range": 40, "statuses": [{ "id": "chill", "seconds": 4 }], "cooldown": 6, "mp": 8 },
-    "seeking_volley": { "name": "Seeking Volley", "shape": "bolt", "element": "arcane", "powerFrom": "blendRanged", "mult": 0.55, "range": 40, "projectiles": 5, "spread": 0.25, "cooldown": 10, "mp": 12 },
-    "starfall_arrow": { "name": "Skyshard Arrow", "shape": "ground", "element": "arcane", "powerFrom": "blendRanged", "mult": 2.4, "range": 40, "radius": 5, "delay": 0.6, "cooldown": 16, "mp": 18 },
-    "arrow_of_ruin": { "name": "Arrow of Ruin", "shape": "bolt", "element": "shadow", "powerFrom": "blendRanged", "mult": 3.6, "range": 50, "pierce": 5, "statuses": [{ "id": "weaken", "seconds": 6 }], "cooldown": 35, "mp": 30 },
-    "measured_cut": { "name": "Measured Cut", "shape": "melee", "element": "physical", "mult": 1.7, "reach": 3.2, "arc": 1.4, "pen": 0.25, "cooldown": 4, "mp": 3, "ranks": [{}, { "power": 1.3, "mp": 1.15 }, { "power": 1.6, "mp": 1.3, "add": { "critBonus": 10 } }] },
-    "riposte_stance": { "name": "Riposte Stance", "shape": "self", "element": "physical", "selfBuff": { "name": "Riposte Stance", "seconds": 6, "resist": 0.3, "damage": 0.15 }, "cooldown": 14, "mp": 6 },
-    "hundred_cuts": { "name": "Hundred Cuts", "shape": "around", "element": "physical", "mult": 0.45, "radius": 4, "repeats": 10, "repeatEvery": 0.15, "cooldown": 40, "mp": 24 },
-    "red_haze": { "name": "Red Haze", "shape": "self", "element": "physical", "selfBuff": { "name": "Red Haze", "seconds": 10, "damage": 0.25, "haste": 0.15, "resist": 0.1 }, "cooldown": 25, "mp": 0 },
-    "savage_leap": { "name": "Savage Leap", "shape": "dash", "element": "physical", "mult": 1.8, "range": 12, "splash": 3, "dash": { "range": 12 }, "knock": { "stagger": 0.8 }, "cooldown": 10, "mp": 6 },
-    "rampage": { "name": "Rampage", "shape": "around", "element": "physical", "mult": 1, "radius": 5, "repeats": 3, "repeatEvery": 0.35, "status": "bleed", "cooldown": 12, "mp": 10 },
-    "world_breaker": { "name": "World Breaker", "shape": "beam", "element": "physical", "mult": 4, "range": 16, "width": 3, "knock": { "stagger": 2 }, "cooldown": 45, "mp": 20 },
-    "death_mark": { "name": "Death Mark", "shape": "bolt", "element": "shadow", "mult": 0.6, "range": 30, "statuses": [{ "id": "marked", "name": "Death Mark", "takeMore": 0.25, "seconds": 10 }], "cooldown": 20, "mp": 10 },
-    "venom_edge": { "name": "Venom Edge", "shape": "melee", "element": "poison", "mult": 1.2, "reach": 3, "arc": 1.4, "statusMult": 1.5, "stack": { "status": "poison", "max": 3 }, "cooldown": 5, "mp": 5 },
-    "final_word": { "name": "Final Word", "shape": "melee", "element": "shadow", "mult": 3.5, "reach": 3, "arc": 1, "execute": { "below": 0.3, "mult": 1 }, "cooldown": 30, "mp": 16 }
+ "_doc": "Oathwild's spell catalogue. js/rules/spells.js is the ONE reader. An entry with no `from` and no `shape` is a REUSED row looked up by id in Farhold's skills.json, then Thousandvale's skills-tv.json `add`, then classes-tv.json `skills` (borrowed, never written). `from: \"<source>:<id>\"` reuses a row under a new id. `set` lays fields over the row (null removes one). An entry with `shape` is Oathwild's own. Fields the round-1 combat sim does not run are dropped when the row is read (js/rules/spells.js SUPPORTED) so nothing describes a rule that does nothing. `ranks` (WoW-style, bought with class points): rank 1 is the row; each later rank lists `power` (x on damage, heals, barriers, summons; buffs grow by half as much), `mp` (x on mana cost), optional `seconds` (added to what it applies), `cooldown` (x) and `add` (a new effect from that rank on). Missing `ranks` = `defaultRanks`. `school: song` makes a spell use Charisma; `powerFrom`: weapon | spell | heal | blend (average of weapon and spell power) | blendRanged.",
+ "defaultRanks": [
+  {},
+  {
+   "power": 1.3,
+   "mp": 1.15
+  },
+  {
+   "power": 1.6,
+   "mp": 1.3
   }
+ ],
+ "spells": {
+  "arcane_blast": {
+   "name": "Arcane Blast",
+   "shape": "melee",
+   "element": "arcane",
+   "mult": 1.33,
+   "reach": 9,
+   "arc": 1.4,
+   "cooldown": 7,
+   "mp": 9,
+   "knock": {
+    "push": 6,
+    "down": 1.2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 3
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "arc": 0.6
+     }
+    }
+   ]
+  },
+  "arcane_slash": {
+   "name": "Arcane Slash",
+   "shape": "melee",
+   "element": "arcane",
+   "powerFrom": "blend",
+   "mult": 2.16,
+   "reach": 5,
+   "arc": 2.4,
+   "cooldown": 3,
+   "mp": 2,
+   "knock": {
+    "push": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 2.5,
+       "down": 1
+      }
+     }
+    }
+   ]
+  },
+  "arcane_spin": {
+   "name": "Arcane Spin",
+   "shape": "around",
+   "element": "arcane",
+   "powerFrom": "blend",
+   "mult": 1.08,
+   "radius": 6,
+   "repeats": 4,
+   "repeatEvery": 0.3,
+   "cooldown": 10,
+   "mp": 5,
+   "pullIn": {
+    "metres": 0.6
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "repeats": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "radius": 1.5
+     }
+    }
+   ]
+  },
+  "assassinate": {
+   "name": "Assassinate",
+   "shape": "leap",
+   "element": "physical",
+   "mult": 6,
+   "range": 18,
+   "radius": 5,
+   "cooldown": 30,
+   "mp": 24,
+   "execute": {
+    "below": 0.35,
+    "mult": 1.5
+   },
+   "knock": {
+    "push": 4,
+    "down": 2
+   }
+  },
+  "ball_lightning": {
+   "name": "Ball Lightning",
+   "shape": "ground",
+   "element": "lightning",
+   "mult": 2.4,
+   "range": 26,
+   "radius": 4.5,
+   "delay": 0.8,
+   "cooldown": 9,
+   "mp": 10,
+   "knock": {
+    "push": 4,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 5,
+       "down": 2.2
+      }
+     }
+    }
+   ]
+  },
+  "battle_hymn": {
+   "name": "Battle Hymn",
+   "shape": "self",
+   "element": "arcane",
+   "school": "song",
+   "cooldown": 24,
+   "mp": 12,
+   "allies": 15,
+   "selfBuff": {
+    "name": "Battle Hymn",
+    "seconds": 10,
+    "damage": 0.3,
+    "haste": 0.2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "seconds": 4
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2
+    }
+   ]
+  },
+  "battle_roar": {
+   "name": "Battle Roar",
+   "shape": "around",
+   "element": "physical",
+   "mult": 1.3,
+   "radius": 8,
+   "cooldown": 14,
+   "mp": 3,
+   "knock": {
+    "push": 5,
+    "down": 1
+   },
+   "statuses": [
+    {
+     "id": "fear",
+     "seconds": 2
+    }
+   ]
+  },
+  "battle_stance": {
+   "name": "Battle Stance",
+   "shape": "self",
+   "element": "physical",
+   "cooldown": 25,
+   "mp": 4,
+   "selfBuff": {
+    "name": "Battle Stance",
+    "seconds": 12,
+    "damage": 0.35,
+    "haste": 0.2
+   }
+  },
+  "bear_shape": {
+   "name": "Bear Shape",
+   "shape": "self",
+   "element": "nature",
+   "cooldown": 1.5,
+   "mp": 8,
+   "taunt": {
+    "radius": 6,
+    "seconds": 3
+   },
+   "form": {
+    "id": "bear",
+    "name": "Bear",
+    "group": "shape",
+    "toggle": true,
+    "body": {
+     "creature": "bear",
+     "scale": 1.3
+    },
+    "stats": {
+     "armorPct": 0.6,
+     "maxHpPct": 0.3,
+     "thorns": 0.1
+    },
+    "basic": {
+     "shape": "melee",
+     "reach": 2.8,
+     "arc": 2.4,
+     "mult": 1.43,
+     "element": "physical"
+    }
+   }
+  },
+  "berserk": {
+   "name": "Berserk",
+   "shape": "self",
+   "element": "physical",
+   "cooldown": 60,
+   "mp": 20,
+   "selfBuff": {
+    "name": "Berserk",
+    "seconds": 14,
+    "damage": 0.5,
+    "haste": 0.35,
+    "move": 0.25
+   }
+  },
+  "blade_dance": {
+   "name": "Blade Dance",
+   "shape": "around",
+   "element": "physical",
+   "mult": 0.6,
+   "radius": 5,
+   "repeats": 4,
+   "repeatEvery": 0.25,
+   "cooldown": 9,
+   "mp": 4,
+   "knock": {
+    "push": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "repeats": 2
+     }
+    }
+   ]
+  },
+  "blade_rush": {
+   "name": "Blade Rush",
+   "shape": "dash",
+   "element": "physical",
+   "mult": 2.4,
+   "range": 12,
+   "splash": 1.8,
+   "cooldown": 9,
+   "mp": 8,
+   "dash": {
+    "range": 12
+   },
+   "knock": {
+    "push": 2,
+    "down": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 3,
+      "dash": {
+       "range": 15
+      }
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "statuses": [
+       {
+        "id": "bleed",
+        "seconds": 6
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "blade_wave": {
+   "name": "Blade Wave",
+   "shape": "beam",
+   "element": "arcane",
+   "powerFrom": "blend",
+   "mult": 2.97,
+   "range": 18,
+   "width": 3,
+   "cooldown": 11,
+   "mp": 6,
+   "knock": {
+    "push": 4,
+    "down": 1.2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "width": 1.5,
+      "knock": {
+       "push": 5,
+       "down": 2
+      }
+     }
+    }
+   ]
+  },
+  "blizzard": {
+   "name": "Blizzard",
+   "shape": "ground",
+   "element": "ice",
+   "mult": 0.24,
+   "range": 28,
+   "radius": 7,
+   "repeats": 8,
+   "repeatEvery": 0.5,
+   "cooldown": 16,
+   "mp": 18,
+   "statuses": [
+    {
+     "id": "chill",
+     "seconds": 2
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 2
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "repeats": 4
+     }
+    }
+   ]
+  },
+  "blood_frenzy": {
+   "name": "Blood Frenzy",
+   "shape": "self",
+   "element": "physical",
+   "hpCost": 0.1,
+   "cooldown": 25,
+   "mp": 2,
+   "selfBuff": {
+    "name": "Blood Frenzy",
+    "seconds": 12,
+    "damage": 0.4,
+    "haste": 0.3
+   }
+  },
+  "blood_pact": {
+   "name": "Blood Pact",
+   "shape": "self",
+   "element": "shadow",
+   "hpCost": 0.15,
+   "cooldown": 30,
+   "mp": 8,
+   "selfBuff": {
+    "name": "Blood Pact",
+    "seconds": 12,
+    "damage": 0.4,
+    "haste": 0.2
+   }
+  },
+  "blood_storm": {
+   "name": "Blood Storm",
+   "shape": "around",
+   "element": "physical",
+   "mult": 0.78,
+   "radius": 9,
+   "repeats": 8,
+   "repeatEvery": 0.25,
+   "leech": 0.15,
+   "cooldown": 28,
+   "mp": 8,
+   "knock": {
+    "push": 1.5
+   }
+  },
+  "bolt_storm": {
+   "name": "Bolt Storm",
+   "shape": "ground",
+   "element": "physical",
+   "powerFrom": "weapon",
+   "mult": 0.75,
+   "range": 30,
+   "radius": 9,
+   "delay": 0.5,
+   "repeats": 10,
+   "repeatEvery": 0.3,
+   "cooldown": 30,
+   "mp": 14,
+   "knock": {
+    "push": 1,
+    "down": 0.8
+   }
+  },
+  "bone_armor": {
+   "name": "Bone Armour",
+   "shape": "self",
+   "element": "shadow",
+   "cooldown": 30,
+   "mp": 14,
+   "barrier": {
+    "share": 0.25,
+    "seconds": 10
+   }
+  },
+  "bone_nova": {
+   "name": "Bone Nova",
+   "shape": "around",
+   "element": "shadow",
+   "mult": 1.7,
+   "radius": 7,
+   "cooldown": 10,
+   "mp": 12,
+   "knock": {
+    "push": 3,
+    "down": 1
+   },
+   "statuses": [
+    {
+     "id": "bleed",
+     "seconds": 5
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 4,
+       "down": 1.8
+      }
+     }
+    }
+   ]
+  },
+  "bone_spear": {
+   "name": "Bone Spear",
+   "shape": "beam",
+   "element": "shadow",
+   "mult": 2.6,
+   "range": 26,
+   "width": 2,
+   "cooldown": 9,
+   "mp": 10,
+   "knock": {
+    "push": 3
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 6
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "width": 1,
+      "knock": {
+       "push": 4,
+       "down": 1.5
+      }
+     }
+    }
+   ]
+  },
+  "bone_spikes": {
+   "name": "Bone Spikes",
+   "shape": "ground",
+   "element": "shadow",
+   "mult": 1.5,
+   "range": 22,
+   "radius": 3.5,
+   "delay": 0.25,
+   "cooldown": 2.5,
+   "mp": 6,
+   "knock": {
+    "push": 1.5
+   },
+   "statuses": [
+    {
+     "id": "bleed",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 2.5,
+       "down": 1
+      }
+     }
+    }
+   ]
+  },
+  "bull_rush": {
+   "name": "Bull Rush",
+   "shape": "dash",
+   "element": "physical",
+   "mult": 2.08,
+   "range": 16,
+   "splash": 2,
+   "cooldown": 10,
+   "mp": 3,
+   "dash": {
+    "range": 16
+   },
+   "knock": {
+    "push": 6,
+    "down": 2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4,
+      "dash": {
+       "range": 20
+      }
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "splash": 1
+     }
+    }
+   ]
+  },
+  "call_bear": {
+   "name": "Call Bear",
+   "shape": "summon",
+   "element": "nature",
+   "pet": "grove_bear",
+   "count": 1,
+   "cooldown": 40,
+   "mp": 26
+  },
+  "call_spirit": {
+   "name": "Call Spirit Bear",
+   "shape": "summon",
+   "element": "nature",
+   "pet": "spirit_bear",
+   "count": 1,
+   "cooldown": 36,
+   "mp": 22,
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2
+    }
+   ]
+  },
+  "call_wolf": {
+   "name": "Call Wolves",
+   "shape": "summon",
+   "element": "nature",
+   "pet": "grove_wolf",
+   "count": 2,
+   "cooldown": 26,
+   "mp": 18,
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "count": 1
+     }
+    }
+   ]
+  },
+  "called_star": {},
+  "cat_shape": {
+   "name": "Cat Shape",
+   "shape": "self",
+   "element": "nature",
+   "cooldown": 1.5,
+   "mp": 8,
+   "form": {
+    "id": "cat",
+    "name": "Mountain Cat",
+    "group": "shape",
+    "toggle": true,
+    "body": {
+     "creature": "cat",
+     "scale": 1.2
+    },
+    "stats": {
+     "movePct": 0.35,
+     "hastePct": 0.1,
+     "armorPct": -0.1
+    },
+    "basic": {
+     "shape": "melee",
+     "reach": 2.6,
+     "arc": 1.4,
+     "mult": 1.69,
+     "hits": 1,
+     "element": "physical"
+    }
+   }
+  },
+  "chain_hook": {
+   "name": "Chain Hook",
+   "shape": "beam",
+   "element": "physical",
+   "powerFrom": "weapon",
+   "mult": 1.3,
+   "range": 18,
+   "width": 2,
+   "cooldown": 10,
+   "mp": 4,
+   "pullIn": {
+    "metres": 8
+   },
+   "knock": {
+    "stagger": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "width": 1.5
+     }
+    }
+   ]
+  },
+  "chain_lightning": {
+   "name": "Chain Lightning",
+   "shape": "beam",
+   "element": "lightning",
+   "mult": 1.5,
+   "range": 22,
+   "width": 2,
+   "cooldown": 2.5,
+   "mp": 6,
+   "statuses": [
+    {
+     "id": "shock",
+     "seconds": 3
+    }
+   ],
+   "knock": {
+    "push": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "width": 1,
+      "knock": {
+       "push": 2,
+       "down": 1
+      }
+     }
+    }
+   ]
+  },
+  "charge": {
+   "name": "Charge",
+   "shape": "dash",
+   "element": "physical",
+   "mult": 1.11,
+   "range": 14,
+   "splash": 1.6,
+   "cooldown": 9,
+   "mp": 6,
+   "dash": {
+    "range": 14
+   },
+   "knock": {
+    "push": 3.5,
+    "down": 1.2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4,
+      "dash": {
+       "range": 18
+      }
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "mult": 0.6
+     }
+    }
+   ]
+  },
+  "cleave": {
+   "name": "Cleave",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.27,
+   "reach": 4.2,
+   "arc": 3.6,
+   "cooldown": 3,
+   "mp": 4,
+   "knock": {
+    "push": 1.2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 0.8
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "statuses": [
+       {
+        "id": "bleed",
+        "seconds": 5
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "clockwork_bolt": {},
+  "combat_roll": {
+   "name": "Combat Roll",
+   "shape": "leap",
+   "element": "physical",
+   "powerFrom": "weapon",
+   "mult": 0.9,
+   "range": 10,
+   "radius": 3.5,
+   "cooldown": 8,
+   "mp": 2,
+   "knock": {
+    "push": 3
+   }
+  },
+  "comet_arrow": {
+   "name": "Comet Arrow",
+   "shape": "ground",
+   "element": "fire",
+   "powerFrom": "blendRanged",
+   "mult": 4,
+   "range": 32,
+   "radius": 8,
+   "delay": 0.8,
+   "cooldown": 28,
+   "mp": 24,
+   "knock": {
+    "push": 6,
+    "down": 2.5
+   },
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 6
+    }
+   ]
+  },
+  "comet_rush": {},
+  "corpse_explosion": {
+   "name": "Corpse Explosion",
+   "shape": "ground",
+   "element": "shadow",
+   "mult": 2.2,
+   "range": 22,
+   "radius": 5,
+   "delay": 0.3,
+   "cooldown": 9,
+   "mp": 10,
+   "knock": {
+    "push": 4,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 5,
+       "down": 2.2
+      }
+     }
+    }
+   ]
+  },
+  "crescendo": {
+   "name": "Crescendo",
+   "shape": "around",
+   "element": "arcane",
+   "school": "song",
+   "mult": 4.68,
+   "radius": 11,
+   "cooldown": 30,
+   "mp": 28,
+   "knock": {
+    "push": 6,
+    "down": 2.5
+   }
+  },
+  "curse_cloud": {
+   "name": "Curse Cloud",
+   "shape": "ground",
+   "element": "shadow",
+   "mult": 0.4,
+   "range": 24,
+   "radius": 5,
+   "delay": 0.3,
+   "repeats": 6,
+   "repeatEvery": 0.6,
+   "cooldown": 12,
+   "mp": 12,
+   "statuses": [
+    {
+     "id": "curse",
+     "seconds": 6
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "repeats": 3
+     }
+    }
+   ]
+  },
+  "dancing_blade": {
+   "name": "Dancing Blade",
+   "shape": "dash",
+   "element": "physical",
+   "mult": 2.08,
+   "range": 10,
+   "splash": 1.8,
+   "cooldown": 8,
+   "mp": 6,
+   "dash": {
+    "range": 10
+   },
+   "knock": {
+    "push": 2,
+    "down": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 3,
+      "dash": {
+       "range": 13
+      }
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "mult": 0.5
+     }
+    }
+   ]
+  },
+  "dark_star": {
+   "name": "Dark Star",
+   "shape": "ground",
+   "element": "shadow",
+   "mult": 4.2,
+   "range": 30,
+   "radius": 8,
+   "delay": 1.2,
+   "cooldown": 30,
+   "mp": 30,
+   "knock": {
+    "push": 6,
+    "down": 3
+   },
+   "statuses": [
+    {
+     "id": "curse",
+     "seconds": 6
+    }
+   ]
+  },
+  "dark_wave": {
+   "name": "Dark Wave",
+   "shape": "melee",
+   "element": "shadow",
+   "mult": 1.9,
+   "reach": 11,
+   "arc": 1.3,
+   "cooldown": 8,
+   "mp": 10,
+   "knock": {
+    "push": 5,
+    "down": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 3
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "arc": 0.5,
+      "knock": {
+       "push": 6,
+       "down": 1.8
+      }
+     }
+    }
+   ]
+  },
+  "darkness": {
+   "name": "Darkness",
+   "shape": "around",
+   "element": "shadow",
+   "mult": 1.6,
+   "radius": 7,
+   "cooldown": 10,
+   "mp": 5,
+   "knock": {
+    "push": 4,
+    "down": 1.5
+   },
+   "statuses": [
+    {
+     "id": "fear",
+     "seconds": 2
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 5,
+       "down": 2.2
+      }
+     }
+    }
+   ]
+  },
+  "deadly_lunge": {
+   "name": "Deadly Lunge",
+   "shape": "dash",
+   "element": "physical",
+   "mult": 3.6,
+   "range": 20,
+   "splash": 2.5,
+   "cooldown": 26,
+   "mp": 10,
+   "dash": {
+    "range": 20
+   },
+   "knock": {
+    "push": 5,
+    "down": 2
+   }
+  },
+  "death_mark": {
+   "name": "Death Mark",
+   "shape": "ground",
+   "element": "shadow",
+   "powerFrom": "weapon",
+   "mult": 1.2,
+   "range": 20,
+   "radius": 4,
+   "delay": 0.2,
+   "cooldown": 10,
+   "mp": 4,
+   "statuses": [
+    {
+     "id": "marked",
+     "seconds": 8
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "seconds": 4
+     }
+    }
+   ]
+  },
+  "death_sentence": {
+   "name": "Death Sentence",
+   "shape": "ground",
+   "element": "shadow",
+   "powerFrom": "weapon",
+   "mult": 4,
+   "range": 24,
+   "radius": 7,
+   "delay": 1,
+   "cooldown": 28,
+   "mp": 10,
+   "execute": {
+    "below": 0.35,
+    "mult": 1
+   },
+   "knock": {
+    "push": 5,
+    "down": 2
+   }
+  },
+  "death_wave": {
+   "name": "Death Wave",
+   "shape": "around",
+   "element": "shadow",
+   "mult": 3.8,
+   "radius": 12,
+   "cooldown": 30,
+   "mp": 30,
+   "knock": {
+    "push": 6,
+    "down": 2.5
+   },
+   "statuses": [
+    {
+     "id": "curse",
+     "seconds": 6
+    }
+   ]
+  },
+  "deep_freeze": {
+   "name": "Deep Freeze",
+   "shape": "around",
+   "element": "ice",
+   "mult": 2.1,
+   "radius": 11,
+   "cooldown": 30,
+   "mp": 30,
+   "statuses": [
+    {
+     "id": "root",
+     "seconds": 4
+    },
+    {
+     "id": "chill",
+     "seconds": 8
+    }
+   ],
+   "knock": {
+    "push": 2
+   }
+  },
+  "demon_gate": {
+   "name": "Demon Gate",
+   "shape": "ground",
+   "element": "shadow",
+   "mult": 2.4,
+   "range": 26,
+   "radius": 5,
+   "delay": 0.4,
+   "hpCost": 0.1,
+   "cooldown": 40,
+   "mp": 28,
+   "knock": {
+    "push": 5,
+    "down": 2
+   },
+   "place": {
+    "kind": "zone",
+    "seconds": 10,
+    "radius": 8,
+    "every": 0.75,
+    "strike": {
+     "mult": 0.35
+    }
+   }
+  },
+  "deploy_sentry": {},
+  "disarming_strike": {
+   "name": "Disarming Strike",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.6,
+   "reach": 4.5,
+   "arc": 1.6,
+   "cooldown": 10,
+   "mp": 4,
+   "knock": {
+    "push": 2
+   },
+   "statuses": [
+    {
+     "id": "disarm",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "arc": 0.8
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "seconds": 1.5
+     }
+    }
+   ]
+  },
+  "divine_hammer": {
+   "name": "Divine Hammer",
+   "shape": "beam",
+   "element": "holy",
+   "mult": 3.77,
+   "range": 18,
+   "width": 4,
+   "cooldown": 14,
+   "mp": 16,
+   "knock": {
+    "push": 4,
+    "down": 2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 6
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "width": 2
+     }
+    }
+   ]
+  },
+  "divine_storm": {
+   "name": "Divine Storm",
+   "shape": "around",
+   "element": "holy",
+   "powerFrom": "blend",
+   "mult": 2.43,
+   "radius": 6,
+   "cooldown": 8,
+   "mp": 5,
+   "knock": {
+    "push": 2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 3,
+       "down": 1.5
+      }
+     }
+    }
+   ]
+  },
+  "dragonscale": {},
+  "drain_life": {
+   "name": "Drain Life",
+   "shape": "beam",
+   "element": "shadow",
+   "mult": 1.6,
+   "range": 18,
+   "width": 2,
+   "leech": 0.3,
+   "cooldown": 6,
+   "mp": 8,
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "width": 1.5
+     }
+    }
+   ]
+  },
+  "eagle_eye": {
+   "name": "Eagle Eye",
+   "shape": "self",
+   "element": "physical",
+   "cooldown": 30,
+   "mp": 10,
+   "selfBuff": {
+    "name": "Eagle Eye",
+    "seconds": 10,
+    "damage": 0.3,
+    "haste": 0.25
+   }
+  },
+  "earth_splitter": {
+   "name": "Earth Splitter",
+   "shape": "beam",
+   "element": "physical",
+   "mult": 5.2,
+   "range": 24,
+   "width": 6,
+   "cooldown": 28,
+   "mp": 8,
+   "knock": {
+    "push": 7,
+    "down": 3
+   }
+  },
+  "earth_stomp": {
+   "name": "Earth Stomp",
+   "shape": "around",
+   "element": "physical",
+   "mult": 2.86,
+   "radius": 8,
+   "cooldown": 14,
+   "mp": 6,
+   "knock": {
+    "push": 3,
+    "down": 2.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 4,
+       "down": 3
+      }
+     }
+    }
+   ]
+  },
+  "earthquake": {
+   "name": "Earthquake",
+   "shape": "beam",
+   "element": "physical",
+   "mult": 2.72,
+   "range": 22,
+   "width": 5,
+   "cooldown": 28,
+   "mp": 26,
+   "knock": {
+    "push": 5,
+    "down": 3
+   }
+  },
+  "entropy_field": {},
+  "eviscerate": {
+   "name": "Eviscerate",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 3.6,
+   "reach": 3.6,
+   "arc": 1.6,
+   "cooldown": 7,
+   "mp": 8,
+   "execute": {
+    "below": 0.3,
+    "mult": 1
+   },
+   "statuses": [
+    {
+     "id": "bleed",
+     "seconds": 6
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "execute": {
+       "below": 0.4,
+       "mult": 1
+      }
+     }
+    }
+   ]
+  },
+  "explosive_arrow": {
+   "name": "Explosive Arrow",
+   "shape": "ground",
+   "element": "fire",
+   "powerFrom": "weapon",
+   "mult": 1.76,
+   "range": 28,
+   "radius": 4,
+   "delay": 0.4,
+   "cooldown": 9,
+   "mp": 10,
+   "knock": {
+    "push": 4,
+    "down": 1.5
+   },
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 5,
+       "down": 2.2
+      }
+     }
+    }
+   ]
+  },
+  "fan_of_knives": {
+   "name": "Fan of Knives",
+   "shape": "around",
+   "element": "physical",
+   "mult": 1.95,
+   "radius": 6,
+   "cooldown": 3,
+   "mp": 4,
+   "knock": {
+    "push": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "statuses": [
+       {
+        "id": "bleed",
+        "seconds": 5
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "final_blow": {
+   "name": "Final Blow",
+   "shape": "leap",
+   "element": "physical",
+   "mult": 5.2,
+   "range": 16,
+   "radius": 6,
+   "cooldown": 28,
+   "mp": 10,
+   "knock": {
+    "push": 6,
+    "down": 3
+   }
+  },
+  "finishing_cut": {
+   "name": "Finishing Cut",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 2.2,
+   "reach": 3.8,
+   "arc": 1.4,
+   "cooldown": 8,
+   "mp": 4,
+   "execute": {
+    "below": 0.35,
+    "mult": 1.5
+   },
+   "knock": {
+    "push": 2,
+    "down": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "arc": 0.6
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "execute": {
+       "below": 0.45,
+       "mult": 1.5
+      }
+     }
+    }
+   ]
+  },
+  "fire_bomb": {
+   "name": "Fire Bomb",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 2.8,
+   "range": 24,
+   "radius": 6,
+   "delay": 1.2,
+   "cooldown": 12,
+   "mp": 14,
+   "knock": {
+    "push": 5,
+    "down": 2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 6,
+       "down": 2.8
+      }
+     }
+    }
+   ]
+  },
+  "fire_nova": {
+   "name": "Fire Nova",
+   "shape": "around",
+   "element": "fire",
+   "mult": 1.8,
+   "radius": 7,
+   "cooldown": 10,
+   "mp": 12,
+   "knock": {
+    "push": 4,
+    "down": 1.5
+   },
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 5,
+       "down": 2.2
+      }
+     }
+    }
+   ]
+  },
+  "fire_slash": {
+   "name": "Fire Slash",
+   "shape": "melee",
+   "element": "fire",
+   "powerFrom": "blend",
+   "mult": 2.43,
+   "reach": 6,
+   "arc": 2,
+   "cooldown": 7,
+   "mp": 4,
+   "knock": {
+    "push": 2
+   },
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 2
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "arc": 0.8
+     }
+    }
+   ]
+  },
+  "fire_storm": {
+   "name": "Fire Storm",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 0.75,
+   "range": 30,
+   "radius": 10,
+   "delay": 0.4,
+   "repeats": 10,
+   "repeatEvery": 0.35,
+   "cooldown": 30,
+   "mp": 30,
+   "knock": {
+    "push": 1.5,
+    "down": 0.8
+   },
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 4
+    }
+   ]
+  },
+  "fire_wall": {
+   "name": "Fire Wall",
+   "shape": "beam",
+   "element": "fire",
+   "mult": 0.55,
+   "range": 18,
+   "width": 3.5,
+   "repeats": 5,
+   "repeatEvery": 0.5,
+   "cooldown": 12,
+   "mp": 12,
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "repeats": 2
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "width": 1.5
+     }
+    }
+   ]
+  },
+  "fireball": {
+   "name": "Fireball",
+   "shape": "bolt",
+   "element": "fire",
+   "mult": 1.26,
+   "range": 30,
+   "explode": {
+    "radius": 4
+   },
+   "cooldown": 2.5,
+   "mp": 7,
+   "knock": {
+    "push": 2.5
+   },
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "explode": {
+       "radius": 5
+      }
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 4,
+       "down": 1.2
+      }
+     }
+    }
+   ]
+  },
+  "flame_arrow": {
+   "name": "Flame Arrow",
+   "shape": "beam",
+   "element": "fire",
+   "powerFrom": "blendRanged",
+   "mult": 1.8,
+   "range": 26,
+   "width": 2,
+   "cooldown": 6,
+   "mp": 6,
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 6
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "width": 1
+     }
+    }
+   ]
+  },
+  "flame_burst": {
+   "name": "Flame Burst",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 1.6,
+   "range": 24,
+   "radius": 3.5,
+   "delay": 0.3,
+   "cooldown": 2.5,
+   "mp": 6,
+   "knock": {
+    "push": 2
+   },
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 3,
+       "down": 1
+      }
+     }
+    }
+   ]
+  },
+  "flame_dash": {
+   "name": "Flame Dash",
+   "shape": "dash",
+   "element": "fire",
+   "mult": 1.3,
+   "range": 12,
+   "splash": 2,
+   "cooldown": 9,
+   "mp": 8,
+   "dash": {
+    "range": 12
+   },
+   "knock": {
+    "push": 2
+   },
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 3,
+      "dash": {
+       "range": 15
+      }
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 3,
+       "down": 1.2
+      }
+     }
+    }
+   ]
+  },
+  "flame_pillar": {
+   "name": "Flame Pillar",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 2.6,
+   "range": 26,
+   "radius": 3,
+   "delay": 0.5,
+   "cooldown": 9,
+   "mp": 10,
+   "knock": {
+    "push": 1,
+    "down": 2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "repeats": 2,
+      "repeatEvery": 0.5
+     }
+    }
+   ]
+  },
+  "flame_wave": {
+   "name": "Flame Wave",
+   "shape": "melee",
+   "element": "fire",
+   "mult": 2,
+   "reach": 10,
+   "arc": 1.6,
+   "cooldown": 8,
+   "mp": 10,
+   "knock": {
+    "push": 5,
+    "down": 1
+   },
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 3
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "arc": 0.5,
+      "knock": {
+       "push": 6,
+       "down": 1.8
+      }
+     }
+    }
+   ]
+  },
+  "flamethrower": {
+   "set": {
+    "repeats": 6,
+    "repeatEvery": 0.25
+   }
+  },
+  "flask_grenade": {},
+  "flurry": {
+   "name": "Flurry",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 0.6,
+   "reach": 4,
+   "arc": 1.6,
+   "repeats": 3,
+   "repeatEvery": 0.15,
+   "cooldown": 3,
+   "mp": 2,
+   "knock": {
+    "push": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "repeats": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "arc": 0.6,
+      "statuses": [
+       {
+        "id": "bleed",
+        "seconds": 5
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "flying_kick": {
+   "name": "Flying Kick",
+   "shape": "leap",
+   "element": "physical",
+   "mult": 2.34,
+   "range": 14,
+   "radius": 3.5,
+   "cooldown": 9,
+   "mp": 4,
+   "knock": {
+    "push": 4,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "radius": 1.5
+     }
+    }
+   ]
+  },
+  "force_shot": {
+   "name": "Force Shot",
+   "shape": "melee",
+   "element": "arcane",
+   "powerFrom": "blendRanged",
+   "mult": 1.8,
+   "reach": 10,
+   "arc": 1,
+   "cooldown": 8,
+   "mp": 8,
+   "knock": {
+    "push": 7,
+    "down": 1.2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 3
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "arc": 0.4,
+      "knock": {
+       "push": 8,
+       "down": 2
+      }
+     }
+    }
+   ]
+  },
+  "frost_arrow": {
+   "name": "Frost Arrow",
+   "shape": "ground",
+   "element": "ice",
+   "powerFrom": "blendRanged",
+   "mult": 1.6,
+   "range": 28,
+   "radius": 4,
+   "delay": 0.35,
+   "cooldown": 3,
+   "mp": 5,
+   "knock": {
+    "push": 1.5
+   },
+   "statuses": [
+    {
+     "id": "chill",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 2.5,
+       "down": 1
+      }
+     }
+    }
+   ]
+  },
+  "frost_nova": {
+   "name": "Frost Nova",
+   "shape": "around",
+   "element": "ice",
+   "mult": 0.91,
+   "radius": 7,
+   "cooldown": 11,
+   "mp": 12,
+   "statuses": [
+    {
+     "id": "root",
+     "seconds": 2.5
+    }
+   ],
+   "knock": {
+    "push": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 2
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "seconds": 1.5
+     }
+    }
+   ]
+  },
+  "giant_blade": {
+   "name": "Giant Blade",
+   "shape": "beam",
+   "element": "arcane",
+   "powerFrom": "blend",
+   "mult": 5.4,
+   "range": 22,
+   "width": 6,
+   "cooldown": 30,
+   "mp": 14,
+   "knock": {
+    "push": 6,
+    "down": 3
+   }
+  },
+  "grand_finale": {
+   "name": "Grand Finale",
+   "shape": "beam",
+   "element": "arcane",
+   "school": "song",
+   "mult": 4.42,
+   "range": 26,
+   "width": 5,
+   "cooldown": 28,
+   "mp": 28,
+   "knock": {
+    "push": 5,
+    "down": 2
+   }
+  },
+  "grand_flourish": {
+   "name": "Grand Flourish",
+   "shape": "around",
+   "element": "physical",
+   "mult": 0.6,
+   "radius": 7,
+   "repeats": 8,
+   "repeatEvery": 0.2,
+   "cooldown": 26,
+   "mp": 10,
+   "knock": {
+    "push": 3,
+    "down": 1.5
+   }
+  },
+  "grasping_dead": {
+   "name": "Grasping Dead",
+   "shape": "ground",
+   "element": "shadow",
+   "mult": 1.2,
+   "range": 22,
+   "radius": 5,
+   "delay": 0.3,
+   "cooldown": 14,
+   "mp": 12,
+   "statuses": [
+    {
+     "id": "root",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "seconds": 1.5
+     }
+    }
+   ]
+  },
+  "grasping_roots": {
+   "name": "Grasping Roots",
+   "shape": "ground",
+   "element": "nature",
+   "mult": 1.43,
+   "range": 22,
+   "radius": 5,
+   "delay": 0.3,
+   "cooldown": 12,
+   "mp": 10,
+   "statuses": [
+    {
+     "id": "root",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "statuses": [
+       {
+        "id": "bleed",
+        "seconds": 6
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "grave_army": {
+   "name": "Grave Army",
+   "shape": "self",
+   "element": "shadow",
+   "mult": 1.6,
+   "radius": 8,
+   "cooldown": 50,
+   "mp": 36,
+   "knock": {
+    "push": 4,
+    "down": 1.5
+   },
+   "summon": {
+    "def": "buried_thrall",
+    "name": "Buried Thrall",
+    "count": 5,
+    "temporary": true,
+    "lifetime": 18
+   }
+  },
+  "great_storm": {
+   "name": "Great Storm",
+   "shape": "ground",
+   "element": "nature",
+   "mult": 0.85,
+   "range": 30,
+   "radius": 10,
+   "delay": 0.4,
+   "repeats": 10,
+   "repeatEvery": 0.35,
+   "cooldown": 32,
+   "mp": 30,
+   "pullIn": {
+    "metres": 0.6
+   },
+   "knock": {
+    "push": 1.5,
+    "down": 1
+   }
+  },
+  "ground_slam": {
+   "name": "Ground Slam",
+   "shape": "around",
+   "element": "physical",
+   "mult": 1.62,
+   "radius": 7,
+   "cooldown": 13,
+   "mp": 14,
+   "knock": {
+    "push": 4,
+    "down": 2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "down": 3
+      }
+     }
+    }
+   ]
+  },
+  "heal": {
+   "name": "Heal",
+   "shape": "bolt",
+   "element": "holy",
+   "target": "ally",
+   "healPower": 1.8,
+   "range": 30,
+   "cooldown": 6,
+   "mp": 12,
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2
+    }
+   ]
+  },
+  "healing_bloom": {
+   "name": "Healing Bloom",
+   "shape": "ground",
+   "element": "nature",
+   "range": 25,
+   "radius": 6,
+   "cooldown": 24,
+   "mp": 22,
+   "place": {
+    "kind": "zone",
+    "seconds": 8,
+    "radius": 6,
+    "every": 1,
+    "heal": 0.03
+   }
+  },
+  "healing_light": {
+   "name": "Healing Light",
+   "shape": "bolt",
+   "element": "holy",
+   "target": "ally",
+   "healPower": 1.6,
+   "range": 30,
+   "cooldown": 8,
+   "mp": 6,
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2
+    }
+   ]
+  },
+  "healing_song": {
+   "name": "Healing Song",
+   "shape": "self",
+   "element": "arcane",
+   "school": "song",
+   "cooldown": 18,
+   "mp": 14,
+   "place": {
+    "kind": "zone",
+    "seconds": 8,
+    "radius": 9,
+    "every": 1,
+    "heal": 0.03,
+    "follow": "self"
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "place": {
+       "radius": 11
+      }
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "place": {
+       "heal": 0.04
+      }
+     }
+    }
+   ]
+  },
+  "healing_totem": {
+   "name": "Healing Totem",
+   "shape": "ground",
+   "element": "nature",
+   "range": 12,
+   "cooldown": 20,
+   "mp": 16,
+   "place": {
+    "kind": "pulse",
+    "seconds": 12,
+    "radius": 8,
+    "every": 1,
+    "heal": 0.025
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2
+    }
+   ]
+  },
+  "heavens_hammer": {
+   "name": "Heaven's Hammer",
+   "shape": "ground",
+   "element": "holy",
+   "mult": 5.4,
+   "range": 28,
+   "radius": 10,
+   "delay": 1,
+   "cooldown": 30,
+   "mp": 15,
+   "knock": {
+    "push": 6,
+    "down": 3
+   }
+  },
+  "holy_arrow": {
+   "name": "Holy Arrow",
+   "shape": "beam",
+   "element": "holy",
+   "powerFrom": "blendRanged",
+   "mult": 1.8,
+   "range": 26,
+   "width": 2,
+   "cooldown": 6,
+   "mp": 3,
+   "knock": {
+    "push": 2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 6
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "width": 1,
+      "statuses": [
+       {
+        "id": "weaken",
+        "seconds": 4
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "holy_avatar": {
+   "name": "Holy Avatar",
+   "shape": "self",
+   "element": "holy",
+   "cooldown": 60,
+   "mp": 12,
+   "allies": 15,
+   "selfBuff": {
+    "name": "Holy Avatar",
+    "seconds": 15,
+    "damage": 0.5,
+    "haste": 0.3,
+    "move": 0.2
+   }
+  },
+  "holy_bomb": {
+   "name": "Holy Bomb",
+   "shape": "ground",
+   "element": "holy",
+   "mult": 2.2,
+   "range": 22,
+   "radius": 5,
+   "delay": 0.6,
+   "cooldown": 10,
+   "mp": 5,
+   "knock": {
+    "push": 4,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 5,
+       "down": 2.2
+      }
+     }
+    }
+   ]
+  },
+  "holy_charge": {
+   "name": "Holy Charge",
+   "shape": "dash",
+   "element": "holy",
+   "powerFrom": "blend",
+   "mult": 2.03,
+   "range": 14,
+   "splash": 2,
+   "cooldown": 10,
+   "mp": 4,
+   "dash": {
+    "range": 14
+   },
+   "knock": {
+    "push": 4,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4,
+      "dash": {
+       "range": 18
+      }
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "splash": 1
+     }
+    }
+   ]
+  },
+  "holy_fire": {
+   "name": "Holy Fire",
+   "shape": "around",
+   "element": "holy",
+   "mult": 1.08,
+   "radius": 6,
+   "cooldown": 14,
+   "mp": 7,
+   "place": {
+    "kind": "zone",
+    "seconds": 8,
+    "radius": 6,
+    "every": 1,
+    "strike": {
+     "mult": 0.54
+    }
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5,
+      "place": {
+       "radius": 7.5
+      }
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "place": {
+       "seconds": 11
+      }
+     }
+    }
+   ]
+  },
+  "holy_ground": {
+   "name": "Holy Ground",
+   "shape": "ground",
+   "element": "holy",
+   "range": 24,
+   "radius": 6,
+   "cooldown": 16,
+   "mp": 18,
+   "place": {
+    "kind": "zone",
+    "seconds": 8,
+    "radius": 6,
+    "every": 1,
+    "strike": {
+     "mult": 0.8,
+     "targets": 10
+    }
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "statuses": [
+       {
+        "id": "weaken",
+        "seconds": 2
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "holy_leap": {
+   "name": "Holy Leap",
+   "shape": "leap",
+   "element": "holy",
+   "powerFrom": "blend",
+   "mult": 2.7,
+   "range": 16,
+   "radius": 5,
+   "cooldown": 12,
+   "mp": 6,
+   "knock": {
+    "push": 3,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "range": 6
+     }
+    }
+   ]
+  },
+  "holy_nova": {
+   "name": "Holy Nova",
+   "shape": "around",
+   "element": "holy",
+   "mult": 2.32,
+   "radius": 7,
+   "cooldown": 10,
+   "mp": 12,
+   "knock": {
+    "push": 3,
+    "down": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 4,
+       "down": 1.8
+      }
+     }
+    }
+   ]
+  },
+  "holy_strike": {
+   "name": "Holy Strike",
+   "shape": "melee",
+   "element": "holy",
+   "powerFrom": "blend",
+   "mult": 2.16,
+   "reach": 4.2,
+   "arc": 2.2,
+   "cooldown": 3,
+   "mp": 2,
+   "knock": {
+    "push": 1.2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "statuses": [
+       {
+        "id": "weaken",
+        "seconds": 4
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "hundred_cuts": {
+   "name": "Hundred Cuts",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 0.59,
+   "reach": 5,
+   "arc": 1.8,
+   "repeats": 8,
+   "repeatEvery": 0.15,
+   "cooldown": 12,
+   "mp": 5,
+   "statuses": [
+    {
+     "id": "bleed",
+     "seconds": 5
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "repeats": 2
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "arc": 0.6
+     }
+    }
+   ]
+  },
+  "hundred_fists": {
+   "name": "Hundred Fists",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 0.78,
+   "reach": 5,
+   "arc": 2,
+   "repeats": 10,
+   "repeatEvery": 0.2,
+   "cooldown": 28,
+   "mp": 11,
+   "knock": {
+    "push": 1.5
+   }
+  },
+  "hunters_leap": {
+   "name": "Hunter's Leap",
+   "shape": "leap",
+   "element": "physical",
+   "powerFrom": "weapon",
+   "mult": 0.96,
+   "range": 12,
+   "radius": 4,
+   "cooldown": 10,
+   "mp": 6,
+   "knock": {
+    "push": 3,
+    "down": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "radius": 1.5
+     }
+    }
+   ]
+  },
+  "ice_spikes": {
+   "name": "Ice Spikes",
+   "shape": "beam",
+   "element": "ice",
+   "mult": 1.05,
+   "range": 15,
+   "width": 2.6,
+   "cooldown": 3,
+   "mp": 6,
+   "statuses": [
+    {
+     "id": "chill",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "statuses": [
+       {
+        "id": "root",
+        "seconds": 1.5
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "ice_storm": {
+   "name": "Ice Storm",
+   "shape": "ground",
+   "element": "ice",
+   "powerFrom": "blendRanged",
+   "mult": 0.7,
+   "range": 30,
+   "radius": 9,
+   "delay": 0.5,
+   "repeats": 10,
+   "repeatEvery": 0.35,
+   "cooldown": 28,
+   "mp": 24,
+   "knock": {
+    "push": 1,
+    "down": 0.8
+   },
+   "statuses": [
+    {
+     "id": "chill",
+     "seconds": 3
+    }
+   ]
+  },
+  "inferno": {
+   "name": "Inferno",
+   "shape": "around",
+   "element": "fire",
+   "mult": 3.6,
+   "radius": 12,
+   "cooldown": 30,
+   "mp": 30,
+   "knock": {
+    "push": 7,
+    "down": 3
+   },
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 6
+    }
+   ]
+  },
+  "inner_speed": {
+   "name": "Inner Speed",
+   "shape": "self",
+   "element": "physical",
+   "cooldown": 25,
+   "mp": 4,
+   "selfBuff": {
+    "name": "Inner Speed",
+    "seconds": 10,
+    "haste": 0.35,
+    "move": 0.3
+   }
+  },
+  "iron_net": {
+   "name": "Iron Net",
+   "shape": "ground",
+   "element": "physical",
+   "powerFrom": "weapon",
+   "mult": 0.5,
+   "range": 18,
+   "radius": 4,
+   "delay": 0.3,
+   "cooldown": 12,
+   "mp": 4,
+   "statuses": [
+    {
+     "id": "root",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "seconds": 1.5
+     }
+    }
+   ]
+  },
+  "judgement": {
+   "name": "Judgement",
+   "shape": "ground",
+   "element": "holy",
+   "mult": 6.09,
+   "range": 30,
+   "radius": 9,
+   "delay": 0.9,
+   "cooldown": 28,
+   "mp": 30,
+   "knock": {
+    "push": 6,
+    "down": 3
+   }
+  },
+  "junk_toss": {},
+  "kind_omen": {
+   "set": {
+    "target": "ally",
+    "range": 20
+   }
+  },
+  "knife_storm": {
+   "name": "Knife Storm",
+   "shape": "around",
+   "element": "physical",
+   "mult": 1.05,
+   "radius": 9,
+   "repeats": 8,
+   "repeatEvery": 0.25,
+   "cooldown": 28,
+   "mp": 26,
+   "knock": {
+    "push": 1
+   },
+   "statuses": [
+    {
+     "id": "bleed",
+     "seconds": 6
+    }
+   ]
+  },
+  "lava_pool": {
+   "name": "Lava Pool",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 1.44,
+   "range": 22,
+   "radius": 5,
+   "delay": 0.3,
+   "cooldown": 14,
+   "mp": 14,
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 4
+    }
+   ],
+   "place": {
+    "kind": "zone",
+    "seconds": 6,
+    "radius": 5,
+    "every": 1,
+    "strike": {
+     "mult": 0.6
+    }
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "place": {
+       "seconds": 9
+      }
+     }
+    }
+   ]
+  },
+  "leap_strike": {
+   "name": "Leap Strike",
+   "shape": "leap",
+   "element": "physical",
+   "mult": 1.7,
+   "range": 16,
+   "radius": 5,
+   "cooldown": 12,
+   "mp": 12,
+   "knock": {
+    "push": 3,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "range": 6
+     }
+    }
+   ]
+  },
+  "light_hammer": {
+   "name": "Light Hammer",
+   "shape": "ground",
+   "element": "holy",
+   "mult": 3.24,
+   "range": 24,
+   "radius": 4,
+   "delay": 0.4,
+   "cooldown": 10,
+   "mp": 6,
+   "knock": {
+    "push": 3,
+    "down": 2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 4,
+       "down": 2.8
+      }
+     }
+    }
+   ]
+  },
+  "lightning_dash": {
+   "name": "Lightning Dash",
+   "shape": "dash",
+   "element": "lightning",
+   "powerFrom": "blend",
+   "mult": 2.16,
+   "range": 14,
+   "splash": 2,
+   "cooldown": 9,
+   "mp": 4,
+   "dash": {
+    "range": 14
+   },
+   "knock": {
+    "push": 3,
+    "down": 1
+   },
+   "statuses": [
+    {
+     "id": "shock",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4,
+      "dash": {
+       "range": 18
+      }
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "splash": 1
+     }
+    }
+   ]
+  },
+  "lightning_storm": {
+   "name": "Lightning Storm",
+   "shape": "ground",
+   "element": "lightning",
+   "mult": 0.84,
+   "range": 30,
+   "radius": 10,
+   "delay": 0.3,
+   "repeats": 10,
+   "repeatEvery": 0.35,
+   "cooldown": 30,
+   "mp": 30,
+   "knock": {
+    "push": 1.5,
+    "down": 1
+   },
+   "statuses": [
+    {
+     "id": "shock",
+     "seconds": 3
+    }
+   ]
+  },
+  "lightning_strike": {
+   "name": "Lightning Strike",
+   "shape": "ground",
+   "element": "lightning",
+   "mult": 1.47,
+   "range": 30,
+   "radius": 3,
+   "delay": 0.25,
+   "cooldown": 8,
+   "mp": 10,
+   "knock": {
+    "push": 1.5,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "repeats": 2,
+      "repeatEvery": 0.4
+     }
+    }
+   ]
+  },
+  "lullaby": {
+   "name": "Lullaby",
+   "shape": "ground",
+   "element": "arcane",
+   "school": "song",
+   "range": 22,
+   "radius": 5,
+   "delay": 0.2,
+   "cooldown": 16,
+   "mp": 12,
+   "statuses": [
+    {
+     "id": "sleep",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "seconds": 2
+     }
+    }
+   ]
+  },
+  "lunge": {
+   "name": "Lunge",
+   "shape": "dash",
+   "element": "physical",
+   "mult": 2,
+   "range": 9,
+   "splash": 1.6,
+   "cooldown": 7,
+   "mp": 3,
+   "dash": {
+    "range": 9
+   },
+   "knock": {
+    "push": 3,
+    "down": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 3,
+      "dash": {
+       "range": 12
+      }
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 4,
+       "down": 1.8
+      }
+     }
+    }
+   ]
+  },
+  "magic_ward": {
+   "name": "Magic Ward",
+   "shape": "self",
+   "element": "arcane",
+   "cooldown": 30,
+   "mp": 6,
+   "selfBuff": {
+    "name": "Magic Ward",
+    "seconds": 8,
+    "resist": 0.4
+   }
+  },
+  "meteor": {
+   "name": "Meteor",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 2.94,
+   "range": 32,
+   "radius": 8,
+   "delay": 1.1,
+   "cooldown": 26,
+   "mp": 30,
+   "knock": {
+    "push": 6,
+    "down": 2.5
+   },
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 6
+    }
+   ]
+  },
+  "multi_shot": {
+   "name": "Multi Shot",
+   "shape": "melee",
+   "element": "physical",
+   "powerFrom": "weapon",
+   "mult": 1.12,
+   "reach": 16,
+   "arc": 0.9,
+   "cooldown": 3,
+   "mp": 4,
+   "knock": {
+    "push": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 4
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "statuses": [
+       {
+        "id": "bleed",
+        "seconds": 5
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "night_strike": {
+   "name": "Night Strike",
+   "shape": "leap",
+   "element": "shadow",
+   "powerFrom": "weapon",
+   "mult": 4,
+   "range": 22,
+   "radius": 6,
+   "cooldown": 28,
+   "mp": 11,
+   "knock": {
+    "push": 6,
+    "down": 2.5
+   }
+  },
+  "omen_bolt": {},
+  "palm_strike": {
+   "name": "Palm Strike",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.95,
+   "reach": 4,
+   "arc": 1.8,
+   "cooldown": 2.5,
+   "mp": 2,
+   "knock": {
+    "push": 2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 3,
+       "down": 1
+      }
+     }
+    }
+   ]
+  },
+  "perfect_cut": {
+   "name": "Perfect Cut",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 2.21,
+   "reach": 4.5,
+   "arc": 2.6,
+   "cooldown": 3,
+   "mp": 2,
+   "knock": {
+    "push": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 2.5,
+       "down": 1
+      }
+     }
+    }
+   ]
+  },
+  "phase_strike": {
+   "name": "Phase Strike",
+   "shape": "leap",
+   "element": "arcane",
+   "powerFrom": "blend",
+   "mult": 2.43,
+   "range": 15,
+   "radius": 4,
+   "cooldown": 10,
+   "mp": 5,
+   "knock": {
+    "push": 3
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "radius": 1.5,
+      "knock": {
+       "push": 4,
+       "down": 1.5
+      }
+     }
+    }
+   ]
+  },
+  "piercing_shot": {
+   "name": "Piercing Shot",
+   "shape": "beam",
+   "element": "physical",
+   "powerFrom": "weapon",
+   "mult": 1.52,
+   "range": 28,
+   "width": 1.8,
+   "cooldown": 6,
+   "mp": 6,
+   "knock": {
+    "push": 2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 6
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "width": 1,
+      "knock": {
+       "push": 3,
+       "down": 1
+      }
+     }
+    }
+   ]
+  },
+  "plague_cloud": {
+   "name": "Plague Cloud",
+   "shape": "ground",
+   "element": "poison",
+   "mult": 0.35,
+   "range": 24,
+   "radius": 5,
+   "delay": 0.3,
+   "repeats": 8,
+   "repeatEvery": 0.6,
+   "cooldown": 14,
+   "mp": 14,
+   "statuses": [
+    {
+     "id": "poison",
+     "seconds": 4
+    },
+    {
+     "id": "weaken",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "repeats": 4
+     }
+    }
+   ]
+  },
+  "poison_bomb": {
+   "name": "Poison Bomb",
+   "shape": "ground",
+   "element": "poison",
+   "powerFrom": "weapon",
+   "mult": 1.6,
+   "range": 20,
+   "radius": 5,
+   "delay": 0.4,
+   "cooldown": 11,
+   "mp": 5,
+   "knock": {
+    "push": 3,
+    "down": 1
+   },
+   "statuses": [
+    {
+     "id": "poison",
+     "seconds": 6
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 4,
+       "down": 1.8
+      }
+     }
+    }
+   ]
+  },
+  "poison_cloud": {
+   "name": "Poison Cloud",
+   "shape": "ground",
+   "element": "poison",
+   "mult": 0.52,
+   "range": 22,
+   "radius": 5,
+   "delay": 0.3,
+   "repeats": 8,
+   "repeatEvery": 0.6,
+   "cooldown": 12,
+   "mp": 12,
+   "statuses": [
+    {
+     "id": "poison",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "repeats": 4
+     }
+    }
+   ]
+  },
+  "pounce": {
+   "name": "Pounce",
+   "shape": "leap",
+   "element": "physical",
+   "mult": 2.21,
+   "range": 12,
+   "radius": 3.5,
+   "cooldown": 8,
+   "mp": 6,
+   "knock": {
+    "push": 2,
+    "down": 1.2
+   },
+   "statuses": [
+    {
+     "id": "bleed",
+     "seconds": 5
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "radius": 1.5,
+      "knock": {
+       "push": 3,
+       "down": 1.8
+      }
+     }
+    }
+   ]
+  },
+  "power_chord": {
+   "name": "Power Chord",
+   "shape": "around",
+   "element": "arcane",
+   "school": "song",
+   "mult": 2.08,
+   "radius": 6,
+   "cooldown": 9,
+   "mp": 10,
+   "knock": {
+    "push": 3,
+    "down": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 4,
+       "down": 1.8
+      }
+     }
+    }
+   ]
+  },
+  "prophecy": {},
+  "purge": {
+   "name": "Purge",
+   "shape": "around",
+   "element": "holy",
+   "mult": 3.6,
+   "radius": 12,
+   "cooldown": 30,
+   "mp": 14,
+   "knock": {
+    "push": 6,
+    "down": 2.5
+   },
+   "statuses": [
+    {
+     "id": "silence",
+     "seconds": 3
+    }
+   ]
+  },
+  "quicken": {
+   "set": {
+    "allies": 12
+   }
+  },
+  "rain_of_arrows": {
+   "name": "Rain of Arrows",
+   "shape": "ground",
+   "element": "physical",
+   "powerFrom": "weapon",
+   "mult": 0.6,
+   "range": 32,
+   "radius": 9,
+   "delay": 0.6,
+   "repeats": 10,
+   "repeatEvery": 0.35,
+   "cooldown": 30,
+   "mp": 30,
+   "knock": {
+    "push": 1.5,
+    "down": 0.8
+   }
+  },
+  "raise_skeleton": {
+   "name": "Raise Skeleton",
+   "shape": "summon",
+   "element": "shadow",
+   "pet": "bone_thrall",
+   "count": 1,
+   "cooldown": 24,
+   "mp": 18,
+   "summon": {
+    "def": "bone_thrall",
+    "name": "Bone Thrall"
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "count": 1
+     }
+    }
+   ]
+  },
+  "rampage": {
+   "name": "Rampage",
+   "shape": "around",
+   "element": "physical",
+   "mult": 0.91,
+   "radius": 6,
+   "repeats": 6,
+   "repeatEvery": 0.3,
+   "cooldown": 12,
+   "mp": 4,
+   "pullIn": {
+    "metres": 0.6
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "repeats": 2
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "radius": 1.5
+     }
+    }
+   ]
+  },
+  "revive": {
+   "name": "Revive",
+   "shape": "self",
+   "element": "holy",
+   "target": "ally",
+   "range": 8,
+   "revive": {
+    "share": 0.4
+   },
+   "cooldown": 45,
+   "mp": 25
+  },
+  "rising_slash": {
+   "name": "Rising Slash",
+   "shape": "beam",
+   "element": "physical",
+   "mult": 2.86,
+   "range": 10,
+   "width": 3,
+   "cooldown": 9,
+   "mp": 4,
+   "knock": {
+    "push": 2,
+    "down": 2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "width": 1.5
+     }
+    }
+   ]
+  },
+  "roar": {
+   "name": "Roar",
+   "shape": "around",
+   "element": "physical",
+   "mult": 1.56,
+   "radius": 7,
+   "cooldown": 12,
+   "mp": 10,
+   "knock": {
+    "push": 4,
+    "down": 1.5
+   },
+   "statuses": [
+    {
+     "id": "weaken",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "statuses": [
+       {
+        "id": "fear",
+        "seconds": 2
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "rolling_thunder": {
+   "name": "Rolling Thunder",
+   "shape": "beam",
+   "element": "lightning",
+   "mult": 2.64,
+   "range": 24,
+   "width": 3.5,
+   "cooldown": 11,
+   "mp": 12,
+   "knock": {
+    "push": 3,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 6
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "width": 1.5
+     }
+    }
+   ]
+  },
+  "rune_blast": {
+   "name": "Rune Blast",
+   "shape": "ground",
+   "element": "arcane",
+   "mult": 3.24,
+   "range": 20,
+   "radius": 4.5,
+   "delay": 0.5,
+   "cooldown": 12,
+   "mp": 6,
+   "knock": {
+    "push": 4,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 5,
+       "down": 2.2
+      }
+     }
+    }
+   ]
+  },
+  "rushing_fist": {
+   "name": "Rushing Fist",
+   "shape": "dash",
+   "element": "physical",
+   "mult": 1.95,
+   "range": 12,
+   "splash": 2,
+   "cooldown": 8,
+   "mp": 3,
+   "dash": {
+    "range": 12
+   },
+   "knock": {
+    "push": 3
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 3,
+      "dash": {
+       "range": 15
+      }
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 4,
+       "down": 1.5
+      }
+     }
+    }
+   ]
+  },
+  "savage_leap": {
+   "name": "Savage Leap",
+   "shape": "leap",
+   "element": "physical",
+   "mult": 2.6,
+   "range": 16,
+   "radius": 5,
+   "cooldown": 9,
+   "mp": 3,
+   "knock": {
+    "push": 4,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 5,
+       "down": 2.2
+      }
+     }
+    }
+   ]
+  },
+  "scale_rend": {},
+  "scatter_shot": {
+   "name": "Scatter Shot",
+   "shape": "melee",
+   "element": "physical",
+   "powerFrom": "weapon",
+   "mult": 1.4,
+   "reach": 14,
+   "arc": 1,
+   "cooldown": 3,
+   "mp": 2,
+   "knock": {
+    "push": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 3
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 2.5,
+       "down": 1
+      }
+     }
+    }
+   ]
+  },
+  "second_hand": {},
+  "shadow_army": {
+   "name": "Shadow Army",
+   "shape": "around",
+   "element": "shadow",
+   "mult": 2,
+   "radius": 8,
+   "cooldown": 40,
+   "mp": 14,
+   "knock": {
+    "push": 4,
+    "down": 1.5
+   },
+   "summon": {
+    "def": "shade",
+    "name": "Shadow Clone",
+    "count": 4,
+    "lifetime": 12,
+    "temporary": true
+   }
+  },
+  "shadow_burst": {
+   "name": "Shadow Burst",
+   "shape": "ground",
+   "element": "shadow",
+   "mult": 1.6,
+   "range": 24,
+   "radius": 3.5,
+   "delay": 0.35,
+   "cooldown": 2.5,
+   "mp": 6,
+   "knock": {
+    "push": 1.5
+   },
+   "statuses": [
+    {
+     "id": "weaken",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 3,
+       "down": 1
+      }
+     }
+    }
+   ]
+  },
+  "shadow_clones": {
+   "name": "Shadow Clones",
+   "shape": "self",
+   "element": "shadow",
+   "cooldown": 30,
+   "mp": 9,
+   "summon": {
+    "def": "shade",
+    "name": "Shadow Clone",
+    "count": 2,
+    "lifetime": 10,
+    "temporary": true
+   }
+  },
+  "shadow_dash": {
+   "name": "Shadow Dash",
+   "shape": "dash",
+   "element": "shadow",
+   "powerFrom": "weapon",
+   "mult": 1.6,
+   "range": 14,
+   "splash": 2,
+   "cooldown": 8,
+   "mp": 3,
+   "dash": {
+    "range": 14
+   },
+   "knock": {
+    "push": 2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4,
+      "dash": {
+       "range": 18
+      }
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 3,
+       "down": 1.2
+      }
+     }
+    }
+   ]
+  },
+  "shadow_leap": {
+   "name": "Shadow Leap",
+   "shape": "leap",
+   "element": "shadow",
+   "powerFrom": "weapon",
+   "mult": 1.8,
+   "range": 16,
+   "radius": 4,
+   "cooldown": 8,
+   "mp": 3,
+   "knock": {
+    "push": 3,
+    "down": 1.2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "radius": 1.5,
+      "knock": {
+       "push": 4,
+       "down": 1.8
+      }
+     }
+    }
+   ]
+  },
+  "shadow_nova": {
+   "name": "Shadow Nova",
+   "shape": "around",
+   "element": "shadow",
+   "mult": 1.8,
+   "radius": 7,
+   "hpCost": 0.05,
+   "cooldown": 10,
+   "mp": 12,
+   "knock": {
+    "push": 4,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 5,
+       "down": 2.2
+      }
+     }
+    }
+   ]
+  },
+  "shadow_slash": {
+   "name": "Shadow Slash",
+   "shape": "melee",
+   "element": "shadow",
+   "powerFrom": "weapon",
+   "mult": 1.5,
+   "reach": 4.5,
+   "arc": 2.2,
+   "cooldown": 3,
+   "mp": 2,
+   "knock": {
+    "push": 1.2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "statuses": [
+       {
+        "id": "weaken",
+        "seconds": 4
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "shadow_step": {
+   "name": "Shadow Step",
+   "shape": "leap",
+   "element": "physical",
+   "mult": 2.4,
+   "range": 14,
+   "radius": 3.5,
+   "cooldown": 9,
+   "mp": 6,
+   "knock": {
+    "push": 1.5,
+    "down": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "radius": 1.5
+     }
+    }
+   ]
+  },
+  "shield_bash": {
+   "name": "Shield Bash",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.19,
+   "reach": 3.2,
+   "arc": 1.6,
+   "cooldown": 7,
+   "mp": 6,
+   "knock": {
+    "push": 3,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "knock": {
+       "down": 2
+      }
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "arc": 1.2
+     }
+    }
+   ]
+  },
+  "shield_of_light": {
+   "name": "Shield of Light",
+   "shape": "self",
+   "element": "holy",
+   "cooldown": 40,
+   "mp": 7,
+   "selfBuff": {
+    "name": "Shield of Light",
+    "seconds": 8,
+    "resist": 0.4
+   }
+  },
+  "shock_nova": {
+   "name": "Shock Nova",
+   "shape": "around",
+   "element": "lightning",
+   "mult": 1.8,
+   "radius": 7,
+   "cooldown": 10,
+   "mp": 12,
+   "knock": {
+    "push": 4,
+    "down": 1.5
+   },
+   "statuses": [
+    {
+     "id": "shock",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 5,
+       "down": 2.2
+      }
+     }
+    }
+   ]
+  },
+  "shock_strike": {
+   "name": "Shock Strike",
+   "shape": "melee",
+   "element": "lightning",
+   "powerFrom": "blend",
+   "mult": 1.8,
+   "reach": 4,
+   "arc": 2.4,
+   "cooldown": 3,
+   "mp": 4,
+   "knock": {
+    "push": 1.2
+   },
+   "statuses": [
+    {
+     "id": "shock",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 2,
+       "down": 1
+      }
+     }
+    }
+   ]
+  },
+  "siege_arrow": {
+   "name": "Siege Arrow",
+   "shape": "ground",
+   "element": "fire",
+   "powerFrom": "weapon",
+   "mult": 3.2,
+   "range": 34,
+   "radius": 9,
+   "delay": 0.7,
+   "cooldown": 30,
+   "mp": 28,
+   "knock": {
+    "push": 6,
+    "down": 2.5
+   },
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 6
+    }
+   ]
+  },
+  "silence_bomb": {
+   "name": "Silence Bomb",
+   "shape": "ground",
+   "element": "holy",
+   "mult": 1.2,
+   "range": 22,
+   "radius": 5,
+   "delay": 0.4,
+   "cooldown": 14,
+   "mp": 5,
+   "statuses": [
+    {
+     "id": "silence",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "seconds": 1.5
+     }
+    }
+   ]
+  },
+  "silent_leap": {
+   "name": "Silent Leap",
+   "shape": "leap",
+   "element": "physical",
+   "mult": 1.8,
+   "range": 15,
+   "radius": 4,
+   "cooldown": 9,
+   "mp": 3,
+   "knock": {
+    "push": 3,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "radius": 1.5
+     }
+    }
+   ]
+  },
+  "silver_slash": {
+   "name": "Silver Slash",
+   "shape": "melee",
+   "element": "holy",
+   "powerFrom": "blend",
+   "mult": 1.7,
+   "reach": 4.5,
+   "arc": 2.4,
+   "cooldown": 6,
+   "mp": 3,
+   "knock": {
+    "push": 2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 3,
+       "down": 1.2
+      }
+     }
+    }
+   ]
+  },
+  "smite": {
+   "name": "Smite",
+   "shape": "ground",
+   "element": "holy",
+   "mult": 3.19,
+   "range": 26,
+   "radius": 3.5,
+   "delay": 0.35,
+   "cooldown": 7,
+   "mp": 9,
+   "knock": {
+    "push": 2,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 2,
+       "down": 2.5
+      }
+     }
+    }
+   ]
+  },
+  "smoke_bomb": {
+   "name": "Smoke Bomb",
+   "shape": "ground",
+   "element": "physical",
+   "mult": 1.2,
+   "range": 16,
+   "radius": 5,
+   "delay": 0.3,
+   "cooldown": 14,
+   "mp": 10,
+   "knock": {
+    "push": 2
+   },
+   "statuses": [
+    {
+     "id": "stagger",
+     "seconds": 2
+    },
+    {
+     "id": "weaken",
+     "seconds": 5
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "statuses": [
+       {
+        "id": "fear",
+        "seconds": 2
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "snare_trap": {
+   "name": "Snare Trap",
+   "shape": "ground",
+   "element": "physical",
+   "powerFrom": "weapon",
+   "mult": 0.96,
+   "range": 18,
+   "radius": 3.5,
+   "delay": 0.3,
+   "cooldown": 14,
+   "mp": 8,
+   "statuses": [
+    {
+     "id": "root",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "statuses": [
+       {
+        "id": "bleed",
+        "seconds": 6
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "sound_blast": {
+   "name": "Sound Blast",
+   "shape": "melee",
+   "element": "arcane",
+   "school": "song",
+   "mult": 1.95,
+   "reach": 9,
+   "arc": 1.2,
+   "cooldown": 3,
+   "mp": 5,
+   "knock": {
+    "push": 2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 3
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 3,
+       "down": 1
+      }
+     }
+    }
+   ]
+  },
+  "sour_note": {
+   "name": "Sour Note",
+   "shape": "ground",
+   "element": "arcane",
+   "school": "song",
+   "mult": 2.34,
+   "range": 24,
+   "radius": 4.5,
+   "delay": 0.3,
+   "cooldown": 7,
+   "mp": 8,
+   "statuses": [
+    {
+     "id": "weaken",
+     "seconds": 5
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 2,
+       "down": 1.2
+      }
+     }
+    }
+   ]
+  },
+  "spinning_kick": {
+   "name": "Spinning Kick",
+   "shape": "around",
+   "element": "physical",
+   "mult": 2.08,
+   "radius": 5,
+   "cooldown": 7,
+   "mp": 3,
+   "knock": {
+    "push": 3,
+    "down": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 4,
+       "down": 1.8
+      }
+     }
+    }
+   ]
+  },
+  "staff_sweep": {
+   "name": "Staff Sweep",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 2.21,
+   "reach": 5,
+   "arc": 3,
+   "cooldown": 8,
+   "mp": 3,
+   "knock": {
+    "push": 1,
+    "down": 1.8
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 1.5,
+       "down": 2.5
+      }
+     }
+    }
+   ]
+  },
+  "stampede": {
+   "name": "Stampede",
+   "shape": "dash",
+   "element": "physical",
+   "mult": 4.16,
+   "range": 20,
+   "splash": 3,
+   "cooldown": 30,
+   "mp": 26,
+   "dash": {
+    "range": 20
+   },
+   "knock": {
+    "push": 6,
+    "down": 2.5
+   }
+  },
+  "star_dart": {},
+  "starcut": {},
+  "stasis_lock": {
+   "set": {
+    "stasis": null,
+    "statuses": [
+     {
+      "id": "sleep",
+      "name": "Held in Time",
+      "seconds": 4
+     }
+    ]
+   }
+  },
+  "static_field": {
+   "name": "Static Field",
+   "shape": "ground",
+   "element": "lightning",
+   "mult": 0.8,
+   "range": 22,
+   "radius": 6,
+   "delay": 0.3,
+   "cooldown": 14,
+   "mp": 14,
+   "statuses": [
+    {
+     "id": "shock",
+     "seconds": 3
+    }
+   ],
+   "place": {
+    "kind": "zone",
+    "seconds": 7,
+    "radius": 6,
+    "every": 1,
+    "strike": {
+     "mult": 0.4
+    }
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5,
+      "place": {
+       "radius": 7.5
+      }
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "place": {
+       "seconds": 10
+      }
+     }
+    }
+   ]
+  },
+  "stone_skin": {
+   "name": "Stone Skin",
+   "shape": "self",
+   "element": "nature",
+   "cooldown": 30,
+   "mp": 12,
+   "selfBuff": {
+    "name": "Stone Skin",
+    "seconds": 10,
+    "armor": 0.4
+   }
+  },
+  "storm_beam": {
+   "name": "Storm Beam",
+   "shape": "beam",
+   "element": "lightning",
+   "mult": 2.4,
+   "range": 28,
+   "width": 3,
+   "cooldown": 12,
+   "mp": 14,
+   "knock": {
+    "push": 3,
+    "down": 1.5
+   },
+   "statuses": [
+    {
+     "id": "shock",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 6
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "width": 1.5
+     }
+    }
+   ]
+  },
+  "storm_eye": {
+   "name": "Eye of the Storm",
+   "shape": "around",
+   "element": "lightning",
+   "mult": 0.9,
+   "radius": 12,
+   "repeats": 6,
+   "repeatEvery": 0.6,
+   "cooldown": 30,
+   "mp": 30,
+   "pullIn": {
+    "metres": 1
+   },
+   "knock": {
+    "push": 3,
+    "down": 1
+   }
+  },
+  "storm_leap": {
+   "name": "Storm Leap",
+   "shape": "leap",
+   "element": "lightning",
+   "mult": 1.6,
+   "range": 16,
+   "radius": 4.5,
+   "cooldown": 10,
+   "mp": 10,
+   "knock": {
+    "push": 3,
+    "down": 1
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "radius": 1.5
+     }
+    }
+   ]
+  },
+  "storm_volley": {
+   "name": "Storm Volley",
+   "shape": "ground",
+   "element": "lightning",
+   "powerFrom": "blendRanged",
+   "mult": 0.7,
+   "range": 28,
+   "radius": 6,
+   "delay": 0.5,
+   "repeats": 5,
+   "repeatEvery": 0.4,
+   "cooldown": 12,
+   "mp": 12,
+   "statuses": [
+    {
+     "id": "shock",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "repeats": 2
+     }
+    }
+   ]
+  },
+  "summon_imp": {
+   "name": "Summon Imp",
+   "shape": "summon",
+   "element": "shadow",
+   "pet": "bound_imp",
+   "count": 1,
+   "hpCost": 0.1,
+   "cooldown": 30,
+   "mp": 16,
+   "summon": {
+    "def": "bound_imp",
+    "name": "Bound Imp"
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "count": 1
+     }
+    }
+   ]
+  },
+  "sunlance": {
+   "name": "Sunlance",
+   "shape": "beam",
+   "element": "holy",
+   "mult": 2.32,
+   "range": 22,
+   "width": 2.2,
+   "cooldown": 3,
+   "mp": 6,
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "width": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "statuses": [
+       {
+        "id": "weaken",
+        "seconds": 4
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "sweeping_blow": {
+   "name": "Sweeping Blow",
+   "shape": "around",
+   "element": "physical",
+   "mult": 2.34,
+   "radius": 6,
+   "cooldown": 8,
+   "mp": 4,
+   "knock": {
+    "push": 3,
+    "down": 1.2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 4,
+       "down": 2
+      }
+     }
+    }
+   ]
+  },
+  "sword_storm": {
+   "name": "Sword Storm",
+   "shape": "around",
+   "element": "arcane",
+   "powerFrom": "blend",
+   "mult": 0.95,
+   "radius": 10,
+   "repeats": 8,
+   "repeatEvery": 0.3,
+   "cooldown": 28,
+   "mp": 13,
+   "pullIn": {
+    "metres": 0.6
+   },
+   "knock": {
+    "push": 1.5
+   }
+  },
+  "teleport": {
+   "name": "Teleport",
+   "shape": "leap",
+   "element": "arcane",
+   "mult": 0.63,
+   "range": 14,
+   "radius": 4,
+   "cooldown": 10,
+   "mp": 8,
+   "knock": {
+    "push": 4
+   }
+  },
+  "terror": {
+   "name": "Terror",
+   "shape": "ground",
+   "element": "shadow",
+   "mult": 0.6,
+   "range": 20,
+   "radius": 5,
+   "delay": 0.3,
+   "cooldown": 18,
+   "mp": 12,
+   "statuses": [
+    {
+     "id": "fear",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "seconds": 1.5
+     }
+    }
+   ]
+  },
+  "thorn_blast": {
+   "name": "Thorn Blast",
+   "shape": "melee",
+   "element": "nature",
+   "mult": 1.95,
+   "reach": 10,
+   "arc": 1.2,
+   "cooldown": 3,
+   "mp": 6,
+   "knock": {
+    "push": 1.5
+   },
+   "statuses": [
+    {
+     "id": "bleed",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 3
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 3,
+       "down": 1
+      }
+     }
+    }
+   ]
+  },
+  "thunder_kick": {
+   "name": "Thunder Kick",
+   "shape": "leap",
+   "element": "physical",
+   "mult": 4.94,
+   "range": 20,
+   "radius": 7,
+   "cooldown": 30,
+   "mp": 12,
+   "knock": {
+    "push": 7,
+    "down": 3
+   }
+  },
+  "thunder_leap": {
+   "name": "Thunder Leap",
+   "shape": "leap",
+   "element": "lightning",
+   "powerFrom": "blend",
+   "mult": 2.16,
+   "range": 14,
+   "radius": 4.5,
+   "cooldown": 12,
+   "mp": 10,
+   "knock": {
+    "push": 3,
+    "down": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 4
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "radius": 1.5
+     }
+    }
+   ]
+  },
+  "thunderclap": {
+   "name": "Thunder Clap",
+   "shape": "around",
+   "element": "lightning",
+   "mult": 1.92,
+   "radius": 7,
+   "cooldown": 9,
+   "mp": 10,
+   "knock": {
+    "push": 3,
+    "down": 1.2
+   },
+   "statuses": [
+    {
+     "id": "shock",
+     "seconds": 3
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 4,
+       "down": 2
+      }
+     }
+    }
+   ]
+  },
+  "thunderstorm": {
+   "name": "Thunderstorm",
+   "shape": "ground",
+   "element": "lightning",
+   "mult": 0.7,
+   "range": 30,
+   "radius": 11,
+   "delay": 0.3,
+   "repeats": 12,
+   "repeatEvery": 0.3,
+   "cooldown": 32,
+   "mp": 30,
+   "knock": {
+    "push": 1,
+    "down": 0.8
+   },
+   "statuses": [
+    {
+     "id": "shock",
+     "seconds": 3
+    }
+   ]
+  },
+  "tornado": {
+   "name": "Tornado",
+   "shape": "ground",
+   "element": "nature",
+   "mult": 0.72,
+   "range": 22,
+   "radius": 4.5,
+   "repeats": 6,
+   "repeatEvery": 0.4,
+   "cooldown": 14,
+   "mp": 16,
+   "pullIn": {
+    "metres": 0.8
+   },
+   "knock": {
+    "push": 2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "repeats": 2
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "radius": 1.5,
+      "knock": {
+       "push": 2,
+       "down": 1
+      }
+     }
+    }
+   ]
+  },
+  "venom_slash": {
+   "name": "Venom Slash",
+   "shape": "melee",
+   "element": "poison",
+   "powerFrom": "weapon",
+   "mult": 1.5,
+   "reach": 4,
+   "arc": 2,
+   "cooldown": 3,
+   "mp": 2,
+   "knock": {
+    "push": 1
+   },
+   "statuses": [
+    {
+     "id": "poison",
+     "seconds": 4
+    }
+   ],
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "arc": 0.6
+     }
+    }
+   ]
+  },
+  "venom_storm": {
+   "name": "Venom Storm",
+   "shape": "around",
+   "element": "poison",
+   "powerFrom": "weapon",
+   "mult": 0.6,
+   "radius": 9,
+   "repeats": 8,
+   "repeatEvery": 0.25,
+   "cooldown": 28,
+   "mp": 10,
+   "knock": {
+    "push": 1
+   },
+   "statuses": [
+    {
+     "id": "poison",
+     "seconds": 6
+    }
+   ]
+  },
+  "volcano": {
+   "name": "Volcano",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 4.56,
+   "range": 28,
+   "radius": 8,
+   "delay": 0.8,
+   "cooldown": 30,
+   "mp": 30,
+   "knock": {
+    "push": 6,
+    "down": 2.5
+   },
+   "statuses": [
+    {
+     "id": "burn",
+     "seconds": 6
+    }
+   ]
+  },
+  "volley": {
+   "name": "Volley",
+   "shape": "ground",
+   "element": "physical",
+   "powerFrom": "weapon",
+   "mult": 0.56,
+   "range": 30,
+   "radius": 5,
+   "delay": 0.5,
+   "repeats": 4,
+   "repeatEvery": 0.4,
+   "cooldown": 12,
+   "mp": 12,
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "radius": 1.5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "repeats": 2
+     }
+    }
+   ]
+  },
+  "war_cry": {
+   "name": "War Cry",
+   "shape": "self",
+   "element": "physical",
+   "cooldown": 24,
+   "mp": 10,
+   "allies": 15,
+   "selfBuff": {
+    "name": "War Cry",
+    "seconds": 10,
+    "damage": 0.3,
+    "move": 0.2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.4,
+     "mp": 1.1,
+     "seconds": 4
+    }
+   ]
+  },
+  "whirling_steel": {
+   "name": "Whirling Steel",
+   "shape": "around",
+   "element": "physical",
+   "mult": 0.72,
+   "radius": 8,
+   "repeats": 10,
+   "repeatEvery": 0.25,
+   "cooldown": 28,
+   "mp": 10,
+   "pullIn": {
+    "metres": 0.8
+   },
+   "knock": {
+    "push": 1.5
+   }
+  },
+  "whirlwind": {
+   "name": "Whirlwind",
+   "shape": "around",
+   "element": "physical",
+   "mult": 0.36,
+   "radius": 5.5,
+   "repeats": 5,
+   "repeatEvery": 0.3,
+   "cooldown": 10,
+   "mp": 12,
+   "pullIn": {
+    "metres": 0.6
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "repeats": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "radius": 1.5
+     }
+    }
+   ]
+  },
+  "wild_swing": {
+   "name": "Wild Swing",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 2.21,
+   "reach": 4.5,
+   "arc": 2.8,
+   "cooldown": 3,
+   "mp": 2,
+   "knock": {
+    "push": 1.5
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 1
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "knock": {
+       "push": 2.5,
+       "down": 1
+      }
+     }
+    }
+   ]
+  },
+  "wind_blast": {
+   "name": "Wind Blast",
+   "shape": "melee",
+   "element": "lightning",
+   "mult": 1.3,
+   "reach": 11,
+   "arc": 1.4,
+   "cooldown": 8,
+   "mp": 8,
+   "knock": {
+    "push": 8,
+    "down": 1.2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "reach": 3
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "arc": 0.5,
+      "knock": {
+       "push": 9,
+       "down": 2
+      }
+     }
+    }
+   ]
+  },
+  "wind_palm": {
+   "name": "Wind Palm",
+   "shape": "beam",
+   "element": "physical",
+   "mult": 2.6,
+   "range": 16,
+   "width": 3,
+   "cooldown": 11,
+   "mp": 5,
+   "knock": {
+    "push": 6,
+    "down": 1.2
+   },
+   "ranks": [
+    {},
+    {
+     "power": 1.25,
+     "mp": 1.1,
+     "add": {
+      "range": 5
+     }
+    },
+    {
+     "power": 1.5,
+     "mp": 1.2,
+     "add": {
+      "width": 1.5
+     }
+    }
+   ]
+  },
+  "wolf_shape": {
+   "name": "Wolf Shape",
+   "shape": "self",
+   "element": "nature",
+   "cooldown": 1.5,
+   "mp": 8,
+   "form": {
+    "id": "wolf",
+    "name": "Wolf",
+    "group": "shape",
+    "toggle": true,
+    "body": {
+     "creature": "wolf",
+     "scale": 1.25
+    },
+    "stats": {
+     "movePct": 0.25,
+     "hastePct": 0.2,
+     "armorPct": -0.15
+    },
+    "basic": {
+     "shape": "melee",
+     "reach": 2.4,
+     "arc": 1.8,
+     "mult": 0.78,
+     "hits": 2,
+     "element": "physical",
+     "status": "bleed"
+    }
+   }
+  },
+  "wrath": {
+   "name": "Wrath of Light",
+   "shape": "self",
+   "element": "holy",
+   "cooldown": 60,
+   "mp": 24,
+   "allies": 15,
+   "selfBuff": {
+    "name": "Wrath of Light",
+    "seconds": 14,
+    "damage": 0.45,
+    "haste": 0.25
+   }
+  },
+  "wyrmfall": {}
+ }
 }

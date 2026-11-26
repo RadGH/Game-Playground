@@ -16,7 +16,7 @@
    "tvClass": "warrior",
    "role": "melee damage / tank",
    "blurb": "The front of the line. Stronger the more of them there are: spins, shoves and a stamp that splits the ground.",
-   "fantasy": "Thousandvale's Warrior. You walk into the middle of the pack on purpose. Crowd Swing and Iron Gyre are the filler, Hold the Line makes them all look at you, and Groundbreaker is a stunning line through everything in front of you. Plate at five.",
+   "fantasy": "Thousandvale's Warrior. You walk into the middle of the pack on purpose. Crowd Swing and Whirlwind are the filler, Hold the Line makes them all look at you, and Groundbreaker is a stunning line through everything in front of you. Plate at five.",
    "starter": [
     "van_crowd_swing",
     "van_hold_line"
@@ -255,7 +255,7 @@
    "tvClass": "knight",
    "role": "tank",
    "blurb": "Takes the blows meant for others. A sworn guard on one friend, a challenge to the pack, a raised wall, a banner that keeps everyone standing.",
-   "fantasy": "Thousandvale's Knight: the purest tank. Sworn Guard links you to a friend so their damage comes to you; Challenge and Rim Strike are taunts; Rampart is a wall; Unbroken Banner a party ward.",
+   "fantasy": "Thousandvale's Knight: the purest tank. Sworn Guard links you to a friend so their damage comes to you; Challenge and Shield Bash are taunts; Rampart is a wall; Unbroken Banner a party ward.",
    "starter": [
     "kni_sworn_guard",
     "kni_challenge"

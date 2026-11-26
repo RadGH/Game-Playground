@@ -1,13 +1,14 @@
 // Class trees: one tab per class the hero has taken, plus "All classes" (every class, what it needs, its tree to read).
-// A tree runs left to right by the class level each node opens at: spells (their medallion), passives, training and
-// spell modifiers (linked to the spell they change), with rank pips, "choose one" groups and the class's two paths as
-// their own rows. Choosing a node shows what it does (the one tooltip card) and Buy rank — or why not, written on it.
+// A tree is one row per class level, top to bottom (owner 2026-11-26: no paths, every node one rank, several choices a
+// level): spells (their medallion), spell ranks II / III ("after Cleave"), passives, training, modifiers ("after" the
+// spell they change), "choose one" capstones. Choosing a node opens its card right under its row with Learn — or why
+// not, written on it.
 //
-//   app.openWindow('classes', { cls }) → .win-classes  (.cls-node[data-node], [data-act="buy"], .cls-path [data-act="path"])
+//   app.openWindow('classes', { cls }) → .win-classes  (.cls-node[data-node], [data-act="buy"])
 import { openWin, esc } from './kit.js';
 import { tipAttrs, tipCard } from './tip.js';
 import { glyph, spellIcon } from './icons.js';
-import { classDef, classIds, classRules, maxClassLevel, nodeKey, nodeMaxRank, nodeRefusal, nodeName, pointsLeft, classRefusal } from '../../rules/classes.js';
+import { classDef, classIds, maxClassLevel, nodeKey, nodeNeeds, nodeRefusal, nodeName, pointsLeft, classRefusal } from '../../rules/classes.js';
 import { describeNode, describeClass, describeRequires } from '../../rules/describe.js';
 import { attrTotals } from '../../rules/sheet.js';
 import { fmt } from '../../../../../shared/format.js';
@@ -15,9 +16,13 @@ import { fmt } from '../../../../../shared/format.js';
 const KIND = { spell: 'Spell', passive: 'Passive', prof: 'Training', mod: 'Modifier' };
 const TIER = { base: 'Base classes', advanced: 'Advanced classes', specialty: 'Specialty classes' };
 
+const KINDS = ['dagger', 'sword', 'axe', 'mace', 'spear', 'staff', 'twohand', 'bow', 'crossbow', 'wand', 'scepter'];
 export function nodeIcon(node, cls, size = 40) {
   if (node.kind === 'spell') return spellIcon(node.spell, size, { cls });
-  return `<span class="cls-glyph is-${node.kind}">${glyph({ passive: 'star', prof: 'shield', mod: 'enchant' }[node.kind] || 'star', size * 0.6)}</span>`;
+  // a training shows its own weapon / armour; a weapon mastery shows that weapon on a passive medallion
+  const mastery = node.kind === 'passive' && KINDS.find(k => node.mods?.[`${k}Pct`]);
+  const id = node.kind === 'prof' ? (node.grants?.[0] === 'twohand' ? 'twohand' : node.grants?.[0]) : mastery || { passive: 'star', mod: 'enchant' }[node.kind] || 'star';
+  return `<span class="cls-glyph is-${node.kind}${mastery ? ' is-mastery' : ''}">${glyph(id, size * 0.6) || glyph('shield', size * 0.6)}</span>`;
 }
 
 export function open(app, opts = {}) {
@@ -63,45 +68,41 @@ function browse(app, c) {
 export function treeHtml(app, c, cls, { sel = null, readOnly = false, preview = false, head: withHead = !preview } = {}) {
   const rules = app.rules, d = classDef(rules, cls);
   if (!d) return '<p class="ow-empty">Choose a class.</p>';
-  const lvl = c.classLevels?.[cls] || 0, max = maxClassLevel(rules, cls), R = classRules(rules);
+  const lvl = c.classLevels?.[cls] || 0, max = maxClassLevel(rules, cls);
   const left = lvl ? pointsLeft(rules, c, cls) : 0;
-  const path = c.paths?.[cls] || null;
-  const rows = [{ id: null, name: 'Core' }, ...Object.entries(d.paths || {}).map(([id, p]) => ({ id, name: p.name, blurb: p.blurb }))];
-  const cols = [...new Set(d.nodes.map(n => n.level))].sort((a, b) => a - b);
   const tile = n => {
-    const have = c.nodes?.[nodeKey(cls, n.id)] || 0, mx = nodeMaxRank(rules, n);
-    const why = lvl && have < mx ? nodeRefusal(rules, c, cls, n.id) : null;
-    const state = have >= mx ? 'is-max' : have ? 'is-have' : !lvl || why ? 'is-locked' : 'is-open';
-    const target = n.kind === 'mod' ? d.nodes.find(x => x.id === n.on) : null;
-    return `<button type="button" class="cls-node ${state}${sel === n.id ? ' is-sel' : ''}${n.choice ? ' is-choice' : ''}" data-node="${esc(n.id)}" ${tipAttrs('node', { cls, id: n.id })}>
-      ${nodeIcon(n, cls, 40)}<span class="cls-node-name">${esc(nodeName(rules, n))}</span>
-      <span class="cls-pips">${Array.from({ length: mx }, (_, i) => `<i class="${i < have ? 'on' : ''}"></i>`).join('')}</span>
-      ${target ? `<span class="cls-on">${glyph('next', 12)}${esc(nodeName(rules, target))}</span>` : ''}${n.choice ? '<span class="cls-choice">Choose one</span>' : ''}</button>`;
+    const have = c.nodes?.[nodeKey(cls, n.id)] || 0;
+    const why = lvl && !have ? nodeRefusal(rules, c, cls, n.id) : null;
+    const state = have ? 'is-have' : !lvl || why ? 'is-locked' : 'is-open';
+    // what it builds on: a rank's earlier rank, a modifier's spell, a mastery's training (owner 2026-11-26: "multiple
+    // ranks appear in higher level as separate icons to unlock that require the predecessor")
+    const after = nodeNeeds(n).map(id => nodeName(rules, d.nodes.find(x => x.id === id))).filter(Boolean);
+    return `<button type="button" class="cls-node ${state}${sel === n.id ? ' is-sel' : ''}${n.choice ? ' is-choice' : ''}${n.rank > 1 ? ' is-rank' : ''}" data-node="${esc(n.id)}" ${tipAttrs('node', { cls, id: n.id })}>
+      ${nodeIcon(n, cls, 40)}${n.rank > 1 ? `<span class="cls-rank">${n.rank === 2 ? 'II' : 'III'}</span>` : ''}<span class="cls-node-name">${esc(nodeName(rules, n))}</span>
+      ${after.length ? `<span class="cls-on">${glyph('next', 12)}after ${esc(after.join(', '))}</span>` : ''}${n.free ? '<span class="cls-free">Free</span>' : ''}${n.choice ? '<span class="cls-choice">Choose one</span>' : ''}${have ? `<span class="cls-got">${glyph('check', 14)}</span>` : ''}</button>`;
   };
-  const grid = rows.map(r => {
-    const inRow = d.nodes.filter(n => (n.path || null) === r.id);
-    if (!inRow.length) return '';
-    const dim = r.id && path && path !== r.id ? ' is-other' : '';
-    return `<div class="cls-row${dim}"><div class="cls-row-name"><b>${esc(r.name)}</b>${r.id && path === r.id ? '<small class="ow-good">Your path</small>' : r.id ? `<small class="ow-dim">Path at level ${fmt(R.pathLevel)}</small>` : ''}</div>
-      ${cols.map(L => `<div class="cls-cell${L > lvl ? ' is-ahead' : ''}">${inRow.filter(n => n.level === L).map(tile).join('')}</div>`).join('')}</div>`;
-  }).join('');
-  const head = `<div class="cls-head ow-card"><div><h3>${esc(d.name)}</h3><small class="ow-dim">${esc(d.role)} · level ${fmt(lvl)} of ${fmt(max)}${readOnly && !lvl ? ' · not taken yet' : ''}</small></div>
-    ${lvl ? `<span class="cls-points ${left ? 'has' : ''}">${fmt(left)} ${esc(d.name)} point${left === 1 ? '' : 's'} left</span>` : ''}
-    ${readOnly ? '<button type="button" class="ow-btn ow-ghost ow-small" data-act="back">' + glyph('back', 16) + 'All classes</button>' : ''}</div>`;
-  const pathPick = lvl >= R.pathLevel && d.paths && !path ? `<div class="cls-paths"><p><b>Choose your ${esc(d.name)} path.</b> <span class="ow-dim">It opens that row of the tree; a shrine can change it later.</span></p>${Object.entries(d.paths).map(([id, p]) => `<div class="cls-path ow-card"><b>${esc(p.name)}</b><p class="ow-dim">${esc(p.blurb || '')}</p><button type="button" class="ow-btn ow-primary ow-small" data-act="path" data-path="${esc(id)}">Walk the ${esc(p.name)} path</button></div>`).join('')}</div>` : '';
-  const levels = `<div class="cls-row cls-levels"><div class="cls-row-name"><small class="ow-dim">${esc(d.name)} level</small></div>${cols.map(L => `<div class="cls-cell"><span class="cls-lvl${L <= lvl ? ' reached' : ''}">${fmt(L)}</span></div>`).join('')}</div>`;
   let detail = '';
   if (sel) {
     const n = d.nodes.find(x => x.id === sel);
     if (n) {
-      const have = c.nodes?.[nodeKey(cls, n.id)] || 0, mx = nodeMaxRank(rules, n);
-      const why = have >= mx ? null : nodeRefusal(rules, c, cls, n.id);
+      const have = c.nodes?.[nodeKey(cls, n.id)] || 0;
+      const why = have ? null : nodeRefusal(rules, c, cls, n.id);
       const model = describeNode(rules, c, cls, n.id);
-      const opensAt = n.level <= 1 ? `${d.name} level 1` : `${d.name} level ${fmt(n.level)}`;
-      detail = `<div class="cls-detail ow-card">${tipCard(model)}<div class="cls-detail-acts">${preview ? (have ? '<span class="ow-good">You start with this</span>' : `<span class="ow-dim">Opens at ${esc(opensAt)}${n.path ? ` on the ${esc(d.paths?.[n.path]?.name || '')} path` : ''}</span>`) : have >= mx ? '<span class="ow-good">Highest rank</span>' : readOnly && !lvl ? '<span class="ow-dim">Take this class at a level up to learn it.</span>' : why ? `<p class="cls-why">${esc(why)}</p>` : `<button type="button" class="ow-btn ow-primary" data-act="buy" data-node="${esc(n.id)}" data-primary>${glyph('plus', 18)}${have ? `Rank ${fmt(have + 1)}` : 'Learn'} (${fmt(n.free && !have ? 0 : n.cost || 1)} point${(n.cost || 1) === 1 ? '' : 's'})</button>`}</div></div>`;
+      detail = `<div class="cls-detail ow-card">${tipCard(model)}<div class="cls-detail-acts">${preview ? (have ? '<span class="ow-good">You start with this</span>' : `<span class="ow-dim">Opens at ${esc(d.name)} level ${fmt(n.level)}</span>`) : have ? '<span class="ow-good">Learned</span>' : readOnly && !lvl ? '<span class="ow-dim">Take this class at a level up to learn it.</span>' : why ? `<p class="cls-why">${esc(why)}</p>` : `<button type="button" class="ow-btn ow-primary" data-act="buy" data-node="${esc(n.id)}" data-primary>${glyph('plus', 18)}Learn (${fmt(n.cost || 1)} point${(n.cost || 1) === 1 ? '' : 's'})</button>`}</div></div>`;
     }
   }
-  return `${withHead ? head : ''}${preview ? '' : pathPick}<div class="cls-tree" role="group" aria-label="${esc(d.name)} tree">${levels}${grid}</div>${detail}${preview ? '' : `<p class="ow-dim cls-blurb">${esc(d.blurb || '')}</p>`}`;
+  // one row per class level, top to bottom (a phone scrolls down, never sideways); the picked node's card opens
+  // right under its own row
+  const levels = [...new Set(d.nodes.map(n => n.level))].sort((a, b) => a - b);
+  const rows = levels.map(L => {
+    const here = d.nodes.filter(n => n.level === L);
+    const hasSel = sel && here.some(n => n.id === sel);
+    return `<div class="cls-tier${L > lvl ? ' is-ahead' : ''}"><span class="cls-lvl${L <= lvl ? ' reached' : ''}" aria-label="${esc(d.name)} level ${fmt(L)}">${fmt(L)}</span><div class="cls-tier-nodes">${here.map(tile).join('')}</div></div>${hasSel ? detail : ''}`;
+  }).join('');
+  const head = `<div class="cls-head ow-card"><div><h3>${esc(d.name)}</h3><small class="ow-dim">${esc(d.role)} · level ${fmt(lvl)} of ${fmt(max)}${readOnly && !lvl ? ' · not taken yet' : ''}</small></div>
+    ${lvl ? `<span class="cls-points ${left ? 'has' : ''}">${fmt(left)} ${esc(d.name)} point${left === 1 ? '' : 's'} left</span>` : ''}
+    ${readOnly ? '<button type="button" class="ow-btn ow-ghost ow-small" data-act="back">' + glyph('back', 16) + 'All classes</button>' : ''}</div>`;
+  return `${withHead ? head : ''}<div class="cls-tree" role="group" aria-label="${esc(d.name)} tree">${rows}</div>${preview ? '' : `<p class="ow-dim cls-blurb">${esc(d.blurb || '')}</p>`}`;
 }
 
 function wire(app, el, w) {
@@ -112,7 +113,6 @@ function wire(app, el, w) {
   w.body.querySelector('[data-act="back"]')?.addEventListener('click', () => { w.data.view = null; w.data.sel = null; w.render(); });
   w.body.querySelectorAll('.cls-node').forEach(b => { b.onclick = () => { w.data.sel = w.data.sel?.id === b.dataset.node && w.data.sel?.cls === cls ? null : { cls, id: b.dataset.node }; w.render(); w.body.querySelector('.cls-detail')?.scrollIntoView({ block: 'nearest' }); }; });
   w.body.querySelector('[data-act="buy"]')?.addEventListener('click', e => { app.act('node', { cls, node: e.currentTarget.dataset.node }); app.sfx('ui.click'); });
-  w.body.querySelectorAll('[data-act="path"]').forEach(b => { b.onclick = () => app.act('path', { cls, path: b.dataset.path }); });
 }
 
 export { describeClass };

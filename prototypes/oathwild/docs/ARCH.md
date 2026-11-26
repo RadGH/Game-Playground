@@ -68,7 +68,15 @@ prototypes/oathwild/
   `spawnCamp / spawnRoamers / spawnMonster`, `events = step(world, dt, inputs)` with input per player `{ move:{x,z},
   aim:{origin,dir}, attack, power, sneak, dodge, cast:{ slot | spell, at, held }, revive, respawn, mount
   }`; `snapshot(world)` for the network; `respawnPlayer`, `refreshPlayer` after gear/points change. Event kinds are
-  listed at the top of combat.js. Loot containers land in `world.containers` (`loot.openFor / takeItem / takeGold`).
+  listed at the top of combat.js. Combat feel (2026-11-26): `knock { who, from, to, air, down, up }` (a body thrown over `air` s,
+  then down + up s; `knockUnit(world, from, target, { push, down })`, flights move a step at a time in `stepFlights`),
+  `leap { who, spell, from, to, air }` + `land { who, spell, at, radius }` (shape `leap`), `rush { who, spell, from,
+  to, seconds }` (shape `dash`, a charge), `burst { who, spell, at, radius }` (a bolt row with `explode`),
+  `windup { who, to, seconds, reach, arc, ranged }` / `windupEnd { who, cancelled }` (every monster blow's tell),
+  `dodge { who, dir, seconds }`, and `miss { …, whiff }` when a blow falls on nobody. Rushes and rolls are predicted
+  by `js/client/play/predict.js` (`rush(kind, dir, metres, dt)`, the dodge wait) with the same step counts
+  (`dashSteps`, `dodgeWaitSteps`, `rushSteps`); the walking speed is `walkSpeedOf` on both sides (snapshot `sp`).
+  Drawn by `js/client/render/actors.js` "combat motion" (actor.knock / leap / lunge / flinch / roll / windup). Loot containers land in `world.containers` (`loot.openFor / takeItem / takeGold`).
 - **Tooltip model**: `describe.describeSpell / describeItem / describeAura / describeTalent / describeNode /
   describeClass / describeSkill` → `{ title, kind, icon, rank, rows, lines, auras, how, compare, next, needs, ok }`.
 - **Rules engine**: `const rules = await bootRules({ seed })` (js/rules/boot.js) or `createRules(data)`; every rules

@@ -82,530 +82,1007 @@ Bard's toggled songs as toggles (they became timed party songs), every Farhold `
 <!-- trees -->
 ### Warrior — Base
 Steel, nerve and a shield or a great blade. The toughest body in the party. *Requires:* open at creation. *Growth a level:* +12 health, +2 mana. Fights with two weapons.
-*Paths (choose one at level 3):* **Bulwark** — Shield first: taunts, stuns and blocks that hold the line. **Reaver** — Two hands on the hilt: spinning cuts and huge single blows.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Cleave *(farhold)* | spell, free | 3 |  |
-| 1 | Arms Drill (leather, mail, shield, martial) | training, free | 1 |  |
-| 1 | Hardy | passive | 3 |  |
-| 2 | War Cry *(farhold)* | spell | 3 |  |
-| 2 | Breaching Shove *(farhold)* | spell | 3 |  |
-| 3 | Rim Strike *(farhold)* | spell | 3 | Bulwark |
-| 3 | Shield Wall | passive | 3 | Bulwark |
-| 3 | Iron Gyre *(farhold)* | spell | 3 | Reaver |
-| 3 | Heavy Hands | passive | 3 | Reaver |
-| 4 | Wide Arc | modifier of Cleave | 1 |  |
-| 5 | Challenge *(farhold)* | spell | 3 | Bulwark |
-| 5 | Precise Strike *(farhold)* | spell | 3 | Reaver |
-| 6 | Iron Resolve *(farhold)* | spell | 3 |  |
-| 6 | Plate Drill (plate) | training | 1 |  |
-| 7 | Ringing Rim | modifier of Rim Strike | 1 | Bulwark |
-| 7 | Red Gyre | modifier of Iron Gyre | 1 | Reaver |
-| 7 | Battle-Hardened | passive | 2 |  |
-| 10 | Groundbreaker *(farhold)* | spell | 3 | capstone (pick one) |
-| 10 | Unyielding | passive | 1 | capstone (pick one) |
+| 1 | Cleave *(melee)* | spell, free |  |  |
+| 1 | Sword Training (sword) | training, free |  |  |
+| 1 | Shield Training (shield) | training, free |  |  |
+| 1 | Mail Armour (mail) | training, free |  |  |
+| 1 | Axe Training (axe) | training |  |  |
+| 1 | Mace Training (mace) | training |  |  |
+| 1 | Two-Handed Training (twohand) | training |  |  |
+| 2 | Shield Bash *(melee)* | spell |  |  |
+| 2 | Charge *(dash)* | spell |  |  |
+| 2 | Dual Wielding (dualWield) | training |  |  |
+| 2 | Spear Training (spear) | training |  |  |
+| 3 | Whirlwind *(around)* | spell |  |  |
+| 3 | Sword Mastery | passive | Sword Training |  |
+| 3 | Axe Mastery | passive | Axe Training |  |
+| 3 | Mace Mastery | passive | Mace Training |  |
+| 3 | Two-Handed Mastery | passive | Two-Handed Training |  |
+| 4 | Cleave II *(melee)* | spell | Cleave |  |
+| 4 | Shield Bash II *(melee)* | spell | Shield Bash |  |
+| 4 | Charge II *(dash)* | spell | Charge |  |
+| 4 | Plate Armour (plate) | training | Mail Armour |  |
+| 4 | Heavy Blows | passive |  |  |
+| 5 | Ground Slam *(around)* | spell |  |  |
+| 5 | War Cry *(self)* | spell |  |  |
+| 5 | Whirlwind II *(around)* | spell | Whirlwind |  |
+| 5 | Wide Cleave | modifier of Cleave | Cleave |  |
+| 6 | Leap Strike *(leap)* | spell |  |  |
+| 6 | Ground Slam II *(around)* | spell | Ground Slam |  |
+| 6 | Brute Strength | passive |  |  |
+| 6 | Bleeding Spin | modifier of Whirlwind | Whirlwind |  |
+| 6 | Toughness | passive |  |  |
+| 7 | Cleave III *(melee)* | spell | Cleave II |  |
+| 7 | Shield Bash III *(melee)* | spell | Shield Bash II |  |
+| 7 | Leap Strike II *(leap)* | spell | Leap Strike |  |
+| 7 | War Cry II *(self)* | spell | War Cry |  |
+| 7 | Killer Instinct | passive |  |  |
+| 8 | Whirlwind III *(around)* | spell | Whirlwind II |  |
+| 8 | Charge III *(dash)* | spell | Charge II |  |
+| 8 | Shockwave | modifier of Ground Slam | Ground Slam |  |
+| 8 | Relentless | passive |  |  |
+| 9 | Ground Slam III *(around)* | spell | Ground Slam II |  |
+| 9 | Leap Strike III *(leap)* | spell | Leap Strike II |  |
+| 9 | Weapon Master | passive |  |  |
+| 9 | Crater | modifier of Leap Strike | Leap Strike |  |
+| 10 | Earthquake *(beam)* | spell |  | capstone (pick one) |
+| 10 | Berserk *(self)* | spell |  | capstone (pick one) |
 
 ### Ranger — Base
 Long shots, quick feet and traps laid where the enemy will walk. *Requires:* open at creation. *Growth a level:* +8 health, +4 mana. Fights with two weapons.
-*Paths (choose one at level 3):* **Marksman** — One arrow, one body: long draws, piercing shots, deadly criticals. **Trapper** — Snares, caltrops and arrow storms that own the ground.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Long Draw *(farhold)* | spell, free | 3 |  |
-| 1 | Woodcraft (leather, bows, martial) | training, free | 1 |  |
-| 1 | Keen Eye | passive | 3 |  |
-| 2 | Broadhead Fan *(farhold)* | spell | 3 |  |
-| 2 | Tracker's Leap *(farhold)* | spell | 3 |  |
-| 3 | Deadeye Shot *(new)* | spell | 3 | Marksman |
-| 3 | Steady Aim | passive | 3 | Marksman |
-| 3 | Hunter's Snare *(farhold)* | spell | 3 | Trapper |
-| 5 | Heartseeker | modifier of Long Draw | 1 | Marksman |
-| 5 | Caltrop Scatter *(farhold)* | spell | 3 | Trapper |
-| 6 | Arrow Storm *(farhold)* | spell | 3 |  |
-| 6 | Fleet | passive | 2 |  |
-| 7 | Sprung Steel | modifier of Hunter's Snare | 1 | Trapper |
-| 10 | Endless Quiver | modifier of Arrow Storm | 1 | capstone (pick one) |
-| 10 | Wind Reader | passive | 1 | capstone (pick one) |
+| 1 | Multi Shot *(melee)* | spell, free |  |  |
+| 1 | Bow Training (bow) | training, free |  |  |
+| 1 | Leather Armour (leather) | training, free |  |  |
+| 1 | Piercing Shot *(beam)* | spell |  |  |
+| 1 | Sword Training (sword) | training |  |  |
+| 1 | Axe Training (axe) | training |  |  |
+| 1 | Dagger Training (dagger) | training |  |  |
+| 1 | Crossbow Training (crossbow) | training |  |  |
+| 2 | Explosive Arrow *(ground)* | spell |  |  |
+| 2 | Hunter's Leap *(leap)* | spell |  |  |
+| 2 | Dual Wielding (dualWield) | training |  |  |
+| 2 | Spear Training (spear) | training |  |  |
+| 3 | Snare Trap *(ground)* | spell |  |  |
+| 3 | Bow Mastery | passive | Bow Training |  |
+| 3 | Crossbow Mastery | passive | Crossbow Training |  |
+| 3 | Sword Mastery | passive | Sword Training |  |
+| 3 | Sharp Eyes | passive |  |  |
+| 4 | Multi Shot II *(melee)* | spell | Multi Shot |  |
+| 4 | Piercing Shot II *(beam)* | spell | Piercing Shot |  |
+| 4 | Volley *(ground)* | spell |  |  |
+| 4 | Mail Armour (mail) | training | Leather Armour |  |
+| 5 | Explosive Arrow II *(ground)* | spell | Explosive Arrow |  |
+| 5 | Eagle Eye *(self)* | spell |  |  |
+| 5 | Marksman | passive |  |  |
+| 5 | Wide Spread | modifier of Multi Shot | Multi Shot |  |
+| 6 | Volley II *(ground)* | spell | Volley |  |
+| 6 | Hunter's Leap II *(leap)* | spell | Hunter's Leap |  |
+| 6 | Swift Feet | passive |  |  |
+| 6 | Fire Arrows | modifier of Volley | Volley |  |
+| 7 | Multi Shot III *(melee)* | spell | Multi Shot II |  |
+| 7 | Piercing Shot III *(beam)* | spell | Piercing Shot II |  |
+| 7 | Snare Trap II *(ground)* | spell | Snare Trap |  |
+| 7 | Deadly Aim | passive |  |  |
+| 8 | Explosive Arrow III *(ground)* | spell | Explosive Arrow II |  |
+| 8 | Quick Hands | passive |  |  |
+| 8 | Quick Draw | passive |  |  |
+| 8 | Cluster Arrow | modifier of Explosive Arrow | Explosive Arrow |  |
+| 9 | Volley III *(ground)* | spell | Volley II |  |
+| 9 | Snare Trap III *(ground)* | spell | Snare Trap II |  |
+| 9 | Hunter's Leap III *(leap)* | spell | Hunter's Leap II |  |
+| 9 | Dagger Mastery | passive | Dagger Training |  |
+| 9 | Killer Shots | passive |  |  |
+| 10 | Rain of Arrows *(ground)* | spell |  | capstone (pick one) |
+| 10 | Siege Arrow *(ground)* | spell |  | capstone (pick one) |
 
 ### Rogue — Base
 Strikes from where you aren't looking, poison on every edge. *Requires:* open at creation. *Growth a level:* +9 health, +3 mana. Fights with two weapons.
-*Paths (choose one at level 3):* **Cutthroat** — Gutting strikes and sudden stuns for one target at a time. **Poisoner** — Darts and clouds that keep killing after you leave.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Gutting Strike *(farhold)* | spell, free | 3 |  |
-| 1 | Light Step (leather, martial) | training, free | 1 |  |
-| 1 | Exploit Weakness | passive, free | 1 |  |
-| 1 | Quick Fingers | passive | 3 |  |
-| 2 | Nimble Feet | passive, free | 1 |  |
-| 2 | Sucker Punch *(farhold)* | spell | 3 |  |
-| 2 | Shroud *(farhold)* | spell | 3 |  |
-| 3 | Grave Mark *(farhold)* | spell | 3 | Cutthroat |
-| 3 | Killer's Eye | passive | 3 | Cutthroat |
-| 3 | Poison Dart *(farhold)* | spell | 3 | Poisoner |
-| 3 | Black Vials | passive | 3 | Poisoner |
-| 4 | Slip Free | passive | 2 |  |
-| 5 | Open Vein | modifier of Gutting Strike | 1 | Cutthroat |
-| 5 | Plague Cloud *(farhold)* | spell | 3 | Poisoner |
-| 6 | Knife Storm *(farhold)* | spell | 3 |  |
-| 10 | Thousand Cuts | modifier of Knife Storm | 1 | capstone (pick one) |
-| 10 | Shadowed Heart | passive | 1 | capstone (pick one) |
+| 1 | Fan of Knives *(around)* | spell, free |  |  |
+| 1 | Dagger Training (dagger) | training, free |  |  |
+| 1 | Leather Armour (leather) | training, free |  |  |
+| 1 | Eviscerate *(melee)* | spell |  |  |
+| 1 | Sword Training (sword) | training |  |  |
+| 1 | Axe Training (axe) | training |  |  |
+| 1 | Crossbow Training (crossbow) | training |  |  |
+| 2 | Shadow Step *(leap)* | spell |  |  |
+| 2 | Poison Cloud *(ground)* | spell |  |  |
+| 2 | Dagger Mastery | passive | Dagger Training |  |
+| 2 | Mace Training (mace) | training |  |  |
+| 3 | Blade Rush *(dash)* | spell |  |  |
+| 3 | Sword Mastery | passive | Sword Training |  |
+| 3 | Axe Mastery | passive | Axe Training |  |
+| 3 | Poisoner | passive |  |  |
+| 3 | Cold Blood | passive |  |  |
+| 4 | Fan of Knives II *(around)* | spell | Fan of Knives |  |
+| 4 | Eviscerate II *(melee)* | spell | Eviscerate |  |
+| 4 | Smoke Bomb *(ground)* | spell |  |  |
+| 4 | Light Feet | passive |  |  |
+| 5 | Shadow Step II *(leap)* | spell | Shadow Step |  |
+| 5 | Poison Cloud II *(ground)* | spell | Poison Cloud |  |
+| 5 | Backstabber | passive |  |  |
+| 5 | Toxic Blades | modifier of Fan of Knives | Fan of Knives |  |
+| 6 | Blade Rush II *(dash)* | spell | Blade Rush |  |
+| 6 | Smoke Bomb II *(ground)* | spell | Smoke Bomb |  |
+| 6 | Vital Spots | passive |  |  |
+| 6 | Deep Cuts | modifier of Eviscerate | Eviscerate |  |
+| 7 | Fan of Knives III *(around)* | spell | Fan of Knives II |  |
+| 7 | Eviscerate III *(melee)* | spell | Eviscerate II |  |
+| 7 | Poison Cloud III *(ground)* | spell | Poison Cloud II |  |
+| 7 | Quick Blades | passive |  |  |
+| 8 | Shadow Step III *(leap)* | spell | Shadow Step II |  |
+| 8 | Blade Rush III *(dash)* | spell | Blade Rush II |  |
+| 8 | Quick Recovery | passive |  |  |
+| 8 | Spreading Cloud | modifier of Poison Cloud | Poison Cloud |  |
+| 9 | Smoke Bomb III *(ground)* | spell | Smoke Bomb II |  |
+| 9 | Killer Edge | passive |  |  |
+| 9 | Hard Landing | modifier of Shadow Step | Shadow Step |  |
+| 10 | Knife Storm *(around)* | spell |  | capstone (pick one) |
+| 10 | Assassinate *(leap)* | spell |  | capstone (pick one) |
 
 ### Mage — Base
-Shards of ice and raw arcane force. Fragile, and terrifying from range. *Requires:* open at creation. *Growth a level:* +5 health, +9 mana.
-*Paths (choose one at level 3):* **Frost** — Slow, freeze and shatter: control the fight from afar. **Arcane** — Wild force and mana-rending blasts: the biggest raw numbers.
+Fireballs that blow enemies off their feet, ice that bursts from the ground, lightning from the sky. Fragile, and devastating from range. *Requires:* open at creation. *Growth a level:* +5 health, +9 mana.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Frost Shard *(farhold)* | spell, free | 3 |  |
-| 1 | Arcane Study (arcane) | training, free | 1 |  |
-| 1 | Mana Font | passive | 3 |  |
-| 2 | Mana Shield *(new)* | spell | 3 |  |
-| 3 | Rime Burst *(farhold)* | spell | 3 | Frost |
-| 3 | Deep Cold | passive | 3 | Frost |
-| 3 | Wild Bolt *(farhold)* | spell | 3 | Arcane |
-| 3 | Raw Force | passive | 3 | Arcane |
-| 4 | Splinter | modifier of Frost Shard | 1 |  |
-| 5 | Rime Spear *(farhold)* | spell | 3 | Frost |
-| 5 | Arcane Burst *(farhold)* | spell | 3 | Arcane |
-| 6 | Overchannel *(farhold)* | spell | 3 |  |
-| 7 | Whiteout *(farhold)* | spell | 3 | Frost |
-| 7 | Mana Rend *(farhold)* | spell | 3 | Arcane |
-| 10 | Stillfrost *(farhold)* | spell | 3 | capstone (pick one) |
-| 10 | Archmage | passive | 1 | capstone (pick one) |
+| 1 | Fireball *(bolt)* | spell, free |  |  |
+| 1 | Staff Training (staff) | training, free |  |  |
+| 1 | Ice Spikes *(beam)* | spell |  |  |
+| 1 | Wand Training (wand) | training |  |  |
+| 1 | Dagger Training (dagger) | training |  |  |
+| 2 | Frost Nova *(around)* | spell |  |  |
+| 2 | Teleport *(leap)* | spell |  |  |
+| 2 | Orb Training (orb) | training |  |  |
+| 2 | Tome Training (tome) | training |  |  |
+| 3 | Arcane Blast *(melee)* | spell |  |  |
+| 3 | Fire Study | passive |  |  |
+| 3 | Frost Study | passive |  |  |
+| 3 | Arcane Study | passive |  |  |
+| 3 | Wand Mastery | passive | Wand Training |  |
+| 3 | Staff Mastery | passive | Staff Training |  |
+| 4 | Fireball II *(bolt)* | spell | Fireball |  |
+| 4 | Ice Spikes II *(beam)* | spell | Ice Spikes |  |
+| 4 | Blizzard *(ground)* | spell |  |  |
+| 4 | Deep Mana | passive |  |  |
+| 5 | Lightning Strike *(ground)* | spell |  |  |
+| 5 | Frost Nova II *(around)* | spell | Frost Nova |  |
+| 5 | Lightning Study | passive |  |  |
+| 5 | Big Fireball | modifier of Fireball | Fireball |  |
+| 6 | Arcane Blast II *(melee)* | spell | Arcane Blast |  |
+| 6 | Blizzard II *(ground)* | spell | Blizzard |  |
+| 6 | Spell Power | passive |  |  |
+| 6 | Frozen Ground | modifier of Frost Nova | Frost Nova |  |
+| 7 | Lightning Strike II *(ground)* | spell | Lightning Strike |  |
+| 7 | Ice Spikes III *(beam)* | spell | Ice Spikes II |  |
+| 7 | Fireball III *(bolt)* | spell | Fireball II |  |
+| 7 | Sharp Mind | passive |  |  |
+| 8 | Frost Nova III *(around)* | spell | Frost Nova II |  |
+| 8 | Forked Lightning | modifier of Lightning Strike | Lightning Strike |  |
+| 8 | Quick Casting | passive |  |  |
+| 8 | Glass Cannon | passive |  |  |
+| 9 | Arcane Blast III *(melee)* | spell | Arcane Blast II |  |
+| 9 | Blizzard III *(ground)* | spell | Blizzard II |  |
+| 9 | Lightning Strike III *(ground)* | spell | Lightning Strike II |  |
+| 9 | Overload | passive |  |  |
+| 10 | Meteor *(ground)* | spell |  | capstone (pick one) |
+| 10 | Deep Freeze *(around)* | spell |  | capstone (pick one) |
 
 ### Cleric — Base
-Keeps the party standing, and burns what threatens it with light or shadow. *Requires:* open at creation. *Growth a level:* +8 health, +7 mana.
-*Paths (choose one at level 3):* **Dawn** — The healer: hallowed ground, mending light, the fallen raised. **Dusk** — The shadow priest: lances of shadow that heal you as they hurt.
+A mace and the light: lances of sun, pillars that slam down from the sky, a holy blast that flattens what is round you. One heal, one revive. *Requires:* open at creation. *Growth a level:* +8 health, +7 mana.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Sunlance *(farhold)* | spell, free | 3 |  |
-| 1 | Kindly Light *(new)* | spell | 3 |  |
-| 1 | Vestments (leather, mail, shield, arcane) | training, free | 1 |  |
-| 1 | Devotion | passive | 3 |  |
-| 2 | Prayer of Dawn *(farhold)* | spell | 3 |  |
-| 3 | Ring of Dawn *(new)* | spell | 3 | Dawn |
-| 3 | Mercy | passive | 3 | Dawn |
-| 3 | Shadow Lance *(farhold)* | spell | 3 | Dusk |
-| 3 | Dusk Hymn | passive | 3 | Dusk |
-| 4 | Lift the Fallen *(new)* | spell | 3 |  |
-| 5 | Bright Reach | modifier of Kindly Light | 1 | Dawn |
-| 5 | Mark the Killer *(farhold)* | spell | 3 | Dusk |
-| 6 | Falling Light *(farhold)* | spell | 3 |  |
-| 7 | Sanctuary *(farhold)* | spell | 3 | Dawn |
-| 7 | Twinlight *(farhold)* | spell | 3 | Dusk |
-| 10 | Dawnfall *(new)* | spell | 3 | capstone (pick one) |
-| 10 | Lightbearer | passive | 1 | capstone (pick one) |
+| 1 | Sunlance *(beam)* | spell, free |  |  |
+| 1 | Mace Training (mace) | training, free |  |  |
+| 1 | Shield Training (shield) | training, free |  |  |
+| 1 | Leather Armour (leather) | training, free |  |  |
+| 1 | Mail Armour (mail) | training, free |  |  |
+| 1 | Heal *(bolt)* | spell |  |  |
+| 1 | Staff Training (staff) | training |  |  |
+| 1 | Sceptre Training (scepter) | training |  |  |
+| 2 | Smite *(ground)* | spell |  |  |
+| 2 | Revive *(self)* | spell |  |  |
+| 2 | Mace Mastery | passive | Mace Training |  |
+| 2 | Two-Handed Training (twohand) | training |  |  |
+| 3 | Holy Nova *(around)* | spell |  |  |
+| 3 | Holy Power | passive |  |  |
+| 3 | Sceptre Mastery | passive | Sceptre Training |  |
+| 3 | Staff Mastery | passive | Staff Training |  |
+| 4 | Sunlance II *(beam)* | spell | Sunlance |  |
+| 4 | Smite II *(ground)* | spell | Smite |  |
+| 4 | Holy Ground *(ground)* | spell |  |  |
+| 4 | Plate Armour (plate) | training | Mail Armour |  |
+| 5 | Divine Hammer *(beam)* | spell |  |  |
+| 5 | Holy Nova II *(around)* | spell | Holy Nova |  |
+| 5 | Heal II *(bolt)* | spell | Heal |  |
+| 5 | Zeal | passive |  |  |
+| 6 | Holy Ground II *(ground)* | spell | Holy Ground |  |
+| 6 | Blinding Light | modifier of Sunlance | Sunlance |  |
+| 6 | Faith | passive |  |  |
+| 6 | Devotion | passive |  |  |
+| 7 | Sunlance III *(beam)* | spell | Sunlance II |  |
+| 7 | Smite III *(ground)* | spell | Smite II |  |
+| 7 | Divine Hammer II *(beam)* | spell | Divine Hammer |  |
+| 7 | Righteous Strikes | passive |  |  |
+| 8 | Holy Nova III *(around)* | spell | Holy Nova II |  |
+| 8 | Double Smite | modifier of Smite | Smite |  |
+| 8 | Quick Prayers | passive |  |  |
+| 9 | Holy Ground III *(ground)* | spell | Holy Ground II |  |
+| 9 | Divine Hammer III *(beam)* | spell | Divine Hammer II |  |
+| 9 | Heal III *(bolt)* | spell | Heal II |  |
+| 9 | Light Unbound | passive |  |  |
+| 10 | Judgement *(ground)* | spell |  | capstone (pick one) |
+| 10 | Wrath of Light *(self)* | spell |  | capstone (pick one) |
 
 ### Druid — Base
-Becomes the wolf and the bear, calls the pack, or speaks with root and storm — choose one way and go deep. *Requires:* open at creation. *Growth a level:* +8 health, +6 mana.
-*Paths (choose one at level 3):* **Shapeshifter** — Become a real wolf, then a real bear; your attacks become theirs. **Summoner** — Call wolves and a great bear to fight beside you. **Caster** — Roots, thorns and moonlight from a distance.
+Becomes the wolf, the bear or the mountain cat, calls wolves to the fight, and throws thorns and tornadoes. *Requires:* open at creation. *Growth a level:* +8 health, +6 mana.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Thornlash *(farhold)* | spell, free | 3 |  |
-| 1 | Grove Garb (leather, arcane) | training, free | 1 |  |
-| 1 | Oakhide | passive | 3 |  |
-| 2 | Greensap *(farhold)* | spell | 3 |  |
-| 3 | Wolf Shape *(thousandvale)* | spell | 3 | Shapeshifter |
-| 3 | Wild Heart | passive | 3 | Shapeshifter |
-| 3 | Call the Pack *(farhold)* | spell | 3 | Summoner |
-| 3 | Pack Bond | passive | 3 | Summoner |
-| 3 | Rootgrasp *(new)* | spell | 3 | Caster |
-| 3 | Green Lore | passive | 3 | Caster |
-| 5 | Bear Shape *(farhold)* | spell | 3 | Shapeshifter |
-| 5 | Call the Great Bear *(new)* | spell | 3 | Summoner |
-| 5 | Silver Moonlight *(new)* | spell | 3 | Caster |
-| 6 | Cat Shape *(new)* | spell | 3 | Shapeshifter |
-| 6 | Mending Rain *(new)* | spell | 3 |  |
-| 7 | Pack Leader | modifier of Wolf Shape | 1 | Shapeshifter |
-| 7 | Alpha Howl | modifier of Call the Pack | 1 | Summoner |
-| 7 | Wrathful Grove | modifier of Thornlash | 1 | Caster |
-| 10 | Elder Grove *(new)* | spell | 3 | capstone (pick one) |
-| 10 | Old Growth | passive | 1 | capstone (pick one) |
+| 1 | Thorn Blast *(melee)* | spell, free |  |  |
+| 1 | Staff Training (staff) | training, free |  |  |
+| 1 | Leather Armour (leather) | training, free |  |  |
+| 1 | Wolf Shape *(self)* | spell |  |  |
+| 1 | Bear Shape *(self)* | spell |  |  |
+| 1 | Cat Shape *(self)* | spell |  |  |
+| 1 | Dagger Training (dagger) | training |  |  |
+| 1 | Mace Training (mace) | training |  |  |
+| 2 | Grasping Roots *(ground)* | spell |  |  |
+| 2 | Pounce *(leap)* | spell |  |  |
+| 2 | Roar *(around)* | spell |  |  |
+| 2 | Spear Training (spear) | training |  |  |
+| 3 | Call Wolves *(summon)* | spell |  |  |
+| 3 | Tornado *(ground)* | spell |  |  |
+| 3 | Staff Mastery | passive | Staff Training |  |
+| 3 | Wild Power | passive |  |  |
+| 4 | Thorn Blast II *(melee)* | spell | Thorn Blast |  |
+| 4 | Pounce II *(leap)* | spell | Pounce |  |
+| 4 | Roar II *(around)* | spell | Roar |  |
+| 4 | Healing Bloom *(ground)* | spell |  |  |
+| 5 | Grasping Roots II *(ground)* | spell | Grasping Roots |  |
+| 5 | Tornado II *(ground)* | spell | Tornado |  |
+| 5 | Thick Hide | passive |  |  |
+| 5 | Pack Leader | modifier of Wolf Shape | Wolf Shape |  |
+| 6 | Call Bear *(summon)* | spell |  |  |
+| 6 | Call Wolves II *(summon)* | spell | Call Wolves |  |
+| 6 | Feral Strength | passive |  |  |
+| 6 | Thorn Spray | modifier of Thorn Blast | Thorn Blast |  |
+| 7 | Thorn Blast III *(melee)* | spell | Thorn Blast II |  |
+| 7 | Pounce III *(leap)* | spell | Pounce II |  |
+| 7 | Roar III *(around)* | spell | Roar II |  |
+| 7 | Predator | passive |  |  |
+| 8 | Tornado III *(ground)* | spell | Tornado II |  |
+| 8 | Grasping Roots III *(ground)* | spell | Grasping Roots II |  |
+| 8 | Quick Change | passive |  |  |
+| 8 | Thunder Roar | modifier of Roar | Roar |  |
+| 9 | Call Wolves III *(summon)* | spell | Call Wolves II |  |
+| 9 | Alpha | passive |  |  |
+| 9 | Nature's Wrath | passive |  |  |
+| 9 | Big Cat | modifier of Cat Shape | Cat Shape |  |
+| 10 | Stampede *(dash)* | spell |  | capstone (pick one) |
+| 10 | Great Storm *(ground)* | spell |  | capstone (pick one) |
 
 ### Bard — Base
-Lifts the party with songs, breaks the enemy with discord, or lulls them to sleep. *Requires:* open at creation. *Growth a level:* +7 health, +6 mana.
-*Paths (choose one at level 3):* **Valour** — Battle songs and a charge that carries the party with you. **Ruin** — Discord that curses and shatters. **Glamour** — Sleep, slow and bewilder.
+Blasts of sound that knock crowds flat, a lullaby for the ones left standing, and a song that lifts the party. *Requires:* open at creation. *Growth a level:* +7 health, +6 mana.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Discord Note *(farhold)* | spell, free | 3 |  |
-| 1 | Traveller's Kit (leather, martial) | training, free | 1 |  |
-| 1 | Stage Presence | passive | 3 |  |
-| 2 | Mending Verse *(thousandvale)* | spell | 3 |  |
-| 3 | Ballad of Valour *(farhold)* | spell | 3 | Valour |
-| 3 | Song of Ruin *(farhold)* | spell | 3 | Ruin |
-| 3 | Drowse *(farhold)* | spell | 3 | Glamour |
-| 3 | Silver Tongue | passive | 3 | Glamour |
-| 5 | Lead the Charge *(farhold)* | spell | 3 | Valour |
-| 5 | Shatter Chord | modifier of Discord Note | 1 | Ruin |
-| 5 | Lethargy *(farhold)* | spell | 3 | Glamour |
-| 6 | Encore | passive | 2 |  |
-| 7 | Rally *(farhold)* | spell | 3 | Valour |
-| 7 | Grand Finale *(farhold)* | spell | 3 | Ruin |
-| 10 | Anthem of Heroes *(new)* | spell | 3 | capstone (pick one) |
-| 10 | Living Legend | passive | 1 | capstone (pick one) |
+| 1 | Sound Blast *(melee)* | spell, free |  |  |
+| 1 | Sword Training (sword) | training, free |  |  |
+| 1 | Leather Armour (leather) | training, free |  |  |
+| 1 | Sour Note *(ground)* | spell |  |  |
+| 1 | Healing Song *(self)* | spell |  |  |
+| 1 | Dagger Training (dagger) | training |  |  |
+| 1 | Bow Training (bow) | training |  |  |
+| 2 | Power Chord *(around)* | spell |  |  |
+| 2 | Dancing Blade *(dash)* | spell |  |  |
+| 2 | Sword Mastery | passive | Sword Training |  |
+| 2 | Axe Training (axe) | training |  |  |
+| 3 | Lullaby *(ground)* | spell |  |  |
+| 3 | Battle Hymn *(self)* | spell |  |  |
+| 3 | Strong Voice | passive |  |  |
+| 3 | Dagger Mastery | passive | Dagger Training |  |
+| 4 | Sound Blast II *(melee)* | spell | Sound Blast |  |
+| 4 | Power Chord II *(around)* | spell | Power Chord |  |
+| 4 | Sour Note II *(ground)* | spell | Sour Note |  |
+| 4 | Dual Wielding (dualWield) | training |  |  |
+| 5 | Dancing Blade II *(dash)* | spell | Dancing Blade |  |
+| 5 | Healing Song II *(self)* | spell | Healing Song |  |
+| 5 | Showman | passive |  |  |
+| 5 | Wide Blast | modifier of Sound Blast | Sound Blast |  |
+| 6 | Lullaby II *(ground)* | spell | Lullaby |  |
+| 6 | Battle Hymn II *(self)* | spell | Battle Hymn |  |
+| 6 | Fast Fingers | passive |  |  |
+| 6 | Echo | modifier of Power Chord | Power Chord |  |
+| 7 | Sound Blast III *(melee)* | spell | Sound Blast II |  |
+| 7 | Sour Note III *(ground)* | spell | Sour Note II |  |
+| 7 | Power Chord III *(around)* | spell | Power Chord II |  |
+| 7 | Big Finish | passive |  |  |
+| 8 | Dancing Blade III *(dash)* | spell | Dancing Blade II |  |
+| 8 | Quick Tempo | passive |  |  |
+| 8 | Duelling Song | passive |  |  |
+| 8 | Bitter Note | modifier of Sour Note | Sour Note |  |
+| 9 | Lullaby III *(ground)* | spell | Lullaby II |  |
+| 9 | Healing Song III *(self)* | spell | Healing Song II |  |
+| 9 | Perfect Pitch | passive |  |  |
+| 10 | Crescendo *(around)* | spell |  | capstone (pick one) |
+| 10 | Grand Finale *(beam)* | spell |  | capstone (pick one) |
 
 ### Shaman — Base
-Plants spirit posts that heal, calls a spirit bear, or brings the storm down. *Requires:* open at creation. *Growth a level:* +9 health, +6 mana.
-*Paths (choose one at level 3):* **Spirit** — Spirit posts and a spirit bear that guard the party. **Storm** — Thunder rings and storm beams.
+A hammer that cracks with lightning, thunder that throws crowds off their feet, lava underfoot and a spirit bear. *Requires:* open at creation. *Growth a level:* +9 health, +6 mana.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Spirit Bolt *(farhold)* | spell, free | 3 |  |
-| 1 | Hide and Mail (leather, mail, shield) | training, free | 1 |  |
-| 1 | Ancestral Vigour | passive | 3 |  |
-| 2 | Mending Post *(farhold)* | spell | 3 |  |
-| 3 | Call a Spirit *(farhold)* | spell | 3 | Spirit |
-| 3 | Spirit Kin | passive | 3 | Spirit |
-| 3 | Thunder Ring *(farhold)* | spell | 3 | Storm |
-| 3 | Charged Air | passive | 3 | Storm |
-| 4 | Forked Spirit | modifier of Spirit Bolt | 1 |  |
-| 5 | Ancestors' Ward *(new)* | spell | 3 | Spirit |
-| 5 | Storm Beam *(farhold)* | spell | 3 | Storm |
-| 6 | Earthbound | passive | 2 |  |
-| 7 | The Great Post *(farhold)* | spell | 3 |  |
-| 10 | Spirit Walker | passive | 1 | capstone (pick one) |
-| 10 | Greater Post | modifier of The Great Post | 1 | capstone (pick one) |
+| 1 | Shock Strike *(melee)* | spell, free |  |  |
+| 1 | Mace Training (mace) | training, free |  |  |
+| 1 | Shield Training (shield) | training, free |  |  |
+| 1 | Leather Armour (leather) | training, free |  |  |
+| 1 | Thunder Clap *(around)* | spell |  |  |
+| 1 | Mail Armour (mail) | training |  |  |
+| 1 | Axe Training (axe) | training |  |  |
+| 1 | Staff Training (staff) | training |  |  |
+| 2 | Lava Pool *(ground)* | spell |  |  |
+| 2 | Healing Totem *(ground)* | spell |  |  |
+| 2 | Mace Mastery | passive | Mace Training |  |
+| 2 | Two-Handed Training (twohand) | training |  |  |
+| 3 | Rolling Thunder *(beam)* | spell |  |  |
+| 3 | Call Spirit Bear *(summon)* | spell |  |  |
+| 3 | Storm Power | passive |  |  |
+| 3 | Molten Power | passive |  |  |
+| 3 | Axe Mastery | passive | Axe Training |  |
+| 4 | Shock Strike II *(melee)* | spell | Shock Strike |  |
+| 4 | Thunder Clap II *(around)* | spell | Thunder Clap |  |
+| 4 | Lava Pool II *(ground)* | spell | Lava Pool |  |
+| 4 | Thunder Leap *(leap)* | spell |  |  |
+| 5 | Rolling Thunder II *(beam)* | spell | Rolling Thunder |  |
+| 5 | Stone Skin *(self)* | spell |  |  |
+| 5 | Spirit Bond | passive |  |  |
+| 5 | Aftershock | modifier of Thunder Clap | Thunder Clap |  |
+| 6 | Thunder Leap II *(leap)* | spell | Thunder Leap |  |
+| 6 | Call Spirit Bear II *(summon)* | spell | Call Spirit Bear |  |
+| 6 | Elemental Force | passive |  |  |
+| 6 | Spreading Lava | modifier of Lava Pool | Lava Pool |  |
+| 7 | Shock Strike III *(melee)* | spell | Shock Strike II |  |
+| 7 | Thunder Clap III *(around)* | spell | Thunder Clap II |  |
+| 7 | Healing Totem II *(ground)* | spell | Healing Totem |  |
+| 7 | Charged | passive |  |  |
+| 8 | Lava Pool III *(ground)* | spell | Lava Pool II |  |
+| 8 | Rolling Thunder III *(beam)* | spell | Rolling Thunder II |  |
+| 8 | Quick Spirits | passive |  |  |
+| 8 | Wide Shock | modifier of Shock Strike | Shock Strike |  |
+| 9 | Thunder Leap III *(leap)* | spell | Thunder Leap II |  |
+| 9 | Overcharge | passive |  |  |
+| 9 | Staff Mastery | passive | Staff Training |  |
+| 9 | Thick Skin | passive |  |  |
+| 10 | Lightning Storm *(ground)* | spell |  | capstone (pick one) |
+| 10 | Volcano *(ground)* | spell |  | capstone (pick one) |
 
 ### Paladin — Advanced
 Sworn steel and holy light. The class that opens plate armour. *Requires:* Warrior 3, Cleric 1, Strength 14, Wisdom 12. *Growth a level:* +11 health, +4 mana.
-*Paths (choose one at level 3):* **Sentinel** — Guards the party: barriers, taunts and blessed earth. **Zealot** — Hunts the dark: holy blows and a descent from the sky.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Sanctified Blade *(farhold)* | spell, free | 3 |  |
-| 1 | Oath Arms (mail, shield, martial) | training, free | 1 |  |
-| 1 | Aura of Resolve | passive | 3 |  |
-| 2 | Plate Training (plate) | training, free | 1 |  |
-| 2 | Mercy's Touch *(thousandvale)* | spell | 3 |  |
-| 3 | Blessed Earth *(farhold)* | spell | 3 | Sentinel |
-| 3 | Bulwark of Faith | passive | 3 | Sentinel |
-| 3 | Holy Vengeance | passive | 3 | Zealot |
-| 4 | Searing Edge | modifier of Sanctified Blade | 1 |  |
-| 5 | Martyr's Vow *(farhold)* | spell | 3 | Sentinel |
-| 5 | Daybreak Descent *(farhold)* | spell | 3 | Zealot |
-| 6 | Falling Light *(farhold)* | spell | 3 |  |
-| 7 | Shield of Dawn *(new)* | spell | 3 |  |
-| 10 | Avatar of Dawn *(new)* | spell | 3 | capstone (pick one) |
-| 10 | Unbroken Oath | passive | 1 | capstone (pick one) |
+| 1 | Holy Strike *(melee)* | spell, free |  |  |
+| 1 | Plate Armour (plate) | training, free |  |  |
+| 1 | Holy Charge *(dash)* | spell |  |  |
+| 1 | Healing Light *(bolt)* | spell |  |  |
+| 1 | Sword Training (sword) | training |  |  |
+| 1 | Mace Training (mace) | training |  |  |
+| 1 | Two-Handed Training (twohand) | training |  |  |
+| 2 | Divine Storm *(around)* | spell |  |  |
+| 2 | Holy Fire *(around)* | spell |  |  |
+| 2 | Shield Training (shield) | training |  |  |
+| 2 | Axe Training (axe) | training |  |  |
+| 3 | Light Hammer *(ground)* | spell |  |  |
+| 3 | Sword Mastery | passive | Sword Training |  |
+| 3 | Mace Mastery | passive | Mace Training |  |
+| 3 | Two-Handed Mastery | passive | Two-Handed Training |  |
+| 3 | Holy Might | passive |  |  |
+| 4 | Holy Strike II *(melee)* | spell | Holy Strike |  |
+| 4 | Holy Charge II *(dash)* | spell | Holy Charge |  |
+| 4 | Divine Storm II *(around)* | spell | Divine Storm |  |
+| 4 | Shield of Light *(self)* | spell |  |  |
+| 5 | Holy Leap *(leap)* | spell |  |  |
+| 5 | Holy Fire II *(around)* | spell | Holy Fire |  |
+| 5 | Light Hammer II *(ground)* | spell | Light Hammer |  |
+| 5 | Armour Expert | passive |  |  |
+| 6 | Healing Light II *(bolt)* | spell | Healing Light |  |
+| 6 | Crusader | passive |  |  |
+| 6 | Axe Mastery | passive | Axe Training |  |
+| 6 | Storm of Light | modifier of Divine Storm | Divine Storm |  |
+| 7 | Holy Strike III *(melee)* | spell | Holy Strike II |  |
+| 7 | Holy Charge III *(dash)* | spell | Holy Charge II |  |
+| 7 | Holy Leap II *(leap)* | spell | Holy Leap |  |
+| 7 | Zealot | passive |  |  |
+| 8 | Divine Storm III *(around)* | spell | Divine Storm II |  |
+| 8 | Light Hammer III *(ground)* | spell | Light Hammer II |  |
+| 8 | Quick Justice | passive |  |  |
+| 8 | Blinding Charge | modifier of Holy Charge | Holy Charge |  |
+| 9 | Holy Fire III *(around)* | spell | Holy Fire II |  |
+| 9 | Holy Leap III *(leap)* | spell | Holy Leap II |  |
+| 9 | Holy Wrath | passive |  |  |
+| 9 | Stout Heart | passive |  |  |
+| 10 | Holy Avatar *(self)* | spell |  | capstone (pick one) |
+| 10 | Heaven's Hammer *(ground)* | spell |  | capstone (pick one) |
 
 ### Spellblade — Advanced
 A blade in one hand and a spell in the other — every strike carries magic. *Requires:* Warrior 2, Mage 2, Intelligence 13. *Growth a level:* +9 health, +6 mana.
-*Paths (choose one at level 3):* **Runeblade** — Runes that stack on the enemy and an anvil that falls on them. **Riftblade** — Steps through the air and strikes from range with an arcane edge.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Arc Edge *(new)* | spell, free | 3 |  |
-| 1 | Battle-Mage Drill (mail, martial, arcane) | training, free | 1 |  |
-| 1 | Spellward | passive | 3 |  |
-| 2 | Runeskin *(farhold)* | spell | 3 |  |
-| 3 | Rune Hammer *(farhold)* | spell | 3 | Runeblade |
-| 3 | Rune Lore | passive | 3 | Runeblade |
-| 3 | Riftstep *(new)* | spell | 3 | Riftblade |
-| 3 | Rift Sense | passive | 3 | Riftblade |
-| 4 | Twin Edge | modifier of Arc Edge | 1 |  |
-| 5 | Flung Edge *(new)* | spell | 3 | Riftblade |
-| 5 | Rend Plate *(farhold)* | spell | 3 |  |
-| 6 | Flame-Bound Blade *(new)* | spell | 3 |  |
-| 7 | The Great Anvil *(farhold)* | spell | 3 | Runeblade |
-| 10 | Spellstorm Blade *(new)* | spell | 3 | capstone (pick one) |
-| 10 | Perfect Union | passive | 1 | capstone (pick one) |
+| 1 | Arcane Slash *(melee)* | spell, free |  |  |
+| 1 | Fire Slash *(melee)* | spell |  |  |
+| 1 | Sword Training (sword) | training |  |  |
+| 1 | Wand Training (wand) | training |  |  |
+| 1 | Mail Armour (mail) | training |  |  |
+| 1 | Two-Handed Training (twohand) | training |  |  |
+| 2 | Lightning Dash *(dash)* | spell |  |  |
+| 2 | Arcane Spin *(around)* | spell |  |  |
+| 2 | Axe Training (axe) | training |  |  |
+| 2 | Dual Wielding (dualWield) | training |  |  |
+| 3 | Blade Wave *(beam)* | spell |  |  |
+| 3 | Sword Mastery | passive | Sword Training |  |
+| 3 | Two-Handed Mastery | passive | Two-Handed Training |  |
+| 3 | Arcane Edge | passive |  |  |
+| 4 | Arcane Slash II *(melee)* | spell | Arcane Slash |  |
+| 4 | Fire Slash II *(melee)* | spell | Fire Slash |  |
+| 4 | Rune Blast *(ground)* | spell |  |  |
+| 4 | Battle Mage | passive |  |  |
+| 5 | Phase Strike *(leap)* | spell |  |  |
+| 5 | Lightning Dash II *(dash)* | spell | Lightning Dash |  |
+| 5 | Arcane Spin II *(around)* | spell | Arcane Spin |  |
+| 5 | Magic Ward *(self)* | spell |  |  |
+| 6 | Blade Wave II *(beam)* | spell | Blade Wave |  |
+| 6 | Rune Blast II *(ground)* | spell | Rune Blast |  |
+| 6 | Fire Edge | passive |  |  |
+| 6 | Storm Edge | passive |  |  |
+| 6 | Burning Edge | modifier of Arcane Slash | Arcane Slash |  |
+| 7 | Arcane Slash III *(melee)* | spell | Arcane Slash II |  |
+| 7 | Fire Slash III *(melee)* | spell | Fire Slash II |  |
+| 7 | Phase Strike II *(leap)* | spell | Phase Strike |  |
+| 7 | Keen Edge | passive |  |  |
+| 8 | Lightning Dash III *(dash)* | spell | Lightning Dash II |  |
+| 8 | Arcane Spin III *(around)* | spell | Arcane Spin II |  |
+| 8 | Quick Spells | passive |  |  |
+| 8 | Chain Runes | modifier of Rune Blast | Rune Blast |  |
+| 9 | Blade Wave III *(beam)* | spell | Blade Wave II |  |
+| 9 | Rune Blast III *(ground)* | spell | Rune Blast II |  |
+| 9 | Phase Strike III *(leap)* | spell | Phase Strike II |  |
+| 9 | Deadly Edge | passive |  |  |
+| 10 | Sword Storm *(around)* | spell |  | capstone (pick one) |
+| 10 | Giant Blade *(beam)* | spell |  | capstone (pick one) |
 
 ### Warlock — Advanced
 Bargained power: hexes that rot, a bound fiend, and gates you pay for in blood. *Requires:* Mage 3, something found in the world. *Growth a level:* +7 health, +7 mana.
-*Paths (choose one at level 3):* **Fiendbound** — A bound fiend at your side, growing stronger. **Hexer** — Hexes and rifts that spread ruin.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Gnawing Dark *(farhold)* | spell, free | 3 |  |
-| 1 | Pact Focus (arcane, leather) | training, free | 1 |  |
-| 1 | Dark Bargain | passive | 3 |  |
-| 2 | Grave Draught *(farhold)* | spell | 3 |  |
-| 3 | Bind a Fiend *(farhold)* | spell | 3 | Fiendbound |
-| 3 | Fiend Pact | passive | 3 | Fiendbound |
-| 3 | Hex of Ruin *(farhold)* | spell | 3 | Hexer |
-| 3 | Malice | passive | 3 | Hexer |
-| 5 | Void Rift *(farhold)* | spell | 3 | Hexer |
-| 5 | Blood Price *(new)* | spell | 3 |  |
-| 6 | A Second Fiend | modifier of Bind a Fiend | 1 | Fiendbound |
-| 7 | Abyss Gate *(farhold)* | spell | 3 |  |
-| 10 | Pact Fulfilled | passive | 1 | capstone (pick one) |
-| 10 | Endless Gate | modifier of Abyss Gate | 1 | capstone (pick one) |
+| 1 | Shadow Burst *(ground)* | spell, free |  |  |
+| 1 | Wand Training (wand) | training, free |  |  |
+| 1 | Drain Life *(beam)* | spell |  |  |
+| 1 | Summon Imp *(summon)* | spell |  |  |
+| 1 | Dagger Training (dagger) | training |  |  |
+| 1 | Staff Training (staff) | training |  |  |
+| 1 | Tome Training (tome) | training |  |  |
+| 2 | Curse Cloud *(ground)* | spell |  |  |
+| 2 | Dark Wave *(melee)* | spell |  |  |
+| 2 | Leather Armour (leather) | training |  |  |
+| 2 | Wand Mastery | passive | Wand Training |  |
+| 3 | Shadow Nova *(around)* | spell |  |  |
+| 3 | Dark Power | passive |  |  |
+| 3 | Staff Mastery | passive | Staff Training |  |
+| 3 | Dagger Mastery | passive | Dagger Training |  |
+| 4 | Shadow Burst II *(ground)* | spell | Shadow Burst |  |
+| 4 | Drain Life II *(beam)* | spell | Drain Life |  |
+| 4 | Summon Imp II *(summon)* | spell | Summon Imp |  |
+| 4 | Terror *(ground)* | spell |  |  |
+| 5 | Curse Cloud II *(ground)* | spell | Curse Cloud |  |
+| 5 | Dark Wave II *(melee)* | spell | Dark Wave |  |
+| 5 | Blood Pact *(self)* | spell |  |  |
+| 5 | Demon Bond | passive |  |  |
+| 6 | Shadow Nova II *(around)* | spell | Shadow Nova |  |
+| 6 | Deep Mana | passive |  |  |
+| 6 | Hungry Shadows | modifier of Drain Life | Drain Life |  |
+| 6 | Cursed Burst | modifier of Shadow Burst | Shadow Burst |  |
+| 7 | Shadow Burst III *(ground)* | spell | Shadow Burst II |  |
+| 7 | Drain Life III *(beam)* | spell | Drain Life II |  |
+| 7 | Terror II *(ground)* | spell | Terror |  |
+| 7 | Cruel Mind | passive |  |  |
+| 8 | Curse Cloud III *(ground)* | spell | Curse Cloud II |  |
+| 8 | Dark Wave III *(melee)* | spell | Dark Wave II |  |
+| 8 | Summon Imp III *(summon)* | spell | Summon Imp II |  |
+| 8 | Quick Hexes | passive |  |  |
+| 9 | Shadow Nova III *(around)* | spell | Shadow Nova II |  |
+| 9 | Dark Hunger | passive |  |  |
+| 9 | Cruel Blows | passive |  |  |
+| 9 | Big Nova | modifier of Shadow Nova | Shadow Nova |  |
+| 10 | Demon Gate *(ground)* | spell |  | capstone (pick one) |
+| 10 | Dark Star *(ground)* | spell |  | capstone (pick one) |
 
 ### Wayfarer — Advanced
 Bare hands, a staff and a still mind. Fast, hard to hit, no armour needed. *Requires:* Rogue 2, Druid 2, Dexterity 14. *Growth a level:* +13 health, +3 mana. Fights with two weapons.
-*Paths (choose one at level 3):* **Open Hand** — Palm strikes that knock down and a fist that shakes the ground. **Still Mind** — Breathe, heal, and spin the staff nine times.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Open Palm *(farhold)* | spell, free | 3 |  |
-| 1 | Road Staff (martial) | training, free | 1 |  |
-| 1 | Trained Hands | passive, free | 1 |  |
-| 1 | Unburdened | passive | 3 |  |
-| 2 | Wind Step *(farhold)* | spell | 3 |  |
-| 3 | Sweeping Heel *(farhold)* | spell | 3 | Open Hand |
-| 3 | Iron Body | passive | 3 | Open Hand |
-| 3 | Inner Stillness *(farhold)* | spell | 3 | Still Mind |
-| 3 | Calm Breath | passive | 3 | Still Mind |
-| 4 | Flowing Palm | modifier of Open Palm | 1 |  |
-| 5 | Mountain Fist *(farhold)* | spell | 3 | Open Hand |
-| 5 | Ninefold Staff *(farhold)* | spell | 3 | Still Mind |
-| 6 | The Far Road | passive | 2 |  |
-| 10 | Hundred Steps *(new)* | spell | 3 | capstone (pick one) |
-| 10 | Empty Hand | passive | 1 | capstone (pick one) |
+| 1 | Palm Strike *(melee)* | spell, free |  |  |
+| 1 | Spinning Kick *(around)* | spell |  |  |
+| 1 | Staff Training (staff) | training |  |  |
+| 1 | Spear Training (spear) | training |  |  |
+| 1 | Dagger Training (dagger) | training |  |  |
+| 2 | Flying Kick *(leap)* | spell |  |  |
+| 2 | Rushing Fist *(dash)* | spell |  |  |
+| 2 | Staff Mastery | passive | Staff Training |  |
+| 2 | Spear Mastery | passive | Spear Training |  |
+| 3 | Staff Sweep *(melee)* | spell |  |  |
+| 3 | Wind Palm *(beam)* | spell |  |  |
+| 3 | Iron Fist | passive |  |  |
+| 3 | Light Step | passive |  |  |
+| 4 | Palm Strike II *(melee)* | spell | Palm Strike |  |
+| 4 | Spinning Kick II *(around)* | spell | Spinning Kick |  |
+| 4 | Flying Kick II *(leap)* | spell | Flying Kick |  |
+| 4 | Inner Speed *(self)* | spell |  |  |
+| 5 | Earth Stomp *(around)* | spell |  |  |
+| 5 | Rushing Fist II *(dash)* | spell | Rushing Fist |  |
+| 5 | Wind Palm II *(beam)* | spell | Wind Palm |  |
+| 5 | Fast Feet | passive |  |  |
+| 6 | Staff Sweep II *(melee)* | spell | Staff Sweep |  |
+| 6 | Flowing Strikes | passive |  |  |
+| 6 | Dagger Mastery | passive | Dagger Training |  |
+| 6 | Whirling Kick | modifier of Spinning Kick | Spinning Kick |  |
+| 7 | Palm Strike III *(melee)* | spell | Palm Strike II |  |
+| 7 | Spinning Kick III *(around)* | spell | Spinning Kick II |  |
+| 7 | Earth Stomp II *(around)* | spell | Earth Stomp |  |
+| 7 | Pressure Points | passive |  |  |
+| 8 | Flying Kick III *(leap)* | spell | Flying Kick II |  |
+| 8 | Rushing Fist III *(dash)* | spell | Rushing Fist II |  |
+| 8 | Calm Mind | passive |  |  |
+| 8 | Gale Palm | modifier of Wind Palm | Wind Palm |  |
+| 9 | Wind Palm III *(beam)* | spell | Wind Palm II |  |
+| 9 | Staff Sweep III *(melee)* | spell | Staff Sweep II |  |
+| 9 | Earth Stomp III *(around)* | spell | Earth Stomp II |  |
+| 9 | Killing Blow | passive |  |  |
+| 10 | Hundred Fists *(melee)* | spell |  | capstone (pick one) |
+| 10 | Thunder Kick *(leap)* | spell |  | capstone (pick one) |
 
 ### Pyromancer — Advanced
 Everything burns. Lines of fire, falling stones and flashovers. *Requires:* Mage 3, Intelligence 14. *Growth a level:* +6 health, +8 mana.
-*Paths (choose one at level 3):* **Inferno** — Wide fires and falling stones. **Cinder** — Close and fast: breath of fire and a burning stride.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Firebolt *(farhold)* | spell, free | 3 |  |
-| 1 | Flame Study (arcane) | training, free | 1 |  |
-| 1 | Kindling | passive | 3 |  |
-| 2 | Burning Line *(farhold)* | spell | 3 |  |
-| 3 | Flashover *(farhold)* | spell | 3 | Inferno |
-| 3 | Wildfire | passive | 3 | Inferno |
-| 3 | Wyrm's Breath *(farhold)* | spell | 3 | Cinder |
-| 3 | Hot Blood | passive | 3 | Cinder |
-| 4 | Twin Bolt | modifier of Firebolt | 1 |  |
-| 5 | Cinder Stride *(farhold)* | spell | 3 | Cinder |
-| 6 | Scorch *(new)* | spell | 3 |  |
-| 7 | Fallstone *(farhold)* | spell | 3 | Inferno |
-| 10 | Heart of Fire | passive | 1 | capstone (pick one) |
-| 10 | Rain of Stone | modifier of Fallstone | 1 | capstone (pick one) |
+| 1 | Flame Burst *(ground)* | spell, free |  |  |
+| 1 | Wand Training (wand) | training, free |  |  |
+| 1 | Flame Wave *(melee)* | spell |  |  |
+| 1 | Staff Training (staff) | training |  |  |
+| 1 | Dagger Training (dagger) | training |  |  |
+| 1 | Orb Training (orb) | training |  |  |
+| 2 | Fire Wall *(beam)* | spell |  |  |
+| 2 | Fire Nova *(around)* | spell |  |  |
+| 2 | Wand Mastery | passive | Wand Training |  |
+| 2 | Tome Training (tome) | training |  |  |
+| 3 | Fire Bomb *(ground)* | spell |  |  |
+| 3 | Fire Power | passive |  |  |
+| 3 | Staff Mastery | passive | Staff Training |  |
+| 3 | Burning Mind | passive |  |  |
+| 4 | Flame Burst II *(ground)* | spell | Flame Burst |  |
+| 4 | Flame Wave II *(melee)* | spell | Flame Wave |  |
+| 4 | Flame Dash *(dash)* | spell |  |  |
+| 4 | Deep Mana | passive |  |  |
+| 5 | Flame Pillar *(ground)* | spell |  |  |
+| 5 | Fire Wall II *(beam)* | spell | Fire Wall |  |
+| 5 | Fire Nova II *(around)* | spell | Fire Nova |  |
+| 5 | Big Burst | modifier of Flame Burst | Flame Burst |  |
+| 6 | Fire Bomb II *(ground)* | spell | Fire Bomb |  |
+| 6 | Flame Dash II *(dash)* | spell | Flame Dash |  |
+| 6 | Hot Blood | passive |  |  |
+| 6 | Scorching Wave | modifier of Flame Wave | Flame Wave |  |
+| 7 | Flame Burst III *(ground)* | spell | Flame Burst II |  |
+| 7 | Flame Wave III *(melee)* | spell | Flame Wave II |  |
+| 7 | Flame Pillar II *(ground)* | spell | Flame Pillar |  |
+| 7 | Wildfire | passive |  |  |
+| 8 | Fire Wall III *(beam)* | spell | Fire Wall II |  |
+| 8 | Fire Nova III *(around)* | spell | Fire Nova II |  |
+| 8 | Quick Fire | passive |  |  |
+| 8 | Cluster Bombs | modifier of Fire Bomb | Fire Bomb |  |
+| 9 | Fire Bomb III *(ground)* | spell | Fire Bomb II |  |
+| 9 | Flame Pillar III *(ground)* | spell | Flame Pillar II |  |
+| 9 | Searing Heat | passive |  |  |
+| 9 | Fire Heart | passive |  |  |
+| 10 | Inferno *(around)* | spell |  | capstone (pick one) |
+| 10 | Fire Storm *(ground)* | spell |  | capstone (pick one) |
 
 ### Stormcaller — Advanced
 Bolts that fork from foe to foe and a storm you walk inside. *Requires:* Mage 2, Shaman 2. *Growth a level:* +6 health, +8 mana.
-*Paths (choose one at level 3):* **Tempest** — The eye of the storm over a whole field. **Conduit** — Step as lightning and chain it further.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Forked Bolt *(farhold)* | spell, free | 3 |  |
-| 1 | Storm Garb (arcane, leather) | training, free | 1 |  |
-| 1 | Static Skin | passive | 3 |  |
-| 2 | Static Lash *(new)* | spell | 3 |  |
-| 3 | Eye of the Tempest *(farhold)* | spell | 3 | Tempest |
-| 3 | Squall | passive | 3 | Tempest |
-| 3 | Bolt Step *(farhold)* | spell | 3 | Conduit |
-| 3 | Conductor | passive | 3 | Conduit |
-| 5 | Long Fork | modifier of Forked Bolt | 1 | Conduit |
-| 5 | Storm Beam *(farhold)* | spell | 3 |  |
-| 6 | Thunder Ring *(farhold)* | spell | 3 |  |
-| 7 | Wide Eye | modifier of Eye of the Tempest | 1 | Tempest |
-| 10 | Living Storm | passive | 1 | capstone (pick one) |
-| 10 | Skybreaker *(new)* | spell | 3 | capstone (pick one) |
+| 1 | Chain Lightning *(beam)* | spell, free |  |  |
+| 1 | Wand Training (wand) | training, free |  |  |
+| 1 | Shock Nova *(around)* | spell |  |  |
+| 1 | Staff Training (staff) | training |  |  |
+| 1 | Leather Armour (leather) | training |  |  |
+| 1 | Dagger Training (dagger) | training |  |  |
+| 2 | Ball Lightning *(ground)* | spell |  |  |
+| 2 | Wind Blast *(melee)* | spell |  |  |
+| 2 | Wand Mastery | passive | Wand Training |  |
+| 2 | Orb Training (orb) | training |  |  |
+| 3 | Static Field *(ground)* | spell |  |  |
+| 3 | Storm Leap *(leap)* | spell |  |  |
+| 3 | Storm Power | passive |  |  |
+| 3 | Staff Mastery | passive | Staff Training |  |
+| 4 | Chain Lightning II *(beam)* | spell | Chain Lightning |  |
+| 4 | Shock Nova II *(around)* | spell | Shock Nova |  |
+| 4 | Storm Beam *(beam)* | spell |  |  |
+| 4 | Deep Mana | passive |  |  |
+| 5 | Ball Lightning II *(ground)* | spell | Ball Lightning |  |
+| 5 | Wind Blast II *(melee)* | spell | Wind Blast |  |
+| 5 | Spell Power | passive |  |  |
+| 5 | Double Chain | modifier of Chain Lightning | Chain Lightning |  |
+| 6 | Static Field II *(ground)* | spell | Static Field |  |
+| 6 | Storm Leap II *(leap)* | spell | Storm Leap |  |
+| 6 | Swift Winds | passive |  |  |
+| 6 | Overload | modifier of Shock Nova | Shock Nova |  |
+| 7 | Chain Lightning III *(beam)* | spell | Chain Lightning II |  |
+| 7 | Shock Nova III *(around)* | spell | Shock Nova II |  |
+| 7 | Storm Beam II *(beam)* | spell | Storm Beam |  |
+| 7 | Static Charge | passive |  |  |
+| 8 | Ball Lightning III *(ground)* | spell | Ball Lightning II |  |
+| 8 | Wind Blast III *(melee)* | spell | Wind Blast II |  |
+| 8 | Quick Storms | passive |  |  |
+| 8 | Double Ball | modifier of Ball Lightning | Ball Lightning |  |
+| 9 | Static Field III *(ground)* | spell | Static Field II |  |
+| 9 | Storm Beam III *(beam)* | spell | Storm Beam II |  |
+| 9 | Storm Leap III *(leap)* | spell | Storm Leap II |  |
+| 9 | High Voltage | passive |  |  |
+| 10 | Thunderstorm *(ground)* | spell |  | capstone (pick one) |
+| 10 | Eye of the Storm *(around)* | spell |  | capstone (pick one) |
 
 ### Necromancer — Advanced
 Raises the dead to fight for you, or rots the living where they stand. *Requires:* Mage 2, something found in the world. *Growth a level:* +6 health, +8 mana.
-*Paths (choose one at level 3):* **Bonecaller** — Thralls from every corpse. **Blight** — Plague clouds and burning corpses.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Marrow Lance *(farhold)* | spell, free | 3 |  |
-| 1 | Grave Robes (arcane) | training, free | 1 |  |
-| 1 | Cold Hands | passive | 3 |  |
-| 2 | Grave Draught *(farhold)* | spell | 3 |  |
-| 3 | Raise Thrall *(farhold)* | spell | 3 | Bonecaller |
-| 3 | Bone Lord | passive | 3 | Bonecaller |
-| 3 | Plague Cloud *(farhold)* | spell | 3 | Blight |
-| 3 | Rot | passive | 3 | Blight |
-| 4 | Splintered Lance | modifier of Marrow Lance | 1 |  |
-| 5 | Corpse Pyre *(farhold)* | spell | 3 | Blight |
-| 6 | Bone Armour *(new)* | spell | 3 |  |
-| 7 | March of the Buried *(farhold)* | spell | 3 | Bonecaller |
-| 10 | Deathless | passive | 1 | capstone (pick one) |
-| 10 | Grave Tide *(new)* | spell | 3 | capstone (pick one) |
+| 1 | Bone Spikes *(ground)* | spell, free |  |  |
+| 1 | Wand Training (wand) | training, free |  |  |
+| 1 | Raise Skeleton *(summon)* | spell |  |  |
+| 1 | Bone Spear *(beam)* | spell |  |  |
+| 1 | Staff Training (staff) | training |  |  |
+| 1 | Dagger Training (dagger) | training |  |  |
+| 1 | Tome Training (tome) | training |  |  |
+| 2 | Corpse Explosion *(ground)* | spell |  |  |
+| 2 | Bone Nova *(around)* | spell |  |  |
+| 2 | Wand Mastery | passive | Wand Training |  |
+| 2 | Sceptre Training (scepter) | training |  |  |
+| 3 | Plague Cloud *(ground)* | spell |  |  |
+| 3 | Grasping Dead *(ground)* | spell |  |  |
+| 3 | Dark Power | passive |  |  |
+| 3 | Staff Mastery | passive | Staff Training |  |
+| 4 | Bone Spikes II *(ground)* | spell | Bone Spikes |  |
+| 4 | Raise Skeleton II *(summon)* | spell | Raise Skeleton |  |
+| 4 | Bone Spear II *(beam)* | spell | Bone Spear |  |
+| 4 | Bone Armour *(self)* | spell |  |  |
+| 5 | Corpse Explosion II *(ground)* | spell | Corpse Explosion |  |
+| 5 | Bone Nova II *(around)* | spell | Bone Nova |  |
+| 5 | Bone Master | passive |  |  |
+| 5 | Plague Lore | passive |  |  |
+| 6 | Plague Cloud II *(ground)* | spell | Plague Cloud |  |
+| 6 | Grasping Dead II *(ground)* | spell | Grasping Dead |  |
+| 6 | Two Skeletons | modifier of Raise Skeleton | Raise Skeleton |  |
+| 6 | Chain Explosion | modifier of Corpse Explosion | Corpse Explosion |  |
+| 7 | Bone Spikes III *(ground)* | spell | Bone Spikes II |  |
+| 7 | Bone Spear III *(beam)* | spell | Bone Spear II |  |
+| 7 | Raise Skeleton III *(summon)* | spell | Raise Skeleton II |  |
+| 7 | Cold Mind | passive |  |  |
+| 8 | Corpse Explosion III *(ground)* | spell | Corpse Explosion II |  |
+| 8 | Bone Nova III *(around)* | spell | Bone Nova II |  |
+| 8 | Quick Rituals | passive |  |  |
+| 8 | Bone Burst | modifier of Bone Nova | Bone Nova |  |
+| 9 | Plague Cloud III *(ground)* | spell | Plague Cloud II |  |
+| 9 | Grasping Dead III *(ground)* | spell | Grasping Dead II |  |
+| 9 | Deep Mana | passive |  |  |
+| 9 | Cruel Blows | passive |  |  |
+| 10 | Grave Army *(self)* | spell |  | capstone (pick one) |
+| 10 | Death Wave *(around)* | spell |  | capstone (pick one) |
 
 ### Witch Hunter — Advanced
 Silver, iron nets and holy writs for the things that cast and the things that crawl out of rifts. *Requires:* Ranger 2, Cleric 1. *Growth a level:* +9 health, +4 mana.
-*Paths (choose one at level 3):* **Inquisitor** — Nets, silence and circles where no spell can be cast. **Slayer** — Brand bolts and chain hooks that drag the prey in.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Silvered Pin *(farhold)* | spell, free | 3 |  |
-| 1 | Hunter's Mail (leather, mail, bows, martial) | training, free | 1 |  |
-| 1 | Iron Will | passive | 3 |  |
-| 2 | Silver Edge *(farhold)* | spell | 3 |  |
-| 3 | Iron Net *(farhold)* | spell | 3 | Inquisitor |
-| 3 | Cold Iron | passive | 3 | Inquisitor |
-| 3 | Brand Bolt *(farhold)* | spell | 3 | Slayer |
-| 3 | Grudge | passive | 3 | Slayer |
-| 4 | Silver Volley | modifier of Silvered Pin | 1 |  |
-| 5 | Null Circle *(farhold)* | spell | 3 | Inquisitor |
-| 5 | Chain Hook *(farhold)* | spell | 3 | Slayer |
-| 6 | Writ of Guilt *(farhold)* | spell | 3 |  |
-| 10 | Rite of Purging *(farhold)* | spell | 3 | capstone (pick one) |
-| 10 | Relentless | passive | 1 | capstone (pick one) |
+| 1 | Scatter Shot *(melee)* | spell, free |  |  |
+| 1 | Crossbow Training (crossbow) | training, free |  |  |
+| 1 | Holy Arrow *(beam)* | spell |  |  |
+| 1 | Silver Slash *(melee)* | spell |  |  |
+| 1 | Bow Training (bow) | training |  |  |
+| 1 | Sword Training (sword) | training |  |  |
+| 1 | Mail Armour (mail) | training |  |  |
+| 2 | Iron Net *(ground)* | spell |  |  |
+| 2 | Chain Hook *(beam)* | spell |  |  |
+| 2 | Crossbow Mastery | passive | Crossbow Training |  |
+| 2 | Axe Training (axe) | training |  |  |
+| 2 | Leather Armour (leather) | training |  |  |
+| 3 | Holy Bomb *(ground)* | spell |  |  |
+| 3 | Bow Mastery | passive | Bow Training |  |
+| 3 | Sword Mastery | passive | Sword Training |  |
+| 3 | Holy Silver | passive |  |  |
+| 4 | Scatter Shot II *(melee)* | spell | Scatter Shot |  |
+| 4 | Holy Arrow II *(beam)* | spell | Holy Arrow |  |
+| 4 | Silver Slash II *(melee)* | spell | Silver Slash |  |
+| 4 | Silence Bomb *(ground)* | spell |  |  |
+| 5 | Combat Roll *(leap)* | spell |  |  |
+| 5 | Iron Net II *(ground)* | spell | Iron Net |  |
+| 5 | Chain Hook II *(beam)* | spell | Chain Hook |  |
+| 5 | Sharpshooter | passive |  |  |
+| 6 | Holy Bomb II *(ground)* | spell | Holy Bomb |  |
+| 6 | Spell Breaker | passive |  |  |
+| 6 | Iron Will | passive |  |  |
+| 6 | Wide Scatter | modifier of Scatter Shot | Scatter Shot |  |
+| 7 | Scatter Shot III *(melee)* | spell | Scatter Shot II |  |
+| 7 | Holy Arrow III *(beam)* | spell | Holy Arrow II |  |
+| 7 | Silver Slash III *(melee)* | spell | Silver Slash II |  |
+| 7 | Keen Eye | passive |  |  |
+| 8 | Silence Bomb II *(ground)* | spell | Silence Bomb |  |
+| 8 | Iron Net III *(ground)* | spell | Iron Net II |  |
+| 8 | Quick Reload | passive |  |  |
+| 8 | Barbed Hook | modifier of Chain Hook | Chain Hook |  |
+| 9 | Holy Bomb III *(ground)* | spell | Holy Bomb II |  |
+| 9 | Chain Hook III *(beam)* | spell | Chain Hook II |  |
+| 9 | Deadly Bolts | passive |  |  |
+| 9 | Blast Bomb | modifier of Holy Bomb | Holy Bomb |  |
+| 10 | Purge *(around)* | spell |  | capstone (pick one) |
+| 10 | Bolt Storm *(ground)* | spell |  | capstone (pick one) |
 
 ### Duelist — Specialty
 A specialty class: flourishes, lunges and a showman's flurry for a light blade. *Requires:* Warrior 2, Rogue 2, Dexterity 13. *Growth a level:* +9 health, +3 mana. Fights with two weapons.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Flourish *(farhold)* | spell, free | 3 |  |
-| 1 | Fencing School (leather, martial) | training, free | 1 |  |
-| 1 | Footwork | passive | 3 |  |
-| 2 | Lunge *(farhold)* | spell | 3 |  |
-| 3 | Pinning Thrust *(farhold)* | spell | 3 |  |
-| 3 | Double Flourish | modifier of Flourish | 1 |  |
-| 4 | Master's Flurry *(farhold)* | spell | 3 |  |
-| 5 | Grand Duellist | passive | 1 | capstone (pick one) |
-| 5 | Matador's Turn *(farhold)* | spell | 3 | capstone (pick one) |
+| 1 | Flurry *(melee)* | spell, free |  |  |
+| 1 | Lunge *(dash)* | spell |  |  |
+| 1 | Sword Training (sword) | training |  |  |
+| 1 | Dagger Training (dagger) | training |  |  |
+| 2 | Blade Dance *(around)* | spell |  |  |
+| 2 | Sword Mastery | passive | Sword Training |  |
+| 2 | Dagger Mastery | passive | Dagger Training |  |
+| 2 | Footwork | passive |  |  |
+| 3 | Disarming Strike *(melee)* | spell |  |  |
+| 3 | Flurry II *(melee)* | spell | Flurry |  |
+| 3 | Lunge II *(dash)* | spell | Lunge |  |
+| 3 | Precision | passive |  |  |
+| 4 | Blade Dance II *(around)* | spell | Blade Dance |  |
+| 4 | Disarming Strike II *(melee)* | spell | Disarming Strike |  |
+| 4 | Showstopper | passive |  |  |
+| 4 | Long Lunge | modifier of Lunge | Lunge |  |
+| 5 | Grand Flourish *(around)* | spell |  | capstone (pick one) |
+| 5 | Deadly Lunge *(dash)* | spell |  | capstone (pick one) |
+| 5 | Flurry III *(melee)* | spell | Flurry II |  |
 
 ### Shadowdancer — Specialty
 A specialty class: steps through shadow and leaves shades of itself behind. *Requires:* Rogue 4, Sneak 30. *Growth a level:* +7 health, +5 mana. Fights with two weapons.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Shade Cut *(farhold)* | spell, free | 3 |  |
-| 1 | Umbral Skin | passive | 3 |  |
-| 2 | Umbral Step *(farhold)* | spell | 3 |  |
-| 3 | Cutting Waltz *(farhold)* | spell | 3 |  |
-| 3 | Deeper Cut | modifier of Shade Cut | 1 |  |
-| 4 | Assassinate *(farhold)* | spell | 3 |  |
-| 5 | Host of Shades *(farhold)* | spell | 3 | capstone (pick one) |
-| 5 | Night Incarnate | passive | 1 | capstone (pick one) |
+| 1 | Shadow Slash *(melee)* | spell, free |  |  |
+| 1 | Shadow Leap *(leap)* | spell |  |  |
+| 1 | Dagger Training (dagger) | training |  |  |
+| 1 | Sword Training (sword) | training |  |  |
+| 2 | Darkness *(around)* | spell |  |  |
+| 2 | Shadow Dash *(dash)* | spell |  |  |
+| 2 | Dagger Mastery | passive | Dagger Training |  |
+| 2 | Sword Mastery | passive | Sword Training |  |
+| 3 | Shadow Clones *(self)* | spell |  |  |
+| 3 | Shadow Slash II *(melee)* | spell | Shadow Slash |  |
+| 3 | Shadow Leap II *(leap)* | spell | Shadow Leap |  |
+| 3 | Dark Arts | passive |  |  |
+| 4 | Darkness II *(around)* | spell | Darkness |  |
+| 4 | Shadow Dash II *(dash)* | spell | Shadow Dash |  |
+| 4 | Night Eyes | passive |  |  |
+| 4 | More Clones | modifier of Shadow Clones | Shadow Clones |  |
+| 5 | Shadow Army *(around)* | spell |  | capstone (pick one) |
+| 5 | Night Strike *(leap)* | spell |  | capstone (pick one) |
+| 5 | Shadow Slash III *(melee)* | spell | Shadow Slash II |  |
 
 ### Spellfletcher — Specialty
 A specialty class: every arrow carries a spell — frost, flame or raw force. *Requires:* Ranger 3, Mage 2, Dexterity 14. *Growth a level:* +7 health, +5 mana.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Charged Arrow *(new)* | spell, free | 3 |  |
-| 1 | Fletcher's Eye | passive | 3 |  |
-| 2 | Frost Fletching *(new)* | spell | 3 |  |
-| 3 | Seeking Volley *(new)* | spell | 3 |  |
-| 3 | Split Charge | modifier of Charged Arrow | 1 |  |
-| 4 | Skyshard Arrow *(new)* | spell | 3 |  |
-| 5 | Arrow of Ruin *(new)* | spell | 3 | capstone (pick one) |
-| 5 | Living Bow | passive | 1 | capstone (pick one) |
+| 1 | Frost Arrow *(ground)* | spell, free |  |  |
+| 1 | Flame Arrow *(beam)* | spell |  |  |
+| 1 | Bow Training (bow) | training |  |  |
+| 1 | Crossbow Training (crossbow) | training |  |  |
+| 2 | Force Shot *(melee)* | spell |  |  |
+| 2 | Bow Mastery | passive | Bow Training |  |
+| 2 | Crossbow Mastery | passive | Crossbow Training |  |
+| 2 | Spell Arrows | passive |  |  |
+| 3 | Storm Volley *(ground)* | spell |  |  |
+| 3 | Frost Arrow II *(ground)* | spell | Frost Arrow |  |
+| 3 | Flame Arrow II *(beam)* | spell | Flame Arrow |  |
+| 3 | Frost Tips | passive |  |  |
+| 4 | Force Shot II *(melee)* | spell | Force Shot |  |
+| 4 | Storm Volley II *(ground)* | spell | Storm Volley |  |
+| 4 | Sharp Eye | passive |  |  |
+| 4 | Freezing Arrow | modifier of Frost Arrow | Frost Arrow |  |
+| 5 | Comet Arrow *(ground)* | spell |  | capstone (pick one) |
+| 5 | Ice Storm *(ground)* | spell |  | capstone (pick one) |
+| 5 | Frost Arrow III *(ground)* | spell | Frost Arrow II |  |
 
 ### Bladesworn — Specialty
 A specialty class: years with one weapon — its every swing perfected. *Requires:* Warrior 4, the Weapon Focus talent. *Growth a level:* +10 health, +2 mana. Fights with two weapons.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Measured Cut *(new)* | spell, free | 3 |  |
-| 1 | Weapon Mastery | passive | 3 |  |
-| 2 | Riposte Stance *(new)* | spell | 3 |  |
-| 3 | Perfect Form | passive | 2 |  |
-| 3 | Sweeping Guard *(farhold)* | spell | 3 |  |
-| 4 | Through the Guard | modifier of Measured Cut | 1 |  |
-| 5 | Hundred Cuts *(new)* | spell | 3 | capstone (pick one) |
-| 5 | One True Blade | passive | 1 | capstone (pick one) |
+| 1 | Perfect Cut *(melee)* | spell, free |  |  |
+| 1 | Sword Training (sword) | training |  |  |
+| 1 | Axe Training (axe) | training |  |  |
+| 1 | Mace Training (mace) | training |  |  |
+| 1 | Two-Handed Training (twohand) | training |  |  |
+| 1 | Spear Training (spear) | training |  |  |
+| 2 | Sweeping Blow *(around)* | spell |  |  |
+| 2 | Rising Slash *(beam)* | spell |  |  |
+| 2 | Sword Mastery | passive | Sword Training |  |
+| 2 | Axe Mastery | passive | Axe Training |  |
+| 2 | Mace Mastery | passive | Mace Training |  |
+| 2 | Two-Handed Mastery | passive | Two-Handed Training |  |
+| 2 | Spear Mastery | passive | Spear Training |  |
+| 3 | Hundred Cuts *(melee)* | spell |  |  |
+| 3 | Perfect Cut II *(melee)* | spell | Perfect Cut |  |
+| 3 | Sweeping Blow II *(around)* | spell | Sweeping Blow |  |
+| 3 | Weapon Expert | passive |  |  |
+| 4 | Battle Stance *(self)* | spell |  |  |
+| 4 | Rising Slash II *(beam)* | spell | Rising Slash |  |
+| 4 | Hundred Cuts II *(melee)* | spell | Hundred Cuts |  |
+| 4 | Perfect Aim | passive |  |  |
+| 4 | Heavy Hands | passive |  |  |
+| 5 | Final Blow *(leap)* | spell |  | capstone (pick one) |
+| 5 | Whirling Steel *(around)* | spell |  | capstone (pick one) |
+| 5 | Perfect Cut III *(melee)* | spell | Perfect Cut II |  |
 
 ### Wrathborn — Specialty
 A specialty class: fury that shrugs off wounds and swings wider the more it bleeds. *Requires:* Warrior 3, Constitution 14, Strength 14. *Growth a level:* +13 health, +1 mana. Fights with two weapons.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Red Haze *(new)* | spell, free | 3 |  |
-| 1 | Thick Skull | passive | 3 |  |
-| 2 | Savage Leap *(new)* | spell | 3 |  |
-| 3 | Blood for Blood | passive | 2 |  |
-| 3 | Rampage *(new)* | spell | 3 |  |
-| 4 | Longer Haze | modifier of Red Haze | 1 |  |
-| 5 | Unstoppable | passive | 1 | capstone (pick one) |
-| 5 | World Breaker *(new)* | spell | 3 | capstone (pick one) |
+| 1 | Wild Swing *(melee)* | spell, free |  |  |
+| 1 | Savage Leap *(leap)* | spell |  |  |
+| 1 | Axe Training (axe) | training |  |  |
+| 1 | Two-Handed Training (twohand) | training |  |  |
+| 1 | Mace Training (mace) | training |  |  |
+| 2 | Rampage *(around)* | spell |  |  |
+| 2 | Bull Rush *(dash)* | spell |  |  |
+| 2 | Axe Mastery | passive | Axe Training |  |
+| 2 | Two-Handed Mastery | passive | Two-Handed Training |  |
+| 2 | Mace Mastery | passive | Mace Training |  |
+| 3 | Blood Frenzy *(self)* | spell |  |  |
+| 3 | Wild Swing II *(melee)* | spell | Wild Swing |  |
+| 3 | Savage Leap II *(leap)* | spell | Savage Leap |  |
+| 3 | Thick Skull | passive |  |  |
+| 4 | Rampage II *(around)* | spell | Rampage |  |
+| 4 | Bull Rush II *(dash)* | spell | Bull Rush |  |
+| 4 | Battle Roar *(around)* | spell |  |  |
+| 4 | Blood Thirst | passive |  |  |
+| 4 | Brutal | passive |  |  |
+| 5 | Earth Splitter *(beam)* | spell |  | capstone (pick one) |
+| 5 | Blood Storm *(around)* | spell |  | capstone (pick one) |
+| 5 | Wild Swing III *(melee)* | spell | Wild Swing II |  |
 
 ### Gravecutter — Specialty
 A specialty class: contracts, marks and the one cut that ends it. Found through a contract in the wilds. *Requires:* Rogue 3, Sneak 25, something found in the world. *Growth a level:* +7 health, +4 mana. Fights with two weapons.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Death Mark *(new)* | spell, free | 3 |  |
-| 1 | Patient Killer | passive | 3 |  |
-| 2 | Venom Edge *(new)* | spell | 3 |  |
-| 3 | Unseen | passive | 2 |  |
-| 3 | Assassinate *(farhold)* | spell | 3 |  |
-| 4 | Marked for Death | modifier of Death Mark | 1 |  |
-| 5 | Contract Closed | passive | 1 | capstone (pick one) |
-| 5 | Final Word *(new)* | spell | 3 | capstone (pick one) |
+| 1 | Venom Slash *(melee)* | spell, free |  |  |
+| 1 | Death Mark *(ground)* | spell |  |  |
+| 1 | Dagger Training (dagger) | training |  |  |
+| 1 | Sword Training (sword) | training |  |  |
+| 2 | Finishing Cut *(melee)* | spell |  |  |
+| 2 | Silent Leap *(leap)* | spell |  |  |
+| 2 | Dagger Mastery | passive | Dagger Training |  |
+| 2 | Sword Mastery | passive | Sword Training |  |
+| 3 | Poison Bomb *(ground)* | spell |  |  |
+| 3 | Venom Slash II *(melee)* | spell | Venom Slash |  |
+| 3 | Death Mark II *(ground)* | spell | Death Mark |  |
+| 3 | Venom Lore | passive |  |  |
+| 4 | Finishing Cut II *(melee)* | spell | Finishing Cut |  |
+| 4 | Silent Leap II *(leap)* | spell | Silent Leap |  |
+| 4 | Poison Bomb II *(ground)* | spell | Poison Bomb |  |
+| 4 | Cold Killer | passive |  |  |
+| 4 | Deep Wounds | passive |  |  |
+| 5 | Death Sentence *(ground)* | spell |  | capstone (pick one) |
+| 5 | Venom Storm *(around)* | spell |  | capstone (pick one) |
+| 5 | Venom Slash III *(melee)* | spell | Venom Slash II |  |
 
 ### Dragon Knight — Advanced (later round)
 Fire-tempered steel, scales and a wyrm's breath. (Opens after the level cap rises.) *Requires:* Warrior 5, Pyromancer 3, Strength 15, character level 12. *Growth a level:* +11 health, +4 mana.
-*Paths (choose one at level 3):* **Scaled** — Scales and temper: the dragon's hide. **Wyrmfire** — Rend and dive in fire.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Scale Rend *(farhold)* | spell, free | 3 |  |
-| 1 | Dragon Plate (mail, plate, martial, shield) | training, free | 1 |  |
-| 1 | Wyrm Blood | passive | 3 |  |
-| 2 | Dragonscale *(farhold)* | spell | 3 |  |
-| 3 | Scale Hide | passive | 3 | Scaled |
-| 3 | Wyrmfall *(farhold)* | spell | 3 | Wyrmfire |
-| 3 | Fire Temper | passive | 3 | Wyrmfire |
-| 4 | Rending Fire | modifier of Scale Rend | 1 |  |
-| 5 | Wyrm's Breath *(farhold)* | spell | 3 |  |
-| 10 | Wyrm Ascendant | passive | 1 | capstone (pick one) |
-| 10 | Elder Scales | passive | 1 | capstone (pick one) |
+| 1 | Scale Rend *(melee)* | spell, free |  |  |
+| 1 | Mail Armour (mail) | training, free |  |  |
+| 1 | Plate Armour (plate) | training, free |  |  |
+| 1 | Sword Training (sword) | training, free |  |  |
+| 1 | Axe Training (axe) | training, free |  |  |
+| 1 | Shield Training (shield) | training, free |  |  |
+| 1 | Wyrm Blood | passive |  |  |
+| 2 | Dragonscale *(self)* | spell |  |  |
+| 3 | Scale Hide | passive |  |  |
+| 3 | Wyrmfall *(dash)* | spell |  |  |
+| 3 | Fire Temper | passive |  |  |
+| 4 | Rending Fire | modifier of Scale Rend | Scale Rend |  |
+| 5 | Wyrm's Breath *(melee)* | spell |  |  |
+| 10 | Wyrm Ascendant | passive |  | capstone (pick one) |
+| 10 | Elder Scales | passive |  | capstone (pick one) |
 
 ### Chronomancer — Advanced (later round)
 Hurries friends, slows foes, and stops the clock. (Opens after the level cap rises.) *Requires:* Mage 5, Enchanting 50, something found in the world. *Growth a level:* +5 health, +9 mana.
-*Paths (choose one at level 3):* **Hastener** — Quicken the party. **Stopper** — Stop enemies in time.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Second Hand *(farhold)* | spell, free | 3 |  |
-| 1 | Time Robes (arcane) | training, free | 1 |  |
-| 1 | Borrowed Time | passive | 3 |  |
-| 3 | Quicken *(farhold)* | spell | 3 | Hastener |
-| 3 | Stasis Lock *(farhold)* | spell | 3 | Stopper |
-| 4 | Tick Tock | modifier of Second Hand | 1 |  |
-| 5 | Entropy Field *(farhold)* | spell | 3 |  |
-| 10 | Master of Hours | passive | 1 | capstone (pick one) |
-| 10 | Endless Moment | passive | 1 | capstone (pick one) |
+| 1 | Second Hand *(bolt)* | spell, free |  |  |
+| 1 | Wand Training (wand) | training, free |  |  |
+| 1 | Borrowed Time | passive |  |  |
+| 3 | Quicken *(self)* | spell |  |  |
+| 3 | Stasis Lock *(bolt)* | spell |  |  |
+| 4 | Tick Tock | modifier of Second Hand | Second Hand |  |
+| 5 | Entropy Field *(ground)* | spell |  |  |
+| 10 | Master of Hours | passive |  | capstone (pick one) |
+| 10 | Endless Moment | passive |  | capstone (pick one) |
 
 ### Oracle — Advanced (later round)
 Sees the blow before it lands. (Opens after the level cap rises.) *Requires:* Cleric 5, Wisdom 16, something found in the world. *Growth a level:* +7 health, +8 mana.
-*Paths (choose one at level 3):* **Foreseer** — Wards before the hit. **Doom** — Prophecies that fall on the enemy.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Omen Bolt *(farhold)* | spell, free | 3 |  |
-| 1 | Seer Robes (arcane, leather) | training, free | 1 |  |
-| 1 | Second Sight | passive | 3 |  |
-| 3 | Kind Omen *(thousandvale)* | spell | 3 | Foreseer |
-| 3 | Prophecy *(farhold)* | spell | 3 | Doom |
-| 4 | Fated Bolt | modifier of Omen Bolt | 1 |  |
-| 10 | All-Seeing | passive | 1 | capstone (pick one) |
-| 10 | Last Word | passive | 1 | capstone (pick one) |
+| 1 | Omen Bolt *(bolt)* | spell, free |  |  |
+| 1 | Wand Training (wand) | training, free |  |  |
+| 1 | Leather Armour (leather) | training, free |  |  |
+| 1 | Second Sight | passive |  |  |
+| 3 | Kind Omen *(self)* | spell |  |  |
+| 3 | Prophecy *(ground)* | spell |  |  |
+| 4 | Fated Bolt | modifier of Omen Bolt | Omen Bolt |  |
+| 10 | All-Seeing | passive |  | capstone (pick one) |
+| 10 | Last Word | passive |  | capstone (pick one) |
 
 ### Tinker — Advanced (later round)
 Sentries, grenades and lucky finds from every pocket. (Opens with the Smithing bench.) *Requires:* Rogue 3, Smithing 40. *Growth a level:* +8 health, +4 mana.
-*Paths (choose one at level 3):* **Engineer** — Sentries and springs. **Scrounger** — Junk, bombs and luck.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Clockwork Bolt *(farhold)* | spell, free | 3 |  |
-| 1 | Work Leathers (leather, bows, martial) | training, free | 1 |  |
-| 1 | Handy | passive | 3 |  |
-| 2 | Flask Grenade *(farhold)* | spell | 3 |  |
-| 3 | Deploy Sentry *(farhold)* | spell | 3 | Engineer |
-| 3 | Junk Toss *(farhold)* | spell | 3 | Scrounger |
-| 4 | Big Flask | modifier of Flask Grenade | 1 |  |
-| 10 | Grand Inventor | passive | 1 | capstone (pick one) |
-| 10 | Pockets Full | passive | 1 | capstone (pick one) |
+| 1 | Clockwork Bolt *(bolt)* | spell, free |  |  |
+| 1 | Leather Armour (leather) | training, free |  |  |
+| 1 | Bow Training (bow) | training, free |  |  |
+| 1 | Sword Training (sword) | training, free |  |  |
+| 1 | Axe Training (axe) | training, free |  |  |
+| 1 | Handy | passive |  |  |
+| 2 | Flask Grenade *(ground)* | spell |  |  |
+| 3 | Deploy Sentry *(self)* | spell |  |  |
+| 3 | Junk Toss *(bolt)* | spell |  |  |
+| 4 | Big Flask | modifier of Flask Grenade | Flask Grenade |  |
+| 10 | Grand Inventor | passive |  | capstone (pick one) |
+| 10 | Pockets Full | passive |  | capstone (pick one) |
 
 ### Starcaller — Advanced (later round)
 Star darts, falling stars and a blade of starlight. (Opens after the level cap rises.) *Requires:* Mage 5, something found in the world, character level 14. *Growth a level:* +6 health, +8 mana.
-*Paths (choose one at level 3):* **Skyward** — Stars that fall where you point. **Starblade** — A blade of starlight up close.
 
-| Lv | Node | Kind | Ranks | Path / choice |
+| Lv | Node | Kind | Needs | Choice |
 |---|---|---|---|---|
-| 1 | Star Dart *(thousandvale)* | spell, free | 3 |  |
-| 1 | Star Robes (arcane, martial) | training, free | 1 |  |
-| 1 | Starlit | passive | 3 |  |
-| 3 | Called Star *(thousandvale)* | spell | 3 | Skyward |
-| 3 | Starcut *(thousandvale)* | spell | 3 | Starblade |
-| 4 | Bright Dart | modifier of Star Dart | 1 |  |
-| 5 | Comet Rush *(thousandvale)* | spell | 3 |  |
-| 10 | Heaven's Herald | passive | 1 | capstone (pick one) |
-| 10 | Starforged | passive | 1 | capstone (pick one) |
+| 1 | Star Dart *(bolt)* | spell, free |  |  |
+| 1 | Wand Training (wand) | training, free |  |  |
+| 1 | Sword Training (sword) | training, free |  |  |
+| 1 | Axe Training (axe) | training, free |  |  |
+| 1 | Starlit | passive |  |  |
+| 3 | Called Star *(ground)* | spell |  |  |
+| 3 | Starcut *(melee)* | spell |  |  |
+| 4 | Bright Dart | modifier of Star Dart | Star Dart |  |
+| 5 | Comet Rush *(dash)* | spell |  |  |
+| 10 | Heaven's Herald | passive |  | capstone (pick one) |
+| 10 | Starforged | passive |  | capstone (pick one) |
 
 <!-- /trees -->

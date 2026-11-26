@@ -1,6 +1,7 @@
 // Character select (its own screen — lessons rule 13): my saved characters as cards, the selected one standing on a
 // live 3D stage in their own look and gear. Play leads to the world list; New character to the creator; Retire asks
 // first (shared/dialog.js). With no characters yet the screen invites you straight into the creator.
+import { focusQuiet } from '../../../../../shared/tooltip.js';
 import { createPreview, summaryItems } from './creator.js';
 import { esc, ask } from '../ui/kit.js';
 import { glyph, uiIcon } from '../ui/icons.js';
@@ -76,7 +77,7 @@ export async function show(app, opts = {}) {
       st.msg = '';
     } catch (e) { st.list = []; st.msg = `${e.message || 'Could not load your heroes.'} The game keeps trying.`; }
     st.loading = false; draw();
-    setTimeout(() => (root.querySelector('.scr-chars-card[aria-selected="true"]') || root.querySelector('[data-primary]'))?.focus({ preventScroll: true }), 30);
+    setTimeout(() => focusQuiet(root.querySelector('.scr-chars-card[aria-selected="true"]') || root.querySelector('[data-primary]')), 30);
   }
 
   root.addEventListener('click', async e => {

@@ -182,7 +182,13 @@ export function createView(canvas, { quality = 'medium' } = {}) {
         g.uGreen.value = L.lookGreenCalm; g.uSat.value = L.lookSaturation; g.uCon.value = L.lookContrast; g.uLift.value = L.lookLift; g.uVig.value = L.lookVignette;
       }
     },
-    render() { clock += 1 / 60; skyU.time.value = clock; ATMOS.tick(clock); view.applyLook(view.tuning); if (post) { post.sun(sunDir); post.render(); } else renderer.render(scene, camera); },
+    shakeOffset: null,                                // the spell kit's camera shake (play.js sets it; zero when Settings → Camera shake is off)
+    render() {
+      clock += 1 / 60; skyU.time.value = clock; ATMOS.tick(clock); view.applyLook(view.tuning);
+      const sh = view.shakeOffset; if (sh) camera.position.addScaledVector(sh, 1.4);
+      if (post) { post.sun(sunDir); post.render(); } else renderer.render(scene, camera);
+      if (sh) camera.position.addScaledVector(sh, -1.4);
+    },
   };
   if (ENV_OFF) ATMOS.set({ cloud: { strength: 0 }, mist: { density: 0 } });
   addEventListener('resize', () => view.resize());

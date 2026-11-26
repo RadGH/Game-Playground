@@ -4,6 +4,7 @@
 //   heroScale(placements, rank, heroes)        → { hp, dmg } from placements.json `encounters.heroScale`
 //   spawnCampFor(world, placements, campId, { heroes, flags })  spawnCamp + group-size scaling + story weakening
 //   spawnZone(world, zone, { heroes, rng })    one roam/wildlife zone's packs at the zone's own level band
+//   packSize(rules, rosterRow, rng)            one pack's head count (fighters mostly 1, combat.json packOdds)
 //   campCentre(rules, campId)                  [x, z]
 //
 // Why the scaling (Guessed, world builder 2026-11-23, owner may overrule): the rules core tunes camp bosses for
@@ -44,6 +45,21 @@ export function spawnCampFor(world, placements, campId, { heroes = 1, flags = []
 
 export const campCentre = (rules, campId) => campRow(rules, campId)?.at || null;
 
+/** How many in one pack: a fighting monster rolls mostly 1, some 2, rarely 3 (combat.json `packOdds`, owner 2026-11-26:
+ *  "every enemy I have seen has been in a pack of 5 or more … I can barely fight 1v1"); never more than 3. Peaceful
+ *  herds (deer, sheep, horses) roll evenly inside their `pack` range. */
+export function packSize(rules, pick, rng) {
+  const [lo, hi] = pick.pack;
+  const def = rules.data.monsters?.monsters?.[pick.id];
+  const odds = rules.data.combat?.packOdds;
+  if ((def?.temper || 'hostile') !== 'hostile' || !Array.isArray(odds)) return lo + Math.floor(rng() * (hi - lo + 1));
+  const top = Math.min(hi, lo + odds.length - 1, 3);
+  const w = odds.slice(0, top - lo + 1), total = w.reduce((a, b) => a + b, 0);
+  let r = rng() * total;
+  for (let k = 0; k < w.length; k++) { r -= w[k]; if (r <= 0) return lo + k; }
+  return top;
+}
+
 /** One roam zone: `packs` picks from the zone roster, each at a level inside the zone's band, spread in the circle. */
 export function spawnZone(world, zone, { rng = world.rng, packs = zone.packs || 1 } = {}) {
   const out = [];
@@ -51,12 +67,14 @@ export function spawnZone(world, zone, { rng = world.rng, packs = zone.packs || 
   for (let p = 0; p < packs; p++) {
     let roll = rng() * total, pick = zone.roster[0];
     for (const r of zone.roster) { roll -= r.weight; if (roll <= 0) { pick = r; break; } }
-    const n = pick.pack[0] + Math.floor(rng() * (pick.pack[1] - pick.pack[0] + 1));
+    const n = packSize(world.rules, pick, rng);
     const level = zone.levels[0] + Math.floor(rng() * (zone.levels[1] - zone.levels[0] + 1));
     const spot = zone.spots?.length ? zone.spots[p % zone.spots.length] : zone.at;
     for (let i = 0; i < n; i++) {
       const at = [spot[0] + (i % 2) * 2, spot[1] + Math.floor(i / 2) * 2];
       const u = spawnMonster(world, pick.id, level, at, { home: at });
+      // a zone's `notice` caps how far its fighters notice a hero (Farhold rows bring up to 32 m — a whole zone came at once)
+      if (u && zone.notice && u.aggroRange > zone.notice) u.aggroRange = zone.notice;
       if (u) { u.zone = zone.id; out.push(u); }
     }
   }

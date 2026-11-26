@@ -42,6 +42,23 @@ const LINE = {
   door: '<path d="M6 20V5a1 1 0 0 1 1-1h8v16M4 20h16M12 12v.5"/>',
   dodge: '<path d="M4 17c5 0 7-9 13-9M14 5l3 3-3 3M4 12.5h3.5M4 8.5h2"/>',
   hand: '<path d="M8 13V6.5a1.5 1.5 0 0 1 3 0V11M11 10V5a1.5 1.5 0 0 1 3 0v6M14 10.5V7a1.5 1.5 0 0 1 3 0v6c0 4-2.5 7-6 7-3 0-4.6-1.8-6-4.6L3.5 12a1.4 1.4 0 0 1 2.4-1.4L8 13"/>',
+  // one glyph per training kind (owner 2026-11-26: each weapon and armour kind is its own tree node)
+  axe: '<path d="M6 20L16 7M13 4c3 0 6 2.5 6 6-2.2 0-4.5-.6-6.3-2.4"/><path d="M13 4c-1 1.5-1.2 3-.3 3.6"/>',
+  mace: '<path d="M6 20l7-7"/><circle cx="15.5" cy="8.5" r="3.5"/><path d="M15.5 3.5v1.5M20.5 8.5H19M18.9 5.1l-1 1M12.1 5.1l1 1M18.9 11.9l-1-1"/>',
+  dagger: '<path d="M16 4l-1 7-4 4-2-2 4-4zM9 13l-3 3M7 17l-2 2M6.5 14.5l3 3"/>',
+  spear: '<path d="M5 19L16 8M16 8l1-4 3 3-4 1z"/>',
+  staff: '<path d="M7 20L16 7"/><circle cx="17" cy="5.5" r="2.2"/>',
+  twohand: '<path d="M17 3.5h3.5V7L9 18.5 5.5 15zM4 16l4 4M3.5 20.5l1.5-1.5M8.5 12.5l3 3"/>',
+  bow: '<path d="M7 4c7 2 10 8 9 16M7 4v16"/><path d="M4 12h13M15 10l2 2-2 2"/>',
+  crossbow: '<path d="M4 9c4-3 12-3 16 0M12 6v14M9 17h6M4 9l8 5 8-5"/>',
+  wand: '<path d="M5 19L15 9"/><path d="M17 4l.8 2.2L20 7l-2.2.8L17 10l-.8-2.2L14 7l2.2-.8z"/>',
+  scepter: '<path d="M7 20l8-8"/><path d="M14 6l2-2 2 2 2 2-2 2-2 2-2-2-2-2z"/>',
+  orb: '<circle cx="12" cy="11" r="6"/><path d="M9 9a3 3 0 0 1 3-2M8 20h8M10 17l-1 3M14 17l1 3"/>',
+  tome: '<path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H18v14H6.5A1.5 1.5 0 0 0 5 19.5zM5 19.5A1.5 1.5 0 0 0 6.5 21H18M9 8h6M9 11h4"/>',
+  leather: '<path d="M8 4l4 2 4-2 3 3-2 3v10H7V10L5 7z"/><path d="M10 12h4M10 15h4"/>',
+  mail: '<path d="M8 4l4 2 4-2 3 3-2 3v10H7V10L5 7z"/><path d="M9 10h6M9 13h6M9 16h6M10.5 10v9M13.5 10v9"/>',
+  plate: '<path d="M8 4l4 2 4-2 3 3-2 3v10H7V10L5 7z"/><path d="M12 6v14M7 12c3 1.5 7 1.5 10 0"/>',
+  dualWield: '<path d="M4 4l9 9M20 4l-9 9M6 16l3-3M18 16l-3-3M4 20l3-3M20 20l-3-3"/>',
 };
 
 /** A small line glyph (24 viewBox, currentColor). */

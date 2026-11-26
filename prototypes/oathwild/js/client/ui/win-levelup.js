@@ -1,6 +1,6 @@
 // LEVEL UP (owner: "every level up you pick a class"). Step 1: choose the class to put the level into — any class you
 // already have, a new base class, or an advanced / specialty class whose requirements you meet (the ones you don't
-// say what is missing on their card). Step 2: that class's path (when this level reaches it), its points on its tree,
+// say what is missing on their card). Step 2: its points on its tree,
 // and the attribute point every even level gives, with the result previewed (health, mana, stamina, new spells)
 // before Confirm. Look first, then spend (2026-11-25, #128): picking a node opens its full card under it with a
 // separate "Spend a point"; picking an attribute shows what it gives. The preview runs the rules' own levelUp on a copy of the character, so what you see is what you get.
@@ -35,7 +35,7 @@ export function open(app) {
 /** Run the rules' levelUp on a copy: { ok, why, char (after), gained }. */
 function preview(app, sel) {
   const c = structuredClone(app.me.char);
-  const r = levelUp(app.rules, c, { cls: sel.cls, path: sel.path || null, spend: sel.spend || [], attr: sel.attr || null, flags: app.me.flags || [] });
+  const r = levelUp(app.rules, c, { cls: sel.cls, spend: sel.spend || [], attr: sel.attr || null, flags: app.me.flags || [] });
   return { ...r, char: c };
 }
 
@@ -74,29 +74,27 @@ function step2(app, c, w) {
   const base = preview(app, { cls: sel.cls });
   if (!base.ok) return `<p class="cls-why">${esc(base.why)}</p>`;
   const R = classRules(rules);
-  const needPath = base.gained.pathNow && d.paths;
   const full = preview(app, sel);
   const after = full.ok ? full.char : base.char;
-  // the spends so far, on top of the level (and the path) — so "can I buy the next one" reads that state
-  const pathed = preview(app, { cls: sel.cls, path: sel.path, spend: sel.spend });
+  // the spends so far, on top of the level — so "can I buy the next one" reads that state
+  const pathed = preview(app, { cls: sel.cls, spend: sel.spend });
   const now = pathed.ok ? pathed.char : base.char;
   const left = pointsLeft(rules, now, sel.cls);
   const lvl = now.classLevels[sel.cls];
   const sb = sheetOf(rules, c), sa = sheetOf(rules, after);
   const newSpells = Object.keys(spellSources(rules, after)).filter(id => !spellSources(rules, c)[id]);
   const delta = (label, a, b) => (b !== a ? `<div class="lu-delta"><span>${esc(label)}</span><b>${hp(a)} → ${hp(b)}</b><em class="${b > a ? 'ow-good' : 'ow-bad'}">${sign(b - a, { decimals: 0 })}</em></div>` : '');
-  const paths = needPath ? `<section class="ow-section"><h3>Choose your ${esc(d.name)} path</h3><div class="lu-paths">${Object.entries(d.paths).map(([id, p]) => `<button type="button" class="lu-path ${sel.path === id ? 'is-sel' : ''}" data-path="${esc(id)}"><b>${esc(p.name)}</b><small>${esc(p.blurb || '')}</small></button>`).join('')}</div></section>` : '';
   // READ BEFORE YOU SPEND (owner 2026-11-25, live report #128: "cannot click skills when leveling up so I have no idea
   // what they do"): a tap / click / the pad's A on a node only picks it; its full card (the one tooltip card,
   // describe.js describeNode on the character as it would be) opens right under it with "Spend a point" — the same
   // look-then-commit the shop uses. Nothing is spent by picking.
   const look = w.data.look?.cls === sel.cls ? w.data.look.id : null;
-  const nodes = d.nodes.filter(n => n.level <= lvl && (!n.path || (now.paths?.[sel.cls] || sel.path) === n.path)).map(n => {
+  const nodes = d.nodes.filter(n => n.level <= lvl).map(n => {
     const have = now.nodes?.[nodeKey(sel.cls, n.id)] || 0, mx = nodeMaxRank(rules, n);
     const added = (sel.spend || []).filter(x => x === n.id).length;
     const why = have < mx ? nodeRefusal(rules, now, sel.cls, n.id) : null;
     const row = `<button type="button" class="lu-node ${added ? 'is-added' : ''} ${why && !added ? 'is-locked' : ''} ${look === n.id ? 'is-sel' : ''}" data-node="${esc(n.id)}" aria-expanded="${look === n.id}">
-      ${nodeIcon(n, sel.cls, 34)}<span class="lu-node-text"><b>${esc(nodeName(rules, n))}</b><small>Rank ${fmt(have)} of ${fmt(mx)}${added ? ` · +${fmt(added)} now` : ''}${have >= mx ? ' · highest rank' : ''}</small>
+      ${nodeIcon(n, sel.cls, 34)}<span class="lu-node-text"><b>${esc(nodeName(rules, n))}</b><small>${added ? 'Learning now' : have >= mx ? 'Learned' : why ? 'Not yet' : 'Open'}</small>
       ${why && have < mx && !added ? `<small class="lu-why">${esc(why)}</small>` : ''}</span>${glyph(look === n.id ? 'up' : 'down', 18)}</button>`;
     if (look !== n.id) return row;
     const cost = n.free && !have ? 0 : n.cost || 1;
@@ -112,7 +110,6 @@ function step2(app, c, w) {
   return `<div class="lu-step2">
     <div class="lu-head ow-card"><div><h3>${esc(d.name)} ${fmt(lvl)}</h3><small class="ow-dim">Character level ${fmt(c.level)} → ${fmt(c.level + 1)}</small>${d.blurb ? `<p class="lu-blurb">${esc(d.blurb)}</p>` : ''}</div>
       <button type="button" class="ow-btn ow-ghost ow-small" data-act="back">${glyph('back', 16)}Another class</button></div>
-    ${paths}
     <section class="ow-section"><h3>${esc(d.name)} points <span class="lu-left ${left ? 'has' : ''}">${fmt(left)} left</span></h3><p class="ow-dim lu-tip">Tap one to read what it does, then spend. Points left over stay for later (the Classes window).</p><div class="lu-nodes">${nodes || '<p class="ow-dim">Nothing to buy at this level.</p>'}</div></section>
     ${attrs}
     <section class="ow-section lu-preview"><h3>After this level</h3>
@@ -132,7 +129,6 @@ function foot(app, el, w) {
     const full = preview(app, sel);
     ok = full.ok;
     why = full.ok ? '' : full.why;
-    if (ok && base.gained?.pathNow && d.paths && !sel.path) { ok = false; why = 'Choose a path first.'; }
     if (ok && base.gained?.attrPoint && !sel.attr) { ok = false; why = 'Choose where your attribute point goes.'; }
   }
   el.innerHTML = sel ? `${why ? `<span class="lu-foot-why">${esc(why)}</span>` : ''}<button type="button" class="ow-btn ow-primary" data-act="confirm" ${ok && !w.data.sent ? '' : 'disabled'} data-primary>${glyph('check', 18)}${w.data.sent ? 'Levelling…' : `Take ${esc(classDef(app.rules, sel.cls).name)} level ${fmt((app.me.char.classLevels?.[sel.cls] || 0) + 1)}`}</button>`
@@ -141,14 +137,13 @@ function foot(app, el, w) {
   el.querySelector('[data-act="confirm"]')?.addEventListener('click', () => {
     if (!ok) return;
     w.data.sent = true;
-    app.act('levelup', { cls: sel.cls, path: sel.path || undefined, spend: sel.spend || [], attr: sel.attr || undefined });
+    app.act('levelup', { cls: sel.cls, spend: sel.spend || [], attr: sel.attr || undefined });
     app.sfx('levelup');
     w.render();
   });
   const B = w.body;
-  B.querySelectorAll('.lu-class').forEach(b => { b.onclick = () => { if (b.getAttribute('aria-disabled')) return; w.data.pick = { cls: b.dataset.cls, path: null, spend: [], attr: null }; w.data.look = null; w.render(); }; });
+  B.querySelectorAll('.lu-class').forEach(b => { b.onclick = () => { if (b.getAttribute('aria-disabled')) return; w.data.pick = { cls: b.dataset.cls, spend: [], attr: null }; w.data.look = null; w.render(); }; });
   B.querySelector('[data-act="back"]')?.addEventListener('click', () => { w.data.pick = null; w.data.look = null; w.render(); });
-  B.querySelectorAll('.lu-path').forEach(b => { b.onclick = () => { sel.path = b.dataset.path; sel.spend = []; w.data.look = null; w.render(); }; });
   // pick a node to read it (again to close it); its card opens under it with the spend button
   B.querySelectorAll('.lu-node').forEach(b => { b.onclick = () => {
     const open = w.data.look?.cls === sel.cls && w.data.look.id === b.dataset.node;

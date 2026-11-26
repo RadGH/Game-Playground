@@ -8,6 +8,8 @@ import { createWorldView } from '../render/world.js';
 import { createActors } from '../render/actors.js';
 import { createFx } from '../render/fx.js';
 import { createCasterFx } from '../render/caster-fx.js';
+import { createSpellLook } from '../render/spell-look.js';
+import { createMoves } from '../render/moves.js';
 import { attackPlan } from '../../rules/casters.js';
 import { createCamera } from '../play/camera.js';
 import { createPredictor } from '../play/predict.js';
@@ -16,7 +18,7 @@ import { createTouch } from '../play/touch.js';
 import { createVillagers } from '../play/villagers.js';
 import { createInput } from '../input/input.js';
 import { castRow } from '../../rules/classes.js';
-import { targetKind } from '../../rules/spells.js';
+import { targetKind, spellRow } from '../../rules/spells.js';
 import { npcAt, npcPresent, liveObjects, questStatus, npcCall } from '../../world/quests.js';
 import { STEP, BTN, UF, packButtons } from '../../net/protocol.js';
 import { windowsOpen, closeAll, findWin } from '../ui/kit.js';
@@ -62,6 +64,20 @@ export async function show(app, { enter = null } = {}) {
     },
     bodyOf: id => actors.get(id)?.root || null,
   });
+  // how every spell and attack looks and moves (render/spell-look.js + render/moves.js; docs/CASE-PALADIN.md recipe)
+  const moves = createMoves(actors);
+  const rowFor = (spell, who) => { try { return (who === S.meId && castRow(app.rules, app.me.char, spell)) || spellRow(app.rules, spell, { rank: 1 }); } catch { try { return spellRow(app.rules, spell, { rank: 1 }); } catch { return null; } } };
+  const handsOf = id => { const b = actors.get(id)?.body?.bones; return b?.hand_l && b?.hand_r && actors.shown?.(id) !== false ? [b.hand_l, b.hand_r] : null; };
+  const look = createSpellLook({ fx, actors, moves, heightAt, rowOf: rowFor, unitOf: id => S.units.get(id), handsOf, meId: () => S.meId, shakeOn: () => app.settings.shake !== false });
+  app.look = look;
+  /** the hand of whoever stands where a bolt starts (the bolt is drawn from it) */
+  const handNear = (x, z) => {
+    let best = null, bd = 2.2;
+    for (const u of S.units.values()) { const d = Math.hypot(u.x - x, u.z - z); if (d < bd) { bd = d; best = u; } }
+    const h = best && handsOf(best.id)?.[1];
+    if (!h) return null;
+    h.getWorldPosition(handV); return [handV.x, handV.y, handV.z];
+  };
   const canvas = view.renderer.domElement;
   canvas.style.visibility = 'visible';
   if (!app.input) {
@@ -82,7 +98,7 @@ export async function show(app, { enter = null } = {}) {
   let clockOff = null, lastAck = 0;
   let acc = 0, lastT = performance.now(), raf = 0, alive = true;
   let sneakOn = false, aim = null, aimFx = null, windFx = null, placeSlot = null, pending = null, channelSlot = null, mountPress = false, dodgePress = false, powerPress = false, respawnPress = false;
-  let lastAttackAt = -9, lastCastAt = -9, softTarget = null;
+  let lastAttackAt = -9, lastCastAt = -9, softTarget = null, attackWas = false;
   const meUnit = () => S.units.get(S.meId);
 
   function unitFrom(info) {
@@ -96,6 +112,7 @@ export async function show(app, { enter = null } = {}) {
     const off = m.wt - now;
     clockOff = clockOff == null ? off : Math.max(clockOff + (off - clockOff) * 0.08, Math.min(clockOff, off));
     S.lastSnap = performance.now();
+    if (m.sp != null && app.me) app.me.speed = m.sp;        // my walking speed changed (a slow, a buff): predict with it
     for (const info of m.add || []) {
       let u = S.units.get(info.id);
       if (!u) { u = unitFrom(info); S.units.set(info.id, u); } else { u.info = info; u.mh = info.mh; u.mm = info.mm; u.ms = info.ms; }
@@ -116,15 +133,44 @@ export async function show(app, { enter = null } = {}) {
     for (const id of m.gone || []) { if (!S.units.has(id)) continue; S.units.delete(id); actors.drop(id, { corpse: dying.has(id) }); dying.delete(id); }
     if (m.au) { for (const [id, list] of Object.entries(m.au)) if (id !== 'b') S.auras.set(id, list); S.barrier = m.au.b || 0; }
     if (m.cd) S.cooldowns = m.cd;
-    if (m.pj) fx.bolts(m.pj, spell => elementOf(spell));
+    if (m.pj) fx.bolts(m.pj, spell => elementOf(spell), { handNear, rowOf: spell => rowFor(spell, null) });
     if (m.lb) S.lootBoxes = m.lb.map(([id, x, z, kind, name]) => ({ id, x, z, kind, name }));
     S.downLeft = m.dn?.left ?? S.downLeft;
     S.revive = m.rv || null;
     for (const e of m.ev || []) onEvent(e);
   };
   const dying = new Set();
+  const later = (s, f) => (s > 0.01 ? setTimeout(f, s * 1000) : f());
   const elementOf = spell => { try { return spell ? castRow(app.rules, app.me.char, spell)?.element || app.rules.spells?.[spell]?.element : null; } catch { return app.rules.spells?.[spell]?.element || null; } };
   const posOf = id => { const u = S.units.get(id); return u ? [u.x, u.y, u.z] : null; };
+  /** Seconds until a server event's moment is drawn (others are drawn interpDelay behind the server's clock). */
+  const drawDelay = e => (clockOff == null || e.at == null || Array.isArray(e.at) ? (app.tuning?.interpDelay ?? 0.1) : Math.max(0, Math.min(0.5, e.at - (performance.now() / 1000 + clockOff - (app.tuning?.interpDelay ?? 0.1)))));
+  // ---------------------------------------------------------------- monster tells (lessons rule 39: every blow can be seen and dodged)
+  // A monster winding up leans back into its swing and a red mark shows where the blow will land (a cone in front of
+  // it, a line toward its target for a shot) until it falls; roll out of the mark or through it (a roll is untouchable).
+  const tells = new Map();
+  function tell(e) {
+    const u = S.units.get(e.who); if (!u) return;
+    actors.get(e.who)?.windup(e.seconds);
+    u.swungAt = u.actedAt = performance.now() / 1000 + e.seconds;       // its 'hit' event will not start a second swing
+    endTell(e.who);
+    const t = S.units.get(e.to);
+    const dir = t ? { x: t.x - u.x, z: t.z - u.z } : { x: Math.sin(u.facing), z: Math.cos(u.facing) };
+    const l = Math.hypot(dir.x, dir.z) || 1; dir.x /= l; dir.z /= l;
+    const h = e.ranged
+      ? fx.indicator('line', { at: { x: u.x, z: u.z }, dir, length: Math.min(e.reach || 20, l + 2), width: 1.2, kind: 'hostile' })
+      : fx.indicator('cone', { at: { x: u.x, z: u.z }, dir, length: e.reach || 3, angle: e.arc || 1.9, radius: e.reach || 3, kind: 'hostile' });
+    tells.set(e.who, { h, until: performance.now() / 1000 + e.seconds + 0.08, dir });
+  }
+  function endTell(id) { const T = tells.get(id); if (T) { T.h?.stop(); tells.delete(id); } }
+  function updateTells() {
+    const now = performance.now() / 1000;
+    for (const [id, T] of tells) {
+      const u = S.units.get(id);
+      if (!u || now > T.until) { endTell(id); continue; }
+      T.h?.set({ at: { x: u.x, z: u.z }, dir: T.dir });
+    }
+  }
   function onEvent(e) {
     const me = S.meId;
     switch (e.t) {
@@ -135,8 +181,11 @@ export async function show(app, { enter = null } = {}) {
         if (p && e.blocked > 0 && e.to === me) { app.play.hud.number(p[0], p[1] + 0.5, p[2], `Blocked ${fmt(e.blocked)}`, 'block'); app.sfx('status.block.apply'); }
         actors.get(e.to)?.act(e.blocked > 0 && S.units.get(e.to)?.info.k === 'player' ? 'block' : 'hit');
         const from = S.units.get(e.from);
+        // every hit lands with weight: pushed back and puffed for a moment (heavier on a crit or a big share of health)
+        if (from) actors.get(e.to)?.flinch(from.x, from.z, !!e.crit || e.amount >= (S.units.get(e.to)?.mh || 1e9) * 0.18);
         if (from && !e.spell && !e.vis && performance.now() / 1000 - (from.swungAt || 0) > 0.35) { from.swungAt = performance.now() / 1000; from.actedAt = from.swungAt; actors.get(e.from)?.act('attack'); }
-        if (p && e.spell) fx.impact(p.map((v, i) => (i === 1 ? v + 1.1 : v)), e.spell, e.element, 1);
+        const lk = look.hit(e) || { scale: 1 };
+        if (p && e.spell) { const at = p.map((v, i) => (i === 1 ? v + 1.1 : v)); fx.impact(at, e.spell, e.element, 1.2, lk); fx.noteHit(at, e.spell); }
         else if (p && e.vis) fx.impact(p.map((v, i) => (i === 1 ? v + 1.1 : v)), fx.kit ? fx.kit.visualFor(null, { kind: 'bolt', element: e.element }) : null, e.element, 0.7);   // a magic weapon's hit lands in its element
         if (e.from === me || e.to === me) app.sfx(e.crit ? 'melee.crit' : e.spell || e.vis ? `spell.${e.element === 'ice' ? 'ice' : e.element || 'physical'}.impact` : 'melee.hit');
         if (e.from === me && S.units.get(e.to)?.hostile) softTarget = { id: e.to, until: performance.now() + 6000 };
@@ -147,7 +196,7 @@ export async function show(app, { enter = null } = {}) {
       case 'barrier': { const p = posOf(e.who); if (p) app.play.hud.number(p[0], p[1], p[2], `+${fmt(e.amount)} shield`, 'heal'); if (e.ward) cfx.ward(e); break; }
       case 'attack': {      // a wand / tome / staff / sceptre's basic attack in its own style (js/rules/caster-attack.js)
         const u = S.units.get(e.who);
-        if (u && e.shape !== 'pool' && e.shape !== 'burst') { u.actedAt = u.swungAt = performance.now() / 1000; actors.get(e.who)?.act(e.shape === 'melee' ? 'attack' : 'cast'); }
+        look.attack(e);                  // its own clip: a point-and-fire, a sceptre's swing, a placed style's push down
         cfx.attack(e);
         if (e.who === me && e.shape !== 'bolt' && e.shape !== 'pool' && e.shape !== 'burst') app.sfx(e.shape === 'melee' ? 'melee.swing' : 'cast.start');
         break;
@@ -156,10 +205,7 @@ export async function show(app, { enter = null } = {}) {
       case 'rider': if (e.who === me && e.rider === 'siphon' && e.amt > 0) { const p = posOf(e.who); if (p) app.play.hud.number(p[0], p[1], p[2], `+${fmt(e.amt)} mana`, 'heal'); } break;
       case 'miss': { const p = posOf(e.to || e.who); if (p && (e.who === me || e.to === me)) app.play.hud.number(p[0], p[1], p[2], e.dodged ? 'Dodged' : e.evade ? 'Evaded' : 'Miss', 'miss'); if (e.who && !e.to) { const u = S.units.get(e.who); if (u && performance.now() / 1000 - (u.swungAt || 0) > 0.35) { u.swungAt = u.actedAt = performance.now() / 1000; actors.get(e.who)?.act('attack'); } } if (e.who === me) app.sfx('melee.swing'); break; }
       case 'cast': {
-        const u = S.units.get(e.who); if (u) { u.actedAt = performance.now() / 1000; actors.get(e.who)?.act('cast'); }
-        const el = elementOf(e.spell);
-        if (e.kind === 'ground' && e.at) fx.impact([e.at[0], heightAt(e.at[0], e.at[1]) + 0.3, e.at[1]], e.spell, el, 2.5);
-        else if (e.kind === 'self' && u) fx.impact([u.x, u.y + 1, u.z], e.spell, el, 1.6);
+        look.cast(e);                    // body, wind-up, release and the spell at its true shape and size
         if (e.who === me) { lastCastAt = performance.now() / 1000; app.sfx('cast.start'); }
         break;
       }
@@ -171,7 +217,16 @@ export async function show(app, { enter = null } = {}) {
       case 'xp': if (e.who === me) app.play.hud.log(`+${fmt(e.amount)} experience`, 'xp'); break;
       case 'loot': if (e.players?.includes(app.me?.char?.id)) { app.play.hud.log(`Loot waiting: ${e.name || 'remains'}`, 'loot'); app.sfx('loot.common'); } break;
       case 'skill': if (e.who === me) app.toast(`${app.rules.data.skillsUse.skills[e.skill]?.name || 'Skill'} is now ${fmt(e.to)}`, 'good'); break;
-      case 'dodge': actors.get(e.who)?.act('dodge'); break;
+      case 'dodge': if (e.who !== me) actors.get(e.who)?.roll(e.seconds || 0.3); break;   // my own roll starts when I press (step)
+      // combat motion (js/rules/combat.js knockUnit / startRush / monster wind-ups): drawn on the server's clock
+      // (bodies: actors.js; the dust, shockwaves and blasts: render/spell-look.js, on the same clock)
+      case 'knock': actors.get(e.who)?.knock(e, drawDelay(e)); later(drawDelay(e), () => look.knock(e)); if (e.down > 0 && posOf(e.who)) app.sfx('melee.crit'); break;
+      case 'leap': if (e.who !== me) actors.get(e.who)?.leap({ air: e.air, len: Math.hypot(e.to[0] - e.from[0], e.to[1] - e.from[1]), delay: drawDelay(e) }); later(e.who === me ? 0 : drawDelay(e), () => look.leap(e)); break;
+      case 'rush': if (e.who !== me) actors.get(e.who)?.lunge({ seconds: e.seconds, delay: drawDelay(e) }); later(e.who === me ? 0 : drawDelay(e), () => look.rush(e)); break;
+      case 'land': later(e.who === me ? 0 : drawDelay(e), () => look.land(e)); if (e.who === me) app.sfx('melee.crit'); break;
+      case 'windup': tell(e); break;
+      case 'burst': { later(drawDelay(e), () => look.burst(e)); if (e.who === me || Math.hypot((posOf(me)?.[0] ?? 1e9) - e.at[0], (posOf(me)?.[2] ?? 1e9) - e.at[1]) < 25) app.sfx('melee.crit'); break; }   // an exploding ball (the fireball) bursts
+      case 'windupEnd': endTell(e.who); break;
       case 'mount': { const a = actors.get(e.who); if (a) actors.setMounted(a, !!e.on); if (e.who === me && e.thrown) app.toast('Thrown from your horse.', 'bad'); break; }
       case 'leash': { const p = posOf(e.who); if (p) app.play.hud.number(p[0], p[1], p[2], 'Evade', 'miss'); break; }
       case 'channelEnd': if (e.who === me) channelSlot = null; break;
@@ -205,7 +260,7 @@ export async function show(app, { enter = null } = {}) {
     if (!spell || meUnit()?.downed) return;
     const row = rowOf(spell); if (!row) return;
     const kind = targetKind(row);
-    if (row.channel) { pending = { slot, held: true }; channelSlot = slot; return; }
+    if (row.channel) { pending = { slot, held: true }; channelSlot = slot; predictCast(slot); return; }
     const aimed = AIMED.has(kind) || (kind === 'self' && (row.radius || 0) >= 3 && row.mult);
     if (aimed && src === 'touch' && kind === 'ground') { placeSlot = slot; app.play.touch?.placing(`Tap the ground to place ${row.name}`); startAim(slot, row, kind); return; }
     if (aimed && !app.settings.quickCast && src !== 'touch') { startAim(slot, row, kind); return; }
@@ -230,6 +285,15 @@ export async function show(app, { enter = null } = {}) {
   function cast(slot) {
     const at = aim ? [aim.point.x, aim.point.y, aim.point.z] : null;
     pending = { slot, at, held: false };
+    predictCast(slot);
+  }
+  /** The key press shows at once (client prediction, CASE-PALADIN §4 phase 0): the body moves and the hands light up
+   *  when the spell is ready and paid for; the server's 'cast' then adds the impacts without moving the body again. */
+  function predictCast(slot) {
+    const spell = slotSpell(slot), me = meUnit(), row = spell && rowOf(spell);
+    if (!row || !me || me.downed || (S.cooldowns[spell] || 0) > 0.2 || me.mp < (row.mp || 0)) return;
+    lastCastAt = performance.now() / 1000;
+    look.press(spell, row);
   }
   function cancelPlace() { placeSlot = null; stopAim(); app.play.touch?.placing(null); }
   function tapAt(x, y) {
@@ -368,12 +432,15 @@ export async function show(app, { enter = null } = {}) {
     const power = powerPress; powerPress = false;
     const respawn = respawnPress; respawnPress = false;
     const auras = S.auras.get(S.meId) || [];
-    const held = auras.some(a => ['root', 'sleep', 'stagger', 'stasis', 'transmuted'].includes(a.id));
+    const held = auras.some(a => ['root', 'sleep', 'stagger', 'knockdown', 'stasis', 'transmuted'].includes(a.id));
     const attack = (input.held('attack') || input.take('attackTap')) && !S.aimingSlot && placeSlot == null;
+    if ((attack || power) && !attackWas && !me.downed) look.pressAttack(attackStyle());     // the first swing starts on the press, not a round trip later
+    attackWas = !!(attack || power);
     pred.step({ x: dx, z: dz }, {
       canMove: !me.downed && !held, speed: app.me?.speed || 5, sneak: sneakOn, dodge, stamina: me.st,
       mounted: !!(me.fl & UF.mounted), facingDir: aim?.dir || f,
     }, STEP);
+    if (pred.state.dodged) actors.get(S.meId)?.roll(app.rules.data.combat.stamina.dodgeSeconds ?? 0.3);   // my roll, drawn at once
     const hero = { x: pred.state.x, z: pred.state.z };
     const d = aim?.dir || f;
     const it = S.interact;
@@ -381,7 +448,7 @@ export async function show(app, { enter = null } = {}) {
     const reviving = it?.kind === 'revive' && (input.held('interact') || S.autoRevive === it.id);
     const msg = { t: 'in', q: pred.state.q, mx: round(dx), mz: round(dz), ax: round(hero.x), ay: round(heightAt(hero.x, hero.z) + 1.4), az: round(hero.z), dx: round(d.x), dy: 0, dz: round(d.z),
       b: packButtons({ attack: attack || power, power, sneak: sneakOn, dodge, mount, respawn, interact: reviving }), c: -1, h: channelSlot != null };
-    if (pending) { msg.c = pending.slot; if (pending.at) msg.at = pending.at.map(round); msg.h = !!pending.held || channelSlot != null; pending = null; }
+    if (pending) { msg.c = pending.slot; if (pending.at) msg.at = pending.at.map(round); msg.h = !!pending.held || channelSlot != null; predictRush(pending, msg, me, held); pending = null; }
     else if ((attack || power) && aim && LANDS.has(myPlan()?.shape)) msg.at = landAt().map(round);     // where a lobbed wand / tome / staff attack lands
     if (reviving) msg.rv = it.id;
     if (S.target) msg.tg = S.target;
@@ -389,6 +456,40 @@ export async function show(app, { enter = null } = {}) {
     if (attack || power) lastAttackAt = performance.now() / 1000;
   }
   const round = v => Math.round(v * 100) / 100;
+  /** my basic attack's body move: a magic weapon points and fires (a sceptre swings), a bow shoots, the rest swing */
+  function attackStyle() {
+    const p = myPlan();
+    if (p) return p.shape === 'melee' ? 'swing' : LANDS.has(p.shape) || p.shape === 'pool' ? 'ground' : 'wand';
+    const w = app.me?.char?.gear?.weapon;
+    return /bow|crossbow|sling/.test(`${w?.subtype || ''} ${w?.baseKey || ''} ${w?.weaponCategory || ''}`) ? 'shoot' : 'swing';
+  }
+
+  // ---------------------------------------------------------------- leaps and charges, predicted
+  // A leap / charge cast in this step moves me along the same steps the server will (js/rules/combat.js startRush,
+  // predict.js rush) from the next step on, so the hero flies at once and lands where the server lands it — no snap.
+  const rushUntil = {};
+  function predictRush(p, msg, me, held) {
+    const spell = slotSpell(p.slot); const row = spell && rowOf(spell);
+    if (!row || (row.shape !== 'leap' && row.shape !== 'dash') || me.downed || held || pred.busy()) return;
+    const now = performance.now() / 1000;
+    if ((S.cooldowns?.[spell] || 0) > 0.15 || (rushUntil[spell] || 0) > now || (me.mp ?? 0) < (row.mp || 0)) return;
+    const x = pred.state.x, z = pred.state.z;
+    let dir = { x: msg.dx, z: msg.dz }, len;
+    if (row.shape === 'dash') len = Math.min(row.dash?.range || row.range || 10, row.range || 99);
+    else {
+      // = combat.js groundPoint: the aimed point, pulled in to the range; no point → 12 m (or less) ahead
+      const range = row.range || 12;
+      let tx, tz;
+      if (msg.at) { tx = msg.at[0]; tz = msg.at[2]; const d = Math.hypot(tx - x, tz - z); if (d > range) { tx = x + (tx - x) / d * range; tz = z + (tz - z) / d * range; } }
+      else { const l = Math.hypot(dir.x, dir.z) || 1; tx = x + dir.x / l * Math.min(range, 12); tz = z + dir.z / l * Math.min(range, 12); }
+      len = Math.hypot(tx - x, tz - z);
+      if (len > 0.05) dir = { x: tx - x, z: tz - z };
+    }
+    const secs = pred.rush(row.shape, dir, len, STEP);
+    rushUntil[spell] = now + Math.max(0.5, (row.cooldown || 1) * 0.5);
+    if (row.shape === 'leap') actors.get(S.meId)?.leap({ air: secs, me: true, len });
+    else actors.get(S.meId)?.lunge({ seconds: secs, me: true });
+  }
 
   // ---------------------------------------------------------------- the magic weapon's attack (lobs and placed styles)
   const LANDS = new Set(['lob', 'ground']);
@@ -448,8 +549,8 @@ export async function show(app, { enter = null } = {}) {
       if (S.aimingSlot === i - 1 && !held && placeSlot == null) slotUp(i - 1);
     }
     if (input.held('freeMouse') && input.locked) input.unlock();
-    const look = input.takeLook();
-    if (look.dx || look.dy) cam.look(look.dx, look.dy, { pad: input.device === 'pad' });
+    const lookIn = input.takeLook();      // (not `look`: that name is the spell-look below — shadowing it broke the frame)
+    if (lookIn.dx || lookIn.dy) cam.look(lookIn.dx, lookIn.dy, { pad: input.device === 'pad' });
     const wh = input.takeWheel(); if (wh) cam.zoom(wh);
     // fixed steps
     acc += dt;
@@ -488,6 +589,7 @@ export async function show(app, { enter = null } = {}) {
       app.play.hud.crosshair(aim.unit ? (aim.unit.hostile ? 'foe' : 'friend') : '');
       updateLandFx();
     }
+    updateTells();
     const nowS = performance.now() / 1000;
     for (const u of S.units.values()) {
       const a = actors.get(u.id); if (!a) continue;
@@ -566,8 +668,12 @@ export async function show(app, { enter = null } = {}) {
       cam.update(dt, { x: me.x, y, z: me.z });
       view.follow(me.x, y, me.z);
     }
-    actors.update(dt);
-    fx.update(dt);
+    // a hit-stop holds the world (bodies, spells) for a few hundredths of a second on your own big hits
+    const wdt = look.update(dt);
+    actors.update(wdt);
+    moves.update(wdt);
+    if (fx.kit) { fx.kit.shakeOn = app.settings.shake !== false; view.shakeOffset = fx.kit.shakeOffset; }
+    fx.update(wdt);
     app.worldView.update(dt, { x: pred.state.x, z: pred.state.z });
     ambient.update(dt, { x: pred.state.x, z: pred.state.z });
     // an automatic graphics pick that runs slow steps down once (from 8 s in, over 6 s: under ~24 frames a second)

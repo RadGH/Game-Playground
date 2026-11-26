@@ -1,39 +1,520 @@
 {
-  "_doc": "Talents: one point at character levels in `pointLevels`, plus one for every use-skill milestone (skills-use.json `milestones`). Rows open at character levels (`rows`); each talent has its own `requires` (attributes, use-skills, class levels, other talents, proficiencies) and `grants` (`prof`: proficiencies; `mods`: sheet numbers per rank, read by js/rules/sheet.js — the same vocabulary as class passives). js/rules/talents.js is the one reader. Adapted from Thousandvale's perk forest and Farhold's perks: small numbers in the low rows, rule-shaping cornerstones in the last.",
-  "pointLevels": [3, 6, 9],
-  "rows": { "1": 1, "2": 4, "3": 7, "4": 10 },
-  "talents": {
-    "weapon_focus": { "name": "Weapon Focus", "row": 1, "ranks": 1, "requires": { "anyAttr": { "str": 12, "dex": 12 } }, "grants": { "mods": { "meleePct": 5, "rangedPct": 5, "critChance": 1 } } },
-    "arcane_focus": { "name": "Spell Focus", "row": 1, "ranks": 1, "requires": { "anyAttr": { "int": 12, "wis": 12, "cha": 12 } }, "grants": { "mods": { "spellPct": 6 } } },
-    "toughness": { "name": "Toughness", "row": 1, "ranks": 3, "requires": {}, "grants": { "mods": { "maxHpPct": 4 } } },
-    "fleet_foot": { "name": "Fleet Foot", "row": 1, "ranks": 2, "requires": {}, "grants": { "mods": { "movePct": 4, "maxStaminaPct": 5 } } },
-    "leather_training": { "name": "Leather Training", "row": 1, "ranks": 1, "requires": {}, "grants": { "prof": ["leather"] } },
-    "martial_training": { "name": "Martial Weapons", "row": 1, "ranks": 1, "requires": { "anyAttr": { "str": 11, "dex": 11 } }, "grants": { "prof": ["martial"] } },
-    "shield_training": { "name": "Shield Training", "row": 1, "ranks": 1, "requires": { "attrs": { "str": 11 } }, "grants": { "prof": ["shield"] } },
-    "two_weapon_fighting": { "name": "Two-Weapon Fighting", "row": 1, "ranks": 1, "requires": { "attrs": { "dex": 13 } }, "grants": { "prof": ["dualWield"] } },
-    "bow_training": { "name": "Bow Training", "row": 1, "ranks": 1, "requires": { "attrs": { "dex": 12 } }, "grants": { "prof": ["bows"] } },
-
-    "mail_training": { "name": "Mail Training", "row": 2, "ranks": 1, "requires": { "attrs": { "str": 12 }, "prof": ["leather"] }, "grants": { "prof": ["mail"] } },
-    "plate_training": { "name": "Plate Training", "row": 2, "ranks": 1, "requires": { "attrs": { "str": 15 }, "prof": ["mail"] }, "grants": { "prof": ["plate"] } },
-    "arcane_training": { "name": "Arcane Implements", "row": 2, "ranks": 1, "requires": { "anyAttr": { "int": 13, "wis": 13 } }, "grants": { "prof": ["arcane"] } },
-    "deep_reserves": { "name": "Deep Reserves", "row": 2, "ranks": 2, "requires": { "anyAttr": { "int": 13, "wis": 13, "cha": 13 } }, "grants": { "mods": { "maxMpPct": 8, "mpRegen": 0.3 } } },
-    "iron_lungs": { "name": "Iron Lungs", "row": 2, "ranks": 2, "requires": { "attrs": { "con": 13 } }, "grants": { "mods": { "maxStaminaPct": 12, "staminaRegen": 2 } } },
-    "quiet_feet": { "name": "Quiet Feet", "row": 2, "ranks": 1, "requires": { "skills": { "sneak": 25 } }, "grants": { "mods": { "threatPct": -10, "dodge": 3 } } },
-    "honeyed_words": { "name": "Honeyed Words", "row": 2, "ranks": 1, "requires": { "skills": { "speech": 25 } }, "grants": { "mods": { "priceCut": 5, "cha": 1 } } },
-    "packmule": { "name": "Packmule", "row": 2, "ranks": 2, "requires": { "attrs": { "con": 12 } }, "grants": { "mods": { "carry": 25 } } },
-
-    "weapon_specialist": { "name": "Weapon Specialist", "row": 3, "ranks": 2, "requires": { "talents": ["weapon_focus"] }, "grants": { "mods": { "meleePct": 6, "rangedPct": 6 } } },
-    "battle_caster": { "name": "Battle Caster", "row": 3, "ranks": 1, "requires": { "classCount": 2 }, "grants": { "mods": { "spellPct": 6, "meleePct": 6 } } },
-    "fire_attunement": { "name": "Fire Affinity", "row": 3, "ranks": 1, "requires": { "attrs": { "int": 14 } }, "grants": { "mods": { "firePct": 12 } } },
-    "frost_attunement": { "name": "Frost Affinity", "row": 3, "ranks": 1, "requires": { "attrs": { "int": 14 } }, "grants": { "mods": { "icePct": 12 } } },
-    "storm_attunement": { "name": "Storm Affinity", "row": 3, "ranks": 1, "requires": { "anyAttr": { "int": 14, "wis": 14 } }, "grants": { "mods": { "lightningPct": 12 } } },
-    "pack_master": { "name": "Pack Master", "row": 3, "ranks": 1, "requires": { "attrs": { "cha": 13 } }, "grants": { "mods": { "petPct": 15 } } },
-    "runic_hand": { "name": "Runic Hand", "row": 3, "ranks": 1, "requires": { "skills": { "enchanting": 50 } }, "grants": { "mods": { "enchantSlots": 1 } } },
-    "second_wind": { "name": "Second Wind", "row": 3, "ranks": 1, "requires": { "attrs": { "con": 14 } }, "grants": { "mods": { "hpRegen": 1.2, "staminaRegen": 3 } } },
-
-    "juggernaut": { "name": "Juggernaut", "row": 4, "ranks": 1, "cornerstone": true, "requires": { "prof": ["plate"] }, "grants": { "mods": { "armorPct": 15, "resistAll": 5, "movePct": -5 } } },
-    "glass_cannon": { "name": "Glass Cannon", "row": 4, "ranks": 1, "cornerstone": true, "requires": { "anyAttr": { "int": 15, "wis": 15, "cha": 15 } }, "grants": { "mods": { "spellPct": 20, "maxHpPct": -15 } } },
-    "quicksilver": { "name": "Quicksilver", "row": 4, "ranks": 1, "cornerstone": true, "requires": { "attrs": { "dex": 15 } }, "grants": { "mods": { "dodge": 8, "critChance": 3, "hastePct": 5 } } },
-    "lifebinder": { "name": "Lifebinder", "row": 4, "ranks": 1, "cornerstone": true, "requires": { "attrs": { "wis": 15 } }, "grants": { "mods": { "healPct": 20, "maxMpPct": 10 } } }
+ "_doc": "Talents: one point at character levels in `pointLevels`, plus one for every use-skill milestone (skills-use.json `milestones`). Rows open at character levels (`rows`); each talent has its own `requires` (attributes, use-skills, class levels, other talents, proficiencies) and `grants` (`prof`: proficiencies; `mods`: sheet numbers per rank, read by js/rules/sheet.js — the same vocabulary as class passives). js/rules/talents.js is the one reader. Owner 2026-11-26: every talent is ONE rank with a BIG number (\"I want 25% increased damage on talents, not 2%\" — no small percentages except critical chance), and each training is its own talent (one weapon or armour kind). Cornerstones in the last row reshape a build.",
+ "pointLevels": [
+  3,
+  6,
+  9
+ ],
+ "rows": {
+  "1": 1,
+  "2": 4,
+  "3": 7,
+  "4": 10
+ },
+ "talents": {
+  "weapon_focus": {
+   "name": "Weapon Focus",
+   "row": 1,
+   "requires": {
+    "anyAttr": {
+     "str": 12,
+     "dex": 12
+    }
+   },
+   "grants": {
+    "mods": {
+     "meleePct": 25,
+     "rangedPct": 25
+    }
+   },
+   "ranks": 1
+  },
+  "arcane_focus": {
+   "name": "Spell Focus",
+   "row": 1,
+   "requires": {
+    "anyAttr": {
+     "int": 12,
+     "wis": 12,
+     "cha": 12
+    }
+   },
+   "grants": {
+    "mods": {
+     "spellPct": 25
+    }
+   },
+   "ranks": 1
+  },
+  "toughness": {
+   "name": "Toughness",
+   "row": 1,
+   "requires": {},
+   "grants": {
+    "mods": {
+     "maxHpPct": 25
+    }
+   },
+   "ranks": 1
+  },
+  "fleet_foot": {
+   "name": "Fleet Foot",
+   "row": 1,
+   "requires": {},
+   "grants": {
+    "mods": {
+     "movePct": 20,
+     "maxStaminaPct": 30
+    }
+   },
+   "ranks": 1
+  },
+  "leather_training": {
+   "name": "Leather Training",
+   "row": 1,
+   "requires": {},
+   "grants": {
+    "prof": [
+     "leather"
+    ]
+   },
+   "ranks": 1
+  },
+  "sword_training": {
+   "name": "Sword Training",
+   "row": 1,
+   "requires": {
+    "anyAttr": {
+     "str": 11,
+     "dex": 11
+    }
+   },
+   "grants": {
+    "prof": [
+     "sword"
+    ]
+   },
+   "ranks": 1
+  },
+  "axe_training": {
+   "name": "Axe Training",
+   "row": 1,
+   "requires": {
+    "attrs": {
+     "str": 11
+    }
+   },
+   "grants": {
+    "prof": [
+     "axe"
+    ]
+   },
+   "ranks": 1
+  },
+  "mace_training": {
+   "name": "Mace Training",
+   "row": 1,
+   "requires": {
+    "anyAttr": {
+     "str": 11,
+     "wis": 11
+    }
+   },
+   "grants": {
+    "prof": [
+     "mace"
+    ]
+   },
+   "ranks": 1
+  },
+  "shield_training": {
+   "name": "Shield Training",
+   "row": 1,
+   "requires": {
+    "attrs": {
+     "str": 11
+    }
+   },
+   "grants": {
+    "prof": [
+     "shield"
+    ]
+   },
+   "ranks": 1
+  },
+  "two_weapon_fighting": {
+   "name": "Two-Weapon Fighting",
+   "row": 1,
+   "requires": {
+    "attrs": {
+     "dex": 13
+    }
+   },
+   "grants": {
+    "prof": [
+     "dualWield"
+    ]
+   },
+   "ranks": 1
+  },
+  "bow_training": {
+   "name": "Bow Training",
+   "row": 1,
+   "requires": {
+    "attrs": {
+     "dex": 12
+    }
+   },
+   "grants": {
+    "prof": [
+     "bow"
+    ]
+   },
+   "ranks": 1
+  },
+  "wand_training": {
+   "name": "Wand Training",
+   "row": 1,
+   "requires": {
+    "anyAttr": {
+     "int": 11,
+     "wis": 11,
+     "cha": 11
+    }
+   },
+   "grants": {
+    "prof": [
+     "wand"
+    ]
+   },
+   "ranks": 1
+  },
+  "mail_training": {
+   "name": "Mail Training",
+   "row": 2,
+   "requires": {
+    "attrs": {
+     "str": 12
+    },
+    "prof": [
+     "leather"
+    ]
+   },
+   "grants": {
+    "prof": [
+     "mail"
+    ]
+   },
+   "ranks": 1
+  },
+  "two_handed_training": {
+   "name": "Two-Handed Training",
+   "row": 2,
+   "requires": {
+    "attrs": {
+     "str": 13
+    }
+   },
+   "grants": {
+    "prof": [
+     "twohand"
+    ]
+   },
+   "ranks": 1
+  },
+  "deep_reserves": {
+   "name": "Deep Reserves",
+   "row": 2,
+   "requires": {
+    "anyAttr": {
+     "int": 13,
+     "wis": 13,
+     "cha": 13
+    }
+   },
+   "grants": {
+    "mods": {
+     "maxMpPct": 40,
+     "mpRegen": 2
+    }
+   },
+   "ranks": 1
+  },
+  "iron_lungs": {
+   "name": "Iron Lungs",
+   "row": 2,
+   "requires": {
+    "attrs": {
+     "con": 13
+    }
+   },
+   "grants": {
+    "mods": {
+     "maxStaminaPct": 50,
+     "staminaRegen": 6
+    }
+   },
+   "ranks": 1
+  },
+  "quiet_feet": {
+   "name": "Quiet Feet",
+   "row": 2,
+   "requires": {
+    "skills": {
+     "sneak": 25
+    }
+   },
+   "grants": {
+    "mods": {
+     "threatPct": -30,
+     "dodge": 10
+    }
+   },
+   "ranks": 1
+  },
+  "honeyed_words": {
+   "name": "Honeyed Words",
+   "row": 2,
+   "requires": {
+    "skills": {
+     "speech": 25
+    }
+   },
+   "grants": {
+    "mods": {
+     "priceCut": 20,
+     "cha": 2
+    }
+   },
+   "ranks": 1
+  },
+  "packmule": {
+   "name": "Packmule",
+   "row": 2,
+   "requires": {
+    "attrs": {
+     "con": 12
+    }
+   },
+   "grants": {
+    "mods": {
+     "carry": 50
+    }
+   },
+   "ranks": 1
+  },
+  "plate_training": {
+   "name": "Plate Training",
+   "row": 3,
+   "requires": {
+    "attrs": {
+     "str": 15
+    },
+    "prof": [
+     "mail"
+    ]
+   },
+   "grants": {
+    "prof": [
+     "plate"
+    ]
+   },
+   "ranks": 1
+  },
+  "weapon_specialist": {
+   "name": "Weapon Specialist",
+   "row": 3,
+   "requires": {
+    "talents": [
+     "weapon_focus"
+    ]
+   },
+   "grants": {
+    "mods": {
+     "critDamage": 50,
+     "critChance": 5
+    }
+   },
+   "ranks": 1
+  },
+  "battle_caster": {
+   "name": "Battle Caster",
+   "row": 3,
+   "requires": {
+    "classCount": 2
+   },
+   "grants": {
+    "mods": {
+     "spellPct": 20,
+     "meleePct": 20
+    }
+   },
+   "ranks": 1
+  },
+  "fire_attunement": {
+   "name": "Fire Affinity",
+   "row": 3,
+   "requires": {
+    "attrs": {
+     "int": 14
+    }
+   },
+   "grants": {
+    "mods": {
+     "firePct": 30
+    }
+   },
+   "ranks": 1
+  },
+  "frost_attunement": {
+   "name": "Frost Affinity",
+   "row": 3,
+   "requires": {
+    "attrs": {
+     "int": 14
+    }
+   },
+   "grants": {
+    "mods": {
+     "icePct": 30
+    }
+   },
+   "ranks": 1
+  },
+  "storm_attunement": {
+   "name": "Lightning Affinity",
+   "row": 3,
+   "requires": {
+    "anyAttr": {
+     "int": 14,
+     "wis": 14
+    }
+   },
+   "grants": {
+    "mods": {
+     "lightningPct": 30
+    }
+   },
+   "ranks": 1
+  },
+  "pack_master": {
+   "name": "Pack Master",
+   "row": 3,
+   "requires": {
+    "attrs": {
+     "cha": 13
+    }
+   },
+   "grants": {
+    "mods": {
+     "petPct": 40
+    }
+   },
+   "ranks": 1
+  },
+  "runic_hand": {
+   "name": "Runic Hand",
+   "row": 3,
+   "requires": {
+    "skills": {
+     "enchanting": 50
+    }
+   },
+   "grants": {
+    "mods": {
+     "enchantSlots": 1
+    }
+   },
+   "ranks": 1
+  },
+  "second_wind": {
+   "name": "Second Wind",
+   "row": 3,
+   "requires": {
+    "attrs": {
+     "con": 14
+    }
+   },
+   "grants": {
+    "mods": {
+     "hpRegen": 4,
+     "staminaRegen": 8
+    }
+   },
+   "ranks": 1
+  },
+  "juggernaut": {
+   "name": "Juggernaut",
+   "row": 4,
+   "cornerstone": true,
+   "requires": {
+    "prof": [
+     "plate"
+    ]
+   },
+   "grants": {
+    "mods": {
+     "armorPct": 40,
+     "meleePct": 20,
+     "movePct": -20
+    }
+   },
+   "ranks": 1
+  },
+  "glass_cannon": {
+   "name": "Glass Cannon",
+   "row": 4,
+   "cornerstone": true,
+   "requires": {
+    "anyAttr": {
+     "int": 15,
+     "wis": 15,
+     "cha": 15
+    }
+   },
+   "grants": {
+    "mods": {
+     "spellPct": 50,
+     "maxHpPct": -25
+    }
+   },
+   "ranks": 1
+  },
+  "quicksilver": {
+   "name": "Quicksilver",
+   "row": 4,
+   "cornerstone": true,
+   "requires": {
+    "attrs": {
+     "dex": 15
+    }
+   },
+   "grants": {
+    "mods": {
+     "dodge": 20,
+     "critChance": 8,
+     "hastePct": 25
+    }
+   },
+   "ranks": 1
+  },
+  "berserker": {
+   "name": "Berserker",
+   "row": 4,
+   "cornerstone": true,
+   "requires": {
+    "attrs": {
+     "str": 15
+    }
+   },
+   "grants": {
+    "mods": {
+     "meleePct": 40,
+     "hastePct": 20,
+     "armorPct": -25
+    }
+   },
+   "ranks": 1
   }
+ }
 }

@@ -57,7 +57,7 @@
    }
   },
   "van_iron_gyre": {
-   "name": "Iron Gyre",
+   "name": "Whirlwind",
    "owner": "vanguard",
    "tree": "thick_of_it",
    "reqLevel": 8,
@@ -217,7 +217,7 @@
     "van_clean_hew"
    ],
    "kind": "synergy",
-   "desc": "Iron Gyre spins harder: more damage per rank.",
+   "desc": "Whirlwind spins harder: more damage per rank.",
    "synergy": {
     "skill": "van_iron_gyre",
     "stat": "damage",
@@ -550,7 +550,7 @@
    ]
   },
   "van_shove": {
-   "name": "Breaching Shove",
+   "name": "Shield Charge",
    "owner": "vanguard",
    "tree": "breaking_line",
    "reqLevel": 5,

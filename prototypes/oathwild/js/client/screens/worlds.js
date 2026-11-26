@@ -2,6 +2,7 @@
 // (of 10), who, and how many quests it has finished. Join walks in with the character chosen on the last screen;
 // New world asks a name and Public / Invite only; Join by code takes the four letters a friend shares. The selected
 // world shows its invite link and a QR code. ?world=CODE in the address picks that world on arrival.
+import { focusQuiet } from '../../../../../shared/tooltip.js';
 import { esc, openWin, ask } from '../ui/kit.js';
 import { glyph, uiIcon } from '../ui/icons.js';
 import { qrSvg } from '../../../../../shared/rgs-signin.js';
@@ -81,7 +82,7 @@ export async function show(app, opts = {}) {
       st.msg = want && !st.list.find(w => w.code === want) ? `Invited to ${want}: press Join by code, or Enter once it is listed.` : '';
     } catch (e) { st.msg = e.message || 'Could not reach the world server. It keeps trying.'; }
     st.loading = false; draw();
-    setTimeout(() => (root.querySelector('.scr-worlds-card[aria-selected="true"]') || root.querySelector('[data-act="new"]'))?.focus({ preventScroll: true }), 30);
+    setTimeout(() => focusQuiet(root.querySelector('.scr-worlds-card[aria-selected="true"]') || root.querySelector('[data-act="new"]')), 30);
   }
 
   function join(code) {

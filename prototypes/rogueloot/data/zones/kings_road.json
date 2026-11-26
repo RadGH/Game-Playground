@@ -660,7 +660,7 @@
     {"x":-100,"z":112,"level":7,"tag":"pack","note":"the burnt mile-house: looters in the ash"},
     {"x":-84,"z":52,"level":7,"tag":"patrol","route":[[-84,52],[-74,48],[-66,44],[-74,48],[-84,52]],"note":"the_road patrol: a warcaller band walking between camps 1 and 2"},
     {"x":-76,"z":26,"level":7,"tag":"pack","note":"the wayfort lane"},
-    {"x":-82,"z":12,"level":8,"tag":"pack","pack":["hollowhorn_bonechanter","hollowhorn_raider","hollowhorn_raider","hollowhorn_raider"],"note":"the wayfort ruin: the first bonechanter at the braziers (pinned) — the SHAMAN lesson; the raiders Shield Shove you off her"},
+    {"x":-82,"z":12,"level":8,"tag":"pack","pack":["hollowhorn_bonechanter","hollowhorn_raider","hollowhorn_raider","hollowhorn_raider"],"note":"the wayfort ruin: the first bonechanter at the braziers (pinned) — the SHAMAN lesson; the raiders Shield Bash you off her"},
     {"x":-46.6,"z":42.3,"level":7,"tag":"pack","pack":["hollowhorn_bonechanter","hollowhorn_raider","hollowhorn_raider","hollowhorn_raider"],"note":"Milestone Camp: a bonechanter and her raiders at the fire (pinned)"},
     {"x":-30.1,"z":34,"level":7,"tag":"pack","note":"Milestone Camp: the pack by the haystack"},
     {"x":-40,"z":22,"level":8,"tag":"patrol","route":[[-40,22],[-30,13],[-20,4],[-30,13],[-40,22]],"note":"the_road patrol: between camp 2 and the bridge"},

@@ -8,6 +8,7 @@
 //   with what each would add (or why it cannot go on), and "Enchant — N gold".
 //
 //   app.openWindow('trade') → .ow-trade  ([data-pick="break:bag:…" | "put:gear:…" | "put:bag:…"], [data-opt], [data-commit])
+import { focusQuiet } from '../../../../../shared/tooltip.js';
 import { openWin, esc, ask, findWin } from './kit.js';
 import { tipAttrs, itemCardHtml } from './tip.js';
 import { glyph, uiIcon } from './icons.js';
@@ -132,7 +133,7 @@ export function open(app, opts = {}) {
       f.querySelectorAll('[data-opt]').forEach(b => {
         b.onclick = () => {
           w.data.opt = b.dataset.opt; w.render();
-          w.footEl?.querySelector('[data-commit]:not([disabled])')?.focus({ preventScroll: true });
+          focusQuiet(w.footEl?.querySelector('[data-commit]:not([disabled])'));
         };
       });
     },

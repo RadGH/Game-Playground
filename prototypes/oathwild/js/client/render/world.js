@@ -19,7 +19,8 @@ import { createBridgeView } from './bridge-draw.js';
 import { addContactShade } from './contact.js';
 import { findChimney } from './chimney.js';
 import { ATMOS } from './atmos.js';
-import { UNDERSTORY_SPECIES } from '../../world/scatter.js';
+import { UNDERSTORY_SPECIES, TREE_SPECIES } from '../../world/scatter.js';
+import { makeSurface } from '../../../../../highdef-3d/js/kit/textures.js';
 
 const TILE = 128;
 const ROOT = new URL('../../../../../', import.meta.url);     // the playground folder
@@ -84,6 +85,7 @@ export function createWorldView(view, { T, placements, art, scattered, book, tow
   /** A kit model for an art row (null when the row has a GLB or no kit). Same spot, same seed, same model. */
   const kitFor = (a, seed) => (a && a.status !== 'ready' ? kitModel(a.id, { seed, size: a.size || a.placeholder?.size }) : null);
   const chimneyOf = new Map();       // art id → chimney top in model space (or null)
+  const placedTrees = [];             // hand-placed trees (placements.props) join the storybook trees below
   function place(id, x, z, y, facing = 0, { scale = 1, name = '' } = {}) {
     const a = artById.get(id);
     const holder = new THREE.Group();
@@ -92,6 +94,8 @@ export function createWorldView(view, { T, placements, art, scattered, book, tow
     holder.rotation.y = facing || 0;
     holder.name = name || id;
     tileGroup(x, z).add(holder);
+    // a tree is never the flat kit tree (owner 2026-11-26, lessons rule 77): drawn by trees.js like every other tree
+    if (TREE_SPECIES[id]) { placedTrees.push({ art: id, x, z, y: gy, rot: facing || 0, h: TREE_SPECIES[id].h * scale }); return holder; }
     if (a?.status === 'ready' && a.file) {
       pending.push(glb(a.file).then(g => {
         const m = g.scene.clone(true);
@@ -140,26 +144,44 @@ export function createWorldView(view, { T, placements, art, scattered, book, tow
   { const hs = Float32Array.from(T.grid.heights).sort(); ATMOS.set({ mist: { base: hs[Math.floor(hs.length * 0.04)] } }); }
 
   // ---------------------------------------------------------------- trees and decor (instanced per art id and tile)
-  const Q = { low: [0.55, 0.4], medium: [0.85, 0.75], high: [1, 1] }[quality] || [0.85, 0.75];
-  function treeGeometry(a) {
-    const [w, h] = a.placeholder?.size || [5, 9, 4];
-    const crownC = new THREE.Color(a.placeholder?.colour || '#5a7a34'), trunkC = new THREE.Color('#6b4a30');
-    const parts = [];
-    const colour = (geo, c, vary = 0) => { const n = geo.attributes.position.count, cols = new Float32Array(n * 3); for (let i = 0; i < n; i++) { const t = c.clone().offsetHSL(0, 0, (hash(i, n) - 0.5) * vary); cols.set([t.r, t.g, t.b], i * 3); } geo.setAttribute('color', new THREE.BufferAttribute(cols, 3)); return geo; };
-    const dead = /dead/.test(a.id);
-    const trunkH = a.placeholder?.shape === 'cone' ? h * 0.25 : dead ? h * 0.85 : h * 0.42;
-    const trunk = new THREE.CylinderGeometry(w * 0.045, w * 0.07, trunkH, 6).toNonIndexed(); trunk.translate(0, trunkH / 2, 0); parts.push(colour(trunk, trunkC, 0.05));
-    if (a.placeholder?.shape === 'cone') {
-      for (let t = 0; t < 3; t++) { const cn = new THREE.ConeGeometry(w * (0.5 - t * 0.1), h * 0.42, 8).toNonIndexed(); cn.translate(0, trunkH + h * 0.18 + t * h * 0.2, 0); parts.push(colour(cn, crownC.clone().offsetHSL(0, 0, t * 0.03), 0.06)); }
-    } else if (!dead) {
-      const blob = new THREE.IcosahedronGeometry(w * 0.42, 1).toNonIndexed(); blob.scale(1, (h - trunkH) / (w * 0.75), 1); blob.translate(0, trunkH + (h - trunkH) * 0.48, 0); parts.push(colour(blob, crownC, 0.1));
-      const blob2 = new THREE.IcosahedronGeometry(w * 0.28, 1).toNonIndexed(); blob2.translate(w * 0.22, trunkH + (h - trunkH) * 0.3, w * 0.1); parts.push(colour(blob2, crownC.clone().offsetHSL(0, 0, -0.04), 0.1));
-    } else {
-      const branch = new THREE.CylinderGeometry(w * 0.02, w * 0.035, h * 0.4, 5).toNonIndexed(); branch.rotateZ(0.7); branch.translate(w * 0.15, trunkH * 0.8, 0); parts.push(colour(branch, trunkC, 0.05));
-    }
-    return mergeGeometries(parts);
-  }
+  // walk-through decor is thinned on lower settings (trees never are: every tree is drawn, 2026-11-26)
+  const DECOR_KEEP = { low: 0.4, medium: 0.75, high: 1 }[quality] ?? 0.75;
   const vcMat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  // the scattered stones, stumps and logs were flat vertex colour (lessons rule 77, owner 2026-11-26: no untextured
+  // models): they keep their kit shapes and colours, with a painted rock / bark picture laid over them in world space
+  // (three-way projection, so no stretched seams on an instanced, scaled, turned stone)
+  const DETAIL = { rock: /^(rock|boulder|cliff)/, bark_oak: /^(stump|log)/ };
+  const detailMats = Object.fromEntries(Object.keys(DETAIL).map(name => [name, detailed(name)]));
+  const matFor = id => { for (const [name, re] of Object.entries(DETAIL)) if (re.test(id)) return detailMats[name]; return vcMat; };
+  function detailed(name) {
+    const tex = makeSurface(name, { size: 256, seed: 5 }).map;
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    // the picture's mean brightness (decoded from sRGB) so laying it on keeps the kit colour's own brightness
+    let mean = 0.5;
+    try { const c = tex.image, g = c.getContext('2d'), d = g.getImageData(0, 0, c.width, c.height).data; let t = 0; const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; for (let i = 0; i < d.length; i += 16) t += 0.2126 * lin(d[i]) + 0.7152 * lin(d[i + 1]) + 0.0722 * lin(d[i + 2]); mean = Math.max(0.02, t / (d.length / 16)); } catch { /* keep 0.5 */ }
+    const m = new THREE.MeshLambertMaterial({ vertexColors: true });
+    m.onBeforeCompile = shader => {
+      shader.uniforms.uDetail = { value: tex }; shader.uniforms.uDetailMean = { value: mean };
+      shader.vertexShader = shader.vertexShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vDetailPos; varying vec3 vDetailN;')
+        .replace('#include <begin_vertex>', `#include <begin_vertex>
+          { vec4 dw = vec4(transformed, 1.0); vec3 dn = objectNormal;
+            #ifdef USE_INSTANCING
+              dw = instanceMatrix * dw; dn = mat3(instanceMatrix) * dn;
+            #endif
+            dw = modelMatrix * dw; vDetailPos = dw.xyz; vDetailN = normalize(mat3(modelMatrix) * dn); }`);
+      shader.fragmentShader = shader.fragmentShader
+        .replace('#include <common>', '#include <common>\nuniform sampler2D uDetail; uniform float uDetailMean; varying vec3 vDetailPos; varying vec3 vDetailN;')
+        .replace('#include <color_fragment>', `#include <color_fragment>
+          { vec3 bw = pow(abs(normalize(vDetailN)), vec3(4.0)); bw /= (bw.x + bw.y + bw.z);
+            vec3 p = vDetailPos * 0.33;
+            vec3 tx = texture2D(uDetail, p.zy).rgb * bw.x + texture2D(uDetail, p.xz).rgb * bw.y + texture2D(uDetail, p.xy).rgb * bw.z;
+            float l = dot(tx, vec3(0.2126, 0.7152, 0.0722)) / uDetailMean;
+            diffuseColor.rgb *= mix(1.0, clamp(l, 0.25, 1.9), 0.85); }`);
+    };
+    m.customProgramCacheKey = () => 'ow-detail-' + name;
+    return m;
+  }
   const geoCache = new Map();
   const VARIANTS = quality === 'low' ? 1 : quality === 'medium' ? 2 : 3;   // each rock / bush kind is baked three ways (lean, which stones), picked by spot; one on Low (fewer draw calls on phones)
   function instGeo(id, v = 0) {
@@ -167,9 +189,10 @@ export function createWorldView(view, { T, placements, art, scattered, book, tow
     if (geoCache.has(key)) return geoCache.get(key);
     const a = artById.get(id) || { id, placeholder: { shape: 'rock', size: [1, 1, 1], colour: '#7a7a6a' } };
     let geo;
+    // lessons rule 77: a tree never comes through here as a flat vertex-colour kit tree (trees.js draws every tree)
+    if (a.kind === 'tree' || TREE_SPECIES[id]) throw new Error(`world tree ${id} must be drawn by trees.js, not the untextured kit`);
     const km = kitFor(a, v + 1);
     if (km) geo = kit.bake(km);
-    else if (a.kind === 'tree' || a.placeholder?.shape === 'tree') geo = treeGeometry(a);
     else { geo = shapeGeometry(a.placeholder || { shape: 'rock', size: a.size || [1, 1, 1], colour: '#7a7a6a' }); if (geo.index) geo = geo.toNonIndexed(); const c = new THREE.Color(a.placeholder?.colour || '#7a7a6a'); const n = geo.attributes.position.count; const cols = new Float32Array(n * 3); for (let i = 0; i < n; i++) { const t = c.clone().offsetHSL(0, 0, (hash(i, 7) - 0.5) * 0.08); cols.set([t.r, t.g, t.b], i * 3); } geo.setAttribute('color', new THREE.BufferAttribute(cols, 3)); }
     geoCache.set(key, geo);
     return geo;
@@ -182,7 +205,7 @@ export function createWorldView(view, { T, placements, art, scattered, book, tow
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
     for (const [k, items] of groups) {
       const [tk, art, v] = k.split('|');
-      const mesh = new THREE.InstancedMesh(instGeo(art, Number(v)), vcMat, items.length);
+      const mesh = new THREE.InstancedMesh(instGeo(art, Number(v)), matFor(art), items.length);
       items.forEach((t, i) => { q.setFromAxisAngle(up, t.rot || 0); s.setScalar(t.scale || 1); p.set(t.x, (t.y ?? T.heightAt(t.x, t.z)) - 0.1, t.z); m4.compose(p, q, s); mesh.setMatrixAt(i, m4); });
       mesh.castShadow = artById.get(art)?.kind === 'tree'; mesh.receiveShadow = true;
       mesh.computeBoundingSphere();
@@ -199,14 +222,15 @@ export function createWorldView(view, { T, placements, art, scattered, book, tow
   const keepU = { low: 0.3, medium: 0.8, high: 1 }[quality] ?? 0.8;
   const bushes = (scattered.decor || []).filter(d => BUSH_AS[d.art]).map(d => ({ ...d, art: BUSH_AS[d.art], h: UNDERSTORY_SPECIES[BUSH_AS[d.art]].h * (d.scale || 1) }));
   const under = [...bushes, ...(scattered.understory || [])].filter((t, n) => (n % 100) / 100 < keepU);
-  pending.push(createTrees({ trees: [...(scattered.trees || []).filter((t, n) => (n % 100) / 100 < Q[0]), ...under], tileGroup: quality === 'low' ? () => root : tileGroup, cell: TILE * (quality === 'low' ? 4 : 2), quality }).then(v => { treeView = v; }));
-  // every tree is solid on the server, so the ones the full renderer leaves out on lower settings are still drawn — as
-  // the cheap kit tree at their own height (owner report #132, 2026-11-25: "invisible collision here")
-  instance((scattered.trees || []).filter((t, n) => (n % 100) / 100 >= Q[0]).map(t => { const a = artById.get(t.art); const sz = a?.size || a?.placeholder?.size || [5, 9, 4]; return { ...t, scale: (t.h || sz[1]) / sz[1] }; }), () => true);
+  // every tree is drawn by the storybook renderer at every setting (owner 2026-11-26: "Where did these low poly mvp trees
+  // come from? Unacceptable." — the trees Low / Medium used to thin out were drawn as the flat kit pine / oak instead).
+  // Every tree is solid on the server (#132), so none is left out; extra trees join their block's existing groups
+  // (same draw calls, more instances). tests/world/textured.test.mjs fails if a world tree goes through instance() again.
+  pending.push(createTrees({ trees: [...(scattered.trees || []), ...placedTrees, ...under], tileGroup: quality === 'low' ? () => root : tileGroup, cell: TILE * (quality === 'low' ? 4 : 2), quality }).then(v => { treeView = v; }));
   // (Low: 512 m blocks hang on the root — a far tile's hiding must not take a block whose near edge is beside you)
   // (anything solid is always drawn: a rock you bump into is never thinned away)
   const decorList = (scattered.decor || []).filter(d => !BUSH_AS[d.art]);
-  instance(decorList, n => decorList[n].solid || (n % 100) / 100 < Q[1]);
+  instance(decorList, n => decorList[n].solid || (n % 100) / 100 < DECOR_KEEP);
 
   // ---------------------------------------------------------------- per frame
   let wt = 0;

@@ -477,7 +477,7 @@
    ]
   },
   "kni_rim_strike": {
-   "name": "Rim Strike",
+   "name": "Shield Bash",
    "owner": "knight",
    "tree": "challenge",
    "reqLevel": 11,

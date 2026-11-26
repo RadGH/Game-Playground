@@ -1,16 +1,21 @@
-// Oathwild — classes as masteries: unlocks, class points, ranks, paths, modifiers. Pure.
+// Oathwild — classes as masteries: unlocks, class points, single-rank nodes, modifiers. Pure.
 // The ONE reader of data/classes.json. (Rules in its _doc; plain-language version in docs/RULES.md.)
+//
+// Tree rules (owner 2026-11-26): no paths / subclasses; every node is ONE rank (one icon = one buy); a spell's higher
+// ranks are their own nodes deeper in the tree (`rank: 2`, `needs: [the rank before]`); `needs` = node ids that must
+// be owned first; each weapon and armour training is its own node. Saved characters from the old ranked trees are
+// cleaned on load (cleanNodes): unknown nodes go, every rank is 1, the points come back.
 //
 // Character fields this module reads and writes (ARCH.md "Character record"):
 //   classLevels { cls: n }    classOrder [cls…] (the order classes were first taken)
-//   nodes { 'cls/node': rank }   paths { cls: pathId }   bar [spellId…]
+//   nodes { 'cls/node': 1 }   bar [spellId…]   (paths: gone — cleanNodes clears it)
 //
 //   classDef(rules, cls) / classIds(rules) / maxClassLevel(rules, cls)
 //   classRefusal(rules, char, cls, { flags })   null or why this class cannot be levelled now (player words)
 //   pointsLeft(rules, char, cls) / pointsEarned / pointsSpent
 //   nodeRefusal(rules, char, cls, nodeId)       null or why the next rank of a node cannot be bought
 //   buyNode(rules, char, cls, nodeId)           { ok, why }
-//   choosePath(rules, char, cls, pathId)        { ok, why }
+//   cleanNodes(rules, char)                     old saves → the current trees (safe to run more than once)
 //   grantFree(rules, char, cls)                 gives every free node the class level has reached
 //   rankCapAt(rules, cls, node, classLevel)     highest rank a class level allows
 //   spellSources(rules, char)                   { spellId: { cls, node, rank } } (the best source wins)
@@ -19,7 +24,7 @@
 //   classProfs(rules, char)                     { prof: [source names] }
 //   refundPoints(rules, char)                   respec: every bought rank back, paths cleared
 
-import { spellRow, maxRankOf } from './spells.js';
+import { spellRow } from './spells.js';
 
 const C = rules => rules.data.classes;
 export const classDef = (rules, cls) => C(rules).classes[cls] || null;
@@ -31,21 +36,21 @@ export const nodeOf = (rules, cls, id) => classDef(rules, cls)?.nodes.find(n => 
 export const totalLevel = char => Object.values(char.classLevels || {}).reduce((s, v) => s + v, 0);
 export const isSpecialty = (rules, cls) => classDef(rules, cls)?.tier === 'specialty';
 
-/** How many ranks a node has. */
-export function nodeMaxRank(rules, node) {
-  if (node.kind === 'spell') return maxRankOf(rules, node.spell);
-  if (node.kind === 'passive') return node.ranks || 1;
-  return 1;
+/** Every node is one rank (owner 2026-11-26: "each icon is a single rank"). */
+export function nodeMaxRank() { return 1; }
+/** 1 once the class level reaches the node, else 0. */
+export function rankCapAt(rules, cls, node, classLevel) { return classLevel >= node.level ? 1 : 0; }
+/** The class level a node opens at. */
+export const levelForRank = (rules, node) => node.level;
+/** Ids a node needs owned first: its own `needs`, and for a modifier the spell node it changes. */
+export function nodeNeeds(node) {
+  const out = [...(node.needs || [])];
+  if (node.kind === 'mod' && node.on && !out.includes(node.on)) out.push(node.on);
+  return out;
 }
-/** The highest rank of `node` a class level allows (rank r needs level + rankGap × (r − 1)). */
-export function rankCapAt(rules, cls, node, classLevel) {
-  const gap = C(rules).rules.rankGap;
-  const max = nodeMaxRank(rules, node);
-  if (classLevel < node.level) return 0;
-  return Math.min(max, 1 + Math.floor((classLevel - node.level) / gap));
-}
-/** The class level rank `r` of a node needs. */
-export const levelForRank = (rules, node, r) => node.level + C(rules).rules.rankGap * (r - 1);
+const ROMAN = ['', '', ' II', ' III', ' IV', ' V'];
+/** "Cleave II" for a spell's rank-2 node. */
+export const rankSuffix = r => ROMAN[r] || (r > 1 ? ` ${r}` : '');
 
 // ---------------------------------------------------------------- taking a class
 
@@ -123,7 +128,6 @@ export function grantFree(rules, char, cls) {
   const lvl = char.classLevels?.[cls] || 0;
   for (const node of classDef(rules, cls)?.nodes || []) {
     if (!node.free || node.level > lvl) continue;
-    if (node.path && char.paths?.[cls] !== node.path) continue;
     const k = nodeKey(cls, node.id);
     if (!char.nodes[k]) char.nodes[k] = 1;
     if (node.kind === 'spell') addToBar(rules, char, node.spell);
@@ -148,23 +152,13 @@ export function nodeRefusal(rules, char, cls, nodeId) {
   const have = char.nodes?.[key] || 0;
   const max = nodeMaxRank(rules, node);
   const label = nodeName(rules, node);
-  if (have >= max) return `${label} is at its highest rank.`;
-  const next = have + 1;
-  const needLvl = levelForRank(rules, node, next);
-  if (lvl < needLvl) return next === 1 ? `${label} opens at ${def.name} level ${needLvl}.` : `Rank ${next} of ${label} needs ${def.name} level ${needLvl}.`;
-  if (node.path) {
-    const p = char.paths?.[cls];
-    if (!p) return `${label} belongs to the ${def.paths[node.path].name} path — choose a path at ${def.name} level ${C(rules).rules.pathLevel}.`;
-    if (p !== node.path) return `${label} belongs to the ${def.paths[node.path].name} path; you chose ${def.paths[p].name}.`;
-  }
+  if (have >= max) return `You already have ${label}.`;
+  if (lvl < node.level) return `${label} opens at ${def.name} level ${node.level}.`;
+  const missing = nodeNeeds(node).filter(id => !(char.nodes?.[nodeKey(cls, id)] > 0)).map(id => nodeName(rules, nodeOf(rules, cls, id)));
+  if (missing.length) return `${label} needs ${missing.join(' and ')} first.`;
   if (node.choice) {
     const other = def.nodes.find(n => n.choice === node.choice && n.id !== node.id && (char.nodes?.[nodeKey(cls, n.id)] || 0) > 0);
     if (other) return `You already chose ${nodeName(rules, other)}; only one of these can be taken.`;
-  }
-  if (node.kind === 'mod') {
-    const target = nodeOf(rules, cls, node.on);
-    const r = char.nodes?.[nodeKey(cls, node.on)] || 0;
-    if (r < (node.needsRank || 1)) return `${label} changes ${nodeName(rules, target)}: it needs ${nodeName(rules, target)} at rank ${node.needsRank || 1} first.`;
   }
   if (node.free && have === 0) return null;   // granted with the level, costs nothing
   const cost = node.cost || 1;
@@ -183,22 +177,57 @@ export function buyNode(rules, char, cls, nodeId) {
   return { ok: true, why: null };
 }
 
-export function choosePath(rules, char, cls, pathId) {
-  const def = classDef(rules, cls);
-  if (!def?.paths?.[pathId]) return { ok: false, why: `${def?.name || 'That class'} has no such path.` };
-  if ((char.classLevels?.[cls] || 0) < C(rules).rules.pathLevel) return { ok: false, why: `${def.name} chooses its path at level ${C(rules).rules.pathLevel}.` };
-  if (char.paths?.[cls]) return { ok: false, why: `You already walk the ${def.paths[char.paths[cls]].name} path (a shrine respec can change it).` };
-  char.paths = char.paths || {};
-  char.paths[cls] = pathId;
-  grantFree(rules, char, cls);
-  return { ok: true, why: null };
+/** Classes have no paths any more (owner 2026-11-26); kept so an old client's message gets a plain answer. */
+export function choosePath() { return { ok: false, why: 'Classes no longer have paths — every node is open to you.' }; }
+
+/**
+ * Bring a saved character onto the current trees: nodes that no longer exist go, every node is rank 1 (the points
+ * of old extra ranks come back), paths are cleared, free nodes are granted, the bar keeps only spells still known.
+ * Returns true when anything changed. Safe to run more than once.
+ */
+export function cleanNodes(rules, char) {
+  let changed = false;
+  const nodes = {};
+  for (const [key, rank] of Object.entries(char.nodes || {})) {
+    const [cls, id] = key.split('/');
+    if (!rank || !nodeOf(rules, cls, id)) { changed = true; continue; }
+    if (rank !== 1) changed = true;
+    nodes[key] = 1;
+  }
+  // a node whose needs are gone is refunded too (repeat: one removal can orphan the next)
+  for (let guard = 0; guard < 8; guard++) {
+    let drop = false;
+    for (const key of Object.keys(nodes)) {
+      const [cls, id] = key.split('/');
+      const node = nodeOf(rules, cls, id);
+      if (node.free) continue;
+      if (nodeNeeds(node).some(n => !nodes[nodeKey(cls, n)])) { delete nodes[key]; drop = changed = true; }
+    }
+    if (!drop) break;
+  }
+  char.nodes = nodes;
+  // talents from the old list (grouped trainings, several ranks) — unknown ones go, every talent is one rank
+  const TT = rules.data.talents?.talents || {};
+  for (const [id, r] of Object.entries(char.talents || {})) {
+    if (!TT[id] || !r) { delete char.talents[id]; changed = true; } else if (r > (TT[id].ranks || 1)) { char.talents[id] = TT[id].ranks || 1; changed = true; }
+  }
+  if (char.paths && Object.keys(char.paths).length) changed = true;
+  char.paths = {};
+  for (const cls of Object.keys(char.classLevels || {})) grantFree(rules, char, cls);
+  const known = spellSources(rules, char);
+  const bar = (char.bar || []).filter(s => s && known[s]);
+  if (bar.length !== (char.bar || []).length) changed = true;
+  char.bar = bar;
+  for (const s of Object.keys(known)) addToBar(rules, char, s);
+  return changed;
 }
 
-/** A node's display name (spell nodes take the spell's name). */
+/** A node's display name (spell nodes take the spell's name; a rank node adds II / III). */
 export function nodeName(rules, node) {
   if (!node) return '';
   if (node.name) return node.name;
-  if (node.kind === 'spell') return rules.spells[node.spell]?.base.name || node.spell;
+  if (node.kind === 'spell') return (rules.spells[node.spell]?.base.name || node.spell) + rankSuffix(node.rank || 1);
+  if (node.kind === 'prof') return rules.data.proficiency.nodeNames?.[node.grants?.[0]] || rules.data.proficiency.names[node.grants?.[0]] || node.id;
   return node.id;
 }
 
@@ -207,11 +236,12 @@ export function nodeName(rules, node) {
 /** Every spell the character knows: the best rank across classes, and which class it counts for. */
 export function spellSources(rules, char) {
   const out = {};
-  for (const [key, rank] of Object.entries(char.nodes || {})) {
+  for (let [key, rank] of Object.entries(char.nodes || {})) {
     if (!rank) continue;
     const [cls, id] = key.split('/');
     const node = nodeOf(rules, cls, id);
     if (node?.kind !== 'spell') continue;
+    rank = node.rank || 1;   // a rank node raises the spell it belongs to
     const lvl = char.classLevels?.[cls] || 0;
     const cur = out[node.spell];
     if (!cur || rank > cur.rank || (rank === cur.rank && lvl > (char.classLevels?.[cur.cls] || 0))) out[node.spell] = { cls, node: id, rank };
@@ -259,7 +289,7 @@ export function passiveMods(rules, char) {
     const node = nodeOf(rules, cls, id);
     if (node?.kind !== 'passive') continue;
     const mods = {};
-    for (const [k, v] of Object.entries(node.mods || {})) mods[k] = v * rank;
+    for (const [k, v] of Object.entries(node.mods || {})) mods[k] = v;
     out.push({ source: `${node.name} (${classDef(rules, cls).name})`, mods });
   }
   return out;
@@ -273,7 +303,7 @@ export function classProfs(rules, char) {
     const [cls, id] = key.split('/');
     const node = nodeOf(rules, cls, id);
     if (node?.kind !== 'prof') continue;
-    for (const g of node.grants || []) (out[g] = out[g] || []).push(`${node.name} (${classDef(rules, cls).name} ${node.level})`);
+    for (const g of node.grants || []) (out[g] = out[g] || []).push(`${nodeName(rules, node)} (${classDef(rules, cls).name} ${node.level})`);
   }
   return out;
 }
@@ -292,7 +322,7 @@ export function classGrowth(rules, char) {
   return { hp, mp, attrs };
 }
 
-/** Respec (points): every bought rank back, paths cleared, free nodes kept. */
+/** Respec (points): every bought node back, free nodes kept. */
 export function refundPoints(rules, char) {
   char.nodes = {};
   char.paths = {};
@@ -301,15 +331,13 @@ export function refundPoints(rules, char) {
 }
 
 /**
- * Spend a class's points the simple way (bots, tests, a "suggest" button): new spells first, then
- * ranks of spells already known, then passives, then modifiers, capstone last; choose `path` (or
- * the class's first path) when the level allows. Returns the node ids bought, in order.
+ * Spend a class's points the simple way (bots, tests): spells and their ranks first, then passives, modifiers,
+ * training last-but-one, capstone last. `prefer`: node ids to buy first when open. Returns the node ids bought.
  */
-export function suggestSpend(rules, char, cls, { path = null } = {}) {
+export function suggestSpend(rules, char, cls, { prefer = [] } = {}) {
   const def = classDef(rules, cls);
   if (!def) return [];
-  if (def.paths && !char.paths?.[cls] && (char.classLevels?.[cls] || 0) >= C(rules).rules.pathLevel) choosePath(rules, char, cls, path || Object.keys(def.paths)[0]);
-  const order = node => (node.choice ? 50 : 0) + ({ spell: 0, prof: 1, passive: 3, mod: 4 }[node.kind] ?? 5) + ((char.nodes?.[nodeKey(cls, node.id)] || 0) > 0 ? 2 : 0);
+  const order = node => (prefer.includes(node.id) ? -10 : 0) + (node.choice ? 50 : 0) + ({ spell: 0, passive: 2, mod: 3, prof: 4 }[node.kind] ?? 5);
   const bought = [];
   for (let guard = 0; guard < 60 && pointsLeft(rules, char, cls) > 0; guard++) {
     const next = def.nodes.filter(n => !nodeRefusal(rules, char, cls, n.id)).sort((a, b) => order(a) - order(b) || a.level - b.level)[0];

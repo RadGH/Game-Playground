@@ -16,7 +16,7 @@
 //   respecPrice(rules, char, kind) / respec(rules, char, kind)   'points' | 'full'
 
 import { pointBuyRefusal } from './attributes.js';
-import { classDef, classRefusal, grantFree, buyNode, choosePath, classRules, totalLevel, refundPoints } from './classes.js';
+import { classDef, classRefusal, grantFree, buyNode, classRules, totalLevel, refundPoints } from './classes.js';
 import { ensureSkills, boostSkill } from './skills-use.js';
 import { refundTalents } from './talents.js';
 import { attrTotals } from './sheet.js';
@@ -131,19 +131,15 @@ export function levelRefusal(rules, char, cls, { flags = [] } = {}) {
 
 /**
  * Put the next level into `cls`. Options, all validated, applied in this order and rolled back if
- * any fails: `path` (choose that class's path if this level reaches it), `spend` (node ids of that
- * class to buy, in order), `attr` (spend an attribute point, on even levels).
+ * any fails: `spend` (node ids of that class to buy, in order), `attr` (spend an attribute point,
+ * on even levels). (Classes have no paths since 2026-11-26.)
  */
-export function levelUp(rules, char, { cls, path = null, spend = [], attr = null, flags = [] } = {}) {
+export function levelUp(rules, char, { cls, spend = [], attr = null, flags = [] } = {}) {
   const why = levelRefusal(rules, char, cls, { flags });
   if (why) return { ok: false, why };
   const backup = structuredClone(char);
   const undo = (reason) => { for (const k of Object.keys(char)) delete char[k]; Object.assign(char, backup); return { ok: false, why: reason }; };
   takeClassLevel(rules, char, cls);
-  if (path) {
-    const r = choosePath(rules, char, cls, path);
-    if (!r.ok) return undo(r.why);
-  }
   for (const nodeId of spend) {
     const r = buyNode(rules, char, cls, nodeId);
     if (!r.ok) return undo(r.why);
@@ -158,7 +154,6 @@ export function levelUp(rules, char, { cls, path = null, spend = [], attr = null
     gained: {
       cls, classLevel: lvl, level: char.level,
       points: classRules(rules).pointsPerLevel,
-      pathNow: lvl === classRules(rules).pathLevel && !char.paths?.[cls] && !!classDef(rules, cls).paths,
       attrPoint: char.level % rules.data.attributes.levelPoints.every === 0,
       talentPoint: rules.data.talents.pointLevels.includes(char.level),
     },

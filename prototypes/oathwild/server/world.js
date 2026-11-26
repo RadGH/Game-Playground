@@ -9,12 +9,12 @@
 // `meta` = { code, name, public, owner, created } · `state` = world-state.js record (or null for a new world)
 // `persist({ world, chars })` is called with what to write (the hub writes files).
 import {
-  createWorld, addPlayer, removePlayer, refreshPlayer, step as simStep, respawnPlayer, die, castRefusal, spellPowerRange, spawnMonster,
+  createWorld, addPlayer, removePlayer, refreshPlayer, step as simStep, respawnPlayer, die, castRefusal, spellPowerRange, spawnMonster, walkSpeedOf, knockUnit,
 } from '../js/rules/combat.js';
 import { createWorldState, fromJSON, toJSON, flagsFor, discoverShrine, setHomeShrine, homeShrine, clearCamp, campsToRespawn, note } from '../js/rules/world-state.js';
 import { openFor, takeItem, takeGold, takeAll, chestOpenFor, chestDef, isEmptyFor, createContainer } from '../js/rules/loot.js';
 import { levelUp, pendingLevels, respec, respecPrice, addXp, xpToReach } from '../js/rules/levels.js';
-import { buyNode, choosePath, classDef, addToBar, spellSources } from '../js/rules/classes.js';
+import { buyNode, choosePath, classDef, addToBar, spellSources, cleanNodes } from '../js/rules/classes.js';
 import { takeTalent } from '../js/rules/talents.js';
 import { spendAttrPoint } from '../js/rules/attributes.js';
 import { sheetOf, attrTotals } from '../js/rules/sheet.js';
@@ -109,6 +109,8 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     for (const P of players.values()) if (P.char.id === char.id) return { error: 'That character is already in this world.' };
     // a magic item made before casters existed learns its element and style now (same item id = same answer)
     for (const it of [...Object.values(char.gear || {}), ...(char.bag || [])]) finishCaster(rules, it);
+    // a hero saved on the old ranked trees (before 2026-11-26) moves onto the new ones: unknown nodes go, points back
+    cleanNodes(rules, char);
     const at = startPoint(char);
     const shrine = shrinePos(homeShrine(ws, char.id)) || spawnAt;
     const u = addPlayer(world, char, { at: [at.x, at.z], shrine: [shrine.x, shrine.z] });
@@ -189,6 +191,12 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
       const c = P.char, n = Math.max(1, Math.min(5, msg.levels | 0 || 1));
       addXp(rules, c, xpToReach(rules, (c.level || 1) + pendingLevels(rules, c) + n) - (c.xp || 0));
       changed(P);
+      return;
+    }
+    // dev builds only: throw every monster within 15 m (knockback + knockdown; tests/ui/knock-shot.mjs)
+    if (msg.t === 'devKnock' && dev) {
+      const u = unitOf(P); if (!u) return;
+      for (const m of [...world.units.values()]) if (m.kind === 'monster' && Math.hypot(m.x - u.x, m.z - u.z) < 15) knockUnit(world, u, m, { push: Number(msg.push) || 4, down: Number(msg.down) || 3 });
       return;
     }
     // dev builds only: still, unkillable targets in a fan ahead of the hero (screenshots of attacks)
@@ -321,7 +329,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
       }
       // ---- levelling (every call validated by the rules core; all-or-nothing)
       case 'levelup': {
-        const r = levelUp(rules, c, { cls: m.cls, path: m.path || null, spend: (m.spend || []).filter(x => typeof x === 'string'), attr: m.attr || null, flags: flagsFor(ws, c.id) });
+        const r = levelUp(rules, c, { cls: m.cls, spend: (m.spend || []).filter(x => typeof x === 'string'), attr: m.attr || null, flags: flagsFor(ws, c.id) });
         if (!r.ok) return err(P, r.why);
         changed(P);
         broadcast({ t: 'say', text: `${c.name} reached level ${c.level} (${classDef(rules, m.cls).name} ${c.classLevels[m.cls]}).`, kind: 'level' });
@@ -658,6 +666,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
       for (const id of P.seen.keys()) if (!keep.has(id)) { gone.push(id); P.seen.delete(id); }
       const ev = events.filter(e => eventFor(e, me));
       const msg = { t: 's', tk: tick, wt: R2(world.t), ack: P.ack, u: rows };
+      const sp = speedOf(me); if (sp !== P.sp) { P.sp = sp; msg.sp = sp; }
       if (add.length) msg.add = add;
       if (gone.length) msg.gone = gone;
       if (ev.length) msg.ev = ev;
@@ -697,9 +706,10 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
   function eventFor(e, me) {
     if (e.t === 'respawnReady' || e.t === 'tick' && e.to !== me.id) return false;
     if (e.who === me.id || e.to === me.id || e.from === me.id || e.players?.includes?.(me.id)) return true;
-    const ref = world.units.get(e.to || e.who || e.from);
+    // (a throw's / leap's `to` is a point [x, z], not a unit id; an event's own `at` may be the time)
+    const ref = world.units.get(typeof e.to === 'string' ? e.to : (e.who || e.from));
     if (ref) return Math.hypot(ref.x - me.x, ref.z - me.z) < EVENT_METRES;
-    if (e.at) return Math.hypot((e.at[0] || 0) - me.x, (e.at[1] || 0) - me.z) < EVENT_METRES;
+    if (Array.isArray(e.at)) return Math.hypot((e.at[0] || 0) - me.x, (e.at[1] || 0) - me.z) < EVENT_METRES;
     return false;
   }
   function sendMe(P) {
@@ -713,15 +723,9 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     }));
   }
   /** The walking speed the sim would use now (the browser predicts its own hero with it). */
-  function speedOf(u) {
-    let k = 1;
-    for (const st of Object.values(u.statuses || {})) k += st.move || 0;
-    let slow = 0;
-    for (const st of Object.values(u.statuses || {})) slow = Math.max(slow, st.slow || 0);
-    let v = u.sheet.moveSpeed * (1 - Math.min(0.9, slow)) * k;
-    if (u.mounted) v *= rules.data.inventory.mount.speedMult;
-    return R2(v);
-  }
+  // the sim's own walking speed (js/rules/combat.js walkSpeedOf: slows, speed buffs, the horse), so the browser's
+  // prediction walks exactly as fast; sent again in a snapshot (`sp`) whenever it changes (a slow landing, a buff ending)
+  function speedOf(u) { return R2(walkSpeedOf(world, u)); }
   function sendWorld(P) {
     P.send(JSON.stringify({
       t: 'wstate', flags: ws.flags, my: ws.playerFlags[P.char.id] || [], quests: ws.quests, shrines: ws.shrines, found: ws.found, camps: ws.camps,

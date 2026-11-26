@@ -6,6 +6,7 @@
 //   w.render()  redraw (keeps scroll) · w.close() · w.setTab(id) · w.el / w.body
 //   toast(text, kind)  a short message near the top (two at most; the same text never twice at once — rule 42)
 import { glyph } from './icons.js';
+import { focusQuiet } from '../../../../../shared/tooltip.js';
 
 const stack = [];
 let escInstalled = false;
@@ -40,7 +41,7 @@ function restoreView(root, kept) {
   const byKey = new Map();
   for (const n of root.querySelectorAll('*')) byKey.set(viewKey(n, root), n);
   for (const [k, top, left] of kept.scrolls) { const n = byKey.get(k); if (n) { n.scrollTop = top; n.scrollLeft = left; } }
-  if (kept.focus) byKey.get(kept.focus)?.focus?.({ preventScroll: true });
+  if (kept.focus) focusQuiet(byKey.get(kept.focus));
 }
 
 export function openWin({ id, title: heading = '', sub = '', cls = '', size = '', tabs = null, tab = null, render, foot = null, onClose = null, clear = false, focus = true }) {
@@ -102,7 +103,7 @@ export function openWin({ id, title: heading = '', sub = '', cls = '', size = ''
   if (focus) {
     // the first useful control gets the focus, never the close button (lessons rule 27)
     const first = el.querySelector('.ow-win-body [data-primary], .ow-win-body button:not([disabled]), .ow-win-foot .ow-primary, .ow-win-body input');
-    first?.focus?.({ preventScroll: true });
+    focusQuiet(first);   // no tooltip on open (owner 2026-11-26)
   }
   changed();
   return w;

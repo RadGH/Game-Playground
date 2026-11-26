@@ -2,7 +2,8 @@
 // validateVisuals(data, { sprites, maps }) → [problem, …] (empty = fine). The kit runs it at load and warns.
 
 export const LAYER_TYPES = ['emitter', 'flipbook', 'decal', 'shell', 'mesh', 'light', 'shake', 'ribbon', 'trail', 'arc', 'sweep'];
-export const PHASES = ['windup', 'release', 'travel', 'impact', 'linger', 'aura', 'beam', 'sweep'];
+// point: drawn at each point of the spell's true shape (kit.spread); area: once at the real radius
+export const PHASES = ['windup', 'release', 'travel', 'impact', 'point', 'area', 'linger', 'aura', 'beam', 'sweep'];
 export const KINDS = ['missile', 'ground', 'line', 'nova', 'beam', 'cone', 'melee', 'self', 'shift', 'summon', 'aura'];
 export const ANCHORS = ['point', 'ground', 'hands', 'hand_l', 'hand_r', 'caster', 'chest', 'head', 'feet', 'target', 'body', 'missile', 'tip'];
 export const SHAPES = ['point', 'sphere', 'disc', 'ring', 'line', 'cylinder'];
@@ -10,7 +11,7 @@ export const SHELLS = ['cylinder', 'cone', 'funnel', 'dome', 'sphere'];
 export const MESHES = ['spike', 'shard', 'core', 'ring', 'pillar', 'arrow'];
 export const SCHOOLS = ['fire', 'ice', 'frost', 'holy', 'nature', 'arcane', 'shadow', 'lightning', 'poison', 'physical', 'bleed', 'blood', 'fel', 'dawn', 'moon', 'haste', 'true'];
 const SCHOOL_TEX = ['fire', 'frost', 'holy', 'nature', 'arcane', 'shadow', 'lightning', 'poison'];
-const COLOR = /^(hot|mid|deep|smoke|white|black|#[0-9a-f]{6})$/i;
+const COLOR = /^(hot|mid|deep|smoke|accent|white|black|#[0-9a-f]{6})$/i;
 
 /** the layers of a visual's phase (some phases hold { layers }) */
 export function phaseLayers(v, phase) {
@@ -46,7 +47,7 @@ export function validateVisuals(data, tex = null) {
       for (const c of [].concat(L.color ?? [], L.edge ?? [])) if (typeof c === 'string' && !COLOR.test(c)) out.push(`${at}: colour ${c} is not a palette name or #rrggbb`);
       for (const k of ['life', 'size', 'speed']) if (Array.isArray(L[k]) && (L[k].length !== 2 || L[k][0] > L[k][1])) out.push(`${at}: ${k} must be [low, high]`);
       if (type === 'emitter' && !L.rate && !L.burst) out.push(`${at}: an emitter needs rate or burst`);
-      if (type === 'emitter' && L.rate && ph !== 'windup' && ph !== 'aura' && ph !== 'linger' && ph !== 'travel' && L.duration == null) out.push(`${at}: a steady emitter in a one-off phase needs a duration`);
+      if (type === 'emitter' && L.rate && !['windup', 'aura', 'linger', 'travel'].includes(ph) && L.duration == null) out.push(`${at}: a steady emitter in a one-off phase needs a duration`);
     });
     if ((v.kind === 'missile') && !v.travel) out.push(`${id}: a missile needs a travel phase`);
     if (v.kind === 'beam' && !v.beam) out.push(`${id}: a beam needs a beam phase`);

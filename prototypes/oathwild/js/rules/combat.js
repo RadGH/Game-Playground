@@ -19,6 +19,13 @@
 //   respawn, mount }
 // Events: { t:'hit'|'heal'|'cast'|'aura'|'death'|'downed'|'revived'|'xp'|'level'|'loot'|'camp'|
 //   'skill'|'miss'|'refused'|'projectile'|'zone'|'summon'|'form'|'mount', … } — see docs/RULES.md.
+// Combat feel (2026-11-26, owner: "I don't want to sit still auto attacking like an npc"):
+//   { t:'knock', who, from:[x,z], to:[x,z], air, down, up }   a body thrown `air` seconds, then down `down` + up `up` s
+//   { t:'leap', who, spell, from:[x,z], to:[x,z], air }        a hero jumping to a point (untouchable in the air)
+//   { t:'land', who, spell, at:[x,z], radius }                 …and landing (the hit follows as ordinary hits)
+//   { t:'rush', who, spell, from:[x,z], to:[x,z], seconds }    a charge running a line
+//   { t:'windup', who, to, seconds, reach, arc, ranged }       a monster's tell before every blow (lessons rule 39)
+//   { t:'windupEnd', who, cancelled }                           the tell stopped early (staggered, knocked down)
 
 import {
   slowOf, outgoingFrom, incomingFrom, STATUS_POWER_SHARE, cooldownPower,
@@ -128,7 +135,7 @@ export function spawnMonster(world, monsterId, level, at, { rank = 'normal', cam
   const R = rank === 'boss' ? 'champion' : rank;   // a camp boss uses the champion numbers, plus its own row
   const e = rules.rpg.makeEnemy(def, level, world.rng, { rank: R });
   const id = newId(world, side === 'monsters' ? 'm' : 'c');
-  const bossK = rank === 'boss' ? 1.5 : 1;
+  const bossK = rank === 'boss' ? (CF(rules).monsterScale.bossHp ?? 1.5) : 1;
   const u = Object.assign(e, {
     id, kind: side === 'monsters' ? 'monster' : 'pet', side, rank, defId: monsterId, art: def.art,
     x: at[0], z: at[1], home: { x: (home || at)[0], z: (home || at)[1] }, facing: 0, alive: true,
@@ -138,11 +145,12 @@ export function spawnMonster(world, monsterId, level, at, { rank = 'normal', cam
   const MS = CF(rules).monsterScale;
   u.maxHp = u.hp = Math.round(u.hp * bossK * (side === 'monsters' ? MS.hp : power));
   if (side !== 'monsters') u.dmg = u.dmg.map(v => Math.max(1, Math.round(v * power)));
-  else u.dmg = u.dmg.map(v => Math.max(1, Math.round(v * MS.dmg * (rank === 'boss' ? 1.2 : 1))));
+  else u.dmg = u.dmg.map(v => Math.max(1, Math.round(v * MS.dmg * (rank === 'boss' ? (MS.bossDmg ?? 1) : 1))));
   u.aggroRange = def.aggroRange ?? CF(rules).monsters.noticeDefault;
   // temperament (owner 2026-11-25, "where are all the wild life?"): hostile hunts you; defensive never starts a fight
   // but answers a blow (cattle, boars); skittish never fights and runs from a hero who comes close (deer, raccoons)
   u.temper = def.temper || 'hostile';
+  if (def.windup != null) u.windupSeconds = def.windup;     // its own tell (data/monsters.json `windup`), else combat.json
   if (u.temper !== 'hostile') u.aggroRange = 0;
   u.fleeRange = def.fleeRange ?? CF(rules).monsters.fleeDefault ?? 10;
   u.wander = side === 'monsters' ? (def.wander ?? (camp ? CF(rules).monsters.wanderCamp ?? 3 : CF(rules).monsters.wanderDefault ?? 9)) : 0;
@@ -156,7 +164,9 @@ export function spawnMonster(world, monsterId, level, at, { rank = 'normal', cam
 export function step(world, dt, inputs = {}) {
   const rules = world.rules;
   world.t += dt;
+  world.dt = dt;
   world.tick++;
+  stepFlights(world);
   for (const u of [...world.units.values()]) {
     if (u.kind === 'player') stepPlayer(world, u, inputs[u.id] || {}, dt);
   }
@@ -222,32 +232,35 @@ function stepPlayer(world, u, input, dt) {
   // the horse
   if (input.mount) toggleMount(world, u, input);
 
-  // movement
-  const dashing = u.dash && u.dash.steps > 0;
+  // movement (full speed at once and none when the stick is let go: no sliding — the browser predicts the same)
+  const dashing = (u.dash && u.dash.steps > 0) || !!u.rush;
   if (ctl.move && !dashing && input.move && (input.move.x || input.move.z)) {
     const dir = norm2(input.move.x, input.move.z);
-    const b = auraTotalsOf(u);
-    let speed = s.moveSpeed * (1 - slowOf(u)) * (1 + (b.move || 0));
+    let speed = walkSpeedOf(world, u);
+    if (u.swimming) speed *= C.swimMult ?? 0.6;               // u.swimming: set by the host from the ground each step
     if (u.sneaking) speed *= hasPerk(rules, u.char, 'soft_soles') ? 0.75 : 0.55;
-    if (u.mounted) speed *= rules.data.inventory.mount.speedMult;
-    if (u.swimming) speed *= C.swimMult ?? 0.6;              // u.swimming: set by the host from the ground each step
     u.x += dir.x * speed * dt; u.z += dir.z * speed * dt;
     if (u.channel) endChannel(world, u);
   }
-  // the dodge: a quick DASH over dodgeSeconds (not a 4 m jump in one step), the way you are moving, or toward the
-  // crosshair when standing still — js/client/play/predict.js does exactly the same, so the drawn hero never snaps back
-  if (input.dodge && ctl.move && !dashing && !u.swimming && u.stamina >= C.stamina.dodge) {
+  // the dodge: a quick ROLL over dodgeSeconds (never a jump in one step), the way you are moving, or toward the
+  // crosshair when standing still; untouchable for most of it; a short wait (dodgeCooldown) before the next.
+  // js/client/play/predict.js runs exactly the same steps, so the drawn hero never snaps back
+  if (u.dodgeWait > 0) u.dodgeWait--;
+  if (input.dodge && ctl.move && !dashing && !u.swimming && !(u.dodgeWait > 0) && u.stamina >= C.stamina.dodge) {
     const d = input.move && (input.move.x || input.move.z) ? norm2(input.move.x, input.move.z) : { x: Math.sin(u.facing), z: Math.cos(u.facing) };
     u.dash = { x: d.x, z: d.z, steps: dashSteps(C, dt) };
-    u.safeUntil = world.t + C.stamina.dodgeSafeSeconds;
+    u.dodgeWait = dodgeWaitSteps(C, dt);
+    u.safeUntil = Math.max(u.safeUntil || 0, world.t + C.stamina.dodgeSafeSeconds);
     spendStamina(world, u, C.stamina.dodge);
-    emit(world, { t: 'dodge', who: u.id });
+    if (u.channel) endChannel(world, u);
+    emit(world, { t: 'dodge', who: u.id, dir: [round2(d.x), round2(d.z)], seconds: C.stamina.dodgeSeconds });
   }
   if (u.dash && u.dash.steps > 0) {
     const step = C.stamina.dodgeMetres / dashSteps(C, dt);
     u.x += u.dash.x * step; u.z += u.dash.z * step;
     if (--u.dash.steps <= 0) u.dash = null;
   }
+  if (u.rush) stepRush(world, u);
   // sneaking unseen near an enemy trains Sneak
   if (u.sneaking) {
     const near = [...world.units.values()].some(m => m.kind === 'monster' && m.alive && dist(m, u) < 15 && !m.threat?.has(u.id));
@@ -258,14 +271,27 @@ function stepPlayer(world, u, input, dt) {
   if (input.revive) tickRevive(world, u, input.revive, dt);
   else u.reviving = null;
 
-  // casting
+  // casting (not in the middle of a leap or a charge: the landing is the spell)
   if (u.channel) tickChannel(world, u, input);
-  if (input.cast && ctl.cast) {
+  if (input.cast && ctl.cast && !u.rush) {
     const spell = input.cast.spell || u.char.bar?.[input.cast.slot];
     if (spell && !(u.channel && u.channel.spell === spell)) castSpell(world, u, spell, { aim: input.aim, at: input.cast.at, held: input.cast.held });
   }
   // the weapon (or a shape's attack)
-  if (input.attack && ctl.act && world.t >= u.swingAt && !u.mounted) basicAttack(world, u, input);
+  if (input.attack && ctl.act && world.t >= u.swingAt && !u.mounted && !u.rush) basicAttack(world, u, input);
+}
+
+const round2 = v => Math.round(v * 100) / 100;
+
+/**
+ * How fast a body walks now: the sheet's speed, slows and speed buffs, the horse (not swimming). The ONE formula — the
+ * server sends it to the browser (server/world.js speedOf) so the predicted hero walks exactly as fast (a slowed hero
+ * whose browser did not know used to be pulled back every step).
+ */
+export function walkSpeedOf(world, u) {
+  let v = (u.sheet?.moveSpeed ?? u.speed ?? 5) * (1 - slowOf(u)) * (1 + (auraTotalsOf(u).move || 0));
+  if (u.mounted) v *= world.rules.data.inventory.mount.speedMult;
+  return v;      // (swimming is applied on top by whoever knows the ground: the step here, the browser's prediction)
 }
 
 function auraTotalsOf(u) {
@@ -359,6 +385,8 @@ export function castRefusal(world, u, spellId) {
   if ((u.cooldowns[spellId] || 0) > world.t) return `${row.name} is not ready (${Math.ceil(u.cooldowns[spellId] - world.t)}s).`;
   if (u.mp < row.mp) return `Not enough mana for ${row.name} (${row.mp} needed).`;
   if (!control(u).cast) return 'You cannot cast while held, asleep, stunned or silenced.';
+  if (u.rush) return 'You are in the middle of a leap.';
+  if ((row.shape === 'leap' || row.shape === 'dash') && !control(u).move) return `You cannot ${row.shape === 'leap' ? 'leap' : 'charge'} while held.`;
   return null;
 }
 
@@ -413,7 +441,7 @@ export function castSpell(world, u, spellId, { aim = null, at = null, held = fal
     return true;
   }
   switch (row.shape) {
-    case 'bolt': fireBolt(world, u, row, dir, { ...ctx, speed: CF(rules).projectile.bolt }); break;
+    case 'bolt': fireBolt(world, u, row, dir, { ...ctx, speed: CF(rules).projectile.bolt, at: row.explode && at ? [at[0], at.length > 2 ? at[2] : at[1]] : null }); break;
     case 'ground': {
       const p = groundPoint(u, dir, at, row.range || 20);
       const reps = row.repeats || 1;
@@ -426,11 +454,11 @@ export function castSpell(world, u, spellId, { aim = null, at = null, held = fal
       if (row.channel) { u.channel = { spell: spellId, row, until: world.t + row.channel.seconds, next: world.t, ctx, dir }; }
       else repeatShape(world, u, row, 'line', { from: origin, dir, ...ctx });
       break;
-    case 'dash': {
-      const len = Math.min(row.dash?.range || row.range || 10, row.range || 99);
-      const from = { x: u.x, z: u.z };
-      u.x += dir.x * len; u.z += dir.z * len;
-      lineHit(world, u, row, from, dir, len, { ...ctx, width: (row.splash || 2) * 2 });
+    case 'dash': startRush(world, u, row, spellId, 'dash', dir, dashLength(row), ctx); break;
+    case 'leap': {
+      const p = groundPoint(u, dir, at, row.range || 12);
+      const len = Math.hypot(p.x - u.x, p.z - u.z);
+      startRush(world, u, row, spellId, 'leap', len > 0.05 ? norm2(p.x - u.x, p.z - u.z) : dir, len, ctx);
       break;
     }
     case 'self': case 'summon': default:
@@ -528,7 +556,8 @@ function coneHit(world, u, row, dir, ctx) {
 function aroundHit(world, u, row, at, ctx) {
   const r = row.radius || row.splash || 3;
   const hits = foesNear(world, u, at, r);
-  for (const t of hits) hit(world, u, t, row, ctx);
+  const c = ctx.knockFrom ? ctx : { ...ctx, knockFrom: { x: at.x, z: at.z, id: u.id } };   // thrown away from the blast
+  for (const t of hits) hit(world, u, t, row, c);
   return hits.length;
 }
 function lineHit(world, u, row, from, dir, len, ctx) {
@@ -548,9 +577,13 @@ function fireBolt(world, u, row, dir, ctx) {
   for (let i = 0; i < n; i++) {
     const off = n > 1 ? (i - (n - 1) / 2) * (spread / Math.max(1, n - 1)) * 2 : 0;
     const a = Math.atan2(dir.x, dir.z) + off;
+    // an exploding ball (row.explode, owner 2026-11-26 "the fireball should be massive … a huge explosion") stops at
+    // the aimed ground point when one is given (never past its range)
+    let left = row.range || 34;
+    if (row.explode && ctx.at && n === 1) { const d = Math.hypot(ctx.at[0] - u.x, ctx.at[1] - u.z); if (d > 0.5) left = Math.min(left, d); }
     world.projectiles.push({
       id: newId(world, 'b'), owner: u.id, x: u.x, z: u.z, dx: Math.sin(a), dz: Math.cos(a), speed: ctx.speed || 32,
-      left: row.range || 34, row, ctx, pierce: row.pierce || 0, hit: new Set(), bounces: row.ricochet?.bounces || 0, keep: 1,
+      left, row, ctx, pierce: row.pierce || 0, hit: new Set(), bounces: row.ricochet?.bounces || 0, keep: 1,
       ...(row.homing ? { homing: row.homing } : {}),
     });
   }
@@ -571,11 +604,12 @@ function stepProjectiles(world, dt) {
       p.left -= stepLen / 2;
       for (const t of world.units.values()) {
         if (t === owner || p.hit.has(t.id) || !isFoe(owner, t) || t.downed) continue;
-        if (Math.hypot(t.x - p.x, t.z - p.z) > R + bodyR(t)) continue;
+        if (Math.hypot(t.x - p.x, t.z - p.z) > R + bodyR(t) + (p.row.explode ? (CF(world.rules).projectile.explodeExtra ?? 0.35) : 0)) continue;
         p.hit.add(t.id);
+        if (p.row.explode) { burst(world, owner, p); done = true; break; }     // the ball bursts on the first foe it touches
         const row = p.keep !== 1 ? { ...p.row, mult: (p.row.mult || 1) * p.keep } : p.row;
         hit(world, owner, t, row, p.ctx);
-        if (p.row.splash) for (const o of foesNear(world, owner, t, p.row.splash)) if (o !== t) hit(world, owner, o, { ...row, mult: (row.mult || 1) * 0.5, applies: row.applies }, p.ctx);
+        if (p.row.splash) { const blast = { ...p.ctx, knockFrom: { x: p.x, z: p.z, id: owner.id } }; for (const o of foesNear(world, owner, t, p.row.splash)) if (o !== t) hit(world, owner, o, { ...row, mult: (row.mult || 1) * 0.5, applies: row.applies }, blast); }
         if (p.bounces > 0) {
           const next = foesNear(world, owner, t, p.row.ricochet.range || 8).filter(o => !p.hit.has(o.id)).sort((a, b) => dist(a, t) - dist(b, t))[0];
           if (next) { if (p.ctx?.vis) emit(world, { t: 'hop', who: owner.id, from: [t.x, t.z], to: [next.x, next.z], el: p.row.element, look: p.ctx.cx?.plan?.look || null }); const d = norm2(next.x - t.x, next.z - t.z); p.dx = d.x; p.dz = d.z; p.x = t.x; p.z = t.z; p.bounces--; p.keep *= p.row.ricochet.keep || 0.8; p.left = Math.max(p.left, dist(next, t) + 1); break; }
@@ -583,11 +617,21 @@ function stepProjectiles(world, dt) {
         if (p.pierce > 0) { p.pierce--; continue; }
         done = true; break;
       }
-      if (p.left <= 0) done = true;
+      if (p.left <= 0 && !done) { done = true; if (p.row.explode) { p.x += p.dx * p.left; p.z += p.dz * p.left; burst(world, owner, p); } }   // …or where it was aimed / its range ends
     }
     if (!done) keep.push(p);
   }
   world.projectiles = keep;
+}
+
+/**
+ * An exploding projectile bursts (row.explode: { radius }): the row's full damage, statuses and knock on everything
+ * within the radius of the burst point, thrown away from it. Emits { t:'burst', who, spell, at:[x,z], radius }.
+ */
+function burst(world, owner, p) {
+  const radius = p.row.explode.radius || p.row.radius || 3;
+  emit(world, { t: 'burst', who: owner.id, spell: p.ctx?.spell || null, at: [round2(p.x), round2(p.z)], radius });
+  aroundHit(world, owner, { ...p.row, radius, splash: 0 }, { x: p.x, z: p.z }, { ...p.ctx, knockFrom: { x: p.x, z: p.z, id: owner.id } });
 }
 
 /**
@@ -610,6 +654,108 @@ export function blockRoll(world, t, from, element) {
 
 /** The world sim's shapes, lent to a magic weapon's attack (js/rules/caster-attack.js). */
 const CASTER_OPS = { fireBolt, coneHit, lineHit, aroundHit, schedule, emit: (w, e) => emit(w, e), hit: (...a) => hit(...a), foesNear };
+
+// ---------------------------------------------------------------- throws, leaps and charges
+
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+/**
+ * Throw body `t` away from `from` (a caster, or a blast's middle): `knock.push` metres over a short flight, then with
+ * `knock.down` it lies on the ground and gets up (data/combat.json knock; bosses and champions move less). The flight
+ * runs a step at a time (stepFlights), so the server's ground check stops it at a wall, a river or a cliff edge.
+ * Heroes are not thrown (no monster carries a knock; their position is the browser's own prediction).
+ */
+export function knockUnit(world, from, t, knock, { pull = false } = {}) {
+  if (!t.alive || t.downed || t.kind === 'player' || t.returning) return null;
+  const rules = world.rules;
+  const K = CF(rules).knock || {};
+  const rk = K.rank?.[t.rank] || { push: 1, down: 1 };
+  const push = Math.max(0, (knock.push || 0) * (rk.push ?? 1));
+  const down = Math.max(0, (knock.down || 0) * (rk.down ?? 1));
+  if (push < 0.05 && down <= 0) return null;
+  let d = pull ? norm2(from.x - t.x, from.z - t.z) : norm2(t.x - from.x, t.z - from.z);
+  if (Math.hypot(t.x - from.x, t.z - from.z) < 0.05) { const f = world.units.get(from.id)?.facing ?? t.facing ?? 0; d = { x: Math.sin(f), z: Math.cos(f) }; }
+  const air = push >= 0.05 ? clamp((K.airMin ?? 0.3) + push * (K.airPerMetre ?? 0.03), K.airMin ?? 0.3, K.airMax ?? 0.45) : 0;
+  const dt = world.dt || 0.05;
+  if (air > 0) { const steps = Math.max(1, Math.round(air / dt)); t.flight = { dx: d.x * push / steps, dz: d.z * push / steps, steps }; }
+  cancelWindup(world, t);
+  t.channel = null;
+  const up = down > 0 ? (K.standUp ?? 0.45) : 0;
+  if (down > 0) applyAura(rules, t, 'knockdown', { over: { seconds: air + down + up }, source: from.id || null });
+  else if (air > 0 && !t.statuses?.knockdown) applyAura(rules, t, 'stagger', { over: { seconds: air }, source: from.id || null });
+  const e = { t: 'knock', who: t.id, from: [round2(t.x), round2(t.z)], to: [round2(t.x + d.x * push), round2(t.z + d.z * push)], air: round2(air), down: round2(down), up: round2(up) };
+  emit(world, e);
+  return e;
+}
+
+/** Bodies in the air move one step of their throw (before anyone thinks: a thrown monster neither walks nor swings). */
+function stepFlights(world) {
+  for (const t of world.units.values()) {
+    const f = t.flight;
+    if (!f) continue;
+    t.x += f.dx; t.z += f.dz;
+    if (--f.steps <= 0) t.flight = null;
+  }
+}
+
+/** A monster's tell stops early (staggered, thrown, knocked down): no blow comes out of it. */
+function cancelWindup(world, m) {
+  if (!m.windup) return;
+  m.windup = null;
+  m.swingAt = Math.max(m.swingAt || 0, world.t + (CF(world.rules).monsters.recoverMin ?? 0.35));
+  emit(world, { t: 'windupEnd', who: m.id, cancelled: true });
+}
+
+/** How far a charge runs (its dash range, never past its range). */
+export const dashLength = row => Math.min(row.dash?.range || row.range || 10, row.range || 99);
+/** How many sim steps a leap or charge of `len` metres takes (the browser's prediction runs the same count). */
+export function rushSteps(C, kind, len, dt) {
+  const R = C.rush || {};
+  const secs = kind === 'leap' ? (R.leapSeconds ?? 0.45) : len / (R.dashSpeed ?? 34);
+  return Math.max(1, Math.round(secs / dt));
+}
+
+/**
+ * A spell that moves its caster. `leap`: over the air time to the point, untouchable, hits round the landing.
+ * `dash`: runs the line, hitting each foe it passes once, untouchable while running. One step at a time
+ * (stepRush), the same steps the browser predicts (predict.js rush), so the drawn hero never snaps back.
+ */
+function startRush(world, u, row, spellId, kind, dir, len, ctx) {
+  const C = CF(world.rules);
+  const dt = world.dt || 0.05;
+  const steps = rushSteps(C, kind, len, dt);
+  u.rush = { kind, row, spell: spellId, ctx, dx: dir.x * len / steps, dz: dir.z * len / steps, dir, steps, hit: new Set() };
+  if (u.dash) u.dash = null;
+  if (u.channel) endChannel(world, u);
+  u.safeUntil = Math.max(u.safeUntil || 0, world.t + steps * dt + 0.05);
+  const to = [round2(u.x + dir.x * len), round2(u.z + dir.z * len)];
+  if (kind === 'leap') emit(world, { t: 'leap', who: u.id, spell: spellId, from: [round2(u.x), round2(u.z)], to, air: round2(steps * dt) });
+  else emit(world, { t: 'rush', who: u.id, spell: spellId, from: [round2(u.x), round2(u.z)], to, seconds: round2(steps * dt) });
+}
+function stepRush(world, u) {
+  const r = u.rush;
+  const from = { x: u.x, z: u.z };
+  u.x += r.dx; u.z += r.dz;
+  if (r.kind === 'dash' && r.row.mult) {
+    // everything the charge passes this step, once each
+    const len = Math.hypot(r.dx, r.dz), half = (r.row.splash || 2);
+    for (const t of targetsOf(world, u)) {
+      if (r.hit.has(t.id)) continue;
+      const dx = t.x - from.x, dz = t.z - from.z;
+      const along = dx * r.dir.x + dz * r.dir.z;
+      if (along < -0.6 || along > len + bodyR(t) + 0.6) continue;
+      if (Math.abs(dx * r.dir.z - dz * r.dir.x) > half + bodyR(t)) continue;
+      r.hit.add(t.id);
+      hit(world, u, t, r.row, { ...r.ctx, knockFrom: { x: from.x - r.dir.x, z: from.z - r.dir.z, id: u.id } });
+    }
+  }
+  if (--r.steps > 0) return;
+  u.rush = null;
+  if (r.kind === 'leap') {
+    emit(world, { t: 'land', who: u.id, spell: r.spell, at: [round2(u.x), round2(u.z)], radius: r.row.radius || r.row.splash || 3 });
+    if (r.row.mult || r.row.applies?.length) aroundHit(world, u, r.row.mult ? r.row : { ...r.row, noDamage: true }, { x: u.x, z: u.z }, r.ctx);
+  }
+}
 
 // ---------------------------------------------------------------- the hit
 
@@ -679,9 +825,17 @@ export function hit(world, u, t, row, ctx = {}) {
     const e = applyAura(rules, t, a.id, { over: a.over, power, source: u.id, spell: ctx.spell || null, bonusSeconds: row.bonusSeconds || 0, strength: row.statusStrength || 1, stackMax: a.stackMax || null });
     if (e) emit(world, { t: 'aura', who: t.id, id: a.id, on: true, from: u.id });
   }
-  if (row.knock?.stagger && t.kind !== 'player') applyAura(rules, t, 'stagger', { over: { seconds: row.knock.stagger * (t.rank === 'boss' ? 0.4 : 1) }, source: u.id });
-  if (row.knock?.push) { const d = norm2(t.x - u.x, t.z - u.z); const k = t.rank === 'boss' ? 0.25 : 1; t.x += d.x * row.knock.push * k; t.z += d.z * row.knock.push * k; }
-  if (row.pullIn?.metres) { const d = norm2(u.x - t.x, u.z - t.z); const m = Math.min(row.pullIn.metres, Math.max(0, dist(u, t) - 1.5)); t.x += d.x * m; t.z += d.z * m; }
+  // knockback, knockdown and stagger: the body is THROWN over a few steps, never moved in one (knockUnit)
+  if (t.hp > 0 && t.kind !== 'player') {
+    const K = CF(rules).knock || {};
+    if (row.knock?.stagger) { if (applyAura(rules, t, 'stagger', { over: { seconds: row.knock.stagger * (t.rank === 'boss' ? 0.4 : 1) }, source: u.id })) { cancelWindup(world, t); emit(world, { t: 'aura', who: t.id, id: 'stagger', on: true, from: u.id }); } }
+    else if (!row.knock && t.rank !== 'boss' && K.heavyShare && res.amount >= t.maxHp * K.heavyShare && !t.statuses?.knockdown) {
+      // a heavy blow staggers by itself: the monster loses its swing (owner: hits must land with weight)
+      if (applyAura(rules, t, 'stagger', { over: { seconds: K.heavyStagger || 0.35 }, source: u.id })) { cancelWindup(world, t); emit(world, { t: 'aura', who: t.id, id: 'stagger', on: true, from: u.id, heavy: true }); }
+    }
+    if (row.knock?.push || row.knock?.down) knockUnit(world, ctx.knockFrom || u, t, row.knock);
+    if (row.pullIn?.metres) knockUnit(world, u, t, { push: Math.min(row.pullIn.metres, Math.max(0, dist(u, t) - 1.5)) }, { pull: true });
+  }
   if (row.leech && u.hp != null) u.hp = Math.min(u.maxHp, u.hp + res.amount * row.leech);
   if (row.onHit?.heal && u.hp != null) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * row.onHit.heal);
   if (row.onHit?.healAllies && u.kind === 'player') for (const a of alliesNear(world, u, 12)) a.hp = Math.min(a.maxHp, a.hp + a.maxHp * row.onHit.healAllies);
@@ -893,6 +1047,7 @@ function stepMonster(world, m, dt) {
   const rules = world.rules;
   const C = CF(rules).monsters;
   if (!m.alive) return;
+  if (m.flight) return;                       // thrown: it flies (stepFlights), it does not think
   const ctl = control(m);
   // walking home after a leash: it ignores everyone and cannot be hurt until it is back
   if (m.returning) {
@@ -944,6 +1099,8 @@ function stepMonster(world, m, dt) {
     emit(world, { t: 'leash', who: m.id });
     return;
   }
+  // winding up a blow: it stands, turns (slowly) toward its target and strikes when the tell is over
+  if (m.windup) { stepWindup(world, m, ctl, dt); return; }
   const d = dist(m, target);
   m.facing = Math.atan2(target.x - m.x, target.z - m.z);
   if (ctl.fleeing) { moveToward(m, { x: m.x * 2 - target.x, z: m.z * 2 - target.z }, m.speed * dt); return; }
@@ -953,14 +1110,56 @@ function stepMonster(world, m, dt) {
     return;
   }
   if (!ctl.act || world.t < m.swingAt) return;
-  m.swingAt = world.t + (m.attackEvery || 1.5);
-  if (m.ranged) {
-    const dir = norm2(target.x - m.x, target.z - m.z);
-    world.projectiles.push({ id: newId(world, 'b'), owner: m.id, x: m.x, z: m.z, dx: dir.x, dz: dir.z, speed: CF(rules).projectile.arrow * 0.6, left: m.ranged.range + 2, row: { mult: 1, element: m.ranged.element || 'physical', ranged: true, applies: m.onHit ? m.onHit.map(id => ({ id, over: {} })) : [] }, ctx: { basic: true }, pierce: 0, hit: new Set(), bounces: 0, keep: 1 });
-    emit(world, { t: 'projectile', who: m.id, to: target.id });
-  } else {
-    hit(world, m, target, { mult: 1, element: 'physical', applies: m.onHit ? m.onHit.map(id => ({ id, over: {} })) : [] }, { basic: true });
+  startWindup(world, m, target);
+}
+
+/** The tell before a monster's blow (data/combat.json monsters windup*; lessons rule 39: nothing you could not dodge). */
+export function windupOf(rules, m) {
+  const C = CF(rules).monsters;
+  if (m.windupSeconds != null) return m.windupSeconds;
+  if (m.rank === 'boss') return C.windupBoss ?? 0.85;
+  return m.ranged ? (C.windupRanged ?? C.windup ?? 0.55) : (C.windup ?? 0.55);
+}
+function startWindup(world, m, target) {
+  const C = CF(world.rules).monsters;
+  const secs = windupOf(world.rules, m);
+  m.windup = { target: target.id, until: world.t + secs, started: world.t };
+  m.facing = Math.atan2(target.x - m.x, target.z - m.z);
+  emit(world, { t: 'windup', who: m.id, to: target.id, seconds: round2(secs), ranged: !!m.ranged, reach: round2(m.ranged ? m.ranged.range : (m.reach || 2.2) + (C.windupReachSlack ?? 0.6)), arc: round2((C.windupArcDegrees ?? 110) * Math.PI / 180) });
+}
+function stepWindup(world, m, ctl, dt) {
+  const rules = world.rules;
+  const C = CF(rules).monsters;
+  const w = m.windup;
+  const target = world.units.get(w.target);
+  if (!ctl.act) { cancelWindup(world, m); return; }
+  if (target && target.alive && !target.downed) {
+    // turn toward the target, but only so fast: a roll to the side leaves the blow's arc
+    const want = Math.atan2(target.x - m.x, target.z - m.z);
+    let diff = want - m.facing; while (diff > Math.PI) diff -= 2 * Math.PI; while (diff < -Math.PI) diff += 2 * Math.PI;
+    const turn = (C.windupTurn ?? 2.5) * dt;
+    m.facing += clamp(diff, -turn, turn);
   }
+  if (world.t < w.until - 1e-9) return;
+  m.windup = null;
+  m.swingAt = world.t + Math.max(C.recoverMin ?? 0.35, (m.attackEvery || 1.5) - windupOf(rules, m));
+  if (!target || !target.alive || target.downed) { emit(world, { t: 'windupEnd', who: m.id, cancelled: true }); return; }
+  const applies = m.onHit ? m.onHit.map(id => ({ id, over: {} })) : [];
+  const fx = Math.sin(m.facing), fz = Math.cos(m.facing);
+  if (m.ranged) {
+    // the shot leaves where it faces now: a hero who rolled aside since the tell began is not where it flies
+    const aim = norm2(target.x - m.x, target.z - m.z);
+    const k = aim.x * fx + aim.z * fz > Math.cos((C.windupArcDegrees ?? 110) * Math.PI / 360) ? aim : { x: fx, z: fz };
+    world.projectiles.push({ id: newId(world, 'b'), owner: m.id, x: m.x, z: m.z, dx: k.x, dz: k.z, speed: CF(rules).projectile.arrow * 0.6, left: m.ranged.range + 2, row: { mult: 1, element: m.ranged.element || 'physical', ranged: true, applies }, ctx: { basic: true }, pierce: 0, hit: new Set(), bounces: 0, keep: 1 });
+    emit(world, { t: 'projectile', who: m.id, to: target.id });
+    return;
+  }
+  // the blow lands on whoever is still in front of it and within reach (+ a little slack)
+  const dx = target.x - m.x, dz = target.z - m.z, d = Math.hypot(dx, dz);
+  const inReach = d <= (m.reach || 2.2) + bodyR(target) + (C.windupReachSlack ?? 0.6);
+  const inArc = d < 0.8 || (dx * fx + dz * fz) / d >= Math.cos((C.windupArcDegrees ?? 110) * Math.PI / 360);
+  if (inReach && inArc) hit(world, m, target, { mult: 1, element: 'physical', applies }, { basic: true });
+  else emit(world, { t: 'miss', who: m.id, to: target.id, dodged: true, whiff: true });
 }
 
 /**
@@ -1098,3 +1297,5 @@ export function spawnRoamers(world, regionId, at, { packs = 1 } = {}) {
 
 /** How many sim steps a dodge dash lasts (the browser's prediction uses the same count). */
 export function dashSteps(C, dt) { return Math.max(1, Math.round((C.stamina.dodgeSeconds ?? 0.25) / dt)); }
+/** Steps from one dodge to the next possible one (the roll + dodgeCooldown); the browser counts the same. */
+export function dodgeWaitSteps(C, dt) { return dashSteps(C, dt) + Math.round((C.stamina.dodgeCooldown ?? 0) / dt); }

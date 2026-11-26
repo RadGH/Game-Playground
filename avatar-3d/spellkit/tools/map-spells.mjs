@@ -49,6 +49,18 @@ const HAND = {
   storm_beam: 'chain_lightning', static_lash: { visual: 'chain_lightning', scale: 0.7 },
   drain: { visual: 'beam_generic', school: 'shadow' }, silver_moonlight: { visual: 'beam_generic', school: 'moon' },
   inner_stillness: { visual: 'heal_generic', school: 'physical' },
+  // the rebuilt class trees (2026-11-26, the "TRIPLE the graphics" round): big named looks
+  fireball: 'fireball', ground_slam: 'ground_slam', leap_strike: 'leap_slam', savage_leap: 'leap_slam',
+  whirlwind: 'whirlwind', cleave: 'cleave_arc', shield_bash: { visual: 'shield_bash', school: 'physical' }, charge: 'charge_rush',
+  war_cry: 'war_cry', earthquake: 'earthquake', world_breaker: { visual: 'earthquake', scale: 1.2 }, mountain_fist: { visual: 'earthquake', scale: 0.8 },
+  ice_spikes: 'ice_spikes', deep_freeze: { visual: 'frost_nova', scale: 1.2 }, sunlance: 'line_wave', divine_hammer: { visual: 'line_wave', scale: 1.2 },
+  lightning_strike: 'thunder_strike', teleport: { visual: 'nova_generic', school: 'arcane', scale: 0.7 },
+  arcane_blast: { visual: 'breath_cone', school: 'arcane', scale: 1.3 }, flame_wave: { visual: 'breath_cone', scale: 1.5 },
+  smite: { visual: 'thunder_strike', school: 'holy' }, holy_nova: { visual: 'nova_generic', scale: 1.25 },
+  multi_shot: 'arrow', explosive_arrow: 'fireball', volley: 'arrow_rain', fan_of_knives: { visual: 'whirlwind', scale: 1.1 },
+  poison_cloud: 'poison_cloud', thunderclap: { visual: 'nova_generic', school: 'lightning', scale: 1.25 },
+  corpse_explosion: { visual: 'fireball', school: 'shadow' }, bone_spikes: { visual: 'ice_spikes', school: 'shadow' },
+  chain_lightning: 'chain_lightning',
 };
 
 /** the visual for a spell nobody named: by target kind, element and flags */
@@ -56,13 +68,18 @@ function guess(id, row) {
   const k = targetKind(row), el = row.element || 'physical', shape = row.shape;
   const heal = !!(row.heal || row.healPower);
   if (row.form) return { visual: 'shapeshift_puff', school: el };
+  if (shape === 'leap') return { visual: 'leap_slam', school: el };
   if (row.summon || shape === 'summon') return { visual: 'summon_circle', school: el };
-  if (shape === 'dash') return { visual: 'dash_generic', school: el };
+  if (shape === 'dash') return { visual: 'charge_rush', school: el };
   if (k === 'bolt') return el === 'physical' ? { visual: 'arrow' } : { visual: 'bolt_generic', school: el };
-  if (k === 'ground') return el === 'physical' ? { visual: 'arrow_rain' } : { visual: 'ground_generic', school: el };
-  if (k === 'cone') return el === 'physical' ? { visual: 'melee_slash' } : { visual: 'elemental_slash', school: el };
-  if (k === 'line' || k === 'beam') return el === 'physical' ? { visual: 'whirl_slash', scale: 0.8 } : { visual: 'beam_generic', school: el };
-  if (shape === 'around') return el === 'physical' ? { visual: 'whirl_slash' } : { visual: 'nova_generic', school: el };
+  if (k === 'ground') return el === 'physical' ? { visual: 'arrow_rain' } : el === 'fire' ? { visual: 'fireball' } : { visual: 'ground_generic', school: el };
+  if (k === 'cone') return el === 'physical' ? { visual: 'cleave_arc', ...((row.arc || 0) < 2 ? { scale: 0.85 } : {}) } : { visual: 'elemental_slash', school: el };
+  if (k === 'beam') return { visual: 'beam_generic', school: el };
+  if (k === 'line') return el === 'physical' ? ((row.width || 0) >= 4 ? { visual: 'earthquake' } : { visual: 'line_wave', school: 'physical', scale: 0.8 }) : el === 'ice' ? { visual: 'ice_spikes' } : { visual: 'line_wave', school: el };
+  if (shape === 'around') {
+    if (el === 'physical') return row.knock?.down ? { visual: 'ground_slam' } : { visual: 'whirlwind' };
+    return el === 'ice' ? { visual: 'frost_nova' } : { visual: 'nova_generic', school: el };
+  }
   if (heal) return { visual: 'heal_generic', school: el === 'physical' ? 'holy' : el };
   return { visual: el === 'physical' ? 'battle_shout' : 'buff_generic', ...(el === 'physical' ? {} : { school: el }) };
 }
@@ -91,9 +108,10 @@ data.fallback = {
   'bolt:fire': 'fire_bolt', 'bolt:ice': 'frost_bolt', 'bolt:arcane': 'arcane_missile', 'bolt:shadow': 'shadow_bolt', 'bolt:nature': 'nature_bolt',
   'bolt:physical': 'arrow', bolt: 'bolt_generic',
   'ground:holy': 'ring_of_dawn', 'ground:poison': 'poison_cloud', 'ground:ice': 'blizzard', 'ground:lightning': 'thunder_strike', 'ground:physical': 'arrow_rain', ground: 'ground_generic',
-  'cone:physical': 'melee_slash', 'cone:fire': 'breath_cone', cone: 'elemental_slash',
-  'line:lightning': 'chain_lightning', 'line:physical': 'whirl_slash', line: 'beam_generic', beam: 'beam_generic',
-  'self:ice': 'frost_nova', 'self:physical': 'battle_shout', self: 'buff_generic',
+  'ground:fire': 'fireball',
+  'cone:physical': 'cleave_arc', 'cone:fire': 'breath_cone', cone: 'elemental_slash',
+  'line:lightning': 'chain_lightning', 'line:physical': 'charge_rush', 'line:ice': 'ice_spikes', line: 'line_wave', beam: 'beam_generic',
+  'self:ice': 'frost_nova', 'self:physical': 'war_cry', self: 'buff_generic',
 };
 // readable: a layer (has "type"), a short array or a short object stays on one line
 function pretty(v, ind = '') {

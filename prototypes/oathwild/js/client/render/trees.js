@@ -106,7 +106,8 @@ export async function createTrees({ trees = [], tileGroup, cell = 128, quality =
     });
     for (const m of [bark, leaf, tuft]) {
       if (!m) continue;
-      m.castShadow = shadow === '1'; m.receiveShadow = true;   // small clutter casts no shadow (cheaper, and no speckle) m.computeBoundingSphere(); m.name = `tree ${species}`;
+      m.castShadow = shadow === '1'; m.receiveShadow = true;   // small clutter casts no shadow (cheaper, and no speckle)
+      m.computeBoundingSphere(); m.name = `tree ${species}`;
       const [i, j] = tile.split(',').map(Number);
       tileGroup((i + 0.5) * cell, (j + 0.5) * cell).add(m); meshes++;
       triangles += (m.geometry.index ? m.geometry.index.count : m.geometry.attributes.position.count) / 3 * items.length;

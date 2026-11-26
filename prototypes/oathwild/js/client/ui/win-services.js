@@ -13,6 +13,7 @@
 //   itemCell(it, { pick: 'buy:shop:i1', sel }) · wirePick(app, w, body) · dropGonePick(w, keys) · pickFoot(app, f, w, {…})
 // The window gets cls 'ow-pickwin': desktop = the pane is a column beside the grids; phone = the pane is pinned at
 // the bottom of the window (its card scrolls by itself; the button never leaves the screen).
+import { focusQuiet } from '../../../../../shared/tooltip.js';
 import { openWin, esc, ask, toast, findWin } from './kit.js';
 import { tipAttrs, hideTip, itemCardHtml } from './tip.js';
 import { glyph, uiIcon } from './icons.js';
@@ -61,7 +62,7 @@ export function wirePick(app, w, body) {
   for (const b of cells) {
     b.addEventListener('click', () => {
       const k = b.dataset.pick;
-      if (w.data.sel === k) { w.footEl?.querySelector('[data-commit]:not([disabled])')?.focus({ preventScroll: true }); hideTip(); return; }
+      if (w.data.sel === k) { focusQuiet(w.footEl?.querySelector('[data-commit]:not([disabled])')); hideTip(); return; }
       w.data.sel = k; w.data.opt = null;
       w.data.selIdx = cells.filter(c => modeOf(c.dataset.pick) === modeOf(k)).indexOf(b);
       w.render(); hideTip();
@@ -73,7 +74,7 @@ export function wirePick(app, w, body) {
   if (w.data.refocus) {
     const { mode, idx } = w.data.refocus; w.data.refocus = null;
     const same = cells.filter(c => modeOf(c.dataset.pick) === mode);
-    (same[Math.min(idx, same.length - 1)] || cells[0])?.focus({ preventScroll: true });
+    focusQuiet(same[Math.min(idx, same.length - 1)] || cells[0]);
     hideTip();
   }
 }

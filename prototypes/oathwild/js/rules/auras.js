@@ -30,7 +30,7 @@ export function dispelKind(rules, id, entry = null) {
   return 'magic';
 }
 
-const CONTROL = new Set(['root', 'sleep', 'fear', 'silence', 'stagger', 'stasis', 'disarm', 'transmuted', 'turned']);
+const CONTROL = new Set(['root', 'sleep', 'fear', 'silence', 'stagger', 'knockdown', 'stasis', 'disarm', 'transmuted', 'turned']);
 
 /**
  * Put status `id` on `target`. opts:
@@ -104,11 +104,11 @@ export function dispel(rules, unit, kind = 'magic', { count = 1, beneficial = fa
   return out;
 }
 
-/** What a body may do with its statuses: move, act (attack), cast. */
+/** What a body may do with its statuses: move, act (attack), cast. Knocked down = staggered (nothing until it is up). */
 export function control(unit) {
   const s = unit.statuses || {};
   const asleep = !!(s.sleep || s.stasis || s.transmuted);
-  const staggered = !!s.stagger;
+  const staggered = !!(s.stagger || s.knockdown);     // knocked down (data/combat.json knock): flat on the ground
   return {
     move: !(s.root || asleep || staggered),
     act: !(asleep || staggered || s.fear),

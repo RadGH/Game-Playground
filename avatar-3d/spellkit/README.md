@@ -1,6 +1,6 @@
 # Spell Kit + Spell Lab
 
-**Status:** playable — engine, 38 visuals, every Oathwild spell mapped, Codex-painted textures, browser tests green (2026-11-23).
+**Status:** playable — engine, 51 visuals, every Oathwild spell mapped, Codex-painted textures, browser tests green. 2026-11-26 "TRIPLE the graphics" round: ~3x every layer (`tools/triple-visuals.mjs`), `point` + `area` phases spread over a spell's true shape (`kit.spread`), weapon-free swings at the true reach (`kit.swing`), phones draw the same counts with 2 lights, bright cores past the bloom cut, an `accent` colour per school.
 **Play:** Spell Lab at `avatar-3d/spellkit/` on the playground server (8400 stable / 8401 dev). `?spell=<visual id>`, `?quality=low`.
 **Next:** wire into Oathwild's client (`js/client/spells`), tune each visual in the live game camera; Wyrmroad and others can adopt it.
 **Parked:** soft particles (fading where a particle meets the ground — needs the depth texture); per-spell sounds (Sound Lab ids in the visual data).
@@ -61,6 +61,10 @@ kit.update(dt); camera.position.add(kit.shakeOffset) /* optional, undo after ren
 | `kit.aura(target, visual, { seconds })` → `{ stop() }` | looping body effect (buffs / debuffs) |
 | `kit.beam(from, [points], visual, { seconds, hop })` → `{ stop() }` | jagged arcs hop by hop (chain lightning) or a held beam |
 | `kit.trail(weapon, visual, { base, tip, seconds })` | weapon sweep between two points in the weapon's frame |
+| `kit.spread(visual, { shape, at, dir, radius, angle, length, n, every, area })` | the impact over a spell's TRUE shape: the visual's `point` phase at each of `shapePoints(shape)` (arc at 0.75 x reach, ring on the radius, line to the end, filled disc), `every` s apart, then its `area` phase once at the real radius |
+| `kit.swing(at, visual, { dir, radius, angle, seconds, height, overhead })` | a crescent sweep at the true reach with no weapon needed (angle ≥ 2π = a spin) |
+| `kit.missile(from, null, visual, { track(out) })` → promise with `.stop()` | a game-driven missile (a server bolt): eases from the hand onto `track`'s point every frame until `stop()` |
+| `kit.shakeOn` | the game's camera-shake setting (false = `shake` layers do nothing) |
 | `kit.cast(visual, { caster, hands, target, at, dir, chain, weapon, tip, onPhase })` | a whole cast, phase by phase (the Lab and quick use) |
 | `kit.visualFor(spellId, { kind, element })` | the spells map, then `fallback['<kind>:<element>']`, then `fallback[kind]` |
 | `kit.update(dt)`, `kit.warm()`, `kit.stats()`, `kit.clear()`, `kit.dispose()`, `kit.wait(s)` | `stats()`: particles, glow/smoke split, budget, effects, draws, lights lit, births refused, objects borrowed |
@@ -86,7 +90,7 @@ kit.update(dt); camera.position.add(kit.shakeOffset) /* optional, undo after ren
 (`rune_{school}`). `ref: "<other visual>"` borrows another visual. In the game file, `spells` maps each spell id to
 a visual (`"firebolt": "fire_bolt"` or `{ "visual", "school", "scale" }`) and `fallback` covers spells added later.
 
-Colours: `hot`, `mid`, `deep`, `smoke` (from the school), `white`, `black` or `#rrggbb`. Every texture is
+Colours: `hot`, `mid`, `deep`, `smoke` (from the school), `accent` (a contrasting colour per school, `ACCENT` in spellkit.js), `white`, `black` or `#rrggbb`. Phases `point` (each point of the true shape) and `area` (once at the real radius) are played by `kit.spread`. Every texture is
 white-on-black; a layer's `color` is its bright parts, `edge` its dim parts (painted fire: white-yellow core, red edge).
 
 ### Layer types (common fields: `type`, `at`, `offset`, `delay`, `life`, `fadeIn`, `fadeOut`, `opacity`, `quality`)
@@ -131,15 +135,15 @@ paintings (warped frame by frame) by `cut-sheets.py`. `procedural.py` keeps a dr
 
 - **Two particle draws for everything**: every sprite and flipbook frame is in one atlas; glowing and smoky
   particles are two instanced meshes. CPU moves the particles (a few thousand is cheap) and writes one buffer a frame.
-- **Budget**: 6,000 particles (phone quality 3,000); each emitter has its own `max`; emitters slow down above 60% of
+- **Budget**: 9,000 particles (phone quality 6,000 — same counts per effect, smaller pools; no halving since 2026-11-26); each emitter has its own `max`; emitters slow down above 60% of
   the budget and births are refused at the cap (counted in `stats().refused`).
 - **Pools, made at load**: ground grids 64, walls per shape (cylinder 20…), ribbons 56, glow meshes 10 per shape,
-  lights 6 (phone: none). When a pool runs dry the oldest item is taken over (`stats().stolen`) — never a new object.
+  lights 6 (phone: 2). When a pool runs dry the oldest item is taken over (`stats().stolen`) — never a new object.
 - **No shader rebuilds mid-game** (lessons rule 29): lights are always in the scene and always visible — only their
   intensity moves; nothing is created or disposed while playing; every pooled material is an instance of one of 5
   programs; `warm()` compiles them all at load. Create the kit before warming the game's own materials (its 6 lights
   change the light count once).
-- **Quality** is chosen at creation (`quality: 'low'` halves particles, drops lights); switching = a new kit.
+- **Quality** is chosen at creation (`quality: 'low'` = smaller pools and budget, 2 lights — the SAME particles per effect); switching = a new kit.
 - Measured (Playwright, software renderer, `avatar-3d/tests/spellkit.spec.js`): 10 casters × a mixed storm of 15
   visuals for 10 s → peak 1,529 particles of 6,000, 92 spell draw calls, 61 effects at once, **0 shader programs
   compiled after warm()**, 0 pooled objects taken over, nothing left after; phone quality peak 701 of 3,000;
@@ -156,3 +160,5 @@ paintings (warped frame by frame) by `cut-sheets.py`. `procedural.py` keeps a dr
 - Number formats change when a tool rewrites JSON (`1.0` → `1`): edit data through the parsed object, not text.
 - Pools sized evenly ran dry on the busy shape (cylinder walls) while others sat idle — size each pool by use.
 - A 6-second scorch mark is not a leak: wait for the longest layer before asserting "everything ended".
+- Halving particles on phones bought nothing (the phone peak was 701 of 3,000) and left the owner's iPhone with "one bullet I can hardly see": keep a global cap, never cut per-effect counts.
+- Per-point bursts multiply fast: a 12-point ring of 70-piece bursts was ~840 pieces from the points alone — keep a point burst ~35 pieces and let the `area` layer carry the size.

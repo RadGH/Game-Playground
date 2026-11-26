@@ -9,6 +9,9 @@
 const RAMP = /* glsl */`
 vec4 ramp(float lum, vec3 core, vec3 edge, float alpha) {
   vec3 c = mix(edge, core, smoothstep(0.12, 0.95, lum));
+  // bright cores go past 1.0 (x1.8 at the very centre) so they cross the bloom cut and read on a bright daytime map
+  // (Oathwild case study: kit colours topped out at 1.0 and tone-mapped to pale yellow on pale ground)
+  c *= 1.0 + 0.8 * smoothstep(0.55, 1.0, lum);
   return vec4(c, lum * alpha);
 }`;
 
@@ -213,7 +216,7 @@ uniform float uOpacity;
 varying float vFacing;
 void main() {
   float core = pow(vFacing, 1.5);
-  vec3 c = mix(uEdge, uCol, core);
+  vec3 c = mix(uEdge, uCol, core) * (1.0 + 0.8 * core);   // a hot centre past 1.0 (crosses the bloom cut)
   gl_FragColor = vec4(c, uOpacity * (0.35 + 0.65 * core));
   #include <tonemapping_fragment>
   #include <colorspace_fragment>

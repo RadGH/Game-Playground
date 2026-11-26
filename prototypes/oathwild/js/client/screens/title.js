@@ -2,6 +2,7 @@
 // What's new (with its unread dot), Settings and Credits; the ☰ menu owns the top-left corner and the account pill the
 // top-right. A small dot at the bottom says whether the world server can be reached, in plain words.
 // The backdrop is painted in CSS (a dusk sky over two ridges) — cheap on every device.
+import { focusQuiet } from '../../../../../shared/tooltip.js';
 import { uiIcon, glyph } from '../ui/icons.js';
 import { accountButton } from '../../../../../shared/rgs-signin.js';
 import { createCredits } from '../../../../../shared/credits.js';
@@ -50,6 +51,6 @@ export async function show(app) {
   };
   drawConn();
   const off = app.net?.on('state', drawConn);
-  setTimeout(() => root.querySelector('[data-act="play"]')?.focus({ preventScroll: true }), 30);
+  setTimeout(() => focusQuiet(root.querySelector('[data-act="play"]')), 30);
   return { view: 'ready', close() { off?.(); credits.close(); } };
 }

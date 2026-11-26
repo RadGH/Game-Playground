@@ -7,38 +7,57 @@
 //
 //   const P = createPredictor({ ground, combat })   P.reset(x, z)   P.step(dir{x,z}, opts) → { q, x, z }
 //   P.reconcile(ack, sx, sz, { snap })   P.drawn(alpha) → { x, z }   P.decay(dt, rate)
+//   P.rush(kind, dir{x,z}, metres, dt)   a leap or a charge that started with this step's cast: the next steps carry the
+//                                        hero along it exactly as js/rules/combat.js startRush/stepRush do (no snap back)
+//   P.busy()                             true while a dodge roll, leap or charge is moving the hero
 export function createPredictor({ ground, combat }) {
   const swimMult = combat.swimMult ?? 0.6;
   const S = combat.stamina;
-  const st = { q: 0, x: 0, z: 0, px: 0, pz: 0, ox: 0, oz: 0, hist: [], stamina: 0, dash: null };
+  const st = { q: 0, x: 0, z: 0, px: 0, pz: 0, ox: 0, oz: 0, hist: [], stamina: 0, dash: null, rush: null, dodgeWait: 0 };
   const dashSteps = dt => Math.max(1, Math.round((S.dodgeSeconds ?? 0.25) / dt));   // = combat.js dashSteps
+  const dodgeWaitSteps = dt => dashSteps(dt) + Math.round((S.dodgeCooldown ?? 0) / dt);   // = combat.js dodgeWaitSteps
+  const R = combat.rush || {};
+  const rushSteps = (kind, len, dt) => Math.max(1, Math.round((kind === 'leap' ? (R.leapSeconds ?? 0.45) : len / (R.dashSpeed ?? 34)) / dt));   // = combat.js rushSteps
   return {
     state: st,
-    reset(x, z) { st.x = st.px = x; st.z = st.pz = z; st.ox = st.oz = 0; st.hist.length = 0; st.dash = null; },
+    reset(x, z) { st.x = st.px = x; st.z = st.pz = z; st.ox = st.oz = 0; st.hist.length = 0; st.dash = null; st.rush = null; st.dodgeWait = 0; },
+    rush(kind, dir, len, dt) {
+      const l = Math.hypot(dir.x, dir.z) || 1, n = rushSteps(kind, len, dt);
+      st.rush = { dx: dir.x / l * len / n, dz: dir.z / l * len / n, steps: n, kind };
+      st.dash = null;
+      return n * dt;
+    },
+    busy: () => !!(st.rush || (st.dash && st.dash.steps > 0)),
     /** One 50 ms step. opts: speed (walk m/s), sneak, dodge, canMove, stamina, mounted, facingDir. */
     step(dir, o, dt) {
       st.q++;
       st.px = st.x; st.pz = st.z;
       let nx = st.x, nz = st.z;
-      const dashing = st.dash && st.dash.steps > 0;
+      const dashing = (st.dash && st.dash.steps > 0) || !!st.rush;
       if (o.canMove && !dashing && (dir.x || dir.z)) {
+        // o.speed = the server's own walking speed for me (combat.js moveSpeedOf: slows, buffs, the horse); swimming here
         let v = o.speed;
-        if (o.sneak) v *= 0.55;
+        if (o.sneak) v *= o.sneakMult ?? 0.55;
         const swimming = ground.swimming?.(st.x, st.z);           // the server checks the same ground each step
         if (swimming) v *= swimMult;
-        nx += dir.x * v * dt; nz += dir.z * v * dt;
+        const l = Math.hypot(dir.x, dir.z) || 1;
+        nx += dir.x / l * v * dt; nz += dir.z / l * v * dt;
       }
-      // the dodge dash, step for step as the server runs it (js/rules/combat.js): the way you move, or the crosshair
-      if (o.dodge && o.canMove && !dashing && !ground.swimming?.(st.x, st.z) && o.stamina >= S.dodge) {
+      // the dodge roll, step for step as the server runs it (js/rules/combat.js): the way you move, or the crosshair
+      if (st.dodgeWait > 0) st.dodgeWait--;
+      if (o.dodge && o.canMove && !dashing && !(st.dodgeWait > 0) && !ground.swimming?.(st.x, st.z) && o.stamina >= S.dodge) {
         const d = dir.x || dir.z ? dir : o.facingDir;
         const l = Math.hypot(d.x, d.z) || 1;
         st.dash = { x: d.x / l, z: d.z / l, steps: dashSteps(dt) };
-      }
+        st.dodgeWait = dodgeWaitSteps(dt);
+        st.dodged = true;
+      } else st.dodged = false;
       if (st.dash && st.dash.steps > 0) {
         const k = S.dodgeMetres / dashSteps(dt);
         nx += st.dash.x * k; nz += st.dash.z * k;
         if (--st.dash.steps <= 0) st.dash = null;
       }
+      if (st.rush) { nx += st.rush.dx; nz += st.rush.dz; if (--st.rush.steps <= 0) st.rush = null; }
       const p = ground.settle({ x: st.x, z: st.z }, { x: nx, z: nz });
       st.x = p.x; st.z = p.z;
       st.hist.push({ q: st.q, x: st.x, z: st.z });

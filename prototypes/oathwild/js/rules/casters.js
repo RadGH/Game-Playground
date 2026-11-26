@@ -85,7 +85,12 @@ export function finishCaster(rules, item, { fresh = true, starter = false } = {}
     item.ranged = false;
   }
   if (starter && cfg.starter?.[kind] && !item.castStyle) item.castStyle = cfg.starter[kind];
-  if (kind === 'wand' || kind === 'tome') wandStyle(forms, item, { fresh });
+  if (kind === 'wand' || kind === 'tome') {
+    wandStyle(forms, item, { fresh });
+    // no plain single-bullet wands (owner 2026-11-26): those styles become an interesting one, the same for the same item
+    const np = cfg.noPlainBolts;
+    if (np?.plain.includes(item.castStyle)) item.castStyle = np.into[Math.floor(hash01(`${item.id || item.baseKey}:style`) * np.into.length) % np.into.length];
+  }
   else if (kind === 'staff') {
     // a staff that names its element spell (a named staff) never rolls one of Thousandvale's two styles over it
     if (!staffStyle(forms, item, { fresh: fresh && !item.staffSpell })) staffSpell(item, item.castElement || 'arcane');

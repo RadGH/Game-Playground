@@ -20,6 +20,7 @@
     "barrier": { "name": "Barrier", "kind": "buff", "element": "arcane", "seconds": 10, "dispel": "none" },
     "form": { "name": "Shape", "kind": "form", "element": "nature", "seconds": 3600, "dispel": "none" },
     "stagger": { "name": "Staggered", "kind": "control", "element": "physical", "seconds": 1, "dispel": "none" },
+    "knockdown": { "name": "Knocked down", "kind": "control", "element": "physical", "seconds": 1, "dispel": "none", "_doc": "Thrown to the ground by a blow (a spell row's knock.down; data/combat.json knock): no moving, attacking or casting until it gets up." },
     "mounted": { "name": "Riding", "kind": "buff", "element": "physical", "seconds": 3600, "dispel": "none" },
     "well_rested": { "name": "Well Fed", "kind": "buff", "element": "nature", "seconds": 1800, "dispel": "none", "healPerSecond": 0.002 }
   }

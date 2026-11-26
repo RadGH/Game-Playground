@@ -16,6 +16,9 @@ import { talentMods } from './talents.js';
 import { carriedWeight, isBroken } from './inventory.js';
 import { attackPlan } from './casters.js';
 
+/** The weapon trainings that have their own damage mastery (data/proficiency.json weapons.bySubtype values). */
+export const WEAPON_KINDS = Object.freeze(['dagger', 'sword', 'axe', 'mace', 'spear', 'staff', 'twohand', 'bow', 'crossbow', 'wand', 'scepter']);
+
 /** The mods vocabulary (class passives, talents, backgrounds, forms). Percent keys are percent numbers (5 = +5%). */
 export const STAT_KEYS = Object.freeze([
   ...ATTRS,
@@ -24,6 +27,8 @@ export const STAT_KEYS = Object.freeze([
   'meleePct', 'rangedPct', 'spellPct', 'healPct', 'petPct',
   'firePct', 'icePct', 'lightningPct', 'arcanePct', 'shadowPct', 'holyPct', 'naturePct', 'poisonPct', 'physicalPct',
   'movePct', 'hastePct', 'cooldownPct', 'threatPct', 'carry', 'priceCut', 'lifeSteal', 'thorns', 'enchantSlots',
+  // damage with one kind of weapon (owner 2026-11-26: a mastery per weapon kind, "25% increased damage, not 2%")
+  ...WEAPON_KINDS.map(k => `${k}Pct`),
 ]);
 const STAT_SET = new Set(STAT_KEYS);
 
@@ -153,17 +158,20 @@ export function sheetOf(rules, char, { form = null } = {}) {
   const weapon = unit.equipment.weapon || null;
   const ranged = !!weapon?.ranged;
   const physK = 1 + m('physicalPct') / 100;
+  // the mastery of the weapon in the main hand ("Sword Mastery: +25% damage with swords")
+  const wKind = weapon ? rules.data.proficiency.weapons.bySubtype[weapon.subtype] : null;
+  const kindK = (1 + (wKind ? m(`${wKind}Pct`) : 0) / 100) * (1 + (base.meleePerLevel || 0) * (level - 1));   // + the weapon grows with the hero's level
   const shareM = weaponAttrShare(rules, weapon, A, { ranged: false });
-  const meleeK = (1 + shareM) * (1 + m('meleePct') / 100) * physK * (ranged ? 0.5 : 1);
+  const meleeK = (1 + shareM) * (1 + m('meleePct') / 100) * physK * kindK * (ranged ? 0.5 : 1);
   const melee = d.damage.map(v => Math.max(1, Math.round(v * meleeK)));
   const shareR = ranged ? weaponAttrShare(rules, weapon, A, { ranged: true }) : 0;
-  const rangedRange = ranged ? d.damage.map(v => Math.max(1, Math.round(v * (1 + shareR) * (1 + m('rangedPct') / 100) * physK))) : null;
+  const rangedRange = ranged ? d.damage.map(v => Math.max(1, Math.round(v * (1 + shareR) * (1 + m('rangedPct') / 100) * physK * kindK))) : null;
   const offhand = d.offDamage ? d.offDamage.map(v => Math.max(1, Math.round(v * meleeK))) : null;
   // spell power: a level curve, plus a share of a magic weapon (and an orb or tome in the off hand)
   const lvlK = 1 + base.spellPerLevel * (level - 1);
   const magicW = [weapon, unit.equipment.offhand].filter(w => w?.type === 'weapon' && w.weaponCategory === 'magic' && w.dmg);
   const spellBase = [0, 1].map(i => base.spellPower[i] * lvlK + magicW.reduce((s, w) => s + w.dmg[i] * base.magicWeaponShare, 0));
-  const gearSpell = 1 + (d.spellPower || 0);
+  const gearSpell = (1 + (d.spellPower || 0)) * (weapon?.weaponCategory === 'magic' ? kindK : 1);
   const spellFor = attr => spellBase.map(v => Math.max(1, Math.round(v * (1 + pp(attr, 'spellShare')) * (1 + m('spellPct') / 100) * gearSpell)));
   const spell = { int: spellFor('int'), wis: spellFor('wis'), cha: spellFor('cha') };
   const healK = (1 + pp('wis', 'healShare')) * (1 + m('healPct') / 100);

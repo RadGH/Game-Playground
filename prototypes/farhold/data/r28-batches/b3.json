@@ -2617,7 +2617,7 @@
      "nodes": [
       {
        "id": "shove_into_line",
-       "name": "Shove Into Line",
+       "name": "Push Into Line",
        "fx": "knock",
        "mod": {
         "knock": {

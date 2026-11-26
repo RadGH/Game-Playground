@@ -1,6 +1,9 @@
 // Phone controls (PLAN §0: phones can join with a simpler set — twin stick, aim assist, tap to place zones): a move
-// stick on the left, dragging anywhere on the right turns the camera, big named buttons for Attack, Dodge and Use
-// (no Block or Run since 2026-11-25: a shield blocks by itself and walking is faster), and the action bar's own buttons cast (a ground spell then waits for a tap on the ground to place it).
+// stick on the left, dragging anywhere on the right turns the camera, a big round Attack with Dodge beside it (no Block
+// or Run since 2026-11-25: a shield blocks by itself and walking is faster; no Use button since 2026-11-26 — owner: "Why
+// is there a use button because every interaction I've seen has its own popup on screen": the on-screen prompt
+// (hud.js .hud-prompt) is the button — tap to use, hold to bring a fallen friend back — and tapping a thing uses it),
+// and the action bar's own buttons cast (a ground spell then waits for a tap on the ground to place it).
 // Stuck fingers are cleared on a fresh pointerdown BEFORE the control takes the new finger (lessons rule 30).
 import { esc } from '../ui/kit.js';
 import { glyph } from '../ui/icons.js';
@@ -13,7 +16,6 @@ export function createTouch(app, input, play) {
     <div class="hud-look" data-look></div>
     <div class="hud-tbtns">
       <button type="button" class="hud-tb" data-tb="dodge">${glyph('dodge', 22)}<span>Dodge</span></button>
-      <button type="button" class="hud-tb" data-tb="interact">${glyph('hand', 22)}<span>Use</span></button>
       <button type="button" class="hud-tb big" data-tb="attack">${glyph('sword', 34)}<span>Attack</span></button>
     </div>
     <div class="hud-place" hidden><span></span><button type="button" class="ow-btn ow-small" data-tb="cancel">Cancel</button></div>`;

@@ -1391,7 +1391,7 @@
     },
     {
      "id": "shield_shove",
-     "name": "Shield Shove",
+     "name": "Shield Bash",
      "kind": "melee_cc",
      "castTime": 0.7,
      "cooldown": 10,
@@ -1744,7 +1744,7 @@
     "patrol": true,
     "leash": 24,
     "kiteDistance": 6,
-    "notes": "stays 5-7 m behind the pack's centre; when a player comes at it, the nearest raider is told to Shield Shove them (pack coordination hook `defendShaman`). Never leaves the pack's leash."
+    "notes": "stays 5-7 m behind the pack's centre; when a player comes at it, the nearest raider is told to Shield Bash them (pack coordination hook `defendShaman`). Never leaves the pack's leash."
    },
    "look": {
     "bodyPlan": "biped",

@@ -20,6 +20,10 @@
 //   crownR    the canopy's radius;  clumps  how many leaf clumps round the top one;  squash  canopy height / width
 //   leafRow   atlas row (0 broadleaf, 1 needle, 2 small leaf, 3 frond);  leaf  vertex-colour multiplier on the leaf picture
 //   bark      vertex-colour multiplier on the bark picture;  bands  birch-style dark bands up the trunk
+//   strandK   (Oathwild) a willow's curtain length × this
+//   OATHWILD 2026-11-26 (owner: conifers "sit too low and block view of enemies"): spruce / fir skirts start higher
+//   (trunkH 0.22 / 0.24) and the willow's curtain is half as long, so the lowest needles / strands of every grown tree
+//   are ≥ 5 m up as drawn — the over-the-shoulder camera sees under them (tests/world/trees.test.mjs "clear under").
 //   accent    the mythical touch: { kind: 'blossom' | 'glow', color, n } small bright cards in the canopy
 export const STORY_TREES = Object.freeze({
   oak:         { form: 'round', h: 12.5, trunkH: 0.42, rB: 0.56, rT: 0.379, flare: 0.75, twist: 0.6, ridge: 0.1, crownR: 4.8, clumps: 5, squash: 0.78, leafRow: 0, leaf: [0.88, 1.22, 0.5], bark: [1.6, 1.22, 0.92], limbs: 3 },
@@ -28,10 +32,10 @@ export const STORY_TREES = Object.freeze({
   silver_birch: { form: 'tall', h: 13, trunkH: 0.4, rB: 0.497, rT: 0.281, flare: 0.45, twist: 0.2, ridge: 0.05, crownR: 3.0, clumps: 4, squash: 1.55, leafRow: 2, leaf: [1.1, 1.26, 0.42], bark: [4.6, 6.4, 8.4], bands: true, limbs: 2 },      // tree_birch (Torbor Downs): the same tree, its own trunk radius (nav-refine SCATTER_COLLIDE)
   ancient_oak: { form: 'round', h: 24, trunkH: 0.36, rB: 2.193, rT: 1.192, flare: 0.9, twist: 0.9, ridge: 0.16, crownR: 12, clumps: 7, squash: 0.72, leafRow: 0, leaf: [0.8, 1.16, 0.6], bark: [1.45, 1.12, 0.88], limbs: 5,
     accent: { kind: 'glow', color: [2.6, 2.2, 1.0], n: 22 } },
-  willow:      { form: 'weep', h: 11, trunkH: 0.4, rB: 0.637, rT: 0.411, flare: 0.8, twist: 0.8, ridge: 0.12, crownR: 5.5, clumps: 5, squash: 0.55, leafRow: 2, leaf: [0.98, 1.22, 0.48], bark: [1.5, 1.25, 0.95], limbs: 4, strands: 22 },
+  willow:      { form: 'weep', h: 11, trunkH: 0.4, rB: 0.637, rT: 0.411, flare: 0.8, twist: 0.8, ridge: 0.12, crownR: 5.5, clumps: 5, squash: 0.55, leafRow: 2, leaf: [0.98, 1.22, 0.48], bark: [1.5, 1.25, 0.95], limbs: 4, strands: 22, strandK: 0.5 },
   pine:        { form: 'crown', h: 19, trunkH: 0.44, rB: 0.416, rT: 0.153, flare: 0.6, twist: 0.4, ridge: 0.08, crownR: 4.6, tiers: 4, leafRow: 1, leaf: [0.8, 1.1, 0.72], bark: [1.65, 1.15, 0.85] },
-  fir:         { form: 'tiers', h: 16, trunkH: 0.12, rB: 0.399, rT: 0.096, flare: 0.5, twist: 0.2, ridge: 0.05, crownR: 4.0, tiers: 5, leafRow: 1, leaf: [0.78, 1.12, 0.8], bark: [1.25, 1.0, 0.8] },
-  spruce:      { form: 'tiers', h: 21, trunkH: 0.1, rB: 0.449, rT: 0.098, flare: 0.5, twist: 0.2, ridge: 0.05, crownR: 3.8, tiers: 6, leafRow: 1, leaf: [0.68, 1.02, 0.86], bark: [1.2, 0.98, 0.82] },
+  fir:         { form: 'tiers', h: 16, trunkH: 0.24, rB: 0.399, rT: 0.096, flare: 0.5, twist: 0.2, ridge: 0.05, crownR: 4.0, tiers: 5, leafRow: 1, leaf: [0.78, 1.12, 0.8], bark: [1.25, 1.0, 0.8] },
+  spruce:      { form: 'tiers', h: 21, trunkH: 0.22, rB: 0.449, rT: 0.098, flare: 0.5, twist: 0.2, ridge: 0.05, crownR: 3.8, tiers: 6, leafRow: 1, leaf: [0.68, 1.02, 0.86], bark: [1.2, 0.98, 0.82] },
   dead_snag:   { form: 'snag', h: 8.5, rB: 0.328, rT: 0.15, flare: 0.8, twist: 1.2, ridge: 0.14, limbs: 3, bark: [1.7, 1.75, 1.9] },
   dead_pine:   { form: 'snag', h: 15, rB: 0.393, rT: 0.094, flare: 0.6, twist: 0.7, ridge: 0.1, limbs: 5, bark: [1.8, 1.85, 2.0], tall: true },
   palm_fan:    { form: 'palm', h: 7, rB: 0.183, rT: 0.129, flare: 0.5, twist: 0, ridge: 0, fronds: 8, frondLen: 3.1, leafRow: 3, leaf: [0.98, 1.22, 0.5], bark: [1.8, 1.45, 1.05] },

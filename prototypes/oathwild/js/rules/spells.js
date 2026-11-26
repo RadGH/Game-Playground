@@ -16,12 +16,12 @@ export const SUPPORTED = Object.freeze(new Set([
   'cooldown', 'mp', 'status', 'statuses', 'statusMult', 'stack', 'repeats', 'repeatEvery', 'delay', 'knock', 'taunt',
   'onHit', 'heal', 'healPower', 'leech', 'allies', 'target', 'buffs', 'selfBuff', 'place', 'ricochet', 'projectiles',
   'spread', 'pierce', 'pet', 'count', 'summon', 'dash', 'pullIn', 'barrier', 'hpCost', 'form', 'revive', 'channel',
-  'execute', 'pen', 'critBonus', 'petPower', 'bonusSeconds', 'statusStrength',
+  'execute', 'pen', 'critBonus', 'petPower', 'bonusSeconds', 'statusStrength', 'explode',
 ]));
 /** Sub-fields kept inside the nested blocks (the rest is dropped the same way). */
 const SUB = {
   onHit: ['taunt', 'heal', 'healAllies'],
-  knock: ['stagger', 'push'],
+  knock: ['stagger', 'push', 'down'],
   taunt: ['radius', 'seconds'],
   place: ['kind', 'seconds', 'radius', 'every', 'strike', 'heal', 'debuff', 'buff', 'follow'],
   summon: ['def', 'count', 'lifetime', 'temporary', 'name'],
@@ -31,6 +31,7 @@ const SUB = {
   revive: ['share'],
   channel: ['seconds', 'every'],
   execute: ['below', 'mult'],
+  explode: ['radius'],
   ricochet: ['bounces', 'range', 'keep'],
   selfBuff: ['name', 'seconds', 'damage', 'resist', 'haste', 'move', 'armor', 'dealLess', 'takeMore', 'healPerSecond'],
   form: ['id', 'name', 'group', 'toggle', 'seconds', 'body', 'stats', 'basic', 'pack'],
@@ -39,7 +40,7 @@ const FORM_STATS = ['armorPct', 'maxHpPct', 'movePct', 'hastePct', 'thorns'];
 const BUFF_FIELDS = ['damage', 'resist', 'haste', 'move', 'armor', 'dealLess', 'takeMore', 'healPerSecond', 'slow'];
 
 /** Farhold's shapes -> the targeting kinds the client draws (ARCH.md "Spell targeting"). */
-export const SHAPE_KIND = Object.freeze({ bolt: 'bolt', ground: 'ground', melee: 'cone', around: 'self', beam: 'line', dash: 'line', self: 'self', summon: 'self' });
+export const SHAPE_KIND = Object.freeze({ bolt: 'bolt', ground: 'ground', leap: 'ground', melee: 'cone', around: 'self', beam: 'line', dash: 'line', self: 'self', summon: 'self' });
 
 const clone = o => (o == null ? o : structuredClone(o));
 

@@ -1,8 +1,8 @@
 # Oathwild
 
-**Status:** town round 2026-11-25 (Larkford rebuilt as a crowded hillside town, Thornwatch cabins, villagers, townspeople at work spots, people called by their job, shops look-then-buy, Trade skills window, phone ability fix). Round 1 playable on the LAN: world server (shared saved worlds, ≤ 10 players, create/join by code) + the 3D client (title, character select, Tabard creator (Look → Class with its tree → Background → Attributes), world list, the world with over-the-shoulder aim, spells with ground indicators, loot windows, inventory, sheet, level-up, class trees, talents, spellbook, quests, map, people, shops, shrines, menus). Live on games.radgh.com since 2026-11-24 (world server on the droplet, saves in /var/lib/oathwild, archived hourly). Not yet played by a person.
+**Status:** combat + class rebuild 2026-11-26 (owner feedback after his first phone play — brainstorm + every point: `docs/BRAINSTORM-2026-11-26.md`): 22 class trees rebuilt to his rules (no paths, one rank per icon, rank II/III as own nodes, one training per weapon/armour kind, big passives, few heals; source `tools/trees/`, check `tests/rules/trees.test.mjs`), abilities are areas with knock-back/knock-down, leap + charge, the exploding Fireball, no plain wands, monster wind-up tells + longer dodge, packs of 1-2, 1v1/1v3 balance sim (`tools/sim-fights.mjs`), spell visuals ×3 with an animation on every key press (`docs/CASE-PALADIN.md`), every tree textured and lifted above the camera, Use button gone, no tooltip on window open. Earlier: town round 2026-11-25, round 1.
 **Play:** https://games.radgh.com/oathwild/ · LAN dev http://192.168.1.34:8401/prototypes/oathwild/ (start the world server first: `tools/game-servers.sh start oathwild-dev`; https for controllers: https://192.168.1.34:8441/prototypes/oathwild/). Stable 8400/8442 pairs with the `oathwild` unit (8660/8662) after publish-stable.
-**Next:** (tried and reverted 2026-11-24: compiling every world material on load — where the browser cannot compile in the background it froze the first seconds in the world, worse than the stalls it meant to remove) investigate prediction on very slow frames (2026-11-24: in the software test browser, at a few frames a second, the client sends ~1/3 of its 20 Hz steps and its predicted position overshoots the server by up to 30 m after the key is released, then snaps — fine at real frame rates, but a slow phone could feel it); a person plays it (check the new look on a real phone: Low 139-159 draw calls / ~400k triangles measured; software frame time ~60% above the old flat world); instance the fal building/prop models (≈490 single meshes on Medium); tune the Look group with `?tune`; item pictures drawn from the worn models (rule 20); buff/debuff visuals on bodies; real horse/boss models as the art budget allows.
+**Next:** the owner plays the rebuilt combat on his iPhone (frame rate with the ×3 spell effects is unmeasured on a real phone: ~170 draw calls with ten casters); balance gaps the sim still shows — from level 5 up a lone monster barely hurts area-heavy classes, Mage loses ~15% of level-10 matchups by running out the clock, Rogue/Bard weak against three; polish the 14 unlockable classes the way the base 8 were (owner: base 8 first); ~40 flat-colour scenery models still to texture (lessons rule 77 list may only shrink); new hand-made clips (two-handed overhead, bow draw) to replace the code-built moves; the three dead-tree props' server colliders are still kit-sized. (tried and reverted 2026-11-24: compiling every world material on load — where the browser cannot compile in the background it froze the first seconds in the world, worse than the stalls it meant to remove) investigate prediction on very slow frames (2026-11-24: in the software test browser, at a few frames a second, the client sends ~1/3 of its 20 Hz steps and its predicted position overshoots the server by up to 30 m after the key is released, then snaps — fine at real frame rates, but a slow phone could feel it); a person plays it (check the new look on a real phone: Low 139-159 draw calls / ~400k triangles measured; software frame time ~60% above the old flat world); instance the fal building/prop models (≈490 single meshes on Medium); tune the Look group with `?tune`; item pictures drawn from the worn models (rule 20); buff/debuff visuals on bodies; real horse/boss models as the art budget allows.
 **Parked:** Smithing / Alchemy benches and the Tinker class (later round); Chronomancer, Oracle, Dragon Knight, Starcaller; charm/turn spells; Farhold's resource / afterimage / "consumes" spell rules; playing offline without the world server; chat box (the server relays chat, no UI yet); **placeholder art to replace later: `docs/PLACEHOLDERS.md`** (props, 8 monsters, horse, items — about $23 of models when there is budget).
 
 A third-person open-world fantasy RPG for 1–10 players in one shared, saved world. The heart of it is levelling:
@@ -61,7 +61,7 @@ belong to the art and spell-visual helpers.
 | `js/client/` | `main.js` (the app contract), `screens/` (title, chars, creator, worlds, play), `play/` (camera + aim, prediction, HUD, minimap, touch), `render/` (view, world, actors, fx + Spell Kit, `caster-fx.js` = how each wand / tome / staff style looks), `ui/` (window kit, the ONE tooltip renderer `tip.js`, every window), `input/` (one binding table, keyboard/mouse/pad/touch, padnav) |
 | `ops/` | `oathwild` / `oathwild-dev` user units (linked, never enabled: `tools/game-servers.sh start oathwild-dev`) |
 
-Controls (rebind in Settings → Controls): WASD move, mouse look (click the world), left click attack, F power attack, Space dodge, X sneak, R horse, E talk/loot/use/revive (hold), 1–8 spells (ground spells: hold to aim, release to cast), Tab target, B bag, C character, K trade skills, N level up, L classes, T talents, P spellbook, J quests, M map, Esc menu. No block key and no run: a shield blocks by itself (a chance on the sheet and the shield's card), and walking is quick (owner 2026-11-25). Controller: left stick move, right stick look, RT attack, A dodge, X use, Y power, B sneak, LB/RB + A/B/X/Y spells, Start menu, d-pad up horse. Phone: stick + drag to look, Attack / Dodge / Use buttons, tap a person / remains / chest / shrine to use it (walks there when far), tap the prompt to use, tap a ground spell then tap the ground. Mouse: with a free mouse, click a person / remains / chest / shrine.
+Controls (rebind in Settings → Controls): WASD move, mouse look (click the world), left click attack, F power attack, Space dodge, X sneak, R horse, E talk/loot/use/revive (hold), 1–8 spells (ground spells: hold to aim, release to cast), Tab target, B bag, C character, K trade skills, N level up, L classes, T talents, P spellbook, J quests, M map, Esc menu. No block key and no run: a shield blocks by itself (a chance on the sheet and the shield's card), and walking is quick (owner 2026-11-25). Controller: left stick move, right stick look, RT attack, A dodge, X use, Y power, B sneak, LB/RB + A/B/X/Y spells, Start menu, d-pad up horse. Phone: stick + drag to look, Attack and Dodge buttons (no Use button since 2026-11-26: the on-screen prompt is the use button — tap it to use, hold it to bring a fallen friend back), tap a person / remains / chest / shrine to use it (walks there when far), tap a ground spell then tap the ground. Mouse: with a free mouse, click a person / remains / chest / shrine.
 
 ## The ground, sky and light (2026-11-24, "the world looks MVP")
 
@@ -159,6 +159,22 @@ smithy hammering and market chatter in the town's sound; a tall landmark (a temp
 
 ## History
 
+- 2026-11-26 — textured trees only, no Use button, one monster at a time (owner: "Where did these low poly mvp trees
+  come from? Unacceptable … They sit too low and block view of enemies", "Why is there a use button", "every enemy I
+  have seen has been in a pack of 5 or more … I can barely fight 1v1"). Trees: Low / Medium used to draw the trees
+  they thinned out as the flat vertex-coloured kit pine / oak (#132's invisible-collider fix); every tree now goes
+  through the storybook renderer at every setting (`render/world.js`; hand-placed tree props too), and the kit
+  instancer refuses a tree id. Spruce / fir skirts start higher and willow curtains are half as long (lowest leaves
+  ≥ 5 m as drawn); tufts within 7 m of the camera dissolve (`tufts.js` NEAR_FADE). Low at the Blighted Grove: 217 → 230
+  draw calls, 608k → 812k triangles (perf-kit). New rule: lessons rule 77 "No untextured models" — checked by
+  `tests/world/textured.test.mjs` (art.json rows textured or grandfathered; kit-props may not grow). Phone: the
+  on-screen prompt is the use button (tap = use, hold = revive); Dodge is a round button against Attack. Monsters:
+  camps laid out as small groups 28 m apart with a 12 m notice (`tools/place-world.mjs` CAMP_GROUPS writes
+  regions.json), roam spots spaced by notice + wander, roam notice ≤ 16 m, fighters' packs roll 1 / 2 / 3 at
+  65 / 27 / 8% (combat.json `packOdds`, `encounters.js packSize`). Encounters (`tools/pack-sizes.mjs`): before 13% one
+  monster, 19% five or more (the barrow 18); after 83% one, 17% two, 0.5% three, none bigger. Check:
+  `tests/world/packs.test.mjs` (sizes, boss guards, kill quests finishable).
+
 - 2026-11-25 — wildlife round (owner: "Rings should be easier to equip … When everything is looted, automatically close
   the popup. Include group/aoe looting like thousand vale. There is too few enemies in the world, except for large packs
   of goblins I cannot kill. Where are all the wild life? … Keep filling out the world"). Jewellery never asks a level
@@ -169,7 +185,7 @@ smithy hammering and market chatter in the town's sound; a tall landmark (a temp
   a field bull, barn rats, cave bats (`data/monsters.json`, `temper` skittish / defensive / hostile); every creature with
   nobody to fight wanders and grazes round its home (`combat.js wanderStep`, combat.json monsters.wander*); 23 new roam
   zones (40 in all). Camps of 5+ split into pairs on a ring with the boss in the middle and a shorter notice
-  (combat.json `campGroups`); the Goblin Warren laid out by hand (pickets, shamans, warchief). Hamlets Crossbrook and
+  (combat.json `campGroups`; replaced 2026-11-26 by hand groups of one or two); the Goblin Warren laid out by hand (pickets, shamans, warchief). Hamlets Crossbrook and
   Fernstead (map.json places + towns.json, the town planner); travellers on the long roads (`town.js planTravellers`).
   Checks: `tests/ui/wildlife-shots.mjs`.
 
@@ -200,7 +216,7 @@ smithy hammering and market chatter in the town's sound; a tall landmark (a temp
   leaf cards became house-sized single leaves; and one detail level for all distances meant Low (every phone) drew the
   far two-card clumps beside the hero. Leaves are now fluffy tufts (`tufts.js`). Low costs ~12% more triangles than the
   old flat cards (ground-probe, phone, Low). Phone HUD: Tap hints from the start, an Attack button, no empty slots.
-  Checks: `tests/ui/tap-interact.mjs [--desktop]` (NPC, prompt, Use, far chest walk-to, wolf remains, Wake at the
+  Checks: `tests/ui/tap-interact.mjs [--desktop]` (NPC, prompt, far chest walk-to, wolf remains, Wake at the
   shrine — real touch taps), `tests/ui/creator-shots.mjs [--phone]`; dev-only `devDown` / `devDummy hp`.
 
 - 2026-11-24 — Thousandvale's magic-weapon itemization (owner: "wands and tomes having special attacks"): 13 wand

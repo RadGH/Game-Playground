@@ -1,98 +1,176 @@
 {
-  "swimMult": 0.6,
-  "_doc": "Oathwild's own combat knobs (js/rules/combat.js is the one reader). Damage maths is Farhold's (rpg.strike); these are the world sim's timings, ranges, stamina costs and death rules.",
-  "tickHz": 20,
-  "projectile": {
-    "_doc": "Metres a second.",
-    "bolt": 32,
-    "arrow": 44,
-    "radius": 0.6
+ "swimMult": 0.6,
+ "_goal": "THE TUNING GOAL (owner 2026-11-26: 'I can barely fight 1v1 and it's obvious you haven't balanced yet'; lessons rule 81). A level-N hero using their abilities kills ONE level-N normal monster in about 6-10 s and loses at most 35% of their health; TWO at once is a real fight they win with abilities and rolls; THREE is dangerous (a real chance to lose); a boss is a long fight for one hero and fine for a group; the weapon alone still wins a 1v1, slowly. Measured by tools/sim-fights.mjs (every base class at levels 1/3/5/10 against 1, 2 and 3 same-level monsters of every kind in the region; the bot casts its bar, rolls out of half the tells, wears the plain kit to level 3 and magic finds from level 5) and pinned by tests/rules/balance.test.mjs. Rerun after any class, spell or monster change.",
+ "_doc": "Oathwild's own combat knobs (js/rules/combat.js is the one reader). Damage maths is Farhold's (rpg.strike); these are the world sim's timings, ranges, stamina costs and death rules.",
+ "tickHz": 20,
+ "projectile": {
+  "_doc": "Metres a second.",
+  "bolt": 32,
+  "arrow": 44,
+  "radius": 0.6,
+  "explodeExtra": 0.35,
+  "_explodeDoc": "An exploding ball (a bolt row with explode: { radius }, e.g. the fireball) is big: it touches a foe `explodeExtra` metres further out than a plain bolt, bursts on the first foe it touches, at the aimed ground point, or at the end of its range, and the burst hits everything within explode.radius (js/rules/combat.js burst)."
+ },
+ "aimAssist": {
+  "_doc": "How far off the aim line (degrees) a target-an-ally or beam spell still finds someone.",
+  "degrees": 8
+ },
+ "stamina": {
+  "_doc": "Stamina pays for a dodge roll and a power attack (a held swing). There is no run button and no block button (owner 2026-11-25): walking is simply faster (attributes.json base.moveSpeed) and a shield blocks on its own (`block` below). The dodge (owner 2026-11-26: 'improve movement and dodging') is a roll of `dodgeMetres` over `dodgeSeconds`, untouchable for the first `dodgeSafeSeconds` of it, then `dodgeCooldown` seconds before the next; `dodge` stamina each, so a fresh hero rolls 3-4 times in a row and again a few seconds later.",
+  "dodge": 25,
+  "dodgeMetres": 5.5,
+  "dodgeSeconds": 0.3,
+  "dodgeSafeSeconds": 0.26,
+  "powerAttack": 20,
+  "powerHold": 0.6,
+  "powerMult": 1.8,
+  "regenDelay": 1,
+  "dodgeCooldown": 0.35
+ },
+ "block": {
+  "_doc": "A shield in the off hand blocks by itself, no button (owner 2026-11-25: 'block should be auto chance, more like WoW'). Each physical blow from the front half (`frontDegrees` wide, centred on where the hero faces) has the shield's `chance` (percent) to be blocked; a block stops `stops` of the blow, plus any flat blockPower from gear. Block chance from passives, talents and gear adds to the shield's own, but only while a shield is held. A quiver and a magic ward are not shields here. Guessed numbers.",
+  "frontDegrees": 180,
+  "elements": [
+   "physical"
+  ],
+  "shields": {
+   "buckler": {
+    "chance": 10,
+    "stops": 0.4
+   },
+   "shield": {
+    "chance": 14,
+    "stops": 0.5
+   },
+   "kite_shield": {
+    "chance": 16,
+    "stops": 0.55
+   },
+   "tower_shield": {
+    "chance": 20,
+    "stops": 0.65
+   },
+   "aegis_shield": {
+    "chance": 20,
+    "stops": 0.7
+   },
+   "rune_aegis": {
+    "chance": 22,
+    "stops": 0.7
+   }
   },
-  "aimAssist": {
-    "_doc": "How far off the aim line (degrees) a target-an-ally or beam spell still finds someone.",
-    "degrees": 8
+  "fallback": "shield",
+  "maxChance": 75
+ },
+ "combatState": {
+  "_doc": "A body is 'in combat' while a monster has it on its threat list or it hit or was hit in the last `seconds`.",
+  "seconds": 6
+ },
+ "regen": {
+  "_doc": "Out of combat, share of maximum health and mana back per second (in combat only the sheet's own regen).",
+  "outOfCombat": 0.04
+ },
+ "monsters": {
+  "leashMetres": 45,
+  "noticeDefault": 18,
+  "wanderDefault": 9,
+  "wanderCamp": 3,
+  "fleeDefault": 10,
+  "thinkRadius": 90,
+  "corpseSeconds": 300,
+  "rangedKeep": 0.8,
+  "windup": 0.55,
+  "windupBoss": 0.85,
+  "windupRanged": 0.6,
+  "windupReachSlack": 0.6,
+  "windupArcDegrees": 110,
+  "windupTurn": 2.5,
+  "recoverMin": 0.35,
+  "_windupDoc": "Every monster blow has a tell (lessons rule 39; owner 2026-11-26: 'make dodging work'): it stops, turns to its target and winds up for `windup` seconds (a monster row may set its own; bosses `windupBoss`, shooters `windupRanged`) while a red mark shows on the ground; then it strikes whoever is still in front of it (within `windupArcDegrees`) and within reach + `windupReachSlack`. It turns at most `windupTurn` radians a second while winding up, so a roll to the side or back takes you out of it; a roll through it is untouchable anyway. A stagger or knockdown cancels the blow. The time between blows stays `attackEvery` (at least `recoverMin` after a blow)."
+ },
+ "death": {
+  "_doc": "A player at 0 health is downed for `downedSeconds` (an ally can revive them by holding Interact for `reviveSeconds` within `reviveRange`, back at `reviveShare` health); after that, or by choice, they respawn at their last shrine paying `goldShare` of their gold (at most goldCapPerLevel x level) and inventory.json durability.respawnLoss.",
+  "downedSeconds": 30,
+  "reviveSeconds": 3,
+  "reviveRange": 3,
+  "reviveShare": 0.3,
+  "goldShare": 0.05,
+  "goldCapPerLevel": 15
+ },
+ "xpRange": {
+  "_doc": "Players further than this from a kill get no XP or loot from it (they did not help, or wandered off).",
+  "metres": 80
+ },
+ "pets": {
+  "_doc": "Summoned companions: their health/damage come from their monster row at the caster's level, x the summon's power and the caster's petPct.",
+  "followMetres": 4,
+  "leashMetres": 30
+ },
+ "monsterScale": {
+  "_doc": "Oathwild's monsters live longer than Farhold's (owner: WoW-like fights). x on every monster's health and damage at spawn (companions are not scaled). 2026-11-26 retune against `_goal` (tools/sim-fights.mjs): health 3 -> 6.5 and growth 30% -> 28% a level (the rebuilt class abilities killed a same-level monster in 1-3 s), damage 1.7 -> 1.9 but growth 10% -> 5% a level (a fresh hero lost a third of their health to one level-1 monster; level-10 fights last longer, so each blow grows less). Lead pass 2026-11-26: health 6.5 -> 9 together with smaller spell ranks (+25/+50%), class depth +2% a level and hero weapons growing +8% a level (attributes.json base.meleePerLevel), so abilities stop one-shotting and the weapon keeps up. Then health 9 -> 7 with growth 1.28 -> 1.316 a level (farholdEnemies): level 10 unchanged, level 1 a fifth softer so the weapon alone still wins a level-1 fight. bossDmg: extra on a boss's blows (was a fixed 1.2 in code; 1.0 since monster damage grows 1.13 a level — a solo hero must still finish the main story, tests/world/campaign.test.mjs). bossHp: extra health on a boss (was a fixed 1.5 in code; 1.0 since base health went to 7 — a solo cleric took 85-150 s per boss and timed out on three).",
+  "hp": 7,
+  "dmg": 1.9,
+  "bossDmg": 1.0,
+  "bossHp": 1.0
+ },
+ "farholdEnemies": {
+  "_doc": "Laid over farhold/data/balance.json `enemies` in memory (js/rules/engine.js): how fast a monster's health and damage grow per level. Oathwild's characters grow faster per level than Farhold's (class points, ranks, class depth), so its monsters do too. Lead pass 2026-11-26: damage growth 1.05 -> 1.13 a level (from level 5 up a hero lost almost nothing to a same-level monster).",
+  "perLevel": 1.316,
+  "dmgPerLevel": 1.13
+ },
+ "magicWeapon": {
+  "_doc": "A magic weapon attacks with spell power in its own style (js/rules/casters.js, data/casters.json): `mult` is every style's base share (a style's own share multiplies it); `element` and `range` are the plain bolt of a quarterstaff or an orb left in the main hand.",
+  "mult": 0.8,
+  "element": "arcane",
+  "range": 32
+ },
+ "formSwing": {
+  "_doc": "Seconds between a shape's basic attacks (a wolf's bite, a bear's swipe) before haste; each attack lands the shape's `hits`.",
+  "every": 1.1
+ },
+ "packOdds": [
+  0.65,
+  0.27,
+  0.08
+ ],
+ "_packOdds": "A fighting monster's pack in a roam zone: odds of 1, 2, 3 (cut to the roster row's `pack` range; never more than 3). Owner 2026-11-26: \"every enemy I have seen has been in a pack of 5 or more … I can barely fight 1v1\". js/world/encounters.js packSize reads it; peaceful herds roll evenly.",
+ "campGroups": {
+  "_doc": "A camp of `from` or more monsters with no hand layout (regions.json spawn `at`) splits itself: groups of `size` on a ring `ring` metres round the middle, the boss in the middle, noticing at `notice` metres (owner 2026-11-25: large packs a hero cannot kill). js/rules/combat.js spawnCamp is the reader.",
+  "from": 5,
+  "size": 2,
+  "ring": 16,
+  "notice": 13
+ },
+ "knock": {
+  "_doc": "Knockback and knockdown (owner 2026-11-26: 'I want things to get blown apart by fireball explosions and smack things in a circle knocking down enemies around me'). A spell row's `knock: { push, down, stagger }` throws the target `push` metres away from the blow over a short flight (airMin..airMax seconds, longer for longer throws; the server's ground check runs every step, so nobody flies through a wall or off a cliff), then, with `down` > 0, it lies knocked down for `down` seconds plus `standUp` to get up: no moving, no attacking, no casting, normal damage taken. `rank` scales push and down for tougher bodies (a boss barely moves). A blow that takes `heavyShare` of a monster's health in one hit staggers it for `heavyStagger` seconds (it loses its swing) — not bosses. Heroes are never thrown (no monster carries a knock yet). js/rules/combat.js knockUnit is the reader.",
+  "airMin": 0.3,
+  "airMax": 0.45,
+  "airPerMetre": 0.03,
+  "standUp": 0.45,
+  "rank": {
+   "boss": {
+    "push": 0.25,
+    "down": 0.3
+   },
+   "champion": {
+    "push": 0.6,
+    "down": 0.6
+   },
+   "elite": {
+    "push": 0.6,
+    "down": 0.6
+   },
+   "rare": {
+    "push": 0.5,
+    "down": 0.5
+   }
   },
-  "stamina": {
-    "_doc": "Stamina pays for a dodge roll and a power attack (a held swing). There is no run button and no block button (owner 2026-11-25): walking is simply faster (attributes.json base.moveSpeed) and a shield blocks on its own (`block` below).",
-    "dodge": 25,
-    "dodgeMetres": 4,
-    "dodgeSeconds": 0.25,
-    "dodgeSafeSeconds": 0.35,
-    "powerAttack": 20,
-    "powerHold": 0.6,
-    "powerMult": 1.8,
-    "regenDelay": 1
-  },
-  "block": {
-    "_doc": "A shield in the off hand blocks by itself, no button (owner 2026-11-25: 'block should be auto chance, more like WoW'). Each physical blow from the front half (`frontDegrees` wide, centred on where the hero faces) has the shield's `chance` (percent) to be blocked; a block stops `stops` of the blow, plus any flat blockPower from gear. Block chance from passives, talents and gear adds to the shield's own, but only while a shield is held. A quiver and a magic ward are not shields here. Guessed numbers.",
-    "frontDegrees": 180,
-    "elements": ["physical"],
-    "shields": {
-      "buckler": { "chance": 10, "stops": 0.4 },
-      "shield": { "chance": 14, "stops": 0.5 },
-      "kite_shield": { "chance": 16, "stops": 0.55 },
-      "tower_shield": { "chance": 20, "stops": 0.65 },
-      "aegis_shield": { "chance": 20, "stops": 0.7 },
-      "rune_aegis": { "chance": 22, "stops": 0.7 }
-    },
-    "fallback": "shield",
-    "maxChance": 75
-  },
-  "combatState": {
-    "_doc": "A body is 'in combat' while a monster has it on its threat list or it hit or was hit in the last `seconds`.",
-    "seconds": 6
-  },
-  "regen": {
-    "_doc": "Out of combat, share of maximum health and mana back per second (in combat only the sheet's own regen).",
-    "outOfCombat": 0.04
-  },
-  "monsters": {
-    "leashMetres": 45,
-    "noticeDefault": 18,
-    "wanderDefault": 9,
-    "wanderCamp": 3,
-    "fleeDefault": 10,
-    "thinkRadius": 90,
-    "corpseSeconds": 300,
-    "rangedKeep": 0.8
-  },
-  "death": {
-    "_doc": "A player at 0 health is downed for `downedSeconds` (an ally can revive them by holding Interact for `reviveSeconds` within `reviveRange`, back at `reviveShare` health); after that, or by choice, they respawn at their last shrine paying `goldShare` of their gold (at most goldCapPerLevel x level) and inventory.json durability.respawnLoss.",
-    "downedSeconds": 30,
-    "reviveSeconds": 3,
-    "reviveRange": 3,
-    "reviveShare": 0.3,
-    "goldShare": 0.05,
-    "goldCapPerLevel": 15
-  },
-  "xpRange": {
-    "_doc": "Players further than this from a kill get no XP or loot from it (they did not help, or wandered off).",
-    "metres": 80
-  },
-  "pets": {
-    "_doc": "Summoned companions: their health/damage come from their monster row at the caster's level, x the summon's power and the caster's petPct.",
-    "followMetres": 4,
-    "leashMetres": 30
-  },
-  "monsterScale": {
-    "_doc": "Oathwild's monsters live longer than Farhold's (owner: WoW-like fights). x on every monster's health and damage at spawn (companions are not scaled).",
-    "hp": 3,
-    "dmg": 1.7
-  },
-  "farholdEnemies": {
-    "_doc": "Laid over farhold/data/balance.json `enemies` in memory (js/rules/engine.js): how fast a monster's health and damage grow per level. Oathwild's characters grow faster per level than Farhold's (class points, ranks, class depth), so its monsters do too.",
-    "perLevel": 1.3,
-    "dmgPerLevel": 1.1
-  },
-  "magicWeapon": {
-    "_doc": "A magic weapon attacks with spell power in its own style (js/rules/casters.js, data/casters.json): `mult` is every style's base share (a style's own share multiplies it); `element` and `range` are the plain bolt of a quarterstaff or an orb left in the main hand.",
-    "mult": 0.8,
-    "element": "arcane",
-    "range": 32
-  },
-  "formSwing": {
-    "_doc": "Seconds between a shape's basic attacks (a wolf's bite, a bear's swipe) before haste; each attack lands the shape's `hits`.",
-    "every": 1.1
-  },
-  "campGroups": { "_doc": "A camp of `from` or more monsters with no hand layout (regions.json spawn `at`) splits itself: groups of `size` on a ring `ring` metres round the middle, the boss in the middle, noticing at `notice` metres (owner 2026-11-25: large packs a hero cannot kill). js/rules/combat.js spawnCamp is the reader.", "from": 5, "size": 2, "ring": 16, "notice": 13 }
+  "heavyShare": 0.18,
+  "heavyStagger": 0.35
+ },
+ "rush": {
+  "_doc": "Spells that move the caster (js/rules/combat.js rush; the browser's prediction runs the same steps, so nothing snaps back). `leap`: the hero jumps to the aimed ground point (at most the row's `range`) over `leapSeconds`, cannot be hit in the air, and on landing hits everything within the row's `radius` (with its `knock`). `dash` (a charge): the hero runs the row's dash range at `dashSpeed` metres a second, hitting each foe it passes once, untouchable while it runs.",
+  "leapSeconds": 0.45,
+  "dashSpeed": 34
+ }
 }

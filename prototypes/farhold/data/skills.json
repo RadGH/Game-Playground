@@ -771,7 +771,7 @@
    "desc": "Strikes everything in an 80° arc 3.2 m in front of you, or as far and as wide as your weapon swings if that is more, for 224% weapon damage. Marks targets with Rent for 8s: they take 15% more damage from every source and take 2 times the damage when a rune detonates on them. 8 mana, 9s cooldown."
   },
   "shield_bash": {
-   "name": "Rim Strike",
+   "name": "Shield Bash",
    "shape": "melee",
    "element": "physical",
    "mult": 1.3,
@@ -839,7 +839,7 @@
       },
       {
        "id": "hook_rim",
-       "name": "Hook Rim",
+       "name": "Hook Bash",
        "fx": "pull",
        "mod": {
         "pullIn": {
@@ -912,7 +912,7 @@
    "desc": "Strikes everything in a 126° arc 2.8 m in front of you, or as far and as wide as your weapon swings if that is more, for 151% weapon damage. Stuns targets for 1s. Each enemy hit is taunted to attack you for 3s. 6 mana, 6s cooldown."
   },
   "whirlwind": {
-   "name": "Iron Gyre",
+   "name": "Whirlwind",
    "shape": "around",
    "element": "physical",
    "mult": 0.8,
@@ -937,7 +937,7 @@
      "nodes": [
       {
        "id": "widening_gyre",
-       "name": "Widening Gyre",
+       "name": "Widening Spin",
        "fx": "wide",
        "mod": {
         "repeats": {
@@ -947,7 +947,7 @@
       },
       {
        "id": "tight_gyre",
-       "name": "Tight Gyre",
+       "name": "Tight Spin",
        "fx": "knock",
        "mod": {
         "set": {
@@ -1053,7 +1053,7 @@
       },
       {
        "id": "endless_gyre",
-       "name": "Endless Gyre",
+       "name": "Endless Spin",
        "fx": "charge",
        "mod": {
         "channel": {
@@ -7166,7 +7166,7 @@
    "desc": "Falls on a spot up to 26 m away and strikes everything within 5 m of it 4 times over 2s, for 88% weapon damage as shadow each time. Every pulse drags everything 2.5 m toward the middle. Copies Gnawed, Burning, Poisoned, Bleeding and Cursed from the target to up to 3 enemies within 5 m. 24 mana, 16s cooldown."
   },
   "breaching_shove": {
-   "name": "Breaching Shove",
+   "name": "Shield Charge",
    "shape": "melee",
    "element": "physical",
    "mult": 1.1,
@@ -7291,7 +7291,7 @@
       },
       {
        "id": "challenge_shove",
-       "name": "Challenge Shove",
+       "name": "Challenge Push",
        "fx": "tag",
        "mod": {
         "onHit": {
@@ -22280,7 +22280,7 @@
      "nodes": [
       {
        "id": "shove_into_line",
-       "name": "Shove Into Line",
+       "name": "Push Into Line",
        "fx": "knock",
        "mod": {
         "knock": {
@@ -25890,7 +25890,7 @@
      "nodes": [
       {
        "id": "shield_shove",
-       "name": "Shield Shove",
+       "name": "Shield Push",
        "fx": "knock",
        "mod": {
         "burst": {

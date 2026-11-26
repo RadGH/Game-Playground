@@ -11,7 +11,7 @@ export const metadata = {
     ]
   },
   "breaching_shove": {
-    "name": "Breaching Shove",
+    "name": "Shield Charge",
     "classId": "warrior",
     "className": "Warrior",
     "categories": [
@@ -31,7 +31,7 @@ export const metadata = {
     ]
   },
   "whirlwind": {
-    "name": "Iron Gyre",
+    "name": "Whirlwind",
     "classId": "warrior",
     "className": "Warrior",
     "categories": [
@@ -1381,7 +1381,7 @@ export const metadata = {
     ]
   },
   "shield_bash": {
-    "name": "Rim Strike",
+    "name": "Shield Bash",
     "classId": "knight",
     "className": "Knight",
     "categories": [

@@ -4,7 +4,7 @@
 //   node prototypes/oathwild/tools/classes-md.mjs [--write]
 import { readFileSync, writeFileSync } from 'node:fs';
 import { bootRules } from '../js/rules/boot.js';
-import { classIds, classDef, nodeName, nodeMaxRank } from '../js/rules/classes.js';
+import { classIds, classDef, nodeName, nodeNeeds } from '../js/rules/classes.js';
 import { describeRequires } from '../js/rules/describe.js';
 
 const rules = await bootRules({ seed: 7 });
@@ -15,13 +15,13 @@ for (const c of classIds(rules)) {
   const req = d.requires ? describeRequires(rules, d.requires) : 'open at creation';
   out.push(`### ${d.name} — ${tierName[d.tier]}${d.round > 1 ? ' (later round)' : ''}`);
   out.push(`${d.blurb} *Requires:* ${req}. *Growth a level:* +${d.growth.hp} health, +${d.growth.mp} mana.${d.dualWield ? ' Fights with two weapons.' : ''}`);
-  if (d.paths) out.push(`*Paths (choose one at level ${rules.data.classes.rules.pathLevel}):* ${Object.values(d.paths).map(p => `**${p.name}** — ${p.blurb}`).join(' ')}`);
-  out.push('', '| Lv | Node | Kind | Ranks | Path / choice |', '|---|---|---|---|---|');
+  out.push('', '| Lv | Node | Kind | Needs | Choice |', '|---|---|---|---|---|');
   for (const n of [...d.nodes].sort((a, b) => a.level - b.level)) {
     const kind = { spell: 'spell', passive: 'passive', prof: 'training', mod: `modifier of ${nodeName(rules, d.nodes.find(x => x.id === n.on))}` }[n.kind];
     const extra = n.kind === 'prof' ? ` (${n.grants.join(', ')})` : '';
-    const src = n.kind === 'spell' && rules.spells[n.spell].source !== 'oathwild' ? ` *(${rules.spells[n.spell].source.split(':')[0]})*` : n.kind === 'spell' ? ' *(new)*' : '';
-    out.push(`| ${n.level} | ${nodeName(rules, n)}${src}${extra} | ${kind}${n.free ? ', free' : ''} | ${nodeMaxRank(rules, n)} | ${n.path ? d.paths[n.path].name : ''}${n.choice ? 'capstone (pick one)' : ''} |`);
+    const shape = n.kind === 'spell' ? ` *(${rules.spells[n.spell].base.shape})*` : '';
+    const needs = nodeNeeds(n).map(id => nodeName(rules, d.nodes.find(x => x.id === id))).join(', ');
+    out.push(`| ${n.level} | ${nodeName(rules, n)}${shape}${extra} | ${kind}${n.free ? ', free' : ''} | ${needs} | ${n.choice ? 'capstone (pick one)' : ''} |`);
   }
   out.push('');
 }

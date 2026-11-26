@@ -26,7 +26,7 @@
 import { fmt, fmtHp, fmtPctOf, fmtSign, fmtRange, fmtSecs, describeAffix, handText, cooldownPower, STATUS_POWER_SHARE, makeRng } from './farhold.js';
 import { sheetOf, attrTotals, shieldBlock, farholdShieldBlock } from './sheet.js';
 import { spellRow, targetKind } from './spells.js';
-import { castRow, spellSources, classDef, nodeOf, nodeKey, nodeName, nodeMaxRank, levelForRank, nodeRefusal, modsForSpell, classRefusal, classPower, rankCapAt, pointsLeft, classRules, requirementGaps } from './classes.js';
+import { castRow, spellSources, classDef, nodeOf, nodeKey, nodeName, nodeMaxRank, levelForRank, nodeRefusal, nodeNeeds, modsForSpell, classRefusal, classPower, rankCapAt, pointsLeft, classRules, requirementGaps } from './classes.js';
 import { talentDef, talentRefusal, rowLevel } from './talents.js';
 import { canWear, itemNeeds, profSources, attrHave } from './proficiency.js';
 import { itemWeight, durabilityOf, isBroken } from './inventory.js';
@@ -65,6 +65,11 @@ const STAT_TEXT = {
   threatPct: v => `${fmtSign(v)}% threat`, carry: v => `${fmtSign(v)} kg carry weight`, priceCut: v => `${fmtSign(-v)}% shop prices`,
   lifeSteal: v => `${fmtSign(v)}% of weapon damage back as health`, thorns: v => `attackers take ${fmtPctOf(v * 100)} of their hit back`,
   enchantSlots: v => `${fmtSign(v)} enchantment slot on each item`,
+  // a mastery of one weapon kind (owner 2026-11-26)
+  daggerPct: v => `${fmtSign(v)}% damage with daggers`, swordPct: v => `${fmtSign(v)}% damage with swords`, axePct: v => `${fmtSign(v)}% damage with axes`,
+  macePct: v => `${fmtSign(v)}% damage with maces and hammers`, spearPct: v => `${fmtSign(v)}% damage with spears`, staffPct: v => `${fmtSign(v)}% damage with staves`,
+  twohandPct: v => `${fmtSign(v)}% damage with two-handed weapons`, bowPct: v => `${fmtSign(v)}% damage with bows`, crossbowPct: v => `${fmtSign(v)}% damage with crossbows`,
+  wandPct: v => `${fmtSign(v)}% spell power while holding a wand`, scepterPct: v => `${fmtSign(v)}% spell power while holding a sceptre`,
 };
 export const STAT_TEXT_KEYS = Object.freeze(Object.keys(STAT_TEXT));
 export function modLine(rules, key, value) {
@@ -108,7 +113,7 @@ function statusSentence(rules, id, over = {}, { power = 0, bonusSeconds = 0, str
 
 function shapePhrase(row) {
   switch (row.shape) {
-    case 'bolt': return `to the first enemy it hits, up to ${metres(row.range || 34)} away${row.splash ? `, and half that to everything within ${metres(row.splash)} of it` : ''}`;
+    case 'bolt': return row.explode ? `to everything within ${metres(row.explode.radius)} where it bursts — on the first enemy it hits, or ${metres(row.range || 34)} away` : `to the first enemy it hits, up to ${metres(row.range || 34)} away${row.splash ? `, and half that to everything within ${metres(row.splash)} of it` : ''}`;
     case 'ground': return `to everything within ${metres(row.radius || 3)} of a spot up to ${metres(row.range || 20)} away`;
     case 'melee': return `to everything in a ${deg(row.arc || 1.6)}° arc ${metres(row.reach || 3)} in front of you`;
     case 'around': return `to everything within ${metres(row.radius || 3)} of you`;
@@ -457,6 +462,7 @@ function changeLines(rules, node) {
   if (ch.mult) out.push(`${fmtSign(Math.round((ch.mult - 1) * 100))}% to its damage and healing`);
   for (const [k, v] of Object.entries(ch.add || {})) {
     if (k === 'radius') out.push(`${fmtSign(v)} m to its area`);
+    else if (k === 'explode') out.push(`explodes ${metres(v.radius)} wide`);
     else if (k === 'repeats') out.push(`${fmtSign(v)} more strikes`);
     else if (k === 'projectiles') out.push(`${fmtSign(v)} more bolts`);
     else if (k === 'count') out.push(`${fmtSign(v)} more companions`);
@@ -481,39 +487,49 @@ export function describeNode(rules, char, cls, nodeId) {
   const node = nodeOf(rules, cls, nodeId);
   if (!def || !node) return blank({ title: 'Unknown', ok: false });
   const have = char.nodes?.[nodeKey(cls, nodeId)] || 0;
-  const max = nodeMaxRank(rules, node);
-  const lvl = char.classLevels?.[cls] || 0;
-  const why = have >= max ? null : nodeRefusal(rules, char, cls, nodeId);
-  const pathName = node.path ? def.paths[node.path].name : null;
-  const kindText = { spell: 'Spell', passive: 'Passive', prof: 'Training', mod: 'Spell modifier' }[node.kind];
+  const why = have ? null : nodeRefusal(rules, char, cls, nodeId);
+  const kindText = { spell: node.rank > 1 ? 'Spell rank' : 'Spell', passive: 'Passive', prof: 'Training', mod: 'Spell modifier' }[node.kind];
   let out;
   if (node.kind === 'spell') {
-    out = describeSpell(rules, char, node.spell, { rank: Math.max(1, have), cls });
+    // a rank node shows the spell as that rank makes it, and what the rank adds over the one before
+    out = describeSpell(rules, char, node.spell, { rank: node.rank || 1, cls });
+    out.title = nodeName(rules, node);   // lint-ok: the card's title text, not a browser title=
     out.kind = `${def.name} ${kindText.toLowerCase()} · ${out.kind}`;
+    if (node.rank > 1) out.lines.unshift(`Upgrades ${rules.spells[node.spell]?.base.name || node.spell} to rank ${fmt(node.rank)}: ${rankGain(rules, node.spell, node.rank)}.`);
+    out.next = null;
   } else {
-    out = blank({ title: nodeName(rules, node), kind: `${def.name} ${kindText.toLowerCase()}`, icon: `node_${cls}_${nodeId}`, rank: max > 1 ? { now: have, max } : null });
+    out = blank({ title: nodeName(rules, node), kind: `${def.name} ${kindText.toLowerCase()}`, icon: `node_${cls}_${nodeId}` });
     if (node.kind === 'passive') {
-      const shown = Math.max(1, have);
-      out.lines.push(...modLines(rules, Object.fromEntries(Object.entries(node.mods || {}).map(([k, v]) => [k, v * shown]))));
-      if (have && have < max) out.next = { title: `Rank ${have + 1}`, lines: modLines(rules, Object.fromEntries(Object.entries(node.mods || {}).map(([k, v]) => [k, v * (have + 1)]))), needs: `${def.name} level ${levelForRank(rules, node, have + 1)}` };
+      out.lines.push(...modLines(rules, node.mods || {}));
     } else if (node.kind === 'prof') {
-      for (const g of node.grants || []) { const a = rules.data.proficiency.attrNeeds?.armour?.[g], AN = { str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' }; out.lines.push(`Lets you wear or wield ${rules.data.proficiency.names[g].toLowerCase()}${a?.base ? ` (it still needs ${fmt(a.base)} ${[].concat(a.stat).map(k => AN[k] || k).join(' or ')} or more, a little more on better pieces)` : ''}.`); }
+      for (const g of node.grants || []) { const a = rules.data.proficiency.attrNeeds?.armour?.[g], AN = { str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' }; out.lines.push(`Lets you ${g === 'dualWield' ? 'hold' : rules.data.proficiency.armour?.[g] || g === 'shield' ? 'wear' : 'wield'} ${rules.data.proficiency.names[g].toLowerCase()}${a?.base ? ` (it still needs ${fmt(a.base)} ${[].concat(a.stat).map(k => AN[k] || k).join(' or ')} or more, a little more on better pieces)` : ''}.`); }
     } else if (node.kind === 'mod') {
       const target = nodeOf(rules, cls, node.on);
       out.lines.push(`Changes ${nodeName(rules, target)}: ${changeLines(rules, node).join(', ')}.`);
-      out.rows.push({ label: 'Needs', value: `${nodeName(rules, target)} rank ${fmt(node.needsRank || 1)}` });
     }
   }
   out.rows.unshift({ label: 'Opens at', value: `${def.name} level ${fmt(node.level)}` });
-  out.rows.splice(1, 0, { label: 'Cost', value: node.free && !have ? 'Free with the level' : `${fmt(node.cost || 1)} ${def.name} point${(node.cost || 1) > 1 ? 's' : ''} a rank` });
-  if (pathName) out.rows.push({ label: 'Path', value: pathName });
+  out.rows.splice(1, 0, { label: 'Cost', value: node.free ? 'Free with the level' : `${fmt(node.cost || 1)} ${def.name} point${(node.cost || 1) > 1 ? 's' : ''}` });
+  const needs = nodeNeeds(node).map(id => nodeName(rules, nodeOf(rules, cls, id)));
+  if (needs.length) out.rows.push({ label: 'Needs', value: needs.join(', ') });
   if (node.choice) out.rows.push({ label: 'Choice', value: 'Only one of these can be taken' });
-  if (max > 1) out.rows.push({ label: 'Rank allowed now', value: `${fmt(rankCapAt(rules, cls, node, lvl))} of ${fmt(max)}` });
-  if (node.kind === 'spell' && out.next) out.next.needs = `${def.name} level ${levelForRank(rules, node, (have || 1) + 1)}`;
-  out.rank = max > 1 || node.kind === 'spell' ? { now: have, max } : out.rank;
+  out.rank = null;
   out.needs = why ? [why] : [];
   out.ok = !why;
   return out;
+}
+
+/** What rank `r` of a spell adds over rank r−1, in words ("+40% damage, knocks enemies down"). */
+function rankGain(rules, spellId, r) {
+  const ranks = rules.spells[spellId]?.ranks || [];
+  const now = ranks[r - 1] || {}, before = ranks[r - 2] || {};
+  const bits = [];
+  const p = (now.power ?? 1) / (before.power ?? 1);
+  if (p > 1.001) bits.push(`${fmtSign(Math.round((p - 1) * 100))}% power`);
+  if (now.cooldown && now.cooldown !== (before.cooldown ?? 1)) bits.push(`${fmtSign(Math.round((now.cooldown / (before.cooldown ?? 1) - 1) * 100))}% cooldown`);
+  if (now.add) bits.push(...changeLines(rules, { change: { add: now.add } }));
+  if (now.seconds) bits.push(`effects last ${fmtSecs(now.seconds)} longer`);
+  return bits.length ? bits.join(', ') : 'stronger';
 }
 
 export function describeClass(rules, char, cls, { flags = [] } = {}) {
@@ -528,7 +544,6 @@ export function describeClass(rules, char, cls, { flags = [] } = {}) {
   out.rows.push({ label: 'Each level', value: `${fmtSign(g.hp)} health, ${fmtSign(g.mp)} mana, ${fmt(classRules(rules).pointsPerLevel)} ${def.name} points` });
   const ag = Object.entries(g.attrs || {}).map(([k, v]) => `${rules.data.attributes.names[k]} +1 every ${fmt(Math.round(1 / v))} levels`);
   if (ag.length) out.rows.push({ label: 'Growth', value: ag.join(', ') });
-  if (def.paths) out.rows.push({ label: 'Paths', value: Object.values(def.paths).map(p => p.name).join(' or ') });
   if (lvl) out.rows.push({ label: 'Points left', value: fmt(pointsLeft(rules, char, cls)) });
   if (def.requires && !lvl) {
     const gaps = requirementGaps(rules, char, def.requires, { flags, attrs: attrTotals(rules, char) });

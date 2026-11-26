@@ -117,10 +117,10 @@ async function makeKit() {
 // ---------------------------------------------------------------------------------------------- picking
 const GROUPS = [
   ['Bolts and missiles', ['fire_bolt', 'frost_bolt', 'arcane_missile', 'shadow_bolt', 'nature_bolt', 'bolt_generic', 'arrow']],
-  ['Ground', ['ring_of_dawn', 'poison_cloud', 'blizzard', 'meteor', 'thunder_strike', 'fire_wall', 'flask_throw', 'arrow_rain', 'ground_generic', 'summon_circle']],
-  ['Around the caster', ['frost_nova', 'nova_generic', 'whirl_slash', 'battle_shout']],
-  ['Beams and cones', ['chain_lightning', 'beam_generic', 'breath_cone']],
-  ['Weapons', ['melee_slash', 'elemental_slash', 'dash_generic']],
+  ['Ground', ['fireball', 'ring_of_dawn', 'poison_cloud', 'blizzard', 'meteor', 'thunder_strike', 'fire_wall', 'flask_throw', 'arrow_rain', 'ground_generic', 'summon_circle']],
+  ['Around the caster', ['ground_slam', 'leap_slam', 'whirlwind', 'frost_nova', 'nova_generic', 'whirl_slash', 'war_cry', 'battle_shout']],
+  ['Beams, lines and cones', ['line_wave', 'ice_spikes', 'earthquake', 'chain_lightning', 'beam_generic', 'breath_cone']],
+  ['Weapons', ['cleave_arc', 'shield_bash', 'melee_slash', 'elemental_slash', 'charge_rush', 'dash_generic']],
   ['On the body', ['nature_heal', 'heal_generic', 'buff_generic', 'shapeshift_puff', 'aura_burning', 'aura_frozen', 'aura_blessed', 'aura_poisoned', 'aura_haste', 'aura_warded', 'aura_cursed']],
 ];
 let cur = Q.get('spell') || 'fire_bolt', curSchool = null, curScale = 1, curName = null;

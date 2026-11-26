@@ -126,13 +126,24 @@ export function installTooltips(root = document, { keepOnPress = false } = {}) {
   host.addEventListener('pointerdown', down, true);
   if (!installed) {
     installed = true;
-    document.addEventListener('focusin', e => { const el = target(e.target); if (el) { current = el; show(el, 0, 0, el); } });
+    // a focus the code gives (a window putting the focus on its first button, a redraw putting it back) shows no
+    // tooltip: only a focus the player moved does (owner 2026-11-26, Oathwild: "the class screen opens a tooltip popup
+    // as soon as you open the menu"). focusQuiet() below is how code focuses without a tooltip.
+    document.addEventListener('focusin', e => { if (quiet) return; const el = target(e.target); if (el) { current = el; show(el, 0, 0, el); } });
     document.addEventListener('focusout', hideTip);
     document.addEventListener('keydown', e => { if (e.key === 'Escape') hideTip(); });
     addEventListener('scroll', hideTip, true);
     addEventListener('blur', hideTip);
   }
   return () => { host.removeEventListener('pointerover', over, true); host.removeEventListener('pointermove', move, true); host.removeEventListener('pointerout', out, true); host.removeEventListener('pointerdown', down, true); };
+}
+
+let quiet = false;
+/** Focus `el` without opening its tooltip (a window's first button on open, focus put back after a redraw). */
+export function focusQuiet(el, opts = { preventScroll: true }) {
+  if (!el?.focus) return;
+  quiet = true;
+  try { el.focus(opts); } finally { quiet = false; }
 }
 
 /** Convenience: set plain-text tooltip on an element (also fills `title` off, so there is only one bubble). */

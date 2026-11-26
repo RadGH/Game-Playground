@@ -234,7 +234,7 @@ export async function createTabard({ body = 'male', items = [], clip = 'idle', c
   let current = null, currentName = null;
   function play(name, fade = 0.25) {
     const c = clipFor(name); if (!c) return false;
-    const once = /Death|Roll|Attack|Shoot|Hit|Punch|Interact|Jump_Start|Jump_Land/.test(c.name);
+    const once = /Death|Roll|Attack|Shoot|Hit|Punch|Interact|Jump_Start|Jump_Land|Spell_Simple_Enter|Spell_Simple_Exit/.test(c.name);   // Enter/Exit: a spell's wind-up and follow-through (Oathwild) play once
     blendTo(mixer, mixer.clipAction(c), fade, once);
     current = mixer.clipAction(c); currentName = name; return true;
   }

@@ -37,10 +37,42 @@ export const EXTRA_PALETTE = {
 const TEX_SCHOOL = { ice: 'frost', frost: 'frost', fire: 'fire', holy: 'holy', nature: 'nature', arcane: 'arcane', shadow: 'shadow',
   lightning: 'lightning', poison: 'poison', physical: 'arcane', bleed: 'shadow', blood: 'shadow', fel: 'poison', dawn: 'holy', moon: 'arcane', haste: 'lightning', true: 'arcane' };
 
+// Pool sizes per quality. Since the Oathwild spell-look round (2026-11-26, "TRIPLE the amount of graphics") every
+// visual draws ~3x the pieces and phones draw the same counts as desktops: 'low' only has smaller pools and budget
+// (the global cap, which the pressure() slow-down keeps storms under) and 2 lights instead of 6 — never 0, so a
+// phone's spells still light the ground (lights are pooled and never toggled: lessons rule 29).
 export const QUALITY = {
-  high: { budget: 6000, normalShare: 0.5, ground: 64, shells: { cylinder: 20, cone: 4, funnel: 4, dome: 6, sphere: 8 }, ribbons: 56, glows: 10, lights: 6 },
-  low: { budget: 3000, normalShare: 0.5, ground: 40, shells: { cylinder: 12, cone: 2, funnel: 2, dome: 4, sphere: 4 }, ribbons: 36, glows: 6, lights: 0 },
+  high: { budget: 9000, normalShare: 0.5, ground: 180, shells: { cylinder: 40, cone: 6, funnel: 6, dome: 10, sphere: 12 }, ribbons: 80, glows: 16, lights: 6 },
+  low: { budget: 6000, normalShare: 0.5, ground: 130, shells: { cylinder: 28, cone: 4, funnel: 4, dome: 6, sphere: 8 }, ribbons: 56, glows: 12, lights: 2 },
 };
+/** A contrasting accent per school (the Paladin's gold + cyan): sparks, rims and shards that pop off the main colour. */
+export const ACCENT = {
+  fire: 0xffe25a, ice: 0xe6d6ff, frost: 0xe6d6ff, holy: 0x9de9ff, dawn: 0x9de9ff, nature: 0xfff07a, arcane: 0x7af0ff,
+  shadow: 0xff5ad0, lightning: 0xfff6b0, poison: 0xd07aff, physical: 0xffa040, bleed: 0xffb050, blood: 0xffb050,
+  fel: 0xfff07a, moon: 0xfff0c0, haste: 0xfff6b0, true: 0xffffff,
+};
+/** Phases that play once and are done (decals etc. default to a 1 s life). */
+const ONE_SHOT = new Set(['impact', 'release', 'point', 'area']);
+
+/**
+ * Points spread over a spell's TRUE shape (Thousandvale's ringPoints / arcPoints / fillPoints): the impact is repeated
+ * at each so an area reads at its real size. o: at [x,y,z], dir {x,z}, radius, angle (radians, arc), length (line), n.
+ * shape: 'arc' (across a swing, at 0.75 x the reach) | 'ring' (round the rim) | 'line' (along a beam) | 'disc' (filling
+ * a circle, golden-angle spiral) | 'point'. Pure (no three.js): returns [[x, y, z], …].
+ */
+export function shapePoints(shape, { at = [0, 0, 0], dir = { x: 0, z: 1 }, radius = 3, angle = 1.6, length = 8, n = 6 } = {}) {
+  const [x0, y0, z0] = Array.isArray(at) ? at : [at.x, at.y, at.z];
+  const dl = Math.hypot(dir.x, dir.z) || 1, dx = dir.x / dl, dz = dir.z / dl;
+  const out = [];
+  if (shape === 'ring') for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; out.push([x0 + Math.sin(a) * radius, y0, z0 + Math.cos(a) * radius]); }
+  else if (shape === 'arc') {
+    const r = radius * 0.75, a0 = Math.atan2(dx, dz);
+    for (let i = 0; i < n; i++) { const a = a0 + (n === 1 ? 0 : (i / (n - 1) - 0.5) * angle); out.push([x0 + Math.sin(a) * r, y0, z0 + Math.cos(a) * r]); }
+  } else if (shape === 'line') for (let i = 0; i < n; i++) { const d = length * (i + 0.5) / n; out.push([x0 + dx * d, y0, z0 + dz * d]); }
+  else if (shape === 'disc') for (let i = 0; i < n; i++) { const r = radius * Math.sqrt((i + 0.5) / n), a = i * 2.39996; out.push([x0 + Math.sin(a) * r, y0, z0 + Math.cos(a) * r]); }
+  else out.push([x0, y0, z0]);
+  return out;
+}
 
 const rnd = (r) => Array.isArray(r) ? r[0] + Math.random() * (r[1] - r[0]) : (r ?? 0);
 const env = (t, life, fin, fout, stopAt) => {
@@ -66,7 +98,7 @@ export class SpellKit {
     this.onShake = onShake;
     this.effects = new Set();
     this.time = 0; this.waits = [];
-    this.trauma = 0; this.shakeOffset = new THREE.Vector3();
+    this.trauma = 0; this.shakeOffset = new THREE.Vector3(); this.shakeOn = true;   // shakeOn: the game's Settings toggle
     this.visuals = {}; this.spellMap = {}; this.fallback = {};
     this._v = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
     this.counts = { spawnRefused: 0, stolen: 0 };
@@ -212,7 +244,7 @@ export class SpellKit {
    * A missile from → to (Vector3 / Object3D — an Object3D is followed, aimed at its chest). Or { dir, range }.
    * Resolves with the arrival point. opts: speed, arc, height (target chest height), scale, school.
    */
-  missile(from, to, visual, { speed, arc, dir = null, range = 25, height = 1.8, scale, school, delay = 0 } = {}) {
+  missile(from, to, visual, { speed, arc, dir = null, range = 25, height = 1.8, scale, school, delay = 0, track = null } = {}) {
     const THREE = this.THREE, r = this.resolve(visual, { scale, school });
     const tr = r.def.travel || {};
     const start = toVec(from, new THREE.Vector3());
@@ -231,7 +263,25 @@ export class SpellKit {
     fx.addLayers(tr.layers || []);
     const sp = (speed ?? tr.speed ?? 16), ar = arc ?? tr.arc ?? 0;
     let t = -delay; const prev = new THREE.Vector3().copy(start);
-    return new Promise(resolve => {
+    let done = null;
+    // track(out): a game-driven missile (a server projectile) — it goes where track() says each frame, starting from
+    // `from` (the hand) and easing onto the tracked path over 0.12 s, until the returned handle's stop()
+    const p = new Promise(resolve => {
+      done = resolve;
+      if (track) {
+        const want = new THREE.Vector3(); let k0 = 0;
+        fx.mover = dt => {
+          t += dt; if (t < 0) return;
+          track(want); k0 = Math.min(1, k0 + dt / 0.12);
+          prev.copy(fx.missile);
+          fx.missile.lerpVectors(start, want, k0);
+          if (k0 >= 1) fx.missile.copy(want);
+          fx.missileVel.subVectors(fx.missile, prev).divideScalar(Math.max(dt, 1e-4));
+          if (fx.missileVel.lengthSq() > 1e-6) fx.dir.copy(fx.missileVel).normalize();
+          fx.point.copy(fx.missile);
+        };
+        return;
+      }
       fx.mover = dt => {
         t += dt; if (t < 0) return;
         aimAt();
@@ -246,6 +296,11 @@ export class SpellKit {
         if (k >= 1) { fx.mover = null; fx.stop(); resolve(end.clone()); }
       };
     });
+    p.fx = fx;
+    /** end it where it is now (a server bolt that hit or ran out); resolves with that point */
+    p.stop = () => { if (!fx.mover) return; fx.mover = null; fx.stop(); done(fx.missile.clone()); };
+    p.where = () => fx.missile;
+    return p;
   }
 
   /** The burst where something lands. opts: scale, school, normal, radius, dir. */
@@ -254,6 +309,31 @@ export class SpellKit {
     const fx = this.effect(r, 'impact', { point: toVec(at, new this.THREE.Vector3()), radius, dir, target, height });
     fx.addLayers(r.def.impact || []);
     return fx;
+  }
+
+  /**
+   * The impact repeated over a spell's true shape (shapePoints): each point plays the visual's `point` phase (or its
+   * impact when it has none), `every` seconds apart; then its `area` phase once at the centre with the real radius.
+   * o: shape (arc|ring|line|disc), at, dir, radius, angle, length, n, every, y (lift of each point off the ground).
+   */
+  spread(visual, { shape = 'ring', at, dir = { x: 0, z: 1 }, radius = 3, angle = 1.6, length = 8, n = 8, every = 0.025, y = 0.5, scale, school, area = true } = {}) {
+    const r = this.resolve(visual, { scale, school });
+    const c = toVec(at, new this.THREE.Vector3());
+    const pts = shapePoints(shape, { at: [c.x, c.y, c.z], dir, radius, angle, length, n });
+    const phase = r.def.point ? 'point' : 'impact';
+    const d3 = new this.THREE.Vector3(dir.x, 0, dir.z);
+    pts.forEach((q, i) => {
+      const go = () => {
+        const v = new this.THREE.Vector3(q[0], this.heightAt ? this.heightAt(q[0], q[2]) + y : q[1], q[2]);
+        this.effect(r, phase, { point: v, radius: Math.max(0.8, radius / Math.max(2, Math.sqrt(n))), dir: d3 }).addLayers(r.def[phase] || []);
+      };
+      if (i === 0 || !every) go(); else this.wait(i * every).then(go);
+    });
+    if (area && r.def.area) {
+      const g = c.clone(); if (this.heightAt) g.y = this.heightAt(g.x, g.z);
+      this.effect(r, 'area', { point: g, radius, dir: d3, length }).addLayers(r.def.area);
+    }
+    return pts;
   }
 
   /** Lingering ground effect (projected rune, rising wall, emitters). Returns a handle with stop(). */
@@ -298,6 +378,21 @@ export class SpellKit {
   }
 
   /**
+   * A weapon swing drawn at the spell's TRUE reach without needing the weapon: a crescent ribbon sweeping `angle`
+   * radians round `at` (the caster's feet) across `dir`, from `inner` x radius out to the radius, `height` m up, in
+   * `seconds`. angle >= 2 pi = a full spin (Whirlwind). Uses the visual's sweep layers (colour, texture), or a default.
+   * opts.overhead: the arc stands up (a vertical chop / slam) instead of lying flat.
+   */
+  swing(at, visual, { dir = { x: 0, z: 1 }, radius = 3, angle = 1.8, seconds = 0.2, height = 1.1, inner = 0.3, tail = 1.1, overhead = false, scale, school } = {}) {
+    const r = this.resolve(visual, { scale, school });
+    const fx = this.effect(r, 'sweep', { point: toVec(at, new this.THREE.Vector3()), seconds: seconds + 0.5 });
+    fx.swingArc = { a0: Math.atan2(dir.x, dir.z), angle, R: radius, inner, h: height, seconds, tail: Math.min(angle, tail * (angle > 6 ? 2.2 : 1)), overhead };
+    const L = (r.def.sweep || []).filter(l => l.type === 'sweep');
+    fx.addLayers(L.length ? L : [{ type: 'sweep', color: 'white', edge: 'mid', tex: 'band_mist' }, { type: 'sweep', color: 'hot', edge: 'accent', tex: 'band_light', inner: 0.75 }]);
+    return fx;
+  }
+
+  /**
    * One whole cast, phase by phase (the Spell Lab and quick game use): windup → release → travel/beam/sweep →
    * impact → linger / aura. opts: caster, hands, target (Object3D or point), at (ground point), dir, windup
    * (seconds), radius, seconds, weapon, onPhase(name). Resolves when the last phase has started.
@@ -332,24 +427,32 @@ export class SpellKit {
         const from = d.travel.from === 'sky' ? at.clone().add(new THREE.Vector3(-3, 14, -2)) : hand.clone();
         await this.missile(from, at, R, {});
       }
+      if (kind === 'line' && d.beam) { ph('beam'); this.beam(hand.clone(), [at.clone().addScaledVector(dir, o.length ?? 8).setY(at.y + 1)], R, {}); }
+      if (kind === 'nova' && d.sweep) this.swing(casterPos, R, { dir, radius: o.radius ?? 4, angle: Math.PI * 2.2, seconds: 0.4 });
       if (d.impact) { ph('impact'); this.impact(at, R, { radius: o.radius ?? d.linger?.radius ?? 4, dir }); }
+      if (d.point || d.area) this.spread(R, kind === 'line' ? { shape: 'line', at, dir, length: o.length ?? 8, n: 6 } : { shape: kind === 'nova' ? 'ring' : 'disc', at, radius: o.radius ?? d.linger?.radius ?? 4, n: kind === 'nova' ? 12 : 9 });
       if (d.linger) { ph('linger'); this.ground(at, R, { radius: o.radius, seconds: o.seconds, dir, length: o.length }); }
     } else if (kind === 'beam') {
       ph('beam');
       const pts = o.chain || [o.target || tgtPos];
       const b = this.beam(o.caster && o.hands ? o.hands[1] || o.caster : hand.clone(), pts, R, { seconds: o.seconds });
       if (d.impact) { ph('impact'); pts.forEach((p, i) => this.wait(i * (b.fx.hop || 0.08)).then(() => this.impact(toVec(p, new THREE.Vector3(), p.isObject3D ? 1.1 : 0), R, {}))); }
+      if (d.point || d.area) { const e0 = toVec(pts[pts.length - 1], new THREE.Vector3()); this.spread(R, { shape: 'line', at: hand, dir, length: hand.distanceTo(e0), n: 6, area: false }); }
       await this.wait(b.fx.seconds);
     } else if (kind === 'cone') {
       ph('impact');
       this.impact(hand.clone(), R, { dir, radius: o.radius ?? 5 });
+      if (d.point || d.area) this.spread(R, { shape: 'arc', at: casterPos, dir, radius: o.radius ?? 5, angle: 1.2, n: 6 });
     } else if (kind === 'melee') {
       ph('sweep');
-      if (o.weapon && d.sweep) this.trail(o.weapon, R, { tip: o.tip, base: o.base, seconds: d.sweepTime ?? 0.4 });
+      if (o.weapon && d.sweep && !d.point) this.trail(o.weapon, R, { tip: o.tip, base: o.base, seconds: d.sweepTime ?? 0.4 });
+      else this.swing(casterPos, R, { dir, radius: o.radius ?? 3, angle: 1.9, seconds: 0.2 });
       await this.wait(d.hitDelay ?? 0.25);
       ph('impact'); this.impact(toVec(o.target || tgtPos, new THREE.Vector3(), 1.1), R, { dir });
+      if (d.point || d.area) this.spread(R, { shape: 'arc', at: casterPos, dir, radius: o.radius ?? 3, angle: 1.8, n: 6 });
     } else if (kind === 'self' || kind === 'shift') {
       if (d.impact) { ph('impact'); this.impact(casterPos, R, { target: o.caster, radius: o.radius ?? 2 }); }
+      if (d.point || d.area) this.spread(R, { shape: 'ring', at: casterPos, radius: o.radius ?? 3, n: 12 });
       if (d.aura && o.caster) { ph('aura'); const a = this.aura(o.caster, R, { seconds: o.seconds ?? d.auraTime ?? 4 }); }
       if (d.linger) { ph('linger'); this.ground(casterPos, R, { radius: o.radius, seconds: o.seconds }); }
     }
@@ -376,6 +479,7 @@ export class SpellKit {
   }
 
   shake(strength = 0.5, seconds = 0.3) {
+    if (!this.shakeOn) return;
     this.trauma = Math.min(1, this.trauma + strength);
     this.onShake?.(strength, seconds);
   }
@@ -471,7 +575,7 @@ class Effect {
     this.school = r.school; this.scale = r.scale;
     const el = elementName(r.school);
     const base = EXTRA_PALETTE[r.school] || ELEMENT_PALETTE[el] || ELEMENT_PALETTE.arcane;
-    this.pal = { ...base, ...(r.def.palette || {}), ...(r.palette || {}), white: 0xffffff, black: 0x000000 };
+    this.pal = { ...base, accent: ACCENT[r.school] ?? ACCENT[el] ?? base.hot, ...(r.def.palette || {}), ...(r.palette || {}), white: 0xffffff, black: 0x000000 };
     this.texSchool = TEX_SCHOOL[r.school] || TEX_SCHOOL[el] || 'arcane';
     this.caster = o.caster || null; this.hands = o.hands || null; this.target = o.target || null;
     this.height = o.height ?? 1.8;
@@ -484,7 +588,7 @@ class Effect {
     this.seconds = o.seconds ?? null;
     this.phaseLength = o.loop ? Infinity : (o.seconds ?? Infinity);
     this.density = r.def.density ?? 1;
-    this.oneShot = phase === 'impact' || phase === 'release';
+    this.oneShot = ONE_SHOT.has(phase);
     this.layers = []; this.t = 0; this.stopped = false; this.done = false; this.stopAt = null;
   }
 
@@ -538,7 +642,7 @@ class Effect {
   update(dt) {
     this.t += dt;
     this.mover?.(dt);
-    if (this.seconds != null && Number.isFinite(this.seconds) && this.t >= this.seconds && !this.stopped && this.phase !== 'impact') this.stop();
+    if (this.seconds != null && Number.isFinite(this.seconds) && this.t >= this.seconds && !this.stopped && !ONE_SHOT.has(this.phase)) this.stop();
     let alive = false;
     for (const l of this.layers) { if (!l.done) { l.update(dt); if (!l.done) alive = true; } }
     if (this.mover) alive = true;
@@ -773,8 +877,10 @@ const LAYERS = {
     return lay;
   },
 
-  // weapon sweep: the strip between the blade's base and tip over the last few frames
+  // weapon sweep: the strip between the blade's base and tip over the last few frames — or, from kit.swing(), a
+  // crescent drawn analytically at the true reach (no weapon needed)
   sweep(fx, L) {
+    if (fx.swingArc) return swingLayer(fx, L);
     const kit = fx.kit, THREE = kit.THREE, it = kit.ribbons.get(), u = it.u;
     const keep = L.seconds ?? 0.18;
     u.uCol.value.copy(fx.hex(L.color || 'hot')); u.uEdge.value.copy(fx.hex(L.edge || 'mid')); u.uOpacity.value = L.opacity ?? 1;
@@ -803,4 +909,42 @@ const LAYERS = {
   },
 };
 LAYERS.trail = LAYERS.ribbon;
+
+/** kit.swing()'s crescent: base/tip pairs round the arc from the trailing edge to the leading edge, every frame. */
+function swingLayer(fx, L) {
+  const kit = fx.kit, THREE = kit.THREE, it = kit.ribbons.get(), u = it.u, S = fx.swingArc;
+  u.uCol.value.copy(fx.hex(L.color || 'hot')); u.uEdge.value.copy(fx.hex(L.edge || 'mid')); u.uOpacity.value = L.opacity ?? 1;
+  u.uMap.value = kit.tex.map(fx.subst(L.tex || 'band_mist')); u.uTexMix.value = L.tex ? 0.6 : 0;
+  it.obj.material.blending = THREE.AdditiveBlending;
+  const M = 24, pts = Array.from({ length: M * 2 }, () => new THREE.Vector3()), fades = new Array(M).fill(1);
+  const lay = { done: false, t: -(L.delay || 0), stopAt: null };
+  const me = { steal: () => { lay.done = true; kit.counts.stolen++; } }; it.owner = me;
+  const c = fx.point, inner = (L.inner ?? S.inner), fout = L.fadeOut ?? 0.22;
+  lay.update = dt => {
+    lay.t += dt; if (lay.t < 0) return;
+    const k = Math.min(1, lay.t / S.seconds), e = 1 - (1 - k) ** 2;
+    const head = -S.angle / 2 + S.angle * e, back = Math.max(-S.angle / 2, head - S.tail);
+    const fadeAll = lay.t > S.seconds ? Math.max(0, 1 - (lay.t - S.seconds) / fout) : 1;
+    for (let i = 0; i < M; i++) {
+      const f = i / (M - 1), a = head + (back - head) * f;
+      if (S.overhead) {   // a vertical arc over the front: from up high, down to the ground in front
+        const fa = Math.atan2(Math.sin(S.a0), Math.cos(S.a0)), up = (a + S.angle / 2) / Math.max(1e-3, S.angle);   // 0 = top, 1 = ground
+        const pitch = Math.PI * 0.5 * (1 - up), rr = S.R * (0.35 + 0.65 * up);
+        const fx0 = Math.sin(fa), fz0 = Math.cos(fa);
+        pts[i * 2].set(c.x + fx0 * rr * inner, c.y + S.h + Math.sin(pitch) * S.R * 0.55 * inner, c.z + fz0 * rr * inner);
+        pts[i * 2 + 1].set(c.x + fx0 * rr, c.y + 0.25 + Math.sin(pitch) * S.R * 0.6, c.z + fz0 * rr);
+      } else {
+        const ang = S.a0 + a, sx = Math.sin(ang), sz = Math.cos(ang);
+        pts[i * 2].set(c.x + sx * S.R * inner, c.y + S.h, c.z + sz * S.R * inner);
+        pts[i * 2 + 1].set(c.x + sx * S.R, c.y + S.h + 0.15, c.z + sz * S.R);
+      }
+      fades[i] = (1 - f) * fadeAll;
+    }
+    fillRibbon(THREE, it, pts, { mode: 'sweep', fades });
+    if (lay.t > S.seconds + fout) lay.free();
+  };
+  lay.stop = () => {};
+  lay.free = () => { if (!lay.freed) { lay.freed = true; if (it.busy && it.owner === me) kit.ribbons.put(it); } lay.done = true; };
+  return lay;
+}
 export const LAYER_TYPES = Object.keys(LAYERS);

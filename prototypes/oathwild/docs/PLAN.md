@@ -71,6 +71,26 @@ circles, cylinder bands, sparks) plus shader noise. A review page (Spell Lab) pl
 caster vs. a target dummy with slow motion. Budget: a group of 10 players casting must hold frame rate (instanced
 particles, pooled materials, a cap per effect + a global particle budget, lower tiers on phones).
 
+### Combat + class rebuild (owner 2026-11-26, after playing on an iPhone)
+Verbatim points: "Where did these low poly mvp trees come from? Unacceptable … No longer allow any new models of any
+type in the game oathwild unless they have textures." · "Why is there a use button because every interaction i've
+seen has its own popup on screen." · "Fix some menus like the class screen open a tooltip popup as soon as you open
+the menu." · "Redesign class menus to have more choices every tier, and remove the subclasses like warrior bulwark and
+reaver." · "Rename everything, loosen our IP protection for skill names and allow common terminology like shield bash.
+No made up names like Rim strike or Iron Gyre — the words rim and gyre are now banned … Ban the word 'shove'." · "each
+icon is a single rank, multiple ranks appear in higher level as separate icons" · "armor proficiency (always its own
+node)" · "no small percentage in the skill tree except for crit chance … 25% increased damage on talents, not 2%" ·
+"separate nodes for things like sword, mace, axe, 2h, wand proficiency. Always as separate options, never grouped." ·
+"Fewer defensive abilities. Fewer heals. Focus on combat for now." · "every enemy I have seen has been in a pack of 5 or
+more … get rid of it. I can barely fight 1v1." · "redesign combat, improve movement and dodging. make the skills fun."
+· "TRIPLE the amount of graphics used EVERYWHERE for ALL spells and attacks." · "Sunlance and cleave don't even do an
+attack animation." · "Do a case study on the paladin from thousand vale" (→ `docs/CASE-PALADIN.md`) · "I don't want
+any simple projectiles like frost bolt in this game except for basic wands. Instead every ability should be something
+significant and interesting: nova, aoe, cone, line, etc." · "I want things to get blown apart by fireball explosions
+and smack things in a circle knocking down enemies around me."
+→ This replaces the "Paths at class level 3" and ranked-node rulings above. Rules: `tools/trees/_dsl.mjs`, RULES.md
+"Class trees", lessons rules 77–79, game-standards §13.
+
 ### Guessed (Claude's calls — owner may overrule)
 - **Heroes**: Tabard characters (avatar-3d/tabard: swappable armour, the new face/hair layers, Chibi 2.6 look fields)
   — the owner's direction is "Tabard for main characters, fal for monsters". Enemies: avatar-3d/fal roster + new ones.

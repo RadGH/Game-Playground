@@ -7,12 +7,13 @@
 // Works by mouse, thumb, keyboard and controller (the pad walks the buttons; the right stick turns the hero).
 // Starting points: Wyrmroad js/ui/creator.js and Oddhaven creator.js (rows, tabs, body always visible), Tumblefair
 // editor.js (character visible on phones). Also exports createPreview() — the 3D hero stage the character select uses.
+import { focusQuiet } from '../../../../../shared/tooltip.js';
 import * as THREE from 'three';
 import { createTabard } from '../../../../../avatar-3d/tabard/js/tabard.js';
 import { FACE_OPTIONS } from '../../../../../avatar-3d/tabard/js/face.js';
 import { tabardItems } from '../../game/gear.js';
 import { ATTRS, pointBuyCost, pointBuyRefusal, suggestedSpread } from '../../rules/attributes.js';
-import { classDef, classIds, classRules } from '../../rules/classes.js';
+import { classDef, classIds } from '../../rules/classes.js';
 import { createCharacter } from '../../rules/levels.js';
 import { sheetOf } from '../../rules/sheet.js';
 import { makeRng } from '../../rules/farhold.js';
@@ -296,8 +297,6 @@ export async function show(app, opts = {}) {
         <span class="scr-creator-class-text"><b>${esc(x.name)}</b><em>${esc(x.role)}</em></span></button>`;
     }).join('');
     const spells = freeSpells(d);
-    const paths = Object.values(d.paths || {});
-    const R = classRules(rules);
     const facts = [
       `<div class="scr-creator-fact"><span>Best with</span><b>${esc(d.primary.map(k => A.names[k]).join(', '))}</b></div>`,
       spells.length ? `<div class="scr-creator-fact"><span>Starts with</span><b>${esc(spells.map(x => x.name).join(', '))}</b></div>` : '',
@@ -311,7 +310,6 @@ export async function show(app, opts = {}) {
           <div><h2>${esc(d.name)}</h2><em>${esc(d.role)}</em><p>${esc(d.blurb || '')}</p></div>
         </div>
         <div class="scr-creator-facts">${facts}</div>
-        ${paths.length ? `<div class="scr-creator-paths">${paths.map(p => `<div class="scr-creator-path"><b>${esc(p.name)}</b><span>${esc(p.blurb || '')}</span></div>`).join('')}<small class="ow-dim">Choose a path at ${esc(d.name)} level ${fmt(R.pathLevel)}.</small></div>` : ''}
         <h3 class="scr-creator-h">${esc(d.name)} tree</h3>
         ${c ? treeHtml(app, c, st.cls, { sel: st.sel, preview: true }) : ''}
         <p class="scr-creator-note">Every level you choose a class again: stay with this one or add any other.</p>
@@ -379,7 +377,7 @@ export async function show(app, opts = {}) {
     if (!STEPS.some(s => s[0] === step) || step === st.step) return;
     st.step = step; st.msg = ''; render({ top: true });
     // a controller needs a starting point on the new page; a mouse or a finger does not (focus would pop a tooltip)
-    if (app.device === 'pad') setTimeout(() => (main.querySelector('[aria-pressed="true"], [aria-selected="true"], button:not([disabled])'))?.focus({ preventScroll: true }), 30);
+    if (app.device === 'pad') setTimeout(() => focusQuiet(main.querySelector('[aria-pressed="true"], [aria-selected="true"], button:not([disabled])')), 30);
   }
 
   root.addEventListener('click', e => {

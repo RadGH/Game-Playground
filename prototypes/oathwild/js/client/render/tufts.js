@@ -209,14 +209,28 @@ const TRANSLUCENT = `
   }
   #endif
   #include <opaque_fragment>`;
+// leaves right in front of the camera dissolve (owner 2026-11-26: low conifer skirts "block view of enemies"): a tuft
+// closer than NEAR_FADE_M to the camera is thinned with a screen-door pattern, gone by a third of that — so a crown on
+// a downhill slope or one the camera backs into never hides the hero or the fight. Shadows are untouched.
+export const NEAR_FADE_M = 7;
+const NEAR_FADE = `
+  if (vTuftDepth < ${NEAR_FADE_M.toFixed(1)}) {
+    float tuftK = clamp((vTuftDepth - ${(NEAR_FADE_M / 3).toFixed(2)}) / ${(NEAR_FADE_M * 2 / 3).toFixed(2)}, 0.0, 1.0);
+    float tuftN = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+    if (tuftN > tuftK) discard;
+  }`;
 function tuftShader(material, key) {
   const prev = material.onBeforeCompile;
   material.onBeforeCompile = (shader, r) => {
     if (prev) prev(shader, r);
+    const see = !material.isMeshDepthMaterial;   // the see-through fade is for the player's camera, never the sun's shadow pass
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute vec2 aCorner; attribute float aSize; attribute float aRot;')
-      .replace('#include <project_vertex>', PROJECT);
-    if (!material.isMeshDepthMaterial) shader.fragmentShader = shader.fragmentShader.replace('#include <opaque_fragment>', TRANSLUCENT);
+      .replace('#include <common>', '#include <common>\nattribute vec2 aCorner; attribute float aSize; attribute float aRot;' + (see ? '\nvarying float vTuftDepth;' : ''))
+      .replace('#include <project_vertex>', PROJECT + (see ? '\n  vTuftDepth = -mvPosition.z;' : ''));
+    if (see) shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying float vTuftDepth;')
+      .replace('#include <alphatest_fragment>', NEAR_FADE + '\n#include <alphatest_fragment>')
+      .replace('#include <opaque_fragment>', TRANSLUCENT);
   };
   material.customProgramCacheKey = () => key;
   return material;

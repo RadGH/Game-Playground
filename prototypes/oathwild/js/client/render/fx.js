@@ -110,7 +110,11 @@ export async function createFx(view, { heightAt, quality = 'medium', spells = nu
     const key = rest.join(':');
     return { el, key, look: api.looks?.[key] || {} };
   };
-  function syncBolts(list, elementOf) {
+  // a bolt the server removed: stop its missile where it is, and a moment later (once this snapshot's events are in)
+  // give it an ending — an exploding ball that got no 'burst' event explodes here, a bolt that hit nobody fizzles
+  const ends = [], hits = [], bursts = [];
+  const handAt = new THREE.Vector3();
+  function syncBolts(list, elementOf, { handNear = null, rowOf = null } = {}) {
     const seen = new Set();
     for (const [id, x, z, dx, dz, speed, spell] of list || []) {
       seen.add(id);
@@ -124,12 +128,39 @@ export async function createFx(view, { heightAt, quality = 'medium', spells = nu
         // the Spell Kit draws a spell's missile (scaled up a little: small bolts read small from over the shoulder);
         // a wand's bolt is its element's bolt visual, sized by its style (a heavy bolt is big, a fan's three are small)
         const visual = wv && kit ? kit.visualFor(null, { kind: 'bolt', element: wv.el }) : spell;
-        if (kit && spell) { try { b.kh = kit.missile([x, heightAt(x, z) + 1.3, z], null, visual, { dir: new THREE.Vector3(dx, 0, dz), range: 30, speed, scale: wv ? 1.4 * (wv.look.scale || 1) : 1.4, school: wv?.el }); b.kh?.catch?.(() => {}); p.s.visible = false; } catch { b.kh = null; } }
+        b.row = !wv && spell ? rowOf?.(spell) : null;
+        // it starts at the shooter's hand and then rides the server's bolt (CASE-PALADIN §3.10: it used to fly a
+        // fixed 30 m from the body's middle, on through whatever it hit)
+        const hand = handNear?.(x, z);
+        const from = hand ? handAt.set(hand[0], hand[1], hand[2]) : handAt.set(x, heightAt(x, z) + 1.3, z);
+        if (kit && spell) {
+          try {
+            b.kh = kit.missile(from.clone(), null, visual, { track: out => out.set(b.x, heightAt(b.x, b.z) + 1.3, b.z), scale: wv ? 1.15 * (wv.look.scale || 1) : 1.15, school: wv?.el });
+            b.kh?.catch?.(() => {}); p.s.visible = false;
+          } catch { b.kh = null; }
+        }
         bolts.set(id, b);
       }
       b.x = x; b.z = z; b.dx = dx; b.dz = dz; b.speed = speed;
     }
-    for (const [id, b] of bolts) if (!seen.has(id)) { b.p.busy = false; b.p.s.visible = false; bolts.delete(id); }
+    for (const [id, b] of bolts) if (!seen.has(id)) {
+      b.p.busy = false; b.p.s.visible = false; bolts.delete(id);
+      if (b.kh) { b.kh.stop?.(); ends.push({ at: [b.x, heightAt(b.x, b.z) + 1.3, b.z], spell: b.spell, row: b.row, t: performance.now() }); }
+    }
+  }
+  function settleEnds() {
+    const t = performance.now();
+    for (let i = ends.length - 1; i >= 0; i--) {
+      const e = ends[i];
+      if (t - e.t < 120) continue;
+      ends.splice(i, 1);
+      const close = list => list.some(h => t - h.t < 600 && h.spell === e.spell && Math.hypot(h.at[0] - e.at[0], h.at[2] - e.at[2]) < (e.row?.explode?.radius || 2.5) + 1.5);
+      try {
+        if (e.row?.explode) { if (!close(bursts)) { const R = e.row.explode.radius || 3; kit.impact(e.at, e.spell, { radius: R, scale: Math.max(0.9, R / 4) }); kit.spread(e.spell, { shape: 'ring', at: [e.at[0], e.at[1] - 1.3, e.at[2]], radius: R * 0.8, n: 10 }); } }
+        else if (!close(hits) && typeof e.spell === 'string' && !e.spell.startsWith('w:')) kit.impact(e.at, e.spell, { radius: 1, scale: 0.7 });
+      } catch { /* a fizzle is decoration */ }
+    }
+    for (const L of [hits, bursts]) while (L.length && t - L[0].t > 1000) L.shift();
   }
 
   const windups = new Set();
@@ -151,8 +182,12 @@ export async function createFx(view, { heightAt, quality = 'medium', spells = nu
       windups.add(w);
       return w;
     },
-    impact(at, spell, element, radius = 1.2) {
-      if (kit && spell) { try { kit.impact(at, spell, { radius }); return; } catch { /* simple */ } }
+    /** a spell landed on a body here (a bolt that ends near it doesn't fizzle) */
+    noteHit(at, spell) { if (spell) hits.push({ at, spell, t: performance.now() }); },
+    /** a ball burst here (its bolt's end draws no second blast) */
+    noteBurst(e) { if (e?.at) bursts.push({ at: [e.at[0], 0, e.at[1]], spell: e.spell, t: performance.now() }); },
+    impact(at, spell, element, radius = 1.2, { scale = 1 } = {}) {
+      if (kit && spell) { try { kit.impact(at, spell, { radius, scale }); return; } catch { /* simple */ } }
       burst(at, ELEMENT_COLOUR[element] || '#fff1d0', 1.2 + radius * 0.6, 0.3);
     },
     ground(at, spell, element, radius, seconds) {
@@ -163,6 +198,7 @@ export async function createFx(view, { heightAt, quality = 'medium', spells = nu
     bolts: syncBolts,
     update(dt) {
       kit?.update(dt);
+      if (kit && ends.length) settleEnds();
       for (const p of sprites) {
         if (!p.busy || p.max > 50) continue;
         p.life -= dt;

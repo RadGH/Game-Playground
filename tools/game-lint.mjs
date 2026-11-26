@@ -24,12 +24,16 @@ const RULES = [
 // docs/banned-names.md. Only names that are unambiguous as a player-facing word; the "(as a …)" ones are checked when
 // they are a whole name on their own ("Rage", "Focus", "Fury", "Heroic", "Chi", "Stealth", "Ambush", "Corruption").
 const BANNED_PHRASES = ['Mythic', 'Keystone', 'War Mode', 'Horde', 'Alliance', 'Hearthstone', 'Delve', 'Delver', 'Renown', 'Rested XP',
-  'Honored', 'Revered', 'Exalted', 'Combo Points', 'Garrote', 'Cheap Shot', 'Barkskin', 'Totemic Recall',
-  'Soul Shards', 'Soul Shard', 'Arcane Charge', 'Counterspell', 'Lay on Hands', 'Consecration', 'Mass Resurrection', 'Healing Wave',
-  'Last Stand', 'Mirror Image', 'Leap of Faith', 'Hellfire', 'Starfall', 'Soulbound', 'Flight Path', 'Skyway', 'Attunement'];
+  'Honored', 'Revered', 'Exalted', 'Combo Points', 'Barkskin', 'Totemic Recall',
+  'Soul Shards', 'Soul Shard', 'Arcane Charge', 'Lay on Hands', 'Consecration', 'Mass Resurrection', 'Healing Wave',
+  'Mirror Image', 'Leap of Faith', 'Hellfire', 'Starfall', 'Soulbound', 'Flight Path', 'Skyway', 'Attunement'];
+// (owner 2026-11-26: common ability words are allowed — Garrote, Cheap Shot, Counterspell, Last Stand, Stealth, Ambush,
+// Blink, Swipe, Maul, Rake, Prowl came off the list; docs/banned-names.md "Ability names")
+// words banned in any NAME (a `name` field in data): owner 2026-11-26 — "Rim Strike", "Iron Gyre", "Breaching Shove"
+const BANNED_NAME_WORDS = /\b(rim|gyre|shove)\b/i;
 // Everyday words that are only banned as a NAME on their own (a druid's "Maul", a resource called "Rage"); "War Maul" or
 // "rake the coals" is fine.
-const BANNED_WHOLE = ['Rage', 'Focus', 'Fury', 'Heroic', 'Chi', 'Stealth', 'Ambush', 'Corruption', 'Blink', 'Swipe', 'Maul', 'Rake', 'Prowl', 'Mythic+'];
+const BANNED_WHOLE = ['Rage', 'Focus', 'Fury', 'Heroic', 'Chi', 'Corruption', 'Mythic+'];
 const PHRASE_RE = new RegExp(`(^|[^\\w'])(${BANNED_PHRASES.map(s => s.replace(/[+ ]/g, m => m === '+' ? '\\+' : '\\s+')).join('|')})(?![\\w])`);
 const SKIP_DIRS = new Set(['tests', 'tools', 'vendor', 'node_modules', 'editor', 'research', 'docs', 'data', '.git', 'shots', 'test-results', 'ops']);
 const DATA_SKIP = new Set(['node_modules', '.git', 'tests', 'fixtures', 'synced']);
@@ -77,6 +81,7 @@ export function lintGame(dir, { strict = false } = {}) {
           if (/\bmuster/i.test(v)) hits.add(`muster|${path}|${v}`);
           const m = v.match(PHRASE_RE); if (m) hits.add(`banned-name|${path}|${m[2]}: ${v}`);
           if (BANNED_WHOLE.includes(v.trim())) hits.add(`banned-name|${path}|${v}`);
+          if (/(^|\.)name$/.test(path) && BANNED_NAME_WORDS.test(v)) hits.add(`banned-name|${path}|${v}`);
         } else if (Array.isArray(v)) v.forEach((x, i) => visit(x, `${path}[${i}]`));
         else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) if (!/^(_|\$)?(comment|notes?|todo|why|source|ref)$/i.test(k)) visit(x, path ? `${path}.${k}` : k);
       })(json, '');

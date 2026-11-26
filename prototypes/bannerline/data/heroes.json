@@ -378,7 +378,7 @@
    "desc": "Strike everything within 4.5 m for 29% weapon damage, +12% for each enemy hit past the first (up to +48%)."
   },
   "breaching_shove": {
-   "name": "Breaching Shove",
+   "name": "Shield Charge",
    "shape": "melee",
    "element": "physical",
    "mult": 0.28,
@@ -430,7 +430,7 @@
    "desc": "For 10 s take 6% less damage per enemy within 6 m (up to 36%); every 4th hit you take releases a 4 m shockwave for 20% weapon damage."
   },
   "whirlwind": {
-   "name": "Iron Gyre",
+   "name": "Whirlwind",
    "shape": "around",
    "element": "physical",
    "mult": 0.2,

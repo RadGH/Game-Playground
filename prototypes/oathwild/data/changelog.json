@@ -1,133 +1,151 @@
 {
-  "entries": [
-    {
-      "id": "2026-11-25-smooth",
-      "date": "2026-11-25",
-      "title": "Smoother towns",
-      "items": [
-        "Walking into a busy town no longer freezes the game for a moment: townsfolk are dressed and given their faces far faster (most noticeable on phones and older computers)."
-      ]
-    },
-    {
-      "id": "2026-11-25-roomier",
-      "date": "2026-11-25",
-      "title": "Room to breathe",
-      "items": [
-        "Towns have wider streets, houses stand back a little from the road, every house outside the very middle has its own fenced yard, and the edge of town spreads out. No more houses standing in the corn.",
-        "Peaceful animals (deer, sheep, cows, horses, hens, raccoons) show no name or health bar until you target or hurt them.",
-        "Shields block by themselves: a chance to stop part of a blow from the front, shown on your sheet and on the shield. The block button is gone.",
-        "No more run button: everyone walks about 15% faster. On phones the Attack, Dodge and Use buttons are bigger.",
-        "Levelling up: tap a skill to read everything about it first; a separate button spends the point.",
-        "Bridges are built properly now, and the invisible wall at the end of the Lark Bridge is gone.",
-        "Fixed: trees and rocks that blocked you but were not drawn on lower graphics settings; dark patches on the sides of timber houses.",
-        "The \"Rate this game\" option is gone."
-      ]
-    },
-    {
-      "id": "2026-11-25-wildlife",
-      "date": "2026-11-25",
-      "title": "A wilder world",
-      "items": [
-        "Wildlife everywhere: deer herds in the meadows and woods, wild horses on the downs, raccoons on the riverbanks, bats round the haunted places, more wolves and boars, and cows, a bull, sheep and hens round Larkford.",
-        "Animals and monsters no longer stand still: they wander and graze round their home until something catches their eye. Deer, horses, sheep, hens and raccoons run from you; cows and the bull only fight if you hit them.",
-        "Rats in the mill and the corn fields, for a first easy fight.",
-        "Big camps are split into small groups you can take one at a time; the Goblin Warren now has two outer pickets, the shamans' fire and the warchief at the back, and they notice you from closer.",
-        "Two new hamlets on the Lark Road, Crossbrook in the vale and Fernstead in the Wilds, and travellers walking the roads between them.",
-        "Looting: opening one body opens every body of yours close by in the same window; Take all and Take gold sweep them all, and the window closes itself when everything is taken.",
-        "Rings and amulets never ask for a level.",
-        "Animals that will not start a fight (deer, horses, sheep, hens, raccoons, cows, the bull) have a yellow name and bar; enemies stay red."
-      ]
-    },
-    {
-      "id": "2026-11-25-towns",
-      "date": "2026-11-25",
-      "title": "Living towns",
-      "items": [
-        "Larkford is a real town now: tall timber, stone and plaster houses packed shoulder to shoulder along a high street, a ring lane, West Street up the hill and narrow alleys, every house its own colours.",
-        "The town follows its hill: houses stand on stone footings with steps up to their doors, and the square, the shrine yard and the tower terrace are level terraces with walls round them.",
-        "Back yards behind the houses, with fences, hedges and low walls, woodpiles, crates and vegetable beds. Big trees stand in the open ground between the houses.",
-        "A market square with stalls, a fountain and benches; lamps along every street; shops with awnings, banners and goods at the door; smoke from the chimneys.",
-        "Villagers walk the streets, stop at the stalls and the fountain and go in and out of doors. They are just villagers: you cannot talk to them.",
-        "Townspeople work at their own spot: the shopkeeper behind the stall, the blacksmith at the anvil, the innkeeper at the inn door, trainers drilling at the training yard. They turn to you when you come close.",
-        "People are called by their job (the Blacksmith, the Shopkeeper, the Innkeeper…); only the people of the main story keep their names.",
-        "Thornwatch has log cabins along its lanes, yards and trees.",
-        "Shops: tapping or clicking an item shows its details first; a separate Buy or Sell button does the trade.",
-        "Enchanting moved to your own Trade skills window (K, or the ☰ menu): break items to learn enchantments and put them on your gear anywhere outside a fight. Shrines no longer do it. Repairs also show the item first, then a Repair button.",
-        "Phones: your first ability button works again (an invisible camera-drag area was covering it).",
-        "Picking an item in your bag shows everything about it: what it does with its numbers, each requirement next to what you have, and how it compares with what you wear.",
-        "Gear now asks mostly for attributes and training instead of level: leather wants Dexterity or Wisdom, mail Strength or Constitution, plate Strength, swords Strength or Dexterity, staves and tomes Intelligence or Wisdom, a little more on better pieces. Only rare and better items still ask for a level, and well below their own."
-      ]
-    },
-    {
-      "id": "2026-11-24-environment",
-      "date": "2026-11-24",
-      "title": "Air, light and life",
-      "items": [
-        "A warm late-afternoon sun with long shadows, and the sky itself now lights the world, so armour and water pick up its blue.",
-        "Soft cloud shadows drift across the land, a thin mist gathers in the river bottoms, and far hills rise beyond the haze.",
-        "Woods have an understory: bushes at the feet of trees, and saplings and shrubs where a wood thins into meadow. Leaves glow when the sun shines through them.",
-        "Leaf litter darkens the ground under trees, and the grass has yellower and deeper-green patches.",
-        "Smoke rises from chimneys, leaves drift down from the trees near you, dust floats in the light, birds wheel overhead and butterflies flit over the meadows.",
-        "You can hear where you are: birdsong in the woods, bustle in town, frogs by the marsh, wind in the open.",
-        "Rivers ripple and catch the sky. Buildings and props sit into the ground instead of floating on it.",
-        "On computers, a light colour grade and a soft glow on the brightest things; High graphics adds soft shade where things meet the ground and longer shadows.",
-        "Graphics quality is picked for your device on your first visit, and steps down once by itself if the game runs slowly (your own choice in Settings always stays)."
-      ]
-    },
-    {
-      "id": "2026-11-24-tap-trees",
-      "date": "2026-11-24",
-      "title": "Tap the world, fuller forests",
-      "items": [
-        "On a phone, tap a person to talk, tap a fallen enemy's remains to search them, tap a chest or a shrine to open it. If it's too far, your hero walks over first.",
-        "With a free mouse on a computer, clicking a person, remains, a chest or a shrine does the same.",
-        "\"Wake at the shrine\" works on phones when you fall (the button was hidden under the screen's look area).",
-        "The \"Talk to…\" / \"Search…\" prompt is a button you can tap. On phones it sits above your action buttons, out of the way of what's in front of you.",
-        "Making a hero is now four pages: your look, then your class with its whole skill tree to explore, then your background, then your attributes with the health, mana and damage you'll start with.",
-        "Trees have full, round crowns of big leaves, and pines are soft needle tiers, near and far and on every graphics setting. They used to be a few huge flat leaves on low graphics.",
-        "Phones: the Attack button looks like one, empty spell slots no longer fill two rows, and button hints say Tap instead of keyboard keys."
-      ]
-    },
-    {
-      "id": "2026-11-24-world",
-      "date": "2026-11-24",
-      "title": "A world worth walking",
-      "items": [
-        "The trees are giants now: oaks, birches and pines tower 20 to 30 metres over you, and the old ancient oaks and great spruces deep in the woods reach past 40.",
-        "Every camp, shrine, ruin, grave, wall and chest is a real piece of the world: tents and banners, glowing shrines, carved standing stones, iron-banded chests that look as rich as what's inside.",
-        "Towns have cobbled squares and streets, worn dirt roads lead between them, and the fields are planted in strips of wheat, cabbage, pumpkins and more behind split-rail fences.",
-        "The ground has grass that sways, the sky has a sun and drifting clouds, and the light is warmer.",
-        "You can swim: wade into a river and swim across, then climb out on the far bank. (Your horse won't follow you in.)",
-        "Dodging is a quick dash the way you're moving, or toward your crosshair when you stand still, with no jump back.",
-        "The townsfolk are all properly dressed people now, and the camera stays in front of walls and trees.",
-        "Windows keep their place: the class tree, your bag and your talents no longer jump back to the start while open."
-      ]
-    },
-    {
-      "id": "2026-11-24-casters",
-      "date": "2026-11-24",
-      "title": "Wands with a will of their own",
-      "items": [
-        "Every wand now has its own attack: a straight bolt, a bursting one, a fan of three, a bolt that jumps between enemies, one that turns to follow, a slow heavy one, a cone, a beam, a ring around you, a lobbed blast, a forking bolt, a shielding bolt, or one that leaves the ground burning.",
-        "Tomes attack too, slower and harder: a Rune drawn on the ground, a Column of light, a Gale, or a Brand that scorches where it lands.",
-        "Staves cast their element's spell (a cone, a ring, a wave, a lobbed flask, a chain, or burning ground), or a Lance, or an Aegis Ring that shields you and your friends.",
-        "Sceptres swing in melee and hit with their element instead of steel.",
-        "An orb or focus in your off hand adds to a wand, tome or sceptre: an echo of every fourth attack, a burst round the enemy you hit, a shield, or mana back. A tome in the off hand echoes too.",
-        "Each item's card says exactly what its attack does, with your own damage numbers. Look out for the Wand of the Ninth Star and other named pieces from bosses, and the tome from The Lost Tome."
-      ]
-    },
-    {
-      "id": "2026-11-23",
-      "date": "2026-11-23",
-      "title": "The first oath",
-      "items": [
-        "Brightwater Vale and Thornmere Wilds are open: two regions, two towns, camps, shrines and 23 quests.",
-        "Make a hero, then pick a class every time you level up — mix as many as you like.",
-        "Play alone or with up to 10 friends in a world that remembers what you did together.",
-        "Every corpse and chest has its own loot for each player, and gold has to be picked up.",
-        "Aim attacks and spells from over the shoulder; ground spells show where they will land.",
-        "Works with mouse and keyboard, a controller, or a phone."
-      ]
-    }
-  ]
+ "entries": [
+  {
+   "id": "2026-11-26-combat",
+   "date": "2026-11-26",
+   "title": "Combat rebuilt: big spells, knockdowns, new class trees",
+   "items": [
+    "Every class tree is new: no more paths, several choices at every level, and every icon is one pick. Stronger ranks of a spell (Cleave II, Cleave III) are their own icons further down the tree.",
+    "Each weapon and armour kind is its own training (Sword, Axe, Mace, Two-Handed, Wand, Plate…), and a weapon Mastery gives +25% damage with that weapon. Passives and talents give big numbers now: +25%, not +2%.",
+    "Abilities are areas: novas round you, cones, lines, circles on the ground, leaps and charges. Big ones throw enemies through the air and knock them flat. Warrior Ground Slam flattens everything round you.",
+    "The Mage starts with Fireball: a huge spinning ball trailing embers that explodes and throws everything near it.",
+    "Every spell and attack looks about three times bigger, at its real size, with a swing or cast the moment you press the key — and phones now get the full effects.",
+    "Wands never fire a plain single bolt any more: every wand fans, chains, bursts, sprays a cone, rings or leaves burning ground.",
+    "Enemies wind up before every blow (a red mark on the ground) so you can roll out of the way. The dodge roll is longer and snappier.",
+    "Monsters come alone or in twos now, not packs of five, and fights are rebalanced so one-on-one is a fair fight.",
+    "Trees are drawn properly on every setting, and their lowest branches sit above the camera so they no longer hide enemies.",
+    "The phone Use button is gone (the prompt on screen does the same), and menus no longer open a tooltip on their own.",
+    "Your character keeps their levels: old class points come back to spend on the new trees."
+   ]
+  },
+  {
+   "id": "2026-11-25-smooth",
+   "date": "2026-11-25",
+   "title": "Smoother towns",
+   "items": [
+    "Walking into a busy town no longer freezes the game for a moment: townsfolk are dressed and given their faces far faster (most noticeable on phones and older computers)."
+   ]
+  },
+  {
+   "id": "2026-11-25-roomier",
+   "date": "2026-11-25",
+   "title": "Room to breathe",
+   "items": [
+    "Towns have wider streets, houses stand back a little from the road, every house outside the very middle has its own fenced yard, and the edge of town spreads out. No more houses standing in the corn.",
+    "Peaceful animals (deer, sheep, cows, horses, hens, raccoons) show no name or health bar until you target or hurt them.",
+    "Shields block by themselves: a chance to stop part of a blow from the front, shown on your sheet and on the shield. The block button is gone.",
+    "No more run button: everyone walks about 15% faster. On phones the Attack, Dodge and Use buttons are bigger.",
+    "Levelling up: tap a skill to read everything about it first; a separate button spends the point.",
+    "Bridges are built properly now, and the invisible wall at the end of the Lark Bridge is gone.",
+    "Fixed: trees and rocks that blocked you but were not drawn on lower graphics settings; dark patches on the sides of timber houses.",
+    "The \"Rate this game\" option is gone."
+   ]
+  },
+  {
+   "id": "2026-11-25-wildlife",
+   "date": "2026-11-25",
+   "title": "A wilder world",
+   "items": [
+    "Wildlife everywhere: deer herds in the meadows and woods, wild horses on the downs, raccoons on the riverbanks, bats round the haunted places, more wolves and boars, and cows, a bull, sheep and hens round Larkford.",
+    "Animals and monsters no longer stand still: they wander and graze round their home until something catches their eye. Deer, horses, sheep, hens and raccoons run from you; cows and the bull only fight if you hit them.",
+    "Rats in the mill and the corn fields, for a first easy fight.",
+    "Big camps are split into small groups you can take one at a time; the Goblin Warren now has two outer pickets, the shamans' fire and the warchief at the back, and they notice you from closer.",
+    "Two new hamlets on the Lark Road, Crossbrook in the vale and Fernstead in the Wilds, and travellers walking the roads between them.",
+    "Looting: opening one body opens every body of yours close by in the same window; Take all and Take gold sweep them all, and the window closes itself when everything is taken.",
+    "Rings and amulets never ask for a level.",
+    "Animals that will not start a fight (deer, horses, sheep, hens, raccoons, cows, the bull) have a yellow name and bar; enemies stay red."
+   ]
+  },
+  {
+   "id": "2026-11-25-towns",
+   "date": "2026-11-25",
+   "title": "Living towns",
+   "items": [
+    "Larkford is a real town now: tall timber, stone and plaster houses packed shoulder to shoulder along a high street, a ring lane, West Street up the hill and narrow alleys, every house its own colours.",
+    "The town follows its hill: houses stand on stone footings with steps up to their doors, and the square, the shrine yard and the tower terrace are level terraces with walls round them.",
+    "Back yards behind the houses, with fences, hedges and low walls, woodpiles, crates and vegetable beds. Big trees stand in the open ground between the houses.",
+    "A market square with stalls, a fountain and benches; lamps along every street; shops with awnings, banners and goods at the door; smoke from the chimneys.",
+    "Villagers walk the streets, stop at the stalls and the fountain and go in and out of doors. They are just villagers: you cannot talk to them.",
+    "Townspeople work at their own spot: the shopkeeper behind the stall, the blacksmith at the anvil, the innkeeper at the inn door, trainers drilling at the training yard. They turn to you when you come close.",
+    "People are called by their job (the Blacksmith, the Shopkeeper, the Innkeeper…); only the people of the main story keep their names.",
+    "Thornwatch has log cabins along its lanes, yards and trees.",
+    "Shops: tapping or clicking an item shows its details first; a separate Buy or Sell button does the trade.",
+    "Enchanting moved to your own Trade skills window (K, or the ☰ menu): break items to learn enchantments and put them on your gear anywhere outside a fight. Shrines no longer do it. Repairs also show the item first, then a Repair button.",
+    "Phones: your first ability button works again (an invisible camera-drag area was covering it).",
+    "Picking an item in your bag shows everything about it: what it does with its numbers, each requirement next to what you have, and how it compares with what you wear.",
+    "Gear now asks mostly for attributes and training instead of level: leather wants Dexterity or Wisdom, mail Strength or Constitution, plate Strength, swords Strength or Dexterity, staves and tomes Intelligence or Wisdom, a little more on better pieces. Only rare and better items still ask for a level, and well below their own."
+   ]
+  },
+  {
+   "id": "2026-11-24-environment",
+   "date": "2026-11-24",
+   "title": "Air, light and life",
+   "items": [
+    "A warm late-afternoon sun with long shadows, and the sky itself now lights the world, so armour and water pick up its blue.",
+    "Soft cloud shadows drift across the land, a thin mist gathers in the river bottoms, and far hills rise beyond the haze.",
+    "Woods have an understory: bushes at the feet of trees, and saplings and shrubs where a wood thins into meadow. Leaves glow when the sun shines through them.",
+    "Leaf litter darkens the ground under trees, and the grass has yellower and deeper-green patches.",
+    "Smoke rises from chimneys, leaves drift down from the trees near you, dust floats in the light, birds wheel overhead and butterflies flit over the meadows.",
+    "You can hear where you are: birdsong in the woods, bustle in town, frogs by the marsh, wind in the open.",
+    "Rivers ripple and catch the sky. Buildings and props sit into the ground instead of floating on it.",
+    "On computers, a light colour grade and a soft glow on the brightest things; High graphics adds soft shade where things meet the ground and longer shadows.",
+    "Graphics quality is picked for your device on your first visit, and steps down once by itself if the game runs slowly (your own choice in Settings always stays)."
+   ]
+  },
+  {
+   "id": "2026-11-24-tap-trees",
+   "date": "2026-11-24",
+   "title": "Tap the world, fuller forests",
+   "items": [
+    "On a phone, tap a person to talk, tap a fallen enemy's remains to search them, tap a chest or a shrine to open it. If it's too far, your hero walks over first.",
+    "With a free mouse on a computer, clicking a person, remains, a chest or a shrine does the same.",
+    "\"Wake at the shrine\" works on phones when you fall (the button was hidden under the screen's look area).",
+    "The \"Talk to…\" / \"Search…\" prompt is a button you can tap. On phones it sits above your action buttons, out of the way of what's in front of you.",
+    "Making a hero is now four pages: your look, then your class with its whole skill tree to explore, then your background, then your attributes with the health, mana and damage you'll start with.",
+    "Trees have full, round crowns of big leaves, and pines are soft needle tiers, near and far and on every graphics setting. They used to be a few huge flat leaves on low graphics.",
+    "Phones: the Attack button looks like one, empty spell slots no longer fill two rows, and button hints say Tap instead of keyboard keys."
+   ]
+  },
+  {
+   "id": "2026-11-24-world",
+   "date": "2026-11-24",
+   "title": "A world worth walking",
+   "items": [
+    "The trees are giants now: oaks, birches and pines tower 20 to 30 metres over you, and the old ancient oaks and great spruces deep in the woods reach past 40.",
+    "Every camp, shrine, ruin, grave, wall and chest is a real piece of the world: tents and banners, glowing shrines, carved standing stones, iron-banded chests that look as rich as what's inside.",
+    "Towns have cobbled squares and streets, worn dirt roads lead between them, and the fields are planted in strips of wheat, cabbage, pumpkins and more behind split-rail fences.",
+    "The ground has grass that sways, the sky has a sun and drifting clouds, and the light is warmer.",
+    "You can swim: wade into a river and swim across, then climb out on the far bank. (Your horse won't follow you in.)",
+    "Dodging is a quick dash the way you're moving, or toward your crosshair when you stand still, with no jump back.",
+    "The townsfolk are all properly dressed people now, and the camera stays in front of walls and trees.",
+    "Windows keep their place: the class tree, your bag and your talents no longer jump back to the start while open."
+   ]
+  },
+  {
+   "id": "2026-11-24-casters",
+   "date": "2026-11-24",
+   "title": "Wands with a will of their own",
+   "items": [
+    "Every wand now has its own attack: a straight bolt, a bursting one, a fan of three, a bolt that jumps between enemies, one that turns to follow, a slow heavy one, a cone, a beam, a ring around you, a lobbed blast, a forking bolt, a shielding bolt, or one that leaves the ground burning.",
+    "Tomes attack too, slower and harder: a Rune drawn on the ground, a Column of light, a Gale, or a Brand that scorches where it lands.",
+    "Staves cast their element's spell (a cone, a ring, a wave, a lobbed flask, a chain, or burning ground), or a Lance, or an Aegis Ring that shields you and your friends.",
+    "Sceptres swing in melee and hit with their element instead of steel.",
+    "An orb or focus in your off hand adds to a wand, tome or sceptre: an echo of every fourth attack, a burst round the enemy you hit, a shield, or mana back. A tome in the off hand echoes too.",
+    "Each item's card says exactly what its attack does, with your own damage numbers. Look out for the Wand of the Ninth Star and other named pieces from bosses, and the tome from The Lost Tome."
+   ]
+  },
+  {
+   "id": "2026-11-23",
+   "date": "2026-11-23",
+   "title": "The first oath",
+   "items": [
+    "Brightwater Vale and Thornmere Wilds are open: two regions, two towns, camps, shrines and 23 quests.",
+    "Make a hero, then pick a class every time you level up — mix as many as you like.",
+    "Play alone or with up to 10 friends in a world that remembers what you did together.",
+    "Every corpse and chest has its own loot for each player, and gold has to be picked up.",
+    "Aim attacks and spells from over the shoulder; ground spells show where they will land.",
+    "Works with mouse and keyboard, a controller, or a phone."
+   ]
+  }
+ ]
 }

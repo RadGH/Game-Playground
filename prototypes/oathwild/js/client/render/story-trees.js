@@ -150,7 +150,7 @@ export function storyPlan(name, seed = 1) {
       const a0 = rng() * TAU;
       for (let k = 0; k < S.strands; k++) {
         const a = a0 + (k / S.strands) * TAU + rand(rng, -0.12, 0.12), d = R * rand(rng, 0.72, 1.02);
-        plan.strands.push({ top: az(a).multiplyScalar(d).setY(cy + R * S.squash * rand(rng, -0.1, 0.25)), len: rand(rng, 0.45, 0.72) * cy, w: R * 0.34, a, ph: rng() });
+        plan.strands.push({ top: az(a).multiplyScalar(d).setY(cy + R * S.squash * rand(rng, -0.1, 0.25)), len: rand(rng, 0.45, 0.72) * cy * (S.strandK ?? 1), w: R * 0.34, a, ph: rng() });
       }
     }
   } else if (S.form === 'tall') {

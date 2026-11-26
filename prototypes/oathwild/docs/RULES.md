@@ -47,45 +47,52 @@ printed in game by the one tooltip model (`js/rules/describe.js`). Owner rulings
 - **Attribute point** at every even character level; **talent point** at levels 3, 6, 9 and for every 25 points in a
   use-skill.
 
-## Class trees (Titan Quest masteries + Pathfinder levels)
+## Class trees (rebuilt 2026-11-26 to the owner's rules)
 
-- Nodes open at class levels. Kinds: **spell** (3 ranks), **passive** (ranks, numbers per rank), **training**
-  (armour/weapons), **modifier** (changes how one of the class's spells works).
-- **Ranks**: rank 1 costs a point when the node opens; rank 2 needs 2 more class levels, rank 3 another 2. A rank
-  multiplies the spell's damage/healing/barrier/summon strength (×1.3 at rank 2, ×1.6 at rank 3; buffs grow half as
-  much) and its mana (×1.15, ×1.3); some ranks add an effect (Cleave rank 3 makes targets bleed; Frost Shard rank 3
-  chills; Aimed Shot rank 3 pierces two).
-- **Paths** at class level 3 (base and advanced classes): pick one; path nodes are only for that path. Changeable at
-  a shrine respec.
+Owner 2026-11-26: "more choices every tier … remove the subclasses … each icon is a single rank, multiple ranks appear
+in higher level as separate icons to unlock that require the predecessor … separate nodes for things like sword,
+mace, axe, 2h, wand proficiency … no small percentage in the skill tree except for crit chance … Fewer defensive
+abilities. Fewer heals. Focus on combat." The trees are written in `tools/trees/<class>.mjs` and built into
+`data/classes.json` + `data/spells.json` by `node tools/build-trees.mjs`; `tests/rules/trees.test.mjs` checks every
+rule below.
+
+- **One tree per class, no paths.** Every class level offers several choices (3–7). Each class level gives
+  2 points to spend in that class.
+- **One icon = one buy.** Node kinds: **spell**, **spell rank** ("Cleave II", "Cleave III" — its own icon deeper in
+  the tree that needs the rank before; rank II = +40% power, rank III = +80% plus an extra effect), **passive** (one
+  big number: +25% melee damage, +30% maximum health, +6% critical chance…), **training** (one weapon or armour kind),
+  **weapon mastery** (+25% damage with that kind; needs its training), **modifier** (changes how one spell works:
+  Wide Cleave also knocks down; Big Fireball hits a wider area).
+- **The starting kit is free**: level 1 gives the class's first spell and the training for the gear it starts in.
 - **Capstone** at the class's last level: two options, pick one.
-- **Depth pays**: a spell gets +5% per level of the class it came from (a level-10 Mage's Frost Shard is ×1.45).
+- **Depth pays**: a spell gets +5% per level of the class it came from.
+- **Abilities are areas**: novas around you, cones, lines, ground circles, leaps and charges. A Fireball flies and
+  explodes where it lands. Big ones knock enemies back and down (bosses resist most of it). Plain bolts exist only as
+  wand basics. At most one heal and one purely defensive spell per class.
 - **Specialty classes** (Duelist, Shadowdancer, Spellfletcher, Bladesworn, Wrathborn, Gravecutter): unlocked by
-  requirements (class levels, attributes, a use-skill, a talent, or a contract found in the world), 5 levels, a strong
-  signature ability at level 1 and a capstone at 5.
-- **No spreading guard** (owner). For information, the combat test prints how builds compare at level 10 against
-  three level-matched Thornmere monsters (latest run): Warrior 10 won in 10 s with 158/346 health left; Mage 10 won in
-  6.7 s untouched; a Paladin build won in 13.1 s (71/335); Warrior 5 / Cleric 5 won in 11.7 s with 3 health left;
-  Mage 6 / Rogue 4 won in 7.9 s untouched; Ranger 4 / Druid 3 / Shaman 3 lost; a five-class spread won in 12.6 s
-  (131/300). Spread builds work, deep ones are a little stronger — no rule forces it.
+  requirements, 5 levels, a capstone at 5.
+- **Old characters**: a hero saved on the old ranked trees is moved onto the new ones when they join a world —
+  nodes that no longer exist go, every node is one rank, paths are cleared, and the points come back to spend.
+- **No spreading guard** (owner): take as many classes as you like.
 
 ## Talents (`data/talents.json`)
 
-Four rows opening at levels 1, 4, 7, 10. Each talent has its own needs (attributes, a use-skill, other training,
-levels in two classes) and gives numbers or training: Weapon Focus, Spell Focus, Toughness, Leather / Mail / **Plate
-Training** (Plate needs Strength 15 and Mail first), Shield, Bow, Two-Weapon Fighting, Quiet Feet (Sneak 25),
-Honeyed Words (Speech 25), Runic Hand (Enchanting 50), the elemental Affinities, and four **cornerstones** at level
-10 (Juggernaut, Glass Cannon, Quicksilver, Lifebinder).
+Four rows opening at levels 1, 4, 7, 10; one point at levels 3, 6, 9 and for every 25 in a use-skill. Every talent
+is one rank with a big number (Weapon Focus +25% weapon damage, Toughness +25% health, the Affinities +30% to an
+element) or one training (Sword, Axe, Mace, Bow, Wand, Shield, Leather, Mail, Plate, Two-Handed, Two-Weapon
+Fighting). Four **cornerstones** at level 10: Juggernaut, Glass Cannon, Quicksilver, Berserker.
 
 ## Armour and weapons (`data/proficiency.json`)
 
-- Everyone can wear cloth and use simple weapons (dagger, mace, spear, staff, javelin). Leather, mail, plate,
-  shields, martial weapons, bows and arcane implements need **training** from a class node, a talent, or an
-  **enchantment** ("of the Bulwark" = plate training, "of the Hauberk" = mail…) on the item itself or anything else worn.
+- Everyone can wear cloth. **Every other armour kind and every weapon kind is its own training** (owner 2026-11-26):
+  leather, mail, plate, shields; daggers, swords, axes, maces and hammers, spears, staves, two-handed weapons, bows,
+  crossbows, wands, sceptres, orbs, tomes; dual wielding. Training comes from a class node, a talent, or an
+  **enchantment** ("of the Bulwark" = plate, "of the Hauberk" = mail, "of Swords" = swords…) on the item itself or
+  anything else worn.
 - Training is not Strength: mail needs 12, plate 15, the heaviest shields 14–15, two-handed heavy weapons 13 —
   whatever grants the training.
-- A refused item says exactly what is missing, e.g. *"Plate Armor: Plate armour needs training (the Warrior's Plate
-  Drill, the Paladin's Plate Training, the Plate Training talent or an item of the Bulwark) and 15 Strength (you
-  have 11)."*
+- A refused item says exactly what is missing, e.g. *"Greatsword: Two-handed weapons needs training (the Warrior's
+  Two-Handed Training, the Two-Handed Training talent) and 13 Strength (you have 11)."*
 - **Dual wielding**: Warrior, Ranger, Rogue, Wayfarer, Duelist, Shadowdancer, Gravecutter, Bladesworn, Wrathborn (or
   the Two-Weapon Fighting talent) may hold a second one-handed weapon; it strikes right after each main-hand swing
   for Farhold's off-hand share (60%) of its own damage.
@@ -96,8 +103,14 @@ Honeyed Words (Speech 25), Runic Hand (Enchanting 50), the elemental Affinities,
   attribute + gear. Out of a fight both come back at 4% a second.
 - **Walking**: 6.2 m/s (`data/attributes.json` base.moveSpeed; was 5.4 with a Run button until 2026-11-25 — owner
   #127: no run, a bit faster). A horse is ×1.65 (about 10.2 m/s, the same as before).
-- **Stamina** (Guessed numbers, `data/combat.json`): 80 + Constitution + Dexterity; a dodge roll 25 (4 m, a third of
-  a second where nothing hits you), a power attack 20 (×1.8 damage). It comes back 1 second after you last spent it.
+- **Stamina** (Guessed numbers, `data/combat.json`): 80 + Constitution + Dexterity; a dodge roll 25, a power attack
+  20 (×1.8 damage). It comes back at 9 a second (was 14), 1 second after you last spent it — a fresh hero rolls 4
+  times in a row, then about once every 3 seconds.
+- **The roll** (2026-11-26, owner: "improve movement and dodging"): 5.5 m in 0.3 s (was 4 m in 0.25 s) the way you
+  move (or toward the crosshair standing still); nothing hits you for the first 0.26 s; 0.35 s after it ends before
+  the next. The browser runs the same steps (no snap back) and plays Tabard's Roll clip sped up to the roll's length.
+- **Walking** is full speed at once and stops at once (no sliding); slows and speed buffs reach the browser in every
+  snapshot (`sp`), so a slowed hero is no longer pulled back each step.
 - **Block** (owner #126, 2026-11-25: "block should be auto chance, more like WoW"; `data/combat.json` block): no
   button. A shield in the off hand blocks a physical blow from the front half by itself: buckler 10% (stops 40% of
   the blow), shield 14% (50%), kite shield 16% (55%), tower shield 20% (65%), aegis 20% (70%), rune aegis 22% (70%).
@@ -197,12 +210,48 @@ nothing; the damage, statuses and shape of the spell stay.
 - **Control**: rooted (can't move), asleep (can't act until hit), feared (runs), silenced (can't cast), stunned.
 - The buff bar gets each status's icon id, time left, stacks, and a tooltip with its live numbers.
 
+## Combat feel: throws, leaps, charges, tells (2026-11-26)
+
+Owner, after playing on an iPhone: *"I don't want to sit still auto attacking like an npc. I want things to get
+blown apart by fireball explosions and smack things in a circle knocking down enemies around me."*
+
+- **Knockback / knockdown** (a spell row's `knock: { push, down, stagger }`, `data/combat.json` knock): the target is
+  THROWN `push` metres away from the blow (a blast throws away from where it burst, not from the caster) over
+  0.3–0.45 s, a sim step at a time, so the ground check stops it at walls, rivers and cliff edges. With `down` it then
+  lies flat for `down` seconds and takes 0.45 s to get up: no moving, swinging or casting (aura `knockdown`), damage
+  as normal. Bosses move ¼ as far and lie ⅓ as long; champions/elites 0.6. Heroes are never thrown.
+- **Stagger**: a row's `knock.stagger`, or any single blow taking 18% of a (non-boss) monster's health: it loses the
+  blow it was winding up.
+- **Leap** (shape `leap`: range, radius, mult, knock): you jump to the aimed ground point (at most the range) over
+  0.45 s, untouchable in the air, and land hitting everything within the radius. **Charge** (shape `dash`): you run
+  its dash range at 34 m/s, untouchable, hitting each foe you pass once. Both run in the browser's prediction too.
+- **Exploding ball** (a bolt row with `explode: { radius }`, the Fireball): a big ball (touches foes 0.35 m further
+  out than a plain bolt) that bursts on the first foe it touches, at the aimed ground point, or at the end of its
+  range; the burst hits everything within the radius with the row's full damage, statuses and knock.
+- **Monster tells** (lessons rule 39; `data/combat.json` monsters.windup*): every monster blow starts with a 0.55 s
+  wind-up (bosses 0.85, shooters 0.6, a row may set its own `windup`): it stops, leans back, a red mark shows on the
+  ground, and it turns at most 2.5 radians a second. The blow lands only on a target still in front of it (110°) and
+  within reach + 0.6 m; rolling out of the mark or through it (untouchable) avoids it ("Dodged"). The time between
+  blows stays the monster's `attackEvery`.
+- **Hit reactions** (drawn): every hit pushes the body back 0.28 m and puffs it 12% for a moment (0.45 m / 16% on a
+  crit or a heavy blow); thrown bodies fly in an arc and tip flat (the whole model: the fal monster rigs have no
+  knockdown clip), lie there, and rise.
+
+## Balance goal (`data/combat.json` `_goal`)
+
+A level-N hero using their abilities kills ONE level-N normal monster in about 6–10 s losing at most 35% health; TWO
+is a real fight they win with abilities and rolls; THREE is dangerous; a boss is long for one, fine for a group; the
+weapon alone still wins a 1v1, slowly. `tools/sim-fights.mjs` measures it (every base class at levels 1/3/5/10 vs 1,
+2, 3 same-level monsters of every kind; the bot casts its bar and rolls out of half the tells; plain kit to level 3,
+magic finds from 5); `tests/rules/balance.test.mjs` pins the goal.
+
 ## Monsters
 
 - Farhold's monster rows, scaled to Oathwild's two regions (`data/monsters.json`), at levels from the region and
-  camp (`data/regions.json`): Brightwater Vale 1–5, Thornmere Wilds 5–10. Oathwild monsters have 3× Farhold's
-  health and 1.7× its damage, and grow 30% health and 10% damage a level (`data/combat.json`; Guessed, tuned so a
-  level-matched monster takes a few seconds to ten to kill solo and two at once are a real fight).
+  camp (`data/regions.json`): Brightwater Vale 1–5, Thornmere Wilds 5–10. Oathwild monsters have 6.5× Farhold's
+  health and 1.9× its damage, and grow 28% health and 5% damage a level (`data/combat.json`; retuned 2026-11-26
+  against the balance goal above — was 3× / 1.7× / 30% / 10%: the rebuilt class abilities killed a same-level monster
+  in 1–3 s, and level-1 monsters hit a fresh hero too hard).
 - They notice you inside their range (much closer if you **sneak**), fight whoever has the most threat (damage, and
   half of healing; a taunt forces them), and give up past 45 m from home — walking back unhurtable, healed.
 - Camp bosses use champion numbers ×1.5 health. No wisps (lessons rule 72): the Guardian Light wisp is not used.

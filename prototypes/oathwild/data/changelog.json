@@ -1,6 +1,14 @@
 {
   "entries": [
     {
+      "id": "2026-11-25-smooth",
+      "date": "2026-11-25",
+      "title": "Smoother towns",
+      "items": [
+        "Walking into a busy town no longer freezes the game for a moment: townsfolk are dressed and given their faces far faster (most noticeable on phones and older computers)."
+      ]
+    },
+    {
       "id": "2026-11-25-roomier",
       "date": "2026-11-25",
       "title": "Room to breathe",

@@ -59,6 +59,10 @@ export const FACIAL_HAIR = FACE_OPTIONS.facialHair.map(o => o[0]);
 export const FACE_MARKS = FACE_OPTIONS.extras.map(o => o[0]);
 
 const DATA = new Map(), BASES = new Map();
+// The clean face picture's pixels, read back from a canvas once per body + size and shared: each new character recolours a
+// copy in memory (a town builds dozens of people; a draw + read-back of the whole face for each one stalled the first
+// steps into town for seconds on slow devices). One copy per body (4 MB at 1024²), not one per skin tone.
+const RAW = new Map();
 const rgb = h => { const n = parseInt(String(h || '#000').replace('#', ''), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
 const css = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
 const mix = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
@@ -154,8 +158,12 @@ export async function createFace(ctx) {
   let baseKey = '', basePx = null;
   function base(skinHex) {
     if (baseKey !== skinHex) {
-      g.globalCompositeOperation = 'copy'; g.drawImage(baseImg, 0, 0, S, S); g.globalCompositeOperation = 'source-over';
-      const im = g.getImageData(0, 0, S, S);
+      const rk = `${body}|${S}`;
+      if (!RAW.has(rk)) {
+        g.globalCompositeOperation = 'copy'; g.drawImage(baseImg, 0, 0, S, S); g.globalCompositeOperation = 'source-over';
+        RAW.set(rk, g.getImageData(0, 0, S, S));
+      }
+      const im = new ImageData(new Uint8ClampedArray(RAW.get(rk).data), S, S);
       tintSkin(im.data, null, rgb(PAINTED_SKIN), skinHex || PAINTED_SKIN);
       basePx = im; baseKey = skinHex;
     }
@@ -282,20 +290,30 @@ export async function createFace(ctx) {
 
   function facialHair(id, hairC) {
     if (!id || id === 'none') return;
-    const layer = document.createElement('canvas'); layer.width = layer.height = S;
-    const L = layer.getContext('2d');
     const path = beardPath(id);
     const r = rng(id.length * 131 + 7);
     // fill the area with hair strokes pointing down the face (outward-down on the cheeks)
     const box = { x0: S, y0: S, x1: 0, y1: 0 };
     for (const k of Object.keys(U)) for (const q of list(k)) { const [x, y] = P(q); box.x0 = Math.min(box.x0, x); box.x1 = Math.max(box.x1, x); box.y1 = Math.max(box.y1, y + cm * 1.5); }
     box.y0 = P(U.nose_tip)[1];
+    // the layer covers only the beard's box (+ stroke length + blur), not the whole 1024² face, and lives in memory: a
+    // full-size GPU layer blurred onto the face canvas cost seconds per bearded villager on slow devices (2026-11-25)
+    // (the path is drawn from the landmarks and its underlayer reaches up the sideburns, so the layer spans every
+    // landmark; the strokes still fall only in `box`)
+    let top = box.y0; for (const k of Object.keys(U)) for (const q of list(k)) top = Math.min(top, P(q)[1]);
+    const pad = Math.ceil(cm * 1.2 + 6);
+    const ox = Math.max(0, Math.floor(box.x0 - pad)), oy = Math.max(0, Math.floor(top - pad));
+    const layer = document.createElement('canvas');
+    layer.width = Math.max(1, Math.min(S, Math.ceil(box.x1 + pad)) - ox); layer.height = Math.max(1, Math.min(S, Math.ceil(box.y1 + pad)) - oy);
+    const L = layer.getContext('2d', { willReadFrequently: true });
+    L.translate(-ox, -oy);                                // draw in face pixels as before
+    const inside = (x, y) => L.isPointInPath(path, x - ox, y - oy);   // the hit test takes untransformed layer pixels
     const mid = P(U.mouth)[0], col = mix(hairC, [0, 0, 0], 0.1);
     L.lineCap = 'round';
     if (id === 'stubble') {
       for (let i = 0; i < 9000; i++) {
         const x = box.x0 + r() * (box.x1 - box.x0), y = box.y0 + r() * (box.y1 - box.y0);
-        if (!L.isPointInPath(path, x, y)) continue;
+        if (!inside(x, y)) continue;
         L.fillStyle = css(mix(col, [0, 0, 0], r() * 0.3), 0.35 + r() * 0.25); L.fillRect(x, y, 1.6, 1.6);
       }
       L.fillStyle = css(col, 0.12); L.fill(path);
@@ -304,7 +322,7 @@ export async function createFace(ctx) {
       const n = id === 'full' ? 5200 : id === 'mustache' ? 2200 : id === 'goatee' ? 2000 : 3600;
       for (let i = 0; i < n; i++) {
         const x = box.x0 + r() * (box.x1 - box.x0), y = box.y0 + r() * (box.y1 - box.y0);
-        if (!L.isPointInPath(path, x, y)) continue;
+        if (!inside(x, y)) continue;
         const side = Math.sign(x - mid) || 1, spread = Math.min(1, Math.abs(x - mid) / (box.x1 - mid + 1));
         const ang = Math.PI / 2 - side * (0.15 + spread * 0.55) + (r() - 0.5) * 0.5;
         const len = cm * (id === 'full' ? 0.5 : 0.32) * (0.6 + r() * 0.8);
@@ -318,7 +336,7 @@ export async function createFace(ctx) {
     L.globalCompositeOperation = 'destination-out';
     L.beginPath(); L.ellipse((cR[0] + cL[0]) / 2, (lu[1] + ll[1]) / 2, Math.abs(cR[0] - cL[0]) / 2 * 0.92, Math.abs(ll[1] - lu[1]) / 2 * 0.8 + 1, 0, 0, Math.PI * 2); L.fill();
     L.globalCompositeOperation = 'source-over';
-    g.save(); g.filter = `blur(${cm * 0.03}px)`; g.drawImage(layer, 0, 0); g.restore();
+    g.save(); g.filter = `blur(${cm * 0.03}px)`; g.drawImage(layer, ox, oy); g.restore();
   }
 
   /** Painted hairline on the skin under the hair layer's edge: short hairs in the hair colour along the landmark

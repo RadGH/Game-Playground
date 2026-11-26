@@ -105,6 +105,9 @@ export const CLIP_NAMES = {
 // top). Those pixels — and only those — take the wanted tone: each channel scaled by wanted / PAINTED_SKIN, so all the
 // painted light, shade and blush stay (a light/colour split measured from the torso turned faces green-pale). Fades out over a small colour difference so cloth edges don't get a hard rim.
 const skinCache = new Map();
+// A finished body paint (skin + painted gear, recoloured) per body + outfit + skin tone: villagers dressed alike share it
+// instead of each reading its canvas back and recolouring a million pixels (seconds of stall walking into a town).
+const paintCache = new Map(), PAINT_MAX = 4;     // 4 MB each at 1024²: a few, for the outfits a town repeats most
 /** The skin painting's pixels and its average tone (bare torso box), measured once per body. */
 export async function skinInfo(body, img) {
   if (!skinCache.has(body)) skinCache.set(body, (async () => {
@@ -184,7 +187,7 @@ export async function createTabard({ body = 'male', items = [], clip = 'idle', c
   // ---- paint layer: one canvas texture for the body and every swap-in piece
   const S = D.regions.size;
   const canvas = document.createElement('canvas'); canvas.width = canvas.height = S;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });   // the skin recolour reads it back: keep it in memory
   const tex = new THREE.CanvasTexture(canvas);
   tex.flipY = false; tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
   const mat = new THREE.MeshLambertMaterial({ map: tex });
@@ -251,27 +254,30 @@ export async function createTabard({ body = 'male', items = [], clip = 'idle', c
     const pics = {};
     await Promise.all([...wantedPaint].map(async p => { pics[p] = await image(`models/${body}/${p}.webp`); }));
     if (v !== version) return;                       // a newer equip arrived while pictures loaded
+    const want = (curLook || null)?.skin?.color;
+    const pkey = `${body}|${S}|${want || ''}|${Object.entries(worn).filter(([, id]) => D.items.items[id]?.paint).map(([sl, id]) => sl + ':' + id).sort().join(',')}`;
+    const on = new Set(), off = new Set();
+    for (const id of Object.values(worn)) { const it = D.items.items[id]; if (it) { (it.geosets || []).forEach(x => on.add(x)); (it.hides || []).forEach(x => off.add(x)); } }
+    const done = () => { tex.needsUpdate = true; for (const [k, m] of Object.entries(geosets)) m.visible = on.has(k) && !off.has(k); hairRule(); };
+    const hit = paintCache.get(pkey);
+    if (hit) { ctx.putImageData(hit, 0, 0); done(); return; }
     ctx.globalCompositeOperation = 'copy'; ctx.drawImage(pics.skin, 0, 0, S, S);
     ctx.globalCompositeOperation = 'source-over';
-    const on = new Set(), off = new Set();
     for (const [slot, id] of Object.entries(worn)) {
-      const it = D.items.items[id]; if (!it) continue;
-      (it.geosets || []).forEach(x => on.add(x)); (it.hides || []).forEach(x => off.add(x));
-      if (!it.paint) continue;
+      const it = D.items.items[id]; if (!it?.paint) continue;
       const boxes = (D.regions.slots[slot] || []).map(r => D.regions.regions[r].rect)
         .concat((it.geosets || []).map(gs => D.regions.geosets[gs].rect));
       for (const [x, y, w, h] of boxes) ctx.drawImage(pics[it.paint], x, y, w, h, x, y, w, h);
     }
-    const want = (curLook || null)?.skin?.color;
     if (want) {                                      // skin colour: recolour only the bare-skin pixels (skinTint)
       const sk = await skinInfo(body, pics.skin);
       if (v !== version) return;
       const im = ctx.getImageData(0, 0, S, S);
       if (tintSkin(im.data, sk.data, sk.tone, want)) ctx.putImageData(im, 0, 0);
+      if (paintCache.size >= PAINT_MAX) paintCache.delete(paintCache.keys().next().value);
+      paintCache.set(pkey, im);
     }
-    tex.needsUpdate = true;
-    for (const [k, m] of Object.entries(geosets)) m.visible = on.has(k) && !off.has(k);
-    hairRule();
+    done();
   }
 
   async function attach(slot, id) {
@@ -484,7 +490,7 @@ export async function createTabard({ body = 'male', items = [], clip = 'idle', c
   const layers = { face: null, hair: null };
   let curLook = look;
   if (faceMesh) {
-    try { const im = await image(`models/${body}/face.webp`); faceCanvas.getContext('2d').drawImage(im, 0, 0, 1024, 1024); faceTex.needsUpdate = true; }
+    try { const im = await image(`models/${body}/face.webp`); faceCanvas.getContext('2d', { willReadFrequently: true }).drawImage(im, 0, 0, 1024, 1024); faceTex.needsUpdate = true; }   // the first getContext fixes the canvas's options: face.js reads it back, so keep it in memory
     catch (e) { console.warn('Tabard: no face painting —', e.message); }
   }
   const ctxLayer = { THREE, D, body, bones, root, group, bodyMesh, faceMesh, faceCanvas, faceTex, geosets, at };

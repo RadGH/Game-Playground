@@ -124,7 +124,9 @@ export function createWorldView(view, { T, placements, art, scattered, book, tow
     return holder;
   }
   for (const b of placements.buildings || []) place(b.art, b.at[0], b.at[1], b.y, b.facing, { name: b.name });
-  for (const p of placements.props || []) place(p.art, p.at[0], p.at[1], p.y, p.facing);
+  // a reward-chest spot (arena) starts hidden: shown only while the hero's own unopened chest stands there (arena-ui.js)
+  const rewardMeshes = [];
+  for (const p of placements.props || []) { const h = place(p.art, p.at[0], p.at[1], p.y, p.facing); if (p.reward) { h.visible = false; rewardMeshes.push({ x: p.at[0], z: p.at[1], holder: h }); } }
   const shrineMarks = [];
   for (const s of placements.shrines || []) { const h = place(s.art || 'shrine-respawn', s.at[0], s.at[1], s.y, s.facing, { name: s.name }); shrineMarks.push({ id: s.id, holder: h }); }
   const chestMeshes = new Map();
@@ -240,7 +242,7 @@ export function createWorldView(view, { T, placements, art, scattered, book, tow
   let wt = 0;
   return {
     get arena() { return arenaView; },
-    root, tiles, chestMeshes, objectMeshes, shrineMarks, ground, grass, kitStats: kit.stats, chimneys: kit.chimneys, get treeStats() { return treeView?.stats || null; }, get townStats() { return townView?.stats || null; }, ready: () => Promise.allSettled([...pending, ground.ready]),
+    root, tiles, chestMeshes, objectMeshes, rewardMeshes, shrineMarks, ground, grass, kitStats: kit.stats, chimneys: kit.chimneys, get treeStats() { return treeView?.stats || null; }, get townStats() { return townView?.stats || null; }, ready: () => Promise.allSettled([...pending, ground.ready]),
     update(dt, at) {
       wt += dt;
       wind.update(dt);   // the ONE wind: trees, tufts, grass and crops all bend to it (./wind.js)

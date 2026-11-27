@@ -339,7 +339,9 @@ export function describeItem(rules, char, item, { slot = null } = {}) {
   out.rows.push({ label: 'Weight', value: `${fmt(itemWeight(rules, item), { decimals: 1 })} kg` });
   const du = durabilityOf(rules, item);
   if (du != null) out.rows.push({ label: 'Durability', value: isBroken(rules, item) ? 'Broken — gives nothing until repaired' : `${fmt(du)} / ${fmt(rules.data.inventory.durability.max)}` });
-  if (item.ilvl) out.rows.push({ label: 'Item level', value: fmt(item.ilvl) });
+  if (item.ilvl) out.rows.push({ label: 'Item level', value: item.power ? `${fmt(item.ilvl)} (${item.power.tier})` : fmt(item.ilvl) });
+  // rarity's enhanced damage / armour (js/rules/gear-power.js — D2's "+% enhanced damage"), its own line on top
+  if (item.power?.enhanced) out.lines.push(`${fmtSign(Math.round(item.power.enhanced * 100))}% enhanced ${item.dmg ? (item.weaponCategory === 'magic' ? 'spell power' : 'damage') : 'armour'}`);
   if (need) {
     // every requirement on its own row with what you have (owner 2026-11-25: gear by attributes and training, hardly level)
     const have = attrTotals(rules, char);

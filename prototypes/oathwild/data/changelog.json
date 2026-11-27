@@ -1,6 +1,24 @@
 {
  "entries": [
   {
+   "id": "2026-11-27-gear",
+   "date": "2026-11-27",
+   "title": "Gear that is worth finding",
+   "items": [
+    "Better gear is much better now. A weapon or armour piece from tougher monsters has a stronger base: about 12% more damage (10% more armour) for every item level.",
+    "Blue, yellow and orange items roll extra power on top: Magic +20-40%, Rare +45-75%, Legendary +80-120% damage or armour, shown as its own line on the card (\"+38% enhanced damage\").",
+    "A rare is never weaker than the same plain item any more.",
+    "Names show the step up: Steel, Tempered and Masterwork weapons and mail; Tanned and Hardened leather; Woven and Silk cloth.",
+    "Your starting weapon no longer grows with your level, so finding and buying upgrades is how you get stronger. Blues and yellows also drop a little more often.",
+    "Plate armour no longer drops before item level 4 (the mail version of the piece drops instead), so early finds are gear you can wear.",
+    "The Take button in a loot window works again.",
+    "The arena shows only your own reward chests by the board, and each one opens.",
+    "The points-left bubble in the Classes window counts down the moment you learn something.",
+    "Spears look like spears.",
+    "The flickering walls by the arena's Heroes' Gate are fixed."
+   ]
+  },
+  {
    "id": "2026-11-26-world-feel",
    "date": "2026-11-26",
    "title": "Weather, a fairer start, dodging that works, and a camera you can tune",

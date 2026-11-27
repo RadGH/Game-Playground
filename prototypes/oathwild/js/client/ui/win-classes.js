@@ -30,8 +30,8 @@ export function open(app, opts = {}) {
   const owned = c ? (c.classOrder || Object.keys(c.classLevels || {})) : [];
   const tabs = () => [...(app.me?.char?.classOrder || owned).map(k => ({ id: k, label: classDef(app.rules, k)?.name || 'Class', badge: pointsLeft(app.rules, app.me.char, k) > 0 ? fmt(pointsLeft(app.rules, app.me.char, k)) : '' })), { id: 'all', label: 'All classes' }];
   const w = openWin({
-    id: 'classes', title: 'Classes', size: 'wide', cls: 'win-classes', tabs: tabs(), tab: opts.cls && owned.includes(opts.cls) ? opts.cls : (owned[0] || 'all'),
-    render: (body, tab, w) => { w.tabs = tabs(); return render(app, body, tab, w); },
+    id: 'classes', title: 'Classes', size: 'wide', cls: 'win-classes', tabs, tab: opts.cls && owned.includes(opts.cls) ? opts.cls : (owned[0] || 'all'),
+    render: (body, tab, w) => render(app, body, tab, w),   // (tabs is a function: kit.js redraws the points-left badges first)
     foot: (el, w) => wire(app, el, w),
   });
   if (opts.cls && !owned.includes(opts.cls)) { w.tab = 'all'; w.data.view = opts.cls; w.render(); }

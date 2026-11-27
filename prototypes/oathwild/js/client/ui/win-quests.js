@@ -28,10 +28,9 @@ export function tracked(app) { if (!Array.isArray(app.settings.tracked)) app.set
 export function open(app, opts = {}) {
   const w = openWin({
     id: 'quests', title: 'Quests', size: 'wide', cls: 'ow-q', tab: opts.tab || 'active',
-    tabs: (() => { const log = myLog(app); return TABS.map(([id, label]) => ({ id, label, badge: log[id].length ? String(log[id].length) : '' })); })(),
+    tabs: () => { const log = myLog(app); return TABS.map(([id, label]) => ({ id, label, badge: log[id].length ? String(log[id].length) : '' })); },   // worked out at every render (kit.js)
     render(body, tab, win) {
       const log = myLog(app);
-      win.tabs = TABS.map(([id, label]) => ({ id, label, badge: log[id].length ? String(log[id].length) : '' }));
       const list = log[tab] || [];
       const sel = list.find(q => q.id === win.data.sel) || list[0] || null;
       if (!list.length) { body.innerHTML = `<p class="ow-empty">${tab === 'active' ? 'No quests on the go. People with something to ask have a mark over their heads.' : tab === 'ready' ? 'Nothing to hand in.' : tab === 'available' ? 'Nobody you know has more to ask right now.' : 'No quests finished yet.'}</p>`; return; }

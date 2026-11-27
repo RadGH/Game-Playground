@@ -3,8 +3,11 @@
 #   tools/prepublish-check.sh <game> [<ref>]        e.g. tools/prepublish-check.sh rogueloot HEAD
 # 1. game-lint   (tools/game-lint.mjs)    on the game AT THAT COMMIT: popups, browser tooltips, banned names, What's new…
 # 2. connected   (tools/game-reach.mjs)   every module in js/ is loaded by a page, worker or the server
-# 3. walk        (tools/walk-screens.mjs) every screen on a desktop and a phone, against the game's dev server
-#                (skipped when the game has no tests/walk.mjs; WALK=0 skips it on purpose — say so when you do)
+# 3. walk        (tools/walk-screens.mjs) the screens this change can touch, on a desktop and a phone, against the
+#                game's dev server. tools/walk-plan.mjs compares with the published copy (`stable`): rules / data /
+#                server / docs / tests only → no walk; only some windows → just their screens; anything else → every
+#                screen (owner 2026-11-27: the full walk on every publish was slow). WALK=all walks everything,
+#                WALK=0 skips it on purpose — say so when you do. No tests/walk.mjs → no walk.
 # Called by tools/publish-stable.sh (for each game that changed) and by every per-game publish script.
 set -euo pipefail
 PLAY="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"; cd "$PLAY"
@@ -29,8 +32,13 @@ echo "== $GAME: game-lint"
 node tools/game-lint.mjs "$SRC" | sed "s#$TMP/##" | tail -40 || FAIL=1
 echo "== $GAME: every module connected"
 node tools/game-reach.mjs "$SRC" | sed "s#$TMP/##" || FAIL=1
-if [[ -f "$DIR/tests/walk.mjs" && "${WALK:-1}" != 0 ]]; then
-  echo "== $GAME: walk every screen (desktop + phone)${DIRTY:+ — NOTE: the dev server serves the working tree, which differs from $SHA}"
+PLAN="all WALK=all"
+[[ "${WALK:-1}" != all && -f "$DIR/tests/walk.mjs" ]] && PLAN="$(node tools/walk-plan.mjs "$GAME" "$SHA" 2>/dev/null || echo 'all the planner failed')"
+SCREENS=""; WHY=" — ${PLAN#all }"; [[ "$PLAN" == screens\ * ]] && SCREENS="${PLAN#screens }" && WHY=" — only these changed"
+if [[ -f "$DIR/tests/walk.mjs" && "${WALK:-1}" != 0 && "$PLAN" == skip* ]]; then
+  echo "== $GAME: screens not walked — ${PLAN#skip } since the published copy (WALK=all walks them anyway)"
+elif [[ -f "$DIR/tests/walk.mjs" && "${WALK:-1}" != 0 ]]; then
+  echo "== $GAME: walk ${SCREENS:-every screen} (desktop + phone)${WHY}${DIRTY:+ — NOTE: the dev server serves the working tree, which differs from $SHA}"
   # a game with its own dev server (tumblefair-dev …): local game servers are off by default (owner 2026-11-16), so
   # start it for the walk and stop it again if this check started it
   STARTED=""
@@ -42,7 +50,7 @@ if [[ -f "$DIR/tests/walk.mjs" && "${WALK:-1}" != 0 ]]; then
   fi
   # the walk's time limit catches a hung page; a big game may ask for more in its walk file (`budgetSec: 1500`)
   BUDGET=$(grep -oE 'budgetSec:[[:space:]]*[0-9]+' "$DIR/tests/walk.mjs" | grep -oE '[0-9]+' | head -1 || true); BUDGET=${BUDGET:-900}   # || true: no budgetSec = no match, which pipefail would turn into a silent exit
-  timeout "$BUDGET" node tools/walk-screens.mjs "$GAME" | tail -60 || FAIL=1
+  timeout "$BUDGET" node tools/walk-screens.mjs "$GAME" ${SCREENS:+--screens "$SCREENS"} | tail -60 || FAIL=1
   [[ -n "$STARTED" ]] && tools/game-servers.sh stop "$STARTED" >/dev/null && echo "   (stopped $STARTED again)"
 elif [[ ! -f "$DIR/tests/walk.mjs" ]]; then
   echo "== $GAME: no tests/walk.mjs, screens not walked"

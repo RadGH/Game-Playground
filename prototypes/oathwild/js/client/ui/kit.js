@@ -2,7 +2,7 @@
 // close button, optional tabs, ONE scroller, an optional footer). Windows stack; Esc / the pad's B / the × close the
 // top one. One window per id: opening it again redraws it in place (and keeps its scroll — lessons rule 12).
 //
-//   const w = openWin({ id: 'bag', title: 'Bag', size: 'wide', tabs: [{ id: 'all', label: 'All' }], render: (body, tab, w) => …, foot })
+//   const w = openWin({ id: 'bag', title: 'Bag', size: 'wide', tabs: [{ id: 'all', label: 'All' }] (or a function → worked out again at every render), render: (body, tab, w) => …, foot })
 //   w.render()  redraw (keeps scroll) · w.close() · w.setTab(id) · w.el / w.body
 //   toast(text, kind)  a short message near the top (two at most; the same text never twice at once — rule 42)
 import { glyph } from './icons.js';
@@ -63,12 +63,15 @@ export function openWin({ id, title: heading = '', sub = '', cls = '', size = ''
   el.setAttribute('aria-label', heading);
   shade.append(el);
   const w = {
-    id, el, shade, tab: tab || tabs?.[0]?.id || null, tabs, heading, sub, body: null, footEl: null, data: {},
+    id, el, shade, tab: tab || (typeof tabs === 'function' ? tabs() : tabs)?.[0]?.id || null, tabs: typeof tabs === 'function' ? tabs() : tabs, heading, sub, body: null, footEl: null, data: {},
     render() {
       // a re-render keeps the player where they were (lessons rule: windows never jump back to the start): every
       // scroller in the window — the body and any inner list or tree, up/down AND sideways — and the focused control
       const sameTab = w._lastTab === w.tab;
       const kept = sameTab ? keepView(el) : null;
+      // tabs given as a function are worked out again on every render, BEFORE the tab row is drawn, so a badge (points
+      // left, quests ready) is never one render behind (owner report #144: "1 remaining" until you changed tabs)
+      if (typeof tabs === 'function') w.tabs = tabs();
       el.innerHTML = `<header class="ow-win-head"><h2>${esc(w.heading)}</h2>${w.sub ? `<span class="ow-win-sub">${esc(w.sub)}</span>` : ''}<button type="button" class="ow-x" data-close aria-label="Close">${glyph('x', 22)}</button></header>`
         + (w.tabs ? `<nav class="ow-tabs" role="tablist">${w.tabs.map(t => `<button type="button" class="ow-tab" role="tab" data-tab="${esc(t.id)}" aria-selected="${t.id === w.tab}">${t.icon || ''}${esc(t.label)}${t.badge ? `<span class="ow-badge">${esc(t.badge)}</span>` : ''}</button>`).join('')}</nav>` : '')
         + '<div class="ow-win-body"></div>' + (foot ? '<footer class="ow-win-foot"></footer>' : '');

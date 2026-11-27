@@ -1,5 +1,5 @@
 {
-  "_doc": "The arena's placed things in data/placements.json's format, plus `arena`: the numbers js/world/arena-place.js builds the arena from (walls and colliders, gates, seats, torches, banners, the champions' balcony) — the server's walls and the drawn ones come from that one layout (lessons rule 22). Angles: 0 = south (+z), pi/2 = east, pi = north. Radii in metres from `centre`.",
+  "_doc": "The arena's placed things in data/placements.json's format, plus `arena`: the numbers js/world/arena-place.js builds the arena from (walls and colliders, gates, seats, torches, banners, the champions' balcony) — the server's walls and the drawn ones come from that one layout (lessons rule 22). Angles: 0 = south (+z), pi/2 = east, pi = north. Radii in metres from `centre`. A prop with `reward: true` is a reward-chest spot (one per `chestSpots` entry): drawn hidden, shown only while YOUR own unopened reward chest stands there (js/client/arena-ui.js) — every hero sees only their own chests.",
   "version": 1,
   "arena": {
     "centre": [0, 0],
@@ -25,10 +25,10 @@
   "buildings": [],
   "props": [
     { "art": "wanted-board", "at": [11, 104], "facing": -2.6, "r": 1, "name": "the Bracket Board" },
-    { "art": "chest-epic", "at": [15, 106], "facing": -2.4, "r": 0.6 },
-    { "art": "chest-epic", "at": [18, 109], "facing": -2.4, "r": 0.6 },
-    { "art": "chest-epic", "at": [21, 112], "facing": -2.4, "r": 0.6 },
-    { "art": "chest-epic", "at": [24, 115], "facing": -2.4, "r": 0.6 },
+    { "art": "chest-epic", "at": [15, 106], "facing": -2.4, "r": 0.6, "reward": true, "walk": true },
+    { "art": "chest-epic", "at": [18, 109], "facing": -2.4, "r": 0.6, "reward": true, "walk": true },
+    { "art": "chest-epic", "at": [21, 112], "facing": -2.4, "r": 0.6, "reward": true, "walk": true },
+    { "art": "chest-epic", "at": [24, 115], "facing": -2.4, "r": 0.6, "reward": true, "walk": true },
     { "art": "weapon-rack", "at": [-17, 125], "facing": 1.57, "r": 0.9 },
     { "art": "barrel", "at": [17, 124], "facing": 0.4, "r": 0.5 },
     { "art": "barrel", "at": [18, 132], "facing": 1.1, "r": 0.5 },

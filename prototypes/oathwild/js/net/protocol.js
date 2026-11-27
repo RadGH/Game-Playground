@@ -52,7 +52,8 @@ export const UF = Object.freeze({ downed: 1, mounted: 2, sneaking: 8, channel: 1
 // Window actions (act.a) and the fields each may carry: [name, type, max]
 const S = 'string', N = 'number', B = 'boolean', A = 'array', O = 'object';
 export const ACTS = {
-  'loot-open': [['id', S, 64]], 'loot-take': [['id', S, 64], ['item', S, 64]], 'loot-gold': [['id', S, 64]], 'loot-all': [['id', S, 64]], 'loot-close': [['id', S, 64]],
+  'loot-open': [['id', S, 64]], 'loot-take': [['id', S, 64], ['item', S, 64], ['from', S, 64]],   // from: the body of an area-loot window the item lies in (owner report #139: without it every Take was dropped as a bad frame)
+  'loot-gold': [['id', S, 64]], 'loot-all': [['id', S, 64]], 'loot-close': [['id', S, 64]],
   chest: [['id', S, 64]], pick: [['id', S, 64]], use: [['id', S, 64]],
   talk: [['npc', S, 64]], choose: [['npc', S, 64], ['option', S, 96], ['pick', N]],
   levelup: [['cls', S, 32], ['path', S, 32], ['spend', A, 12], ['attr', S, 4]],

@@ -25,43 +25,58 @@ export async function createArenaView({ scene, L, quality = 'medium' }) {
   const parts = [];
   const C = L.centre;
   const polar = (a, r) => [C[0] + Math.sin(a) * r, C[1] + Math.cos(a) * r];
+  // No two faces in one plane (owner report #145, z-fighting by the Heroes' Gate): a ring of straight boxes is drawn
+  // MITRED — each box exactly as wide as the polygon side at its OUTERMOST face (rOut · tan(da/2) each way), so
+  // neighbours meet edge to edge there and every other overlap is buried inside the neighbour. The server's colliders
+  // (arena-place.js ring: r·sin(da/2) + 0.12) overlap on purpose so nobody slips between them; the drawing must not
+  // copy that overlap, or two differently painted faces cross at a 3° angle at every joint and flicker. Pieces that
+  // frame or cap another (pillars, arches, lintels) stand ~0.1 m proud of it instead of sharing its face.
+  const ringDa = (r, piece) => 2 * Math.PI / Math.max(24, Math.ceil(2 * Math.PI * r / piece));   // = arena-place.js ring()
+  const mitre = (rOut, da) => 2 * rOut * Math.tan(da / 2) + 0.004;                                 // full side width (+4 mm: no hairline gap)
 
   // ---------------------------------------------------------------- the podium wall round the sand, with a coping
   const W = cfg.wall;
   const angOff = (a, b) => { let d = a - b; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return Math.abs(d); };
   const gateAngles = [...L.gates, L.champGate].map(g => g.angle);
+  const daIn = ringDa(W.r, 4);
   for (const b of L.ring.inner) {
     // (the drawn wall opens at each gate: the gate's dark doors stand in the gap; the server's wall stays whole there)
     if (gateAngles.some(a => angOff(b.facing, a) < (cfg.gateWidth / 2) / W.r)) continue;
-    parts.push(box(b.hw * 2, W.height + 2, b.hd * 2, [b.x, y0 + W.height / 2 - 1, b.z], b.facing, 'stone', STONE));
-    parts.push(box(b.hw * 2 + 0.1, 0.35, b.hd * 2 + 0.5, [b.x, y0 + W.height + 0.17, b.z], b.facing, 'fieldstone', WARM));
+    parts.push(box(mitre(W.r + b.hd, daIn), W.height + 2, b.hd * 2, [b.x, y0 + W.height / 2 - 1, b.z], b.facing, 'stone', STONE));
+    parts.push(box(mitre(W.r + b.hd + 0.25, daIn), 0.35, b.hd * 2 + 0.5, [b.x, y0 + W.height + 0.17, b.z], b.facing, 'fieldstone', WARM));
   }
   // ---------------------------------------------------------------- the tiers (stepped, round the whole bowl but the passage)
   const HG = { ...L.heroGate, width: cfg.heroGate.width }, gapHalf = a => { let d = a - HG.angle; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return Math.abs(d); };
   for (const [i, t] of L.tiers.entries()) {
     const r = (t.r0 + t.r1) / 2, depth = t.r1 - t.r0 + 0.05, n = Math.ceil(2 * Math.PI * r / 4), da = 2 * Math.PI / n;
+    const bench = depth * 0.5, benchAt = depth * 0.2;
     const top = y0 + t.y + 0.55, h = top - (y0 - 1);
     for (let k = 0; k < n; k++) {
       const a = -Math.PI + (k + 0.5) * da;
       if (gapHalf(a) < (HG.width / 2 + 0.6) / r + da / 2) continue;
       const [x, z] = polar(a, r);
-      parts.push(box(2 * r * Math.sin(da / 2) + 0.08, h, depth, [x, y0 - 1 + h / 2, z], a, 'stone', i % 2 ? STONE : '#cfc6b6'));
-      parts.push(box(2 * r * Math.sin(da / 2) + 0.08, 0.12, depth * 0.5, [x + Math.sin(a) * depth * 0.2, top + 0.06, z + Math.cos(a) * depth * 0.2], a, 'planks', '#b08a5a'));   // the bench
+      parts.push(box(mitre(r + depth / 2, da), h, depth, [x, y0 - 1 + h / 2, z], a, 'stone', i % 2 ? STONE : '#cfc6b6'));
+      parts.push(box(mitre(r + benchAt + bench / 2, da), 0.12, bench, [x + Math.sin(a) * benchAt, top + 0.06, z + Math.cos(a) * benchAt], a, 'planks', '#b08a5a'));   // the bench
     }
   }
   // ---------------------------------------------------------------- the outer wall: buttresses, battlements
-  const O = cfg.outer;
+  const O = cfg.outer, daOut = ringDa(O.r, 5);
   L.ring.outer.forEach((b, i) => {
-    parts.push(box(b.hw * 2, O.height + 4, b.hd * 2, [b.x, y0 + O.height / 2 - 2, b.z], b.facing, i % 2 ? 'stone' : 'fieldstone', i % 2 ? STONE : '#cbc2b2'));
-    if (i % 2 === 0) { const [x, z] = polar(b.facing, O.r + O.thick / 2 + 0.8); parts.push(box(1.6, O.height + 4, 1.4, [x, y0 + O.height / 2 - 2, z], b.facing, 'fieldstone', '#bfb6a6')); }
+    // (the stone and fieldstone segments alternate: the stone ones stand 3 cm taller so their tops never share a plane)
+    const hgt = O.height + 4 + (i % 2) * 0.03;
+    parts.push(box(mitre(O.r + b.hd, daOut), hgt, b.hd * 2, [b.x, y0 - 2 + hgt / 2, b.z], b.facing, i % 2 ? 'stone' : 'fieldstone', i % 2 ? STONE : '#cbc2b2'));
+    // (the buttress bites 0.1 m into the wall; it used to stand 0.1 m off it)
+    if (i % 2 === 0) { const [x, z] = polar(b.facing, O.r + O.thick / 2 + 0.6); parts.push(box(1.6, O.height + 4, 1.4, [x, y0 + O.height / 2 - 2, z], b.facing, 'fieldstone', '#bfb6a6')); }
     if (i % 2) { const [x, z] = polar(b.facing, O.r + 0.4); parts.push(box(b.hw * 1.1, 1.4, b.hd * 2 + 0.3, [x, y0 + O.height + 0.7, z], b.facing, 'stone', STONE)); }
   });
   // ---------------------------------------------------------------- the Heroes' Gate: the passage walls and two arches
   for (const b of L.ring.passage) parts.push(box(b.hw * 2, cfg.wall.height + 6, b.hd * 2, [b.x, y0 + (cfg.wall.height + 6) / 2 - 1, b.z], b.facing, 'stone', STONE));
   for (const rr of [cfg.wall.r, O.r]) {
+    // (the arch is 3.0 deep over 2.8-deep pillars over the passage walls' ends, and 0.1 m above the pillars' tops; the
+    // pillars stand 0.12 m proud of the passage walls' inner faces — they shared that plane: report #145)
     const [x, z] = polar(HG.angle, rr), hgt = rr === O.r ? O.height : W.height + 4;
-    parts.push(box(HG.width + 3, 2.2, 2.6, [x, y0 + hgt - 1.1 + (rr === O.r ? 0 : 1.5), z], HG.angle, 'fieldstone', WARM));
-    for (const s of [-1, 1]) { const px = x + Math.cos(HG.angle) * (HG.width / 2 + 0.9) * s, pz = z - Math.sin(HG.angle) * (HG.width / 2 + 0.9) * s; parts.push(box(1.8, hgt + 1, 2.8, [px, y0 + (hgt + 1) / 2 - 1, pz], HG.angle, 'fieldstone', '#cbc2b2')); }
+    parts.push(box(HG.width + 3, 2.2, 3.0, [x, y0 + hgt - 1.1 + (rr === O.r ? 0.1 : 1.5), z], HG.angle, 'fieldstone', WARM));
+    for (const s of [-1, 1]) { const px = x + Math.cos(HG.angle) * (HG.width / 2 + 0.78) * s, pz = z - Math.sin(HG.angle) * (HG.width / 2 + 0.78) * s; parts.push(box(1.8, hgt + 1, 2.8, [px, y0 + (hgt + 1) / 2 - 1, pz], HG.angle, 'fieldstone', '#cbc2b2')); }
   }
   // ---------------------------------------------------------------- the monster gates + the champions' gate: recess, pillars, lintel
   const gates = [...L.gates, L.champGate];
@@ -70,7 +85,7 @@ export async function createArenaView({ scene, L, quality = 'medium' }) {
     const [x, z] = polar(g.angle, cfg.wall.r - 0.05), rot = g.angle;
     parts.push(box(gw + 0.4, W.height + 2, 0.4, [x + Math.sin(g.angle) * 0.9, y0 + W.height / 2, z + Math.cos(g.angle) * 0.9], rot, 'planks', '#3a2e24'));   // the dark doors behind
     for (const s of [-1, 1]) { const px = x + Math.cos(g.angle) * (gw / 2 + 0.6) * s, pz = z - Math.sin(g.angle) * (gw / 2 + 0.6) * s; parts.push(box(1.3, W.height + 2.6, 2.4, [px, y0 + (W.height + 2.6) / 2 - 1, pz], rot, 'fieldstone', g.kind === 'champion' ? '#d9c060' : '#cbc2b2')); }
-    parts.push(box(gw + 2.6, 1.3, 2.4, [x, y0 + W.height + 0.9, z], rot, 'fieldstone', g.kind === 'champion' ? '#d9c060' : WARM));
+    parts.push(box(gw + 2.6, 1.3, 2.6, [x, y0 + W.height + 0.9, z], rot, 'fieldstone', g.kind === 'champion' ? '#d9c060' : WARM));   // (2.6 deep over 2.4-deep pillars: their faces no longer share a plane)
     // a shield over the gate in the gate's banner colour
     parts.push(box(1.5, 1.8, 0.25, [x - Math.sin(g.angle) * 1.3, y0 + W.height + 1.8, z - Math.cos(g.angle) * 1.3], rot, 'paint', g.kind === 'champion' ? '#c9a03a' : '#8c2a2a'));
   }

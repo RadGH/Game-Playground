@@ -92,7 +92,7 @@
   }
  },
  "base": {
-  "_doc": "The numbers every character starts from before attributes, classes and gear. hp 46 -> 66 (owner 2026-11-26: a new hero died to one level-2 boar; a flat start mostly helps the first levels). meleePerLevel: a hero's weapon damage grows this share a character level (2026-11-26 balance: abilities grew ~9x from level 1 to 10, the weapon ~3x).",
+  "_doc": "The numbers every character starts from before attributes, classes and gear. hp 46 -> 66 (owner 2026-11-26: a new hero died to one level-2 boar; a flat start mostly helps the first levels). meleePerLevel: a hero's weapon damage grows this share a character level (2026-11-26 balance: abilities grew ~9x from level 1 to 10, the weapon ~3x). 2026-11-27 (owner: gear upgrades like D2, report #142): 0.08 -> 0 — the item carries that growth now (loot-tables.json `power`), so the starting sword stays a level-1 sword.",
   "hp": 66,
   "mp": 20,
   "mpRegen": 1.2,
@@ -109,7 +109,7 @@
   "moveSpeed": 6.2,
   "stamina": 80,
   "staminaRegen": 9,
-  "meleePerLevel": 0.08
+  "meleePerLevel": 0
  },
  "schoolAttr": {
   "_doc": "Which attribute powers a spell, by its element. `weapon` spells use the weapon in your hands instead (melee or ranged power).",

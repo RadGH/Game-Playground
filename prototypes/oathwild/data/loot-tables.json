@@ -3,8 +3,24 @@
   "goldPerLevel": 0.3,
   "itemLevelSpread": [-1, 1],
   "profAffixChance": 0.05,
-  "rarityWeights": { "normal": 60, "magic": 30, "rare": 9, "legendary": 1 },
+  "rarityWeights": { "normal": 52, "magic": 34, "rare": 12, "legendary": 2 },
+  "_rarityDoc": "2026-11-27 (owner: gear upgrades like D2): 60/30/9/1 -> 52/34/12/2 — more blues and yellows now that rarity means real power (loot-tables `power.enhanced`).",
   "qualityWeights": { "low": 25, "medium": 50, "high": 20, "elite": 5 },
+  "power": {
+    "_doc": "Gear power (owner 2026-11-27: 'significantly better upgrades like d2'; report #142; docs/BRAINSTORM-2026-11-27-gear.md). js/rules/gear-power.js is the one reader; every item maker passes through it (js/rules/engine.js). A piece's damage / armour = its base x `quality` x (1 + perLevel x (item level - 1)) x (1 + enhanced). `enhanced` = D2's '+% enhanced damage': a share rolled per item inside its rarity's range (from the item's id, so it costs no loot roll). `quality` replaces Emberveil's 0.7-1.6 so a rare is never worse than the same white. `tiers`: the word put before the base name by item level and material (a Steel Longsword, Tanned Boots). `armourFromLevel`: a base starting with `prefix` below item level `from` is made as `else` instead (#143: plate from item level 4, where 13 Strength is usual). The hero's own weapon growth (attributes.json base.meleePerLevel) went to 0 the same day: the item carries it now.",
+    "perLevel": { "weapon": 0.12, "armour": 0.1 },
+    "quality": { "low": 0.9, "medium": 1, "mid": 1, "high": 1.1, "elite": 1.2, "exotic": 1.3 },
+    "enhanced": { "magic": [0.2, 0.4], "rare": [0.45, 0.75], "legendary": [0.8, 1.2], "unique": [1.0, 1.4], "set": [0.9, 1.3] },
+    "materialByTier": { "cloth": "cloth", "light": "leather", "medium": "metal", "heavy": "metal" },
+    "tiers": [
+      { "from": 1, "name": "Tier 1", "words": {} },
+      { "from": 4, "name": "Tier 2", "words": { "metal": "Steel", "leather": "Tanned", "cloth": "Woven", "arcane": "Carved" } },
+      { "from": 7, "name": "Tier 3", "words": { "metal": "Tempered", "leather": "Hardened", "cloth": "Silk", "arcane": "Runed" } },
+      { "from": 10, "name": "Tier 4", "words": { "metal": "Masterwork", "leather": "Studded", "cloth": "Enchanted", "arcane": "Gilded" } },
+      { "from": 15, "name": "Tier 5", "words": { "metal": "Champion", "leather": "Dragonhide", "cloth": "Royal", "arcane": "Royal" } }
+    ],
+    "armourFromLevel": [{ "prefix": "heavy_", "from": 4, "else": "medium_" }]
+  },
   "kinds": {
     "_doc": "Which Emberveil base keys can drop, by kind. Bases with minAct > 2 or dragon parts are left out of round 1.",
     "weapon": ["dagger", "sword", "longsword", "rapier", "wand", "scepter", "staff", "quarterstaff", "hammer", "warhammer", "battleaxe", "iron_mace", "sword2h", "axe2h", "halberd", "spear", "bow", "shortbow", "crossbow", "javelin", "orb", "tome"],

@@ -56,7 +56,10 @@ export function createArenaMode(api) {
   }
   function giveChest(P, r) {
     const list = ws.arena.chests[P.char.id] = ws.arena.chests[P.char.id] || [];
-    r.at = L.chestSpots[list.length % L.chestSpots.length];
+    // the first spot none of YOUR waiting chests stands on (owner report #140: by the count it reused a spot a chest still
+    // stood on once one was opened); more chests than spots share the last one and open one after another
+    const used = new Set(list.map(x => String(x.at)));
+    r.at = L.chestSpots.find(at => !used.has(String(at))) || L.chestSpots[L.chestSpots.length - 1];
     list.push(r);
     // the box reads straight from the saved reward (the same item objects), so a half-emptied chest saves as such
     const c = chestFor(P.char.id, r);
@@ -65,7 +68,7 @@ export function createArenaMode(api) {
   function chestView(P, c) {
     const s = c.shares[P.char.id] || { gold: 0, items: [] };
     const r = c.reward;
-    return { t: 'win', kind: 'arenaChest', id: c.id, at: c.at, name: r.title, bracket: r.bracket, champion: r.champion || null, first: !!r.first, gold: s.gold, items: s.items, newTitle: r.newTitle || null, xp: r.xp || 0, left: (ws.arena.chests[P.char.id] || []).length };
+    return { t: 'win', kind: 'arenaChest', id: c.id, at: c.at, name: r.title, bracket: r.bracket, champion: r.champion || null, first: !!r.first, gold: s.gold, items: s.items, newTitle: r.newTitle || null, xp: r.xp || 0, left: (ws.arena.chests[P.char.id] || []).filter(x => boxId(x) !== c.id).length };   // the OTHER chests still waiting
   }
   function syncSaved(c, charId) { const s = c.shares[charId]; c.reward.gold = s.gold; c.reward.items = s.items; }
 

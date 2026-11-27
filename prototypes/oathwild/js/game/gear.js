@@ -131,8 +131,9 @@ const PIECE = {
   head: { wanderer: 'hood_wanderer', trail: 'cap_trail', ironlink: 'coif_ironlink', bulwark: 'helm_bulwark' },
 };
 // fal.ai hero weapons (avatar-3d/fal round 3, 2026-11-24) are Tabard items 'fal:<id>'; the shortbow waits for the owner's
-// review (its string did not come through), so bows keep the horn bow
-const WEAPON = { sword: 'sword_arming', sword2h: 'sword_arming', dagger: 'sword_arming', axe: 'axe_halfmoon', axe2h: 'axe_halfmoon', hammer: 'fal:ow-warhammer', mace: 'mace_thornhead', staff: 'fal:ow-quarterstaff', polearm: 'fal:ow-halberd', spear: 'staff_oak', scepter: 'mace_thornhead', wand: 'staff_oak', bow: 'bow_horn', crossbow: 'bow_horn', javelin: 'staff_oak' };
+// review (its string did not come through), so bows keep the horn bow. Spears and javelins hold fal's leaf-bladed
+// 'guard-spear' (owner report #141: the plain oak staff read as a staff, not a spear)
+const WEAPON = { sword: 'sword_arming', sword2h: 'sword_arming', dagger: 'sword_arming', axe: 'axe_halfmoon', axe2h: 'axe_halfmoon', hammer: 'fal:ow-warhammer', mace: 'mace_thornhead', staff: 'fal:ow-quarterstaff', polearm: 'fal:ow-halberd', spear: 'fal:guard-spear', scepter: 'mace_thornhead', wand: 'staff_oak', bow: 'bow_horn', crossbow: 'bow_horn', javelin: 'fal:guard-spear' };
 const CASTER = { wand: 'fal:ow-wand', sceptre: 'fal:ow-sceptre', tome: 'fal:ow-tome', staff: 'staff_oak', pole: 'staff_oak' };
 const SHIELD = { buckler: 'shield_oakring', shield: 'shield_heater', kite_shield: 'shield_bluefield', tower_shield: 'shield_bastion', aegis_shield: 'shield_bastion', rune_aegis: 'shield_bastion' };
 

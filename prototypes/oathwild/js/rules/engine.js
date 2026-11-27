@@ -10,6 +10,7 @@
 import { Rpg, makeRng } from './farhold.js';
 import { buildCatalog } from './spells.js';
 import { finishCaster } from './casters.js';
+import { empower, armourKindFor } from './gear-power.js';
 
 const strip = o => Object.fromEntries(Object.entries(o || {}).filter(([k]) => !k.startsWith('_')));
 
@@ -32,8 +33,11 @@ export function createRules(data, { seed = 1 } = {}) {
   // leaves it with its element, its wand / tome / staff style or its off-hand rider (js/rules/casters.js).
   // `raw: true` skips that (a named caster sets its element and style first).
   const generate = rpg.loot.generate.bind(rpg.loot);
+  // gear power (js/rules/gear-power.js, owner 2026-11-27 "upgrades like d2"): item level grows the base, rarity adds
+  // enhanced damage / armour, and plate below its item level comes out as mail (#143) — on EVERY item, raw or not
   rpg.loot.generate = (baseKey, rarity, quality, opts = {}) => {
-    const it = generate(baseKey, rarity, quality, opts);
+    const key = opts.ilvl ? armourKindFor(rules, baseKey, opts.ilvl) : baseKey;
+    const it = empower(rules, generate(key, rarity, quality, opts));
     return it && !opts.raw ? finishCaster(rules, it) : it;
   };
   return rules;

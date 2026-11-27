@@ -366,6 +366,16 @@
     "from": 0.05
    }
   },
+  "fal:guard-spear": {
+   "slot": "mainhand",
+   "name": "Lantern Spear",
+   "fal": "guard-spear",
+   "_shrinkDoc": "Owner 2026-11-27: the spear head was twice too big (same as the mace). The collar + blade start ~0.48 m up the file (the fist is at 0): only that part is halved, the shaft keeps its length.",
+   "shrinkAbove": {
+    "k": 0.5,
+    "from": 0.48
+   }
+  },
   "fal:gob-cleaver": {
    "slot": "mainhand",
    "name": "Rusty Cleaver",

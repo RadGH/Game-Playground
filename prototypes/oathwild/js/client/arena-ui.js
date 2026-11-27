@@ -73,11 +73,23 @@ export function installArena(app) {
     banner.hidden = false; banner.classList.remove('go'); void banner.offsetWidth; banner.classList.add('go');
     clearTimeout(bannerTimer); bannerTimer = setTimeout(() => { if (banner) banner.hidden = true; }, 2600);
   }
+  // the reward chests by the board: the place has a chest at every spot, drawn hidden; only YOUR unopened chests show
+  // (owner report #140: four were drawn for everyone, one was real). Run every frame: the world view can be rebuilt.
+  let chestSig = '', chestSpots = null;
+  function syncChests() {
+    const spots = app.worldView?.rewardMeshes; if (!spots?.length) return;
+    const mine = placeOf(app) === 'arena' ? (S.view?.chests || []) : [];
+    const sig = `${spots.length}|${mine.map(c => c.at.join(',')).join(';')}`;
+    if (sig === chestSig && spots === chestSpots) return;
+    chestSig = sig; chestSpots = spots;
+    for (const s of spots) s.holder.visible = mine.some(c => Math.hypot(c.at[0] - s.x, c.at[1] - s.z) < 1);
+  }
   const gateName = id => S.view?.gates?.find(g => g.id === id)?.name || 'a gate';
   function draw() {
     if (!el) return;
     const v = S.view || { state: 'idle' };
     const chests = v.chests || [];
+    syncChests();
     if (v.state === 'idle' || !v.state) {
       el.dataset.state = 'idle';
       el.innerHTML = `<h4>${glyph('sword', 16)} The Arena</h4><p>${chests.length ? `<b class="ow-gold">${fmt(chests.length)} reward chest${chests.length > 1 ? 's' : ''}</b> by the board` : 'Pick a bracket at the board by the gate'}</p>`;
@@ -101,6 +113,7 @@ export function installArena(app) {
   // the edge markers (every frame): the gate of the next pack, and every enemy of the match off screen
   function frame() {
     raf = requestAnimationFrame(frame);
+    syncChests();
     if (!edge || !app.play?.screenOf) return;
     const v = S.view;
     const marks = [];

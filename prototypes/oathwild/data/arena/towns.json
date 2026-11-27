@@ -1,0 +1,18 @@
+{
+  "_doc": "The arena court as a small town (js/world/town.js planTowns, the open world's own planner and house kit): houses line Court Street and Banner Row; the court's people stand at their spots.",
+  "idles": { "shopkeeper": [["idle", 4, 7], ["PickUp_Table", 2.2, 2.2], ["idle", 3, 5], ["talk", 4, 6], ["Interact", 1.6, 1.6]], "smith": [["Interact", 1.4, 1.4], ["Interact", 1.4, 1.4], ["Interact", 1.4, 1.4], ["idle", 2, 3], ["Fixing_Kneeling", 5, 7], ["idle", 2, 3]], "trainer": [["ready", 3, 5], ["attack", 1.2, 1.2], ["ready", 2, 3], ["attack", 1.2, 1.2], ["idle", 3, 5]], "elder": [["idle", 5, 8], ["talk", 3, 5]] },
+  "arena_court": {
+    "seed": 5150, "radius": 52, "streets": ["court_street", "court_cross"],
+    "styles": [["stone", 3], ["timber", 2], ["plaster", 2]], "fences": [["stone", 2], ["wood", 2]], "villagers": 6, "lampEvery": 14,
+    "rules": { "widths": [[2, 3], [3, 2]], "depths": [[2, 2], [3, 1]], "storeys": [[2, 3], [3, 1]], "gapEvery": [3, 4], "outskirts": 0.6 },
+    "streetRules": { "court_street": { "shops": 0.6, "setback": 0.4 } },
+    "keep": [[0, 104, 12], [14, 112, 6], [-9, 112, 6]],
+    "spots": [
+      { "npc": "arena_master", "at": [7, 110], "face": 3.6, "idle": "elder" },
+      { "npc": "arena_smith", "at": [-13, 128], "face": 1.57, "idle": "smith" },
+      { "npc": "arena_goods", "at": [13, 128], "face": -1.57, "idle": "shopkeeper" },
+      { "npc": "arena_trainer", "at": [-8, 118], "face": 1.2, "idle": "trainer" }
+    ],
+    "stops": [{ "at": [4, 140], "kind": "square", "face": 3.14 }, { "at": [-4, 160], "kind": "square", "face": 0 }]
+  }
+}

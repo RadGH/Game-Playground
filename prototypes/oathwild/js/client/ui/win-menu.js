@@ -31,6 +31,8 @@ export function open(app, opts = {}) {
           ${row('controls', glyph(dev === 'pad' ? 'pad' : 'keyboard', 20), 'Controls')}
           ${row('news', glyph('news', 20), "What's new", app.news?.unread ? '<span class="ow-menu-dot"></span>' : '')}
           ${row('report', uiIcon('feedback', 20), 'Report a bug')}
+          ${where === 'play' ? row('camera', glyph('eye', 20), 'Tune camera') : ''}
+          ${where === 'play' ? row('lag', glyph('refresh', 20), 'Send a lag report') : ''}
           ${row('credits', glyph('info', 20), 'Credits')}
           ${row('account', glyph('people', 20), user ? `Signed in as ${user.username || user.name || 'you'} — sign out` : 'Sign in (optional)')}
           ${where === 'play' ? row('leave', glyph('door', 20), 'Leave the world') : ''}
@@ -45,6 +47,8 @@ export function open(app, opts = {}) {
     if (m === 'controls') return app.openWindow('controls');
     if (m === 'news') return app.news?.open();
     if (m === 'report') { w.close(); return app.openWindow('report'); }
+    if (m === 'lag') { w.close(); return app.openWindow('lag'); }
+    if (m === 'camera') { w.close(); return app.cameraTuner?.open(); }
     if (m === 'credits') { credits = credits || createCredits({ game: 'oathwild', made: 'Oathwild by Radley Sustaire.' }); return credits.open(); }
     if (m === 'account') {
       const user = await account.user().catch(() => null);

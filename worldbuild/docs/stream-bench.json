@@ -1,0 +1,376 @@
+{
+ "when": "2026-11-27",
+ "brief": "oathwild-4k",
+ "seed": 4242,
+ "quality": "medium",
+ "pageBuildMs": 28571,
+ "stagesInBrowser": [
+  {
+   "id": "brief",
+   "label": "Brief",
+   "ms": 930
+  },
+  {
+   "id": "shape",
+   "label": "Shape",
+   "ms": 5351
+  },
+  {
+   "id": "regions",
+   "label": "Regions & biomes",
+   "ms": 952
+  },
+  {
+   "id": "places",
+   "label": "Places",
+   "ms": 2306
+  },
+  {
+   "id": "roads",
+   "label": "Roads",
+   "ms": 7842
+  },
+  {
+   "id": "detail",
+   "label": "Detail",
+   "ms": 2535
+  },
+  {
+   "id": "checks",
+   "label": "Checks",
+   "ms": 7935
+  },
+  {
+   "id": "edits",
+   "label": "Hand fixes",
+   "ms": 42
+  }
+ ],
+ "checksPass": true,
+ "files": {
+  "tiles": 289,
+  "totalMB": 36.9,
+  "avgKB": 125,
+  "decodeMsAvg": 0.11,
+  "decodeMsMax": 3.17
+ },
+ "server": {
+  "buildMs": 29195,
+  "heapMB": 426,
+  "chunk": {
+   "256": {
+    "msAvg": 1.4,
+    "msMax": 3.9,
+    "KB": 136
+   },
+   "512": {
+    "msAvg": 7,
+    "msMax": 12,
+    "KB": 136
+   },
+   "1024": {
+    "msAvg": 4.6,
+    "msMax": 6.4,
+    "KB": 136
+   },
+   "2048": {
+    "msAvg": 1.6,
+    "msMax": 2,
+    "KB": 136
+   },
+   "4096": {
+    "msAvg": 1.1,
+    "msMax": 1.2,
+    "KB": 136
+   },
+   "8192": {
+    "msAvg": 1.1,
+    "msMax": 1.2,
+    "KB": 136
+   }
+  },
+  "tileMsAvg": 1,
+  "tileMsMax": 2,
+  "towns": [
+   {
+    "id": "harrowby",
+    "houses": 44,
+    "ms": 1
+   },
+   {
+    "id": "wheatley",
+    "houses": 29,
+    "ms": 0
+   },
+   {
+    "id": "harrowfield",
+    "houses": 12,
+    "ms": 0
+   },
+   {
+    "id": "fellwick",
+    "houses": 28,
+    "ms": 0
+   },
+   {
+    "id": "fellhold",
+    "houses": 11,
+    "ms": 0
+   },
+   {
+    "id": "oakhollow",
+    "houses": 28,
+    "ms": 0
+   }
+  ]
+ },
+ "spots": [
+  {
+   "name": "Pinned town (Larkford)",
+   "at": [
+    -192,
+    74
+   ],
+   "settled": false,
+   "settleMs": 91650,
+   "chunksDrawn": 71,
+   "chunksCached": 108,
+   "chunkMB": 60.2,
+   "bySize": {
+    "256": 32,
+    "512": 32,
+    "1024": 6,
+    "4096": 1
+   },
+   "waiting": 10,
+   "chunkMs": {
+    "avg": 6424,
+    "max": 48194,
+    "nearAvg": 3231,
+    "nearMax": 12288
+   },
+   "buildMs": {
+    "avg": 5,
+    "max": 40
+   },
+   "tiles": 35,
+   "tileMs": {
+    "avg": 68,
+    "max": 183
+   },
+   "trees": 2440,
+   "treeMeshes": 212,
+   "treeMB": 0.3,
+   "towns": 4,
+   "townMs": 1197,
+   "bridges": 4,
+   "groundTextureMB": 12.6,
+   "note": "",
+   "drawCalls": 118,
+   "triangles": 1676567,
+   "fps": 0,
+   "heapMB": 164,
+   "gpuGeometries": 99,
+   "gpuTextures": 54,
+   "height": 36
+  },
+  {
+   "name": "New town (Harrowby)",
+   "at": [
+    918,
+    148
+   ],
+   "settled": false,
+   "settleMs": 91619,
+   "chunksDrawn": 66,
+   "chunksCached": 146,
+   "chunkMB": 82.9,
+   "bySize": {
+    "256": 32,
+    "512": 26,
+    "1024": 7,
+    "4096": 1
+   },
+   "waiting": 0,
+   "chunkMs": {
+    "avg": 11798,
+    "max": 180092,
+    "nearAvg": 7887,
+    "nearMax": 28527
+   },
+   "buildMs": {
+    "avg": 5,
+    "max": 40
+   },
+   "tiles": 37,
+   "tileMs": {
+    "avg": 1451,
+    "max": 22587
+   },
+   "trees": 1101,
+   "treeMeshes": 75,
+   "treeMB": 0.1,
+   "towns": 5,
+   "townMs": 1196,
+   "bridges": 5,
+   "groundTextureMB": 12.6,
+   "note": "",
+   "drawCalls": 111,
+   "triangles": 1332286,
+   "fps": 0,
+   "heapMB": 196,
+   "gpuGeometries": 169,
+   "gpuTextures": 83,
+   "height": 35
+  },
+  {
+   "name": "Deep woods",
+   "at": [
+    1535,
+    -476
+   ],
+   "settled": false,
+   "settleMs": 91619,
+   "chunksDrawn": 66,
+   "chunksCached": 173,
+   "chunkMB": 97.4,
+   "bySize": {
+    "256": 18,
+    "512": 35,
+    "1024": 11,
+    "2048": 2
+   },
+   "waiting": 12,
+   "chunkMs": {
+    "avg": 11970,
+    "max": 180092,
+    "nearAvg": 8881,
+    "nearMax": 28527
+   },
+   "buildMs": {
+    "avg": 5,
+    "max": 40
+   },
+   "tiles": 33,
+   "tileMs": {
+    "avg": 1109,
+    "max": 22587
+   },
+   "trees": 209,
+   "treeMeshes": 17,
+   "treeMB": 0,
+   "towns": 4,
+   "townMs": 335,
+   "bridges": 2,
+   "groundTextureMB": 12.6,
+   "note": "",
+   "drawCalls": 47,
+   "triangles": 743752,
+   "fps": 0,
+   "heapMB": 218,
+   "gpuGeometries": 179,
+   "gpuTextures": 99,
+   "height": 30
+  },
+  {
+   "name": "Mountains",
+   "at": [
+    -400,
+    -1950
+   ],
+   "settled": false,
+   "settleMs": 91507,
+   "chunksDrawn": 74,
+   "chunksCached": 236,
+   "chunkMB": 126.1,
+   "bySize": {
+    "256": 40,
+    "512": 18,
+    "1024": 14,
+    "2048": 2
+   },
+   "waiting": 3,
+   "chunkMs": {
+    "avg": 13812,
+    "max": 180092,
+    "nearAvg": 8951,
+    "nearMax": 28527
+   },
+   "buildMs": {
+    "avg": 4,
+    "max": 40
+   },
+   "tiles": 34,
+   "tileMs": {
+    "avg": 792,
+    "max": 22587
+   },
+   "trees": 0,
+   "treeMeshes": 0,
+   "treeMB": 0,
+   "towns": 0,
+   "townMs": 0,
+   "bridges": 4,
+   "groundTextureMB": 12.6,
+   "note": "",
+   "drawCalls": 14,
+   "triangles": 409986,
+   "fps": 0,
+   "heapMB": 202,
+   "gpuGeometries": 173,
+   "gpuTextures": 112,
+   "height": 60
+  },
+  {
+   "name": "High over the middle",
+   "at": [
+    200,
+    -400
+   ],
+   "settled": true,
+   "settleMs": 65667,
+   "chunksDrawn": 109,
+   "chunksCached": 259,
+   "chunkMB": 137.6,
+   "bySize": {
+    "256": 56,
+    "512": 42,
+    "1024": 11
+   },
+   "waiting": 0,
+   "chunkMs": {
+    "avg": 14495,
+    "max": 180092,
+    "nearAvg": 8558,
+    "nearMax": 28527
+   },
+   "buildMs": {
+    "avg": 4,
+    "max": 40
+   },
+   "tiles": 37,
+   "tileMs": {
+    "avg": 609,
+    "max": 22587
+   },
+   "trees": 3028,
+   "treeMeshes": 287,
+   "treeMB": 0.4,
+   "towns": 5,
+   "townMs": 378,
+   "bridges": 4,
+   "groundTextureMB": 12.6,
+   "note": "",
+   "drawCalls": 116,
+   "triangles": 1419918,
+   "fps": 0,
+   "heapMB": 260,
+   "gpuGeometries": 221,
+   "gpuTextures": 141,
+   "height": 700
+  }
+ ],
+ "errors": [
+  "screenshot: page.screenshot: Timeout 90000ms exceeded."
+ ]
+}

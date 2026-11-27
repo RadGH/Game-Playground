@@ -1,0 +1,144 @@
+{
+  "_doc": "House Kit styles (housekit/README.md). Read by js/describe.js — every knob here changes a house (tests/describe.test.mjs moves each one to an odd value and checks the pieces change, lessons rule 32). Sizes in metres; one kit cell = `cell` metres wide and one storey tall. Colours are tints multiplied over the painted atlas textures (white = the painting as it is). `looks` names an atlas texture (data/atlas.json) and how it is laid on: 'wrap' repeats both ways at the texture's metres, 'band' lays one beam or plank across the face (painted borders on its edges).",
+  "cell": 3,
+  "wallOut": -1,
+  "glassTint": "#a4b8b4",
+  "_wallOut": "which side of a Kenney wall piece faces the street: -1 = its -x side (the side its shutters and sills stand out on)",
+  "looks": {
+    "plaster": { "tex": "plaster" },
+    "timber": { "tex": "timber", "mode": "band", "maxBand": 0.55 },
+    "planks": { "tex": "planks" },
+    "stone": { "tex": "stone" },
+    "fieldstone": { "tex": "fieldstone" },
+    "shingles": { "tex": "shingles" },
+    "slate": { "tex": "slate" },
+    "clay": { "tex": "clay" },
+    "thatch": { "tex": "thatch" },
+    "cobbles": { "tex": "cobbles" },
+    "door": { "tex": "door" },
+    "glass": { "tex": "window" },
+    "ivy": { "tex": "ivy" },
+    "flowers": { "tex": "flowers" },
+    "sign": { "tex": "signs", "mode": "fit" },
+    "iron": { "tex": "iron" },
+    "cloth": { "tex": "cloth" },
+    "paint": { "tex": "paintwood" },
+    "soil": { "tex": "fieldstone" },
+    "water": { "tex": "window" }
+  },
+  "families": {
+    "_doc": "Kenney Fantasy Town wall pieces per storey (picked at random per cell), and which part of each piece is which role. `cells` maps the kit palette square a triangle samples ('col,row') to a role; 'trim' = anything standing out of the wall face (shutters, sills). Sides and backs are mostly `plain` (cost; the chance is quality.*.plainOdds).",
+    "timber": { "ground": ["wall", "wall-window-shutters", "wall-window-glass", "wall"], "upper": ["wall-detail-cross", "wall-window-shutters", "wall-detail-diagonal", "wall-window-shutters", "wall-detail-horizontal"], "door": "wall-door", "plain": "wall", "small": "wall-window-small", "cells": { "3,2": "wall", "9,3": "frame", "11,3": "door", "15,3": "frame", "trim": "shutter" } },
+    "stone": { "ground": ["wall", "wall-window-stone", "wall", "wall-window-small"], "upper": ["wall-window-stone", "wall", "wall-window-round", "wall-window-stone"], "door": "wall-door", "plain": "wall", "small": "wall-window-small", "cells": { "3,2": "wall", "9,3": "frame", "11,3": "door", "15,3": "quoin", "trim": "shutter" } },
+    "plaster": { "ground": ["wall-window-glass", "wall", "wall-window-shutters"], "upper": ["wall-window-shutters", "wall", "wall-window-glass", "wall-window-shutters"], "door": "wall-door", "plain": "wall", "small": "wall-window-small", "cells": { "3,2": "wall", "9,3": "frame", "11,3": "door", "15,3": "quoin", "trim": "shutter" } },
+    "wood": { "ground": ["wall-wood", "wall-wood-window-small", "wall-wood-window-shutters"], "upper": ["wall-wood-window-shutters", "wall-wood-detail-cross", "wall-wood"], "door": "wall-wood-door", "plain": "wall-wood", "small": "wall-wood-window-small", "cells": { "3,2": "wall", "9,3": "frame", "11,3": "door", "trim": "shutter" } }
+  },
+  "lowSwap": { "wall-window-shutters": "wall-window-small", "wall-wood-window-shutters": "wall-wood-window-small", "wall-window-round": "wall-window-small", "wall-window-glass": "wall-window-small" },
+  "windowGlass": {
+    "_doc": "the opening of each window piece in the piece's own units (z across, y up; 1 = one cell), glazed with leaded glass just inside the wall",
+    "wall-window-shutters": [0.15, 0.31, 0.69], "wall-window-glass": [0.1, 0.31, 0.69], "wall-window-small": [0.06, 0.31, 0.69],
+    "wall-window-stone": [0.06, 0.31, 0.69], "wall-window-round": [0.06, 0.31, 0.69], "wall-wood-window-small": [0.08, 0.31, 0.69],
+    "wall-wood-window-shutters": [0.15, 0.31, 0.69]
+  },
+  "styles": {
+    "timber": {
+      "label": "Half-timbered", "family": "timber",
+      "wall": "plaster", "frame": "timber", "frameTint": "#eedccb", "quoin": "timber", "quoinTint": "#dcc4ac", "gable": "plaster", "gableBeams": true,
+      "plasters": ["#f2e6c9", "#e6c98f", "#efd9cc", "#d9d4c8"],
+      "doorTints": ["#8a4a32", "#5d6b3c", "#6a4a7a", "#7a5232"],
+      "shutters": ["#4f7a4c", "#3f5f86", "#8a3c30", "#a07a3a", "#5a7a7a"],
+      "base": "fieldstone", "baseTint": "#cfc6b8", "baseCourse": 0.55,
+      "roofs": ["clay", "slate", "shingles", "thatch"],
+      "deco": { "windowBox": 0.45, "shutters": 1, "corners": 1, "floorBeams": 1, "gableBraces": 1, "ivy": 0, "doorLantern": 0.6, "rainBarrel": 0.55, "woodpile": 0.45, "dormer": 0.5, "balcony": 0.3, "porch": 0.25, "canopy": 0.55, "finials": 0.7, "chimneyPots": 0.8, "doorFrame": 0.4 }
+    },
+    "stone": {
+      "label": "Stone", "family": "stone",
+      "wall": "stone", "frame": "stone", "frameTint": "#b8afa3", "quoin": "stone", "quoinTint": "#ddd4c6", "gable": "stone", "gableBeams": false,
+      "plasters": ["#e8e2d6", "#d8cbb4", "#cfd3d6", "#e0d0bc"],
+      "doorTints": ["#7a4a2e", "#4f5f3a", "#5a4060", "#6a3a2a"],
+      "shutters": ["#3f5f86", "#4f7a4c", "#7a3a30", "#6a6a3a"],
+      "base": "fieldstone", "baseTint": "#a9a196", "baseCourse": 0.7,
+      "roofs": ["slate", "slate", "shingles", "clay"],
+      "deco": { "windowBox": 0.35, "shutters": 1, "corners": 0.5, "floorBeams": 0, "gableBraces": 0, "ivy": 0.65, "doorLantern": 0.7, "rainBarrel": 0.5, "woodpile": 0.5, "dormer": 0.45, "balcony": 0.15, "porch": 0.1, "canopy": 0.35, "finials": 0.8, "chimneyPots": 0.9, "doorFrame": 0.9 }
+    },
+    "plaster": {
+      "label": "Plastered", "family": "plaster",
+      "wall": "plaster", "frame": "timber", "frameTint": "#f2e2cc", "quoin": "stone", "quoinTint": "#d2c9ba", "gable": "plaster", "gableBeams": false,
+      "plasters": ["#f4ecda", "#e9c58a", "#f0d2c4", "#d2dbd6"],
+      "doorTints": ["#3f5f86", "#8a4a32", "#5d6b3c", "#7a5232"],
+      "shutters": ["#3f6f9a", "#5a8a52", "#9a4a3a", "#c09a4a", "#6a5a8a"],
+      "base": "stone", "baseTint": "#d8d0c2", "baseCourse": 0.45,
+      "roofs": ["clay", "slate", "shingles", "thatch"],
+      "deco": { "windowBox": 0.6, "shutters": 1, "corners": 0, "floorBeams": 0.5, "gableBraces": 0, "ivy": 0.15, "doorLantern": 0.5, "rainBarrel": 0.5, "woodpile": 0.35, "dormer": 0.4, "balcony": 0.4, "porch": 0.3, "canopy": 0.6, "finials": 0.5, "chimneyPots": 0.8, "doorFrame": 0.7 }
+    },
+    "wood": {
+      "label": "Wooden cabin", "family": "wood",
+      "wall": "planks", "frame": "timber", "frameTint": "#dcc6ae", "quoin": "timber", "quoinTint": "#c8ae94", "gable": "planks", "gableBeams": true,
+      "plasters": ["#c89a6a", "#b0845a", "#d0a878", "#a07850"],
+      "doorTints": ["#6a3a24", "#4a5a30", "#5a3a2a", "#6a4a30"],
+      "shutters": ["#4f7a4c", "#8a3c30", "#3f5f86", "#a07a3a"],
+      "base": "fieldstone", "baseTint": "#b8b0a2", "baseCourse": 0.5,
+      "roofs": ["shingles", "thatch", "shingles", "slate"],
+      "deco": { "windowBox": 0.3, "shutters": 1, "corners": 1, "floorBeams": 1, "gableBraces": 1, "ivy": 0.1, "doorLantern": 0.4, "rainBarrel": 0.6, "woodpile": 0.8, "dormer": 0.25, "balcony": 0.2, "porch": 0.5, "canopy": 0.4, "finials": 0.4, "chimneyPots": 0.6, "doorFrame": 0.2 }
+    }
+  },
+  "roofs": {
+    "_doc": "Roof kinds. A plan house's `roof` number 0..3 picks from its style's `roofs` list. thick = slab thickness, eave = how far past the walls the eaves reach, gableOver = past the gable ends, pitch = rise / half span (min, max, by seed), ridge = what caps the ridge.",
+    "clay": { "label": "Clay tiles", "look": "clay", "tint": "#ecd4c4", "edge": ["timber", "#e4cdb4"], "under": "planks", "thick": 0.22, "eave": 0.45, "gableOver": 0.35, "pitch": [0.78, 1.02], "ridge": "roll", "ridgeLook": "clay", "ridgeTint": "#d9a088", "finial": true },
+    "slate": { "label": "Slate", "look": "slate", "tint": "#ffffff", "edge": ["timber", "#e4cdb4"], "under": "planks", "thick": 0.2, "eave": 0.4, "gableOver": 0.3, "pitch": [0.9, 1.15], "ridge": "roll", "ridgeLook": "slate", "ridgeTint": "#9aa2ae", "finial": true },
+    "shingles": { "label": "Wood shingles", "look": "shingles", "tint": "#ffffff", "edge": ["timber", "#e4cdb4"], "under": "planks", "thick": 0.22, "eave": 0.45, "gableOver": 0.35, "pitch": [0.8, 1.05], "ridge": "board", "ridgeLook": "timber", "ridgeTint": "#e0c8b0", "finial": false },
+    "thatch": { "label": "Thatch", "look": "thatch", "tint": "#ffffff", "edge": ["thatch", "#e8d8b8"], "under": "thatch", "thick": 0.5, "eave": 0.65, "gableOver": 0.45, "pitch": [0.95, 1.2], "ridge": "thick", "ridgeLook": "thatch", "ridgeTint": "#c9a865", "finial": false, "noDormers": false }
+  },
+  "jetty": { "depth": 0.5, "corbels": true },
+  "decoSizes": {
+    "_doc": "sizes of the decorations, metres",
+    "windowBox": { "w": 1.2, "h": 0.26, "d": 0.32, "drop": 0.12 },
+    "sign": { "arm": 0.95, "w": 0.6, "h": 0.8, "y": 2.95 },
+    "lantern": { "side": 0.95, "y": 2.0, "out": 0.3 },
+    "canopy": { "w": 1.9, "d": 0.8, "y": 2.45, "rise": 0.45 },
+    "balcony": { "w": 2.4, "d": 0.85, "rail": 0.95 },
+    "porch": { "depth": 1.2 },
+    "dormer": { "w": 1.3, "h": 1.15 },
+    "baseCourseOut": 0.05,
+    "corner": 0.3,
+    "floorBeam": 0.26
+  },
+  "trades": {
+    "_doc": "Shop trades: the sign emblem (atlas `signs` cell) each shows. A plan house with `shop` but no `trade` gets one from its seed.",
+    "smith": { "label": "Smith", "sign": "anvil" },
+    "alchemist": { "label": "Alchemist", "sign": "bottle" },
+    "baker": { "label": "Baker", "sign": "loaf" },
+    "inn": { "label": "Inn", "sign": "bed" },
+    "bowyer": { "label": "Bowyer", "sign": "bow" },
+    "armourer": { "label": "Armourer", "sign": "sword" },
+    "cobbler": { "label": "Cobbler", "sign": "boot" },
+    "tavern": { "label": "Tavern", "sign": "mug" }
+  },
+  "signCells": { "_doc": "the emblems painted on the atlas square `signs`, in order, and its grid [columns, rows] (must match tools/textures.json)", "items": ["anvil", "bottle", "loaf", "bed", "bow", "sword", "boot", "mug"], "grid": [4, 2] },
+  "quality": {
+    "_doc": "Per quality setting: `deco` scales every decoration's chance (decorations collide with nothing, rule 22b), `plainOdds` replaces the family's side-wall chance, `swap` turns fancy windows into small ones, `flowers` = flower clumps per window box",
+    "low": { "deco": 0.45, "plainOdds": 0.75, "swap": true, "flowers": 1 },
+    "medium": { "deco": 1, "plainOdds": 0.55, "swap": false, "flowers": 2 },
+    "high": { "deco": 1, "plainOdds": 0.4, "swap": false, "flowers": 3 }
+  },
+  "kitCells": {
+    "_doc": "palette square → look for kit props (yards, streets, stalls); `tint` per square optional",
+    "town": { "3,2": ["stone", "#d8d0c4"], "15,3": ["stone", "#b0a89e"], "9,3": ["timber", "#f4e2cc"], "11,3": ["planks", "#e0c4a4"], "1,3": ["cloth", "#b8463a"], "3,3": ["cloth", "#4f8a5a"], "7,3": ["ivy", "#7a9a5a"], "5,2": ["glass", "#ffd890"], "*": ["stone", "#c8c0b4"] },
+    "survival": { "7,2": ["planks", "#e8c8a8"], "5,3": ["iron", "#ffffff"], "9,3": ["planks", "#f0d4b4"], "13,3": ["planks", "#e0b080"], "1,2": ["ivy", "#9ac070"], "1,3": ["iron", "#ffffff"], "7,3": ["cloth", "#f0e8d8"], "*": ["planks", "#f0d4b4"] }
+  },
+  "lanternLook": { "town": { "3,2": ["iron", "#ffffff"], "15,3": ["iron", "#cfcfcf"], "5,2": ["glass", "#ffd27a"] } },
+  "props": {
+    "_doc": "yard / street props from the Kenney kits: [kit, piece, scale]",
+    "lantern": ["town", "lantern", 2.4], "stall": ["town", "stall-red", 3], "stall-green": ["town", "stall-green", 3], "fountain": ["town", "fountain-round-detail", 3],
+    "bench": ["town", "stall-bench", 2.4], "cart": ["town", "cart", 2.6], "barrel": ["survival", "barrel", 3], "crate": ["survival", "box", 3.2], "sacks": ["survival", "box-open", 3],
+    "workbench": ["survival", "workbench", 3.6], "bucket": ["survival", "bucket", 3], "tools": ["survival", "tool-shovel", 3.4]
+  },
+  "fences": { "stone": { "look": "fieldstone", "tint": "#d0c8bc", "h": 0.95, "w": 0.5, "cap": "stone", "capTint": "#a8a096" }, "wood": { "post": 0.14, "h": 1.05, "rails": 2 }, "hedge": { "h": 1.3, "w": 0.9, "tint": "#6f9a4a" } },
+  "landmarks": {
+    "_doc": "Landmark bases (the page's Landmarks; a plan house with `kind` set draws one). cells = [wide, deep], storeys, style, roof kind, ridge 'long' or 'front' (gable to the street).",
+    "inn": { "label": "Inn", "cells": [4, 3], "storeys": 3, "style": "timber", "roof": "clay", "ridge": "long", "trade": "inn", "doorPiece": "wall-doorway-round", "doorFill": [0.2, 0.03, 0.74], "balcony": true, "lanterns": 2 },
+    "tower": { "label": "Watch tower", "cells": [2, 2], "storeys": 4, "style": "stone", "roof": "slate", "ridge": "pyramid", "battlement": true },
+    "smithy": { "label": "Smithy", "cells": [3, 2], "storeys": 1, "style": "stone", "roof": "shingles", "ridge": "long", "trade": "smith", "openFront": 2, "forge": true },
+    "chapel": { "label": "Chapel", "cells": [2, 4], "storeys": 2, "style": "stone", "roof": "slate", "ridge": "front", "pitch": 1.5, "bellCote": true, "roseWindow": true }
+  }
+}

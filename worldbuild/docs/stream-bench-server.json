@@ -1,0 +1,82 @@
+{
+ "when": "2026-11-27",
+ "brief": "oathwild-4k",
+ "seed": 4242,
+ "files": {
+  "tiles": 289,
+  "totalMB": 36.9,
+  "avgKB": 125,
+  "decodeMsAvg": 0.11,
+  "decodeMsMax": 1.45
+ },
+ "server": {
+  "buildMs": 36248,
+  "heapMB": 467,
+  "chunk": {
+   "256": {
+    "msAvg": 2.4,
+    "msMax": 8.2,
+    "KB": 136
+   },
+   "512": {
+    "msAvg": 8.5,
+    "msMax": 16.8,
+    "KB": 136
+   },
+   "1024": {
+    "msAvg": 7.3,
+    "msMax": 11.4,
+    "KB": 136
+   },
+   "2048": {
+    "msAvg": 2,
+    "msMax": 3.2,
+    "KB": 136
+   },
+   "4096": {
+    "msAvg": 1.9,
+    "msMax": 2.1,
+    "KB": 136
+   },
+   "8192": {
+    "msAvg": 1.6,
+    "msMax": 1.9,
+    "KB": 136
+   }
+  },
+  "tileMsAvg": 1,
+  "tileMsMax": 4,
+  "towns": [
+   {
+    "id": "harrowby",
+    "houses": 44,
+    "ms": 1
+   },
+   {
+    "id": "wheatley",
+    "houses": 29,
+    "ms": 1
+   },
+   {
+    "id": "harrowfield",
+    "houses": 12,
+    "ms": 0
+   },
+   {
+    "id": "fellwick",
+    "houses": 28,
+    "ms": 0
+   },
+   {
+    "id": "fellhold",
+    "houses": 11,
+    "ms": 0
+   },
+   {
+    "id": "oakhollow",
+    "houses": 28,
+    "ms": 0
+   }
+  ]
+ }
+}

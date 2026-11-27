@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "nextId": 4,
+  "trees": {
+    "remove": [],
+    "add": [],
+    "areas": []
+  },
+  "decor": {
+    "remove": [],
+    "add": []
+  },
+  "ground": [],
+  "moves": {},
+  "zones": [
+    {
+      "id": "z1",
+      "kind": "fog",
+      "name": "Mist over the Thornmere Mire",
+      "at": [
+        470,
+        240
+      ],
+      "r": 150,
+      "soft": 60,
+      "amount": 1,
+      "mist": 0.0022,
+      "saturation": -0.04,
+      "tint": "#b8d0c8",
+      "tintAmount": 0.05
+    },
+    {
+      "id": "z2",
+      "kind": "fireflies",
+      "name": "Fireflies at the Druid Circle",
+      "at": [
+        256,
+        -246
+      ],
+      "r": 30,
+      "soft": 12,
+      "amount": 1.2
+    },
+    {
+      "id": "z3",
+      "kind": "embers",
+      "name": "Embers over the bandits' fire",
+      "at": [
+        -78,
+        214
+      ],
+      "r": 6,
+      "soft": 3,
+      "amount": 1
+    }
+  ],
+  "looks": {},
+  "notes": [],
+  "_doc": "The map editor's layer on top of the generated world (js/world/edits.js explains every field; README 'Map editor'). Written by the dev world server when someone edits; safe to hand-edit while the server is stopped."
+}

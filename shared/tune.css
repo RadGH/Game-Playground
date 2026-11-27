@@ -23,6 +23,7 @@
 .tune-foot { display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid rgba(255, 255, 255, .1); }
 .tune-foot button { flex: 1; min-height: 44px; border-radius: 10px; font: 600 15px system-ui, sans-serif; cursor: pointer;
   border: 1px solid rgba(255, 255, 255, .2); background: transparent; color: inherit; }
+.tune-foot .tune-send { border-color: var(--tune-accent, #ffc95a); color: var(--tune-accent, #ffc95a); }
 .tune-foot .tune-save { background: var(--tune-accent, #ffc95a); color: #2a1a00; border-color: transparent; }
 .tune-out { padding: 0 14px 12px; }
 .tune-out p { margin: 0 0 6px; font-size: 13px; }

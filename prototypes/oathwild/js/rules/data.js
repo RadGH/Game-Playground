@@ -30,6 +30,7 @@ export const RULES_DATA_FILES = {
   backgrounds: '../../data/backgrounds.json',
   combat: '../../data/combat.json',
   casters: '../../data/casters.json',
+  arena: '../../data/arena.json',
 };
 
 /** URL of one data file, resolved against this module. */

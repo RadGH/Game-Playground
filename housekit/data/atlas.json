@@ -1,0 +1,213 @@
+{
+ "_doc": "written by tools/build-atlas.py \u2014 do not edit by hand. rect = [u, v, w, h] of the painted area as fractions of the atlas (v 0 = top row); metres = world size of one repeat.",
+ "file": "atlas.webp",
+ "small": "atlas-1024.webp",
+ "size": 2048,
+ "slot": 512,
+ "gutter": 32,
+ "tiles": {
+  "plaster": {
+   "rect": [
+    0.015625,
+    0.015625,
+    0.21875,
+    0.21875
+   ],
+   "metres": 2.4,
+   "tile": "wrap",
+   "source": "codex"
+  },
+  "timber": {
+   "rect": [
+    0.265625,
+    0.015625,
+    0.21875,
+    0.21875
+   ],
+   "metres": 1.6,
+   "tile": "band",
+   "source": "codex"
+  },
+  "planks": {
+   "rect": [
+    0.515625,
+    0.015625,
+    0.21875,
+    0.21875
+   ],
+   "metres": 2.0,
+   "tile": "wrap",
+   "source": "codex"
+  },
+  "stone": {
+   "rect": [
+    0.765625,
+    0.015625,
+    0.21875,
+    0.21875
+   ],
+   "metres": 2.4,
+   "tile": "wrap",
+   "source": "codex"
+  },
+  "fieldstone": {
+   "rect": [
+    0.015625,
+    0.265625,
+    0.21875,
+    0.21875
+   ],
+   "metres": 2.2,
+   "tile": "wrap",
+   "source": "codex"
+  },
+  "shingles": {
+   "rect": [
+    0.265625,
+    0.265625,
+    0.21875,
+    0.21875
+   ],
+   "metres": 1.8,
+   "tile": "wrap",
+   "source": "codex"
+  },
+  "slate": {
+   "rect": [
+    0.515625,
+    0.265625,
+    0.21875,
+    0.21875
+   ],
+   "metres": 1.8,
+   "tile": "wrap",
+   "source": "codex"
+  },
+  "clay": {
+   "rect": [
+    0.765625,
+    0.265625,
+    0.21875,
+    0.21875
+   ],
+   "metres": 1.8,
+   "tile": "wrap",
+   "source": "codex"
+  },
+  "thatch": {
+   "rect": [
+    0.015625,
+    0.515625,
+    0.21875,
+    0.21875
+   ],
+   "metres": 2.0,
+   "tile": "wrap",
+   "source": "codex"
+  },
+  "cobbles": {
+   "rect": [
+    0.265625,
+    0.515625,
+    0.21875,
+    0.21875
+   ],
+   "metres": 2.4,
+   "tile": "wrap",
+   "source": "codex"
+  },
+  "door": {
+   "rect": [
+    0.515625,
+    0.515625,
+    0.21875,
+    0.21875
+   ],
+   "metres": 1.2,
+   "tile": "wrap",
+   "source": "codex"
+  },
+  "window": {
+   "rect": [
+    0.765625,
+    0.515625,
+    0.21875,
+    0.21875
+   ],
+   "metres": 0.7,
+   "tile": "wrap",
+   "source": "codex"
+  },
+  "ivy": {
+   "rect": [
+    0.015625,
+    0.765625,
+    0.21875,
+    0.21875
+   ],
+   "metres": 1.4,
+   "tile": "wrap",
+   "source": "codex"
+  },
+  "flowers": {
+   "rect": [
+    0.265625,
+    0.765625,
+    0.21875,
+    0.21875
+   ],
+   "metres": 0.8,
+   "tile": "wrap",
+   "source": "codex"
+  },
+  "signs": {
+   "rect": [
+    0.515625,
+    0.765625,
+    0.21875,
+    0.21875
+   ],
+   "metres": 1,
+   "tile": "cells",
+   "source": "codex",
+   "cells": [
+    4,
+    2
+   ]
+  },
+  "iron": {
+   "rect": [
+    0.765625,
+    0.765625,
+    0.09375,
+    0.09375
+   ],
+   "metres": 0.8,
+   "tile": "wrap",
+   "source": "codex"
+  },
+  "paintwood": {
+   "rect": [
+    0.765625,
+    0.890625,
+    0.09375,
+    0.09375
+   ],
+   "metres": 1.2,
+   "tile": "wrap",
+   "source": "codex"
+  },
+  "cloth": {
+   "rect": [
+    0.890625,
+    0.765625,
+    0.09375,
+    0.09375
+   ],
+   "metres": 1.5,
+   "tile": "wrap",
+   "source": "codex"
+  }
+ },
+ "missing": []
+}

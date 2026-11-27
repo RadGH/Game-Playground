@@ -18,7 +18,8 @@
 // when an event never comes (an older server): a leap without a 'land' still lands, a ball without a 'burst' still
 // explodes where its bolt ended (fx.js).
 //
-//   const look = createSpellLook({ fx, actors, moves, heightAt, rowOf(spell, who), unitOf(id), handsOf(id), meId(), shakeOn() })
+//   const look = createSpellLook({ fx, actors, moves, heightAt, rowOf(spell, who), unitOf(id), handsOf(id), meId(), shakeOn(), swings })
+//   (swings: render/swings.js — my basic-attack key swings the weapon kind's own clip with its trail)
 //   look.press(spell, row, { dir, at })   look.cast(e)   look.hit(e)   look.knock(e)   look.leap(e)   look.land(e)
 //   look.rush(e)   look.burst(e)   look.attack(e) (a wand's basic: its own clip)   look.update(dt) → dt for the world (hit-stop)
 import * as THREE from 'three';
@@ -47,7 +48,7 @@ export function moveStyle(row, id = '') {
   return 'ground';
 }
 
-export function createSpellLook({ fx, actors, moves, heightAt, rowOf, unitOf, handsOf, meId, shakeOn = () => true }) {
+export function createSpellLook({ fx, actors, moves, heightAt, rowOf, unitOf, handsOf, meId, shakeOn = () => true, swings = null }) {
   const kit = fx.kit;
   const safe = f => { try { return f(); } catch (err) { console.info('spell look:', err.message); return null; } };
   const V = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -69,7 +70,7 @@ export function createSpellLook({ fx, actors, moves, heightAt, rowOf, unitOf, ha
   /** The body + wind-up of a cast (mine on the key press, others' when the server says). */
   function begin(who, spell, row) {
     const style = moveStyle(row, spell);
-    moves.play(who, style, { reps: style === 'spin' ? row.repeats || 1 : 1, every: row.repeatEvery || 0.3 });
+    moves.play(who, style, { reps: style === 'spin' ? row.repeats || 1 : 1, every: row.repeatEvery || 0.3, spell: true });
     if (style !== 'channel' && style !== 'rush' && style !== 'leap') windup(who, spell, style === 'swing' || style === 'bash' || style === 'spin' ? 0.22 : 0.3);
   }
 
@@ -164,12 +165,14 @@ export function createSpellLook({ fx, actors, moves, heightAt, rowOf, unitOf, ha
       if (e.who === meId() && now() - (predicted.get('attack') || -9) < 0.4) return;
       moves.play(e.who, style);
     },
-    /** My basic-attack key: swing at once (the server's hit / miss then doesn't swing again). */
+    /** My basic-attack key: swing at once (the server's hit / miss then doesn't swing again). A weapon or bare hands:
+     *  the weapon kind's own clip, move and trail (render/swings.js through actor.act); a wand etc.: its style. */
     pressAttack(style = 'swing') {
       const me = meId(), u = unitOf(me); if (!u) return;
       if (now() - (u.swungAt || -9) < 0.45) return;
       u.swungAt = u.actedAt = now(); predicted.set('attack', now());
-      moves.play(me, style);
+      if ((style === 'swing' || style === 'shoot') && swings?.handles(me)) actors.get(me)?.act('attack');
+      else moves.play(me, style);
     },
     cast(e) {
       const u = unitOf(e.who); if (!u) return;
@@ -219,7 +222,7 @@ export function createSpellLook({ fx, actors, moves, heightAt, rowOf, unitOf, ha
       const l = leaps.get(e.who); if (l) { l.landed = true; leaps.delete(e.who); }
       const row = rowOf(e.spell, e.who), vis = visualOf(e.spell, row) || 'leap_slam', R = e.radius || row?.radius || 4;
       const at = ground(e.at[0], e.at[1]);
-      moves.play(e.who, 'slam');
+      moves.play(e.who, 'slam', { spell: true });
       safe(() => kit.impact(V(at.x, at.y + 0.3, at.z), vis, { radius: R }));
       safe(() => kit.spread(vis, { shape: 'ring', at, radius: R, n: 12, every: 0.02 }));
       if (near(at, 25)) shake(e.who === meId() ? 0.6 : 0.35);

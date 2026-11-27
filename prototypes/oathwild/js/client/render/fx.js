@@ -17,12 +17,15 @@ export const ELEMENT_COLOUR = { physical: '#e8dcc0', fire: '#ff8a3a', ice: '#8fd
 
 export async function createFx(view, { heightAt, quality = 'medium', spells = null }) {
   const scene = view.scene;
-  let kit = null;
+  let kit = null, swingData = null;
   try {
-    const [{ createSpellKit }, visuals] = await Promise.all([
+    const [{ createSpellKit }, visuals, swings] = await Promise.all([
       import('../../../../../avatar-3d/spellkit/js/spellkit.js'),
       fetch(new URL('../../../data/spell-visuals.json', import.meta.url)).then(r => (r.ok ? r.json() : null)),
+      fetch(new URL('../../../data/swing-visuals.json', import.meta.url)).then(r => (r.ok ? r.json() : null)).catch(() => null),
     ]);
+    // basic-attack swing looks (render/swings.js): their visuals join the spell visuals in the one kit
+    if (visuals && swings) { Object.assign(visuals.visuals, swings.visuals); swingData = swings; }
     if (visuals) {
       kit = await createSpellKit({ THREE, scene, camera: view.camera, renderer: view.renderer, visuals, heightAt, quality: quality === 'low' ? 'low' : 'high' });
       kit.warm?.();
@@ -133,9 +136,10 @@ export async function createFx(view, { heightAt, quality = 'medium', spells = nu
         // fixed 30 m from the body's middle, on through whatever it hit)
         const hand = handNear?.(x, z);
         const from = hand ? handAt.set(hand[0], hand[1], hand[2]) : handAt.set(x, heightAt(x, z) + 1.3, z);
-        if (kit && spell) {
+        // an arrow (no spell): the kit's arrow — a shaft with a streak behind it, not a dot (owner report #138)
+        if (kit && (spell || kit.visuals.arrow)) {
           try {
-            b.kh = kit.missile(from.clone(), null, visual, { track: out => out.set(b.x, heightAt(b.x, b.z) + 1.3, b.z), scale: wv ? 1.15 * (wv.look.scale || 1) : 1.15, school: wv?.el });
+            b.kh = kit.missile(from.clone(), null, spell ? visual : 'arrow', { track: out => out.set(b.x, heightAt(b.x, b.z) + 1.3, b.z), scale: wv ? 1.15 * (wv.look.scale || 1) : spell ? 1.15 : 1, school: wv?.el });
             b.kh?.catch?.(() => {}); p.s.visible = false;
           } catch { b.kh = null; }
         }
@@ -174,6 +178,8 @@ export async function createFx(view, { heightAt, quality = 'medium', spells = nu
   const api = {
     flash,
     kit, looks: null, ELEMENT_COLOUR, burst, groundRing,
+    /** data/swing-visuals.json (render/swings.js), or null without the kit */
+    get swingData() { return swingData; },
     indicator(shape, opts) { if (kit) { try { return kit.indicator(shape, opts); } catch { /* fall back */ } } return simpleIndicator(shape, opts); },
     windup(obj, spell, element, hands = null) {
       if (kit) { try { const w = kit.windup(obj, spell, { hands }); return { stop: () => w.release() }; } catch { /* simple */ } }

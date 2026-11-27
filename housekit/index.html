@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>House Kit — modular houses</title>
+<link rel="stylesheet" href="../shared/style.css">
+<link rel="stylesheet" href="housekit.css">
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+</head>
+<body class="hk">
+<!-- House Kit review page: the exact builder Oathwild's towns use (js/describe.js + js/build.js). ?mode=one|gallery|street|pieces
+     ?house=<Larkford house id> opens a house from the game. window.__hk = { ready, state, set(), stats() } for tests. -->
+<header class="hk-top">
+  <a class="hk-back" href="../">← Playground</a>
+  <div class="hk-title">
+    <h1>House Kit</h1>
+    <p>The houses of Oathwild's towns, built piece by piece — the same builder the game uses.</p>
+  </div>
+</header>
+
+<nav class="hk-modes" id="modes" role="tablist" aria-label="View">
+  <button type="button" role="tab" data-mode="one">One house</button>
+  <button type="button" role="tab" data-mode="gallery">Gallery</button>
+  <button type="button" role="tab" data-mode="street">Street</button>
+  <button type="button" role="tab" data-mode="pieces">Pieces</button>
+</nav>
+
+<main class="hk-main">
+  <section class="hk-stage-wrap">
+    <div id="stage" class="hk-stage" aria-label="3D view: drag to turn, pinch or scroll to zoom"></div>
+    <div id="labels" class="hk-labels" aria-hidden="true"></div>
+    <div id="loading" class="hk-loading">Loading the wall pieces and the painted textures…</div>
+    <dl class="hk-hud" id="hud"></dl>
+    <p class="hk-hint" id="hint">Drag to turn · scroll or pinch to zoom · right-drag to pan</p>
+  </section>
+
+  <aside class="hk-side" id="side">
+    <section class="hk-card" data-for="one">
+      <h2>Building</h2>
+      <div class="hk-chips" id="kind"></div>
+      <label class="hk-field"><span>Or a house from Larkford (the game)</span><select id="game-house"></select></label>
+    </section>
+
+    <section class="hk-card" data-for="one">
+      <h2>Style</h2>
+      <div class="hk-chips" id="style"></div>
+      <div class="hk-row"><span class="hk-lbl">Walls</span><div class="hk-swatches" id="plaster" role="radiogroup" aria-label="Wall colour"></div></div>
+      <div class="hk-row"><span class="hk-lbl">Roof</span><div class="hk-chips hk-chips-s" id="roof"></div></div>
+    </section>
+
+    <section class="hk-card" data-for="one">
+      <h2>Size</h2>
+      <div class="hk-steps" id="sizes"></div>
+      <div class="hk-row"><span class="hk-lbl">Slope</span><input type="range" id="slope" min="0" max="0.45" step="0.05" aria-label="Slope of the ground"><b class="hk-val" id="slope-v"></b></div>
+    </section>
+
+    <section class="hk-card" data-for="one">
+      <h2>Details</h2>
+      <div class="hk-row"><span class="hk-lbl">Seed</span>
+        <div class="hk-seed"><button type="button" id="seed-prev" aria-label="Previous seed">◀</button><input type="number" id="seed" min="0" max="999999" aria-label="Seed"><button type="button" id="seed-next" aria-label="Next seed">▶</button><button type="button" id="seed-dice">Roll</button></div>
+      </div>
+      <label class="hk-field"><span>Shop</span><select id="trade"></select></label>
+      <div class="hk-row hk-toggles">
+        <button type="button" class="hk-toggle" id="jetty" aria-pressed="false">Jettied upper floors</button>
+        <button type="button" class="hk-toggle" id="chimney" aria-pressed="true">Chimney</button>
+      </div>
+    </section>
+
+    <section class="hk-card" data-for="one">
+      <h2>This house rolled</h2>
+      <p class="hk-sum" id="summary"></p>
+      <div class="hk-deco" id="deco"></div>
+    </section>
+
+    <section class="hk-card" data-for="gallery street pieces">
+      <h2 id="mode-title">Gallery</h2>
+      <p class="hk-sum" id="mode-text"></p>
+      <div class="hk-row" data-for="gallery street"><span class="hk-lbl">Seeds from</span>
+        <div class="hk-seed"><button type="button" id="mseed-prev" aria-label="Earlier seeds">◀</button><b class="hk-val" id="mseed"></b><button type="button" id="mseed-next" aria-label="Later seeds">▶</button></div>
+      </div>
+    </section>
+
+    <section class="hk-card">
+      <h2>Quality and cost</h2>
+      <div class="hk-row"><span class="hk-lbl">Quality</span>
+        <div class="hk-seg" id="quality" role="radiogroup" aria-label="Quality">
+          <button type="button" data-v="low">Low</button><button type="button" data-v="medium">Medium</button><button type="button" data-v="high">High</button>
+        </div>
+      </div>
+      <dl class="hk-stats" id="stats"></dl>
+      <p class="hk-note">One texture picture for everything, so a whole town chunk is one draw call.</p>
+    </section>
+  </aside>
+</main>
+<script type="module" src="js/page.js"></script>
+</body>
+</html>

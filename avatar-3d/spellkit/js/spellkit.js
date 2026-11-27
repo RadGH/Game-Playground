@@ -393,6 +393,28 @@ export class SpellKit {
   }
 
   /**
+   * A weapon swing along a MEASURED path (a basic attack: Oathwild data/swing-visuals.json, measured from the real clip
+   * by tools/measure-swings.mjs): `path` = keyframes [t, hx, hy, hz, dx, dy, dz] in `obj`'s own frame (t = seconds
+   * into the clip, h = the hand, d = the blade's direction); the ribbon runs from h + d*b0 to h + d*b1, its head
+   * following the clip's own time (x `speed`), its tail `tail` seconds of clip behind. Starts `delay` s from now.
+   * Emitter layers with at:'tip' ride the blade's tip as it moves (sparks thrown off the swing). `back` (< 0): the far
+   * end of a two-ended weapon, for sweep layers with end:'back'. Returns the effect (null while it waits for `delay`).
+   */
+  pathSwing(obj, visual, { path, from, to, speed = 1, b0 = 0.25, b1 = 1, back = 0, tail = 0.09, delay = 0, scale, school } = {}) {
+    if (!obj || !path?.length) return null;
+    // the stroke starts `delay` from now: the whole effect waits (its sparks and its ribbon start together)
+    if (delay > 0) { this.wait(delay).then(() => { if (obj.parent) this.pathSwing(obj, visual, { path, from, to, speed, b0, b1, back, tail, scale, school }); }); return null; }
+    const r = this.resolve(visual, { scale, school });
+    const t0 = from ?? path[0][0], t1 = to ?? path[path.length - 1][0];
+    const fx = this.effect(r, 'sweep', { caster: obj, seconds: (t1 - t0) / speed + 0.5 });
+    fx.weapon = obj; fx.tip = new this.THREE.Vector3(); fx.pathArc = { path, t0, t1, speed, b0, b1, back, tail };
+    pathAt(path, t0, fx.tip, b1);
+    const L = r.def.sweep || [];
+    fx.addLayers(L.some(l => l.type === 'sweep') ? L : [{ type: 'sweep', color: 'white', edge: 'mid', tex: 'band_mist' }, ...L]);
+    return fx;
+  }
+
+  /**
    * One whole cast, phase by phase (the Spell Lab and quick game use): windup → release → travel/beam/sweep →
    * impact → linger / aura. opts: caster, hands, target (Object3D or point), at (ground point), dir, windup
    * (seconds), radius, seconds, weapon, onPhase(name). Resolves when the last phase has started.
@@ -881,6 +903,7 @@ const LAYERS = {
   // crescent drawn analytically at the true reach (no weapon needed)
   sweep(fx, L) {
     if (fx.swingArc) return swingLayer(fx, L);
+    if (fx.pathArc) return pathLayer(fx, L);
     const kit = fx.kit, THREE = kit.THREE, it = kit.ribbons.get(), u = it.u;
     const keep = L.seconds ?? 0.18;
     u.uCol.value.copy(fx.hex(L.color || 'hot')); u.uEdge.value.copy(fx.hex(L.edge || 'mid')); u.uOpacity.value = L.opacity ?? 1;
@@ -942,6 +965,50 @@ function swingLayer(fx, L) {
     }
     fillRibbon(THREE, it, pts, { mode: 'sweep', fades });
     if (lay.t > S.seconds + fout) lay.free();
+  };
+  lay.stop = () => {};
+  lay.free = () => { if (!lay.freed) { lay.freed = true; if (it.busy && it.owner === me) kit.ribbons.put(it); } lay.done = true; };
+  return lay;
+}
+/** The point `k` metres along the blade at clip time `t` of a measured swing path (obj-local), into `out`. */
+function pathAt(path, t, out, k) {
+  let i = 0;
+  while (i < path.length - 2 && path[i + 1][0] < t) i++;
+  const a = path[i], b = path[Math.min(path.length - 1, i + 1)];
+  const f = b[0] > a[0] ? Math.max(0, Math.min(1, (t - a[0]) / (b[0] - a[0]))) : 0;
+  const L = j => a[j] + (b[j] - a[j]) * f;
+  let dx = L(4), dy = L(5), dz = L(6); const n = Math.hypot(dx, dy, dz) || 1; dx /= n; dy /= n; dz /= n;
+  return out.set(L(1) + dx * k, L(2) + dy * k, L(3) + dz * k);
+}
+/** kit.pathSwing()'s ribbon: the blade's sweep between b0 and b1 along the measured path, head on the clip's clock. */
+function pathLayer(fx, L) {
+  const kit = fx.kit, THREE = kit.THREE, it = kit.ribbons.get(), u = it.u, S = fx.pathArc;
+  u.uCol.value.copy(fx.hex(L.color || 'hot')); u.uEdge.value.copy(fx.hex(L.edge || 'mid')); u.uOpacity.value = L.opacity ?? 1;
+  u.uMap.value = kit.tex.map(fx.subst(L.tex || 'band_mist')); u.uTexMix.value = L.tex ? 0.6 : 0;
+  it.obj.material.blending = THREE.AdditiveBlending;
+  const M = 20, pts = Array.from({ length: M * 2 }, () => new THREE.Vector3()), fades = new Array(M).fill(1);
+  const lay = { done: false, t: -(L.delay || 0), stopAt: null };
+  const me = { steal: () => { lay.done = true; kit.counts.stolen++; } }; it.owner = me;
+  // L.end 'back': the weapon's other end (a quarterstaff swings both); L.inner: start part-way up the blade; L.reach: past the tip
+  const lo = L.end === 'back' ? -S.b0 : S.b0, hi = L.end === 'back' ? S.back : S.b1;
+  const inner = L.inner ?? 0, b0 = lo + (hi - lo) * inner, b1 = hi * (L.reach ?? 1), tail = S.tail * (L.tail ?? 1);
+  const fout = L.fadeOut ?? 0.18;
+  lay.update = dt => {
+    lay.t += dt; if (lay.t < 0) return;
+    // the head rides the clip's clock to the end of the stroke; then the whole arc stays and fades over fadeOut s
+    const hT = S.t0 + lay.t * S.speed, head = Math.min(hT, S.t1), back = Math.max(S.t0, head - tail);
+    const fadeAll = hT > S.t1 ? 1 - (hT - S.t1) / S.speed / fout : 1;
+    if (fadeAll <= 0) { lay.free(); return; }
+    const obj = fx.weapon; obj.updateWorldMatrix(true, false);
+    const mw = obj.matrixWorld;
+    for (let i = 0; i < M; i++) {
+      const f = i / (M - 1), t = head + (back - head) * f;
+      pathAt(S.path, t, pts[i * 2], b0).applyMatrix4(mw);
+      pathAt(S.path, t, pts[i * 2 + 1], b1).applyMatrix4(mw);
+      fades[i] = (1 - f) ** 1.1 * fadeAll;
+    }
+    pathAt(S.path, head, fx.tip, S.b1);              // the 'tip' anchor (obj-local; applied with obj.matrixWorld)
+    fillRibbon(THREE, it, pts, { mode: 'sweep', fades });
   };
   lay.stop = () => {};
   lay.free = () => { if (!lay.freed) { lay.freed = true; if (it.busy && it.owner === me) kit.ribbons.put(it); } lay.done = true; };

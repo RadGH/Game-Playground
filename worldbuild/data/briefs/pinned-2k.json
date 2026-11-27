@@ -1,0 +1,272 @@
+{
+  "_doc": "The hand-made Oathwild map pinned in a smaller 2.4 x 2 km world with three new regions: quick enough for the tests that check the pinned piece stays unchanged and that roads and rivers join it.",
+  "id": "pinned-2k",
+  "name": "Oathwild pinned, 2.4 x 2 km",
+  "seed": 99,
+  "size": {
+    "bounds": {
+      "minX": -1000,
+      "maxX": 1400,
+      "minZ": -1200,
+      "maxZ": 800
+    },
+    "cell": 2,
+    "margin": 40
+  },
+  "relief": {
+    "base": 14,
+    "roll": 18,
+    "detail": 1.3
+  },
+  "sea": {
+    "edges": [
+      "south"
+    ],
+    "from": 160,
+    "shelf": 80,
+    "depth": 12,
+    "wobble": 70
+  },
+  "start": {
+    "at": [
+      -252,
+      -16
+    ],
+    "name": "Larkford"
+  },
+  "pin": {
+    "_doc": "Oathwild's hand-made map, pasted in unchanged. `keep` = the area kept byte for byte ('play' = the map's bounds minus its 40 m out-of-bounds margin); the `seam` metres outside it blend into the new world. `edits` = the map editor's layer (its ground strokes, tree fixes and moves apply here as in the game). `gates` are the roads that leave it: each starts exactly at the end of one of its roads (lessons rule 65) and is the only change allowed inside the kept area. `rivers` say which of its rivers come in from the new world or run out into it. Roads leave from the Wilds side only (levels 6-9 there): a road out of the Vale (levels 1-5) would lead straight into level 10+ country; the Vale's rivers still run in and out.",
+    "name": "Brightwater Vale and Thornmere Wilds",
+    "map": "prototypes/oathwild/data/map.json",
+    "towns": "prototypes/oathwild/data/towns.json",
+    "placements": "prototypes/oathwild/data/placements.json",
+    "edits": "prototypes/oathwild/data/edits.json",
+    "at": [
+      0,
+      0
+    ],
+    "keep": "play",
+    "seam": 260,
+    "gates": [
+      {
+        "id": "gate_northeast",
+        "name": "the Mirewater Path",
+        "road": "grove_trail",
+        "end": "end",
+        "via": [
+          [
+            268,
+            -300
+          ]
+        ],
+        "edge": [
+          276,
+          -360
+        ],
+        "class": "trail",
+        "width": 4
+      },
+      {
+        "id": "gate_east",
+        "name": "the Amber Road",
+        "road": "lark_road",
+        "end": "end",
+        "via": [
+          [
+            528,
+            100
+          ]
+        ],
+        "edge": [
+          560,
+          148
+        ],
+        "class": "road",
+        "width": 6
+      }
+    ],
+    "rivers": [
+      {
+        "river": "brightwater",
+        "end": "in"
+      },
+      {
+        "river": "brightwater",
+        "end": "out"
+      },
+      {
+        "river": "mirewater",
+        "end": "in"
+      }
+    ]
+  },
+  "ranges": [
+    {
+      "id": "north_fells",
+      "name": "the North Fells",
+      "points": [
+        [
+          -900,
+          -1050
+        ],
+        [
+          0,
+          -1110
+        ],
+        [
+          1300,
+          -1020
+        ]
+      ],
+      "height": 180,
+      "width": 300,
+      "sharpness": 0.6,
+      "passes": [
+        [
+          300,
+          -1080,
+          0.6
+        ]
+      ]
+    }
+  ],
+  "lakes": [
+    {
+      "id": "east_mere",
+      "name": "East Mere",
+      "at": [
+        1080,
+        330
+      ],
+      "radius": 90,
+      "depth": 5
+    }
+  ],
+  "rivers": [
+    {
+      "id": "brightwater_upper",
+      "name": "the Brightwater",
+      "from": [
+        -260,
+        -960
+      ],
+      "to": "pin:brightwater",
+      "width": 10,
+      "depth": 2
+    },
+    {
+      "id": "mirewater_upper",
+      "name": "the Mirewater",
+      "from": [
+        420,
+        -940
+      ],
+      "to": "pin:mirewater",
+      "width": 9,
+      "depth": 1.8
+    },
+    {
+      "id": "brightwater_lower",
+      "name": "the Brightwater",
+      "from": "pin:brightwater",
+      "to": "sea",
+      "width": 14,
+      "depth": 2.4
+    }
+  ],
+  "streams": {
+    "catchment": 0.08,
+    "max": 8,
+    "minLength": 220,
+    "width": [
+      4,
+      7
+    ]
+  },
+  "regions": [
+    {
+      "id": "amberfield",
+      "name": "Amberfield Downs",
+      "theme": "farmland",
+      "at": [
+        1000,
+        -100
+      ],
+      "levels": [
+        10,
+        14
+      ],
+      "towns": [
+        {
+          "name": "Harrowby",
+          "size": "village"
+        }
+      ],
+      "camps": 2,
+      "dungeons": 1,
+      "shrines": 1,
+      "landmarks": [
+        {
+          "kind": "standing_stones"
+        }
+      ],
+      "fields": 4
+    },
+    {
+      "id": "greyfell",
+      "name": "the Greyfell Moors",
+      "theme": "moor",
+      "at": [
+        100,
+        -800
+      ],
+      "levels": [
+        10,
+        15
+      ],
+      "towns": [
+        {
+          "name": "Fellwick",
+          "size": "hamlet"
+        }
+      ],
+      "camps": 2,
+      "dungeons": 1,
+      "shrines": 1,
+      "landmarks": [
+        {
+          "kind": "ruin"
+        }
+      ],
+      "fields": 0
+    },
+    {
+      "id": "saltcliff",
+      "name": "the Saltcliff Coast",
+      "theme": "coast",
+      "at": [
+        -500,
+        620
+      ],
+      "levels": [
+        12,
+        16
+      ],
+      "towns": [
+        {
+          "name": "Gullhaven",
+          "size": "village"
+        }
+      ],
+      "camps": 2,
+      "dungeons": 1,
+      "shrines": 1,
+      "landmarks": [
+        {
+          "kind": "lighthouse"
+        }
+      ],
+      "fields": 2
+    }
+  ]
+}

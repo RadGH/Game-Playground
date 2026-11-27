@@ -5,6 +5,7 @@ import { openWin, esc } from './kit.js';
 import { glyph } from './icons.js';
 import { fmt } from '../../../../../shared/format.js';
 import { ACTIONS, keyName, padName, rebind, saveBindings, resetBindings } from '../input/bindings.js';
+import { lookPanelHtml, bindLookPanel } from './look-panel.js';
 
 const TABS = [{ id: 'game', label: 'Game' }, { id: 'graphics', label: 'Graphics' }, { id: 'sound', label: 'Sound' }, { id: 'controls', label: 'Controls' }];
 const QUALITY = [['low', 'Low', 'Simpler trees, fewer plants and stones, no shadows or after-effects: smoothest on phones'], ['medium', 'Medium', 'Shadows near you, colour grading and a soft glow, most plants'], ['high', 'High', 'Every plant, longer sharper shadows, soft shade where things meet the ground']];
@@ -36,7 +37,9 @@ export function open(app, opts = {}) {
           ${toggle('numbers', 'Damage numbers', 'The numbers that rise from every hit and heal')}
         </section>`;
       } else if (tab === 'graphics') {
-        body.innerHTML = `<section class="ow-section"><h3>Quality</h3><div class="ow-set-choices">${QUALITY.map(([id, name, help]) => `<button type="button" class="ow-set-choice${S.quality === id ? ' ow-set-on' : ''}" data-quality="${id}" ${S.quality === id ? 'data-primary' : ''}><b>${esc(name)}</b><small>${esc(help)}</small></button>`).join('')}</div></section>`;
+        body.innerHTML = `<section class="ow-section"><h3>Quality</h3><div class="ow-set-choices">${QUALITY.map(([id, name, help]) => `<button type="button" class="ow-set-choice${S.quality === id ? ' ow-set-on' : ''}" data-quality="${id}" ${S.quality === id ? 'data-primary' : ''}><b>${esc(name)}</b><small>${esc(help)}</small></button>`).join('')}</div></section>`
+          + lookPanelHtml(S.look, { quality: S.quality });   // the Look: presets, Custom sliders, effects with their phone cost
+        bindLookPanel(body, { get: () => app.settings.look || { id: 'classic' }, set: next => { S.look = next; app.saveSettings(); app.lookStyle?.set(next); }, rerender: () => win.render() });
       } else if (tab === 'sound') {
         body.innerHTML = `<section class="ow-section"><h3>Sound</h3>${toggle('sfxOn', 'Sound effects', '')}${slider('volume', 'Volume', 0, 1, 0.05, SHOW.volume)}</section>`;
       } else {

@@ -91,6 +91,32 @@ and smack things in a circle knocking down enemies around me."
 → This replaces the "Paths at class level 3" and ranked-node rulings above. Rules: `tools/trees/_dsl.mjs`, RULES.md
 "Class trees", lessons rules 77–79, game-standards §13.
 
+### Focus + arena (owner 2026-11-26 evening — `docs/BRAINSTORM-2026-11-27-arena-camera.md`)
+Verbatim: "I think at this point of the game we should focus on improving the camera, combat, and leveling. Add a new
+hosting option for waves mode where you go to a massive arena and fight waves of monsters of certain level ranges,
+really it's own entire game mode. In between battles you can visit the shops and respec. Have gear as rewards via
+chests after the arena matches are completed. Arena matches should scale with level but starting it should be possible
+for a lvl 1 character. Arena may be incorporated into the main game later if that is better than keeping it separate
+hosting option, maybe we can just have a teleport take you there. Include other heroes in the system with special
+rewards for defeating them somewhat like oblivion."
+- **Focus**: rounds go to camera, combat and levelling first; the world tools are used, not extended, unless asked.
+- **Arena = its own hosting option** (New world / **New arena** on the world list), its own saved place with a code,
+  1-10 players. **Heroes are shared** (owner answer 1): XP, gold, gear, classes and the arena record live on the hero.
+  Built as a self-contained place (`data/arena/*`, `js/world/arena-place.js`) so a teleport stone can later lead there.
+- **Matches**: brackets by level range (1-2 … 9-10), five waves, a brute on wave 3 and a boss on wave 5, a 20 s
+  breather (no shops mid-match), monsters from every region's roster at the bracket's levels, scaled by party size;
+  everyone down = back to the court, XP kept, no chest. Brackets above you are marked hard, never locked.
+- **Rewards**: a reward chest per player (individual loot); better rarity higher up; a first clear adds a piece and
+  guarantees a magic-or-better one.
+- **Champions** (owner answer 2: **made-up only**): a ten-rank ladder to a Grand Champion, each built and played like a
+  hero, unlocked rank by rank after a bracket; each gives a unique item, a title on your name and the next rank.
+- Guessed (Claude, arena round 2026-11-26 — owner may overrule): the breather restores every standing hero to full
+  health and mana ("water-bearers": a lone hero has no healer and five waves back to back lost most runs in the sim);
+  wave 5 is the boss alone for one hero (its guards come with a party); a lone hero meets ordinary monsters at 80%
+  health / 85% damage in the arena; champions' numbers are tuned per champion in `data/arena.json`; titles can be
+  switched (or hidden) on the board's Champions tab; rematches give gold + XP only; a champion bout's XP = 120 + 25 per
+  champion level.
+
 ### Guessed (Claude's calls — owner may overrule)
 - **Heroes**: Tabard characters (avatar-3d/tabard: swappable armour, the new face/hair layers, Chibi 2.6 look fields)
   — the owner's direction is "Tabard for main characters, fal for monsters". Enemies: avatar-3d/fal roster + new ones.

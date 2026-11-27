@@ -92,8 +92,8 @@
   }
  },
  "base": {
-  "_doc": "The numbers every character starts from before attributes, classes and gear. meleePerLevel: a hero's weapon damage grows this share a character level (2026-11-26 balance: abilities grew ~9x from level 1 to 10, the weapon ~3x).",
-  "hp": 46,
+  "_doc": "The numbers every character starts from before attributes, classes and gear. hp 46 -> 66 (owner 2026-11-26: a new hero died to one level-2 boar; a flat start mostly helps the first levels). meleePerLevel: a hero's weapon damage grows this share a character level (2026-11-26 balance: abilities grew ~9x from level 1 to 10, the weapon ~3x).",
+  "hp": 66,
   "mp": 20,
   "mpRegen": 1.2,
   "hpRegen": 0.6,

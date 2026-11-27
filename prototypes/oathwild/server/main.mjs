@@ -5,6 +5,10 @@
 //   --https-port <n>   also serve wss with the playground's self-signed cert for the https pages on the LAN (8441/8442:
 //                      browsers only expose gamepads on a secure page).
 //   --saves <dir>      where worlds and characters are kept (default prototypes/oathwild/saves/<build kind>)
+//   --edit-dir <dir>   where the map editor reads and writes map.json + edits.json (default prototypes/oathwild/data;
+//                      tests point it at a scratch copy)
+//   --editor           open the map editor line (/ws/edit) on a build that is not dev/test. NEVER on the live droplet:
+//                      the editor rewrites the world's files and every player would see a stray brush stroke.
 // GET /healthz ("ok") and GET /status (JSON), also under /ws/oathwild/. WebSocket at /ws and /ws/oathwild.
 // Admin feed: /internal/admin/feed + /internal/admin/action when RGS_ADMIN_SECRET is set.
 // SIGTERM / SIGINT: every world is saved, sockets close with 1012 (service restart) so pages reconnect by themselves.
@@ -19,9 +23,12 @@ import { createHub } from './hub.js';
 import { createStore } from './store.js';
 import { createRedeemer } from './rgs.mjs';
 import { bootRules } from '../js/rules/boot.js';
-import { bootWorld } from '../js/world/boot.js';
-import { scatter } from '../js/world/scatter.js';
+import { bootWorld, loadWorldData } from '../js/world/boot.js';
+import { worldScene, rebuildWorld, swapInto, refill } from '../js/world/live.js';
+import { createEditor, mapText } from './editor.js';
+import { writeFileSync, appendFileSync, mkdirSync, renameSync } from 'node:fs';
 import { createGround } from '../js/game/ground.js';
+import { bootArena } from '../js/world/arena-place.js';
 import { MAX_FRAME, STEP_HZ } from '../js/net/protocol.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url)), GAME = resolve(HERE, '..'), PLAY = resolve(GAME, '..', '..');
@@ -33,14 +40,48 @@ const savesDir = resolve(arg('saves', join(GAME, 'saves', build.startsWith('stab
 
 const log = (what, d) => console.log(new Date().toISOString(), what, JSON.stringify(d));
 const t0 = Date.now();
+const editDir = resolve(arg('edit-dir', join(GAME, 'data')));
+const editorOn = build === 'dev' || build === 'test' || process.argv.includes('--editor');
+const readJson = f => JSON.parse(readFileSync(f, 'utf8'));
+const editFiles = { map: join(editDir, 'map.json'), edits: join(editDir, 'edits.json') };
 const rules = await bootRules({ seed: 7 });
-const W = await bootWorld({ regions: rules.data.regions });
-const scattered = scatter(W.terrain, W.data.placements);
+const loaded = await loadWorldData(async url => readJson(url));
+if (existsSync(editFiles.map)) loaded.map = readJson(editFiles.map);
+loaded.edits = existsSync(editFiles.edits) ? readJson(editFiles.edits) : loaded.edits;
+const W = await bootWorld({ regions: rules.data.regions, data: loaded });
+const scattered = worldScene(W);                                // trees + decor with the editor's layer (js/world/edits.js)
 const ground = createGround(W.terrain, W.data.placements, scattered, W.town);
+// the arena (brainstorm 2026-11-27 §2a): its own small place, booted the same way (data/arena/*, js/world/arena-place.js)
+const arenaW = await bootArena({ regions: rules.data.regions });
+const arenaPlace = { W: arenaW, ground: createGround(arenaW.terrain, arenaW.data.placements, worldScene(arenaW), arenaW.town) };
+if (scattered.report.orphans.length) log('editor.orphans', { n: scattered.report.orphans.length, first: scattered.report.orphans.slice(0, 5) });
 log('server.boot', { ms: Date.now() - t0, saves: savesDir });
 
 const store = createStore(savesDir);
-const hub = createHub({ rules, W, ground, store, build, log, randomToken: () => randomBytes(18).toString('base64url'), redeem: createRedeemer({ game: 'oathwild', log }) });
+// ---- the map editor (dev only): an edit rebuilds the world with the browser's own code and swaps it in place, so
+// every open world's colliders, heights and placements change at once (js/world/live.js swapInto)
+let editor = null;
+if (editorOn) {
+  // map.json keeps its hand layout (only the changed pieces are rewritten); edits.json is plain two-space JSON
+  const writeJson = (f, o) => { const tmp = f + '.tmp'; const text = f === editFiles.map && existsSync(f) ? mapText(readFileSync(f, 'utf8'), o) : JSON.stringify(o, null, 2) + '\n'; writeFileSync(tmp, text); renameSync(tmp, f); };
+  mkdirSync(savesDir, { recursive: true });
+  editor = createEditor({
+    files: editFiles, readJson: f => (existsSync(f) ? readJson(f) : {}), writeJson, log,
+    appendLog: e => { try { appendFileSync(join(savesDir, 'edit-log.jsonl'), JSON.stringify(e) + '\n'); } catch { /* keep going */ } },
+    getWorld: () => ({ W, scattered, ground, report: scattered.report }),
+    rebuild: async ({ map, edits }) => {
+      const t = Date.now();
+      const fresh = await rebuildWorld(W.pristine, { map, edits, regions: rules.data.regions });
+      const sc = worldScene(fresh);
+      const g = createGround(fresh.terrain, fresh.data.placements, sc, fresh.town);
+      swapInto(W, fresh); refill(scattered, sc); refill(ground, g);
+      log('editor.rebuild', { ms: Date.now() - t, trees: sc.trees.length, orphans: sc.report.orphans.length });
+      return { report: sc.report };
+    },
+    broadcastGame: m => hub.broadcast(m),
+  });
+}
+const hub = createHub({ rules, W, ground, arenaPlace, store, build, log, randomToken: () => randomBytes(18).toString('base64url'), redeem: createRedeemer({ game: 'oathwild', log }) });
 const started = Date.now(), cpu0 = process.cpuUsage();
 
 const ipOf = req => {
@@ -53,7 +94,7 @@ const secret = process.env.RGS_ADMIN_SECRET || '';
 const same = (a, b) => { const x = createHash('sha256').update(String(a)).digest(), y = createHash('sha256').update(String(b)).digest(); return timingSafeEqual(x, y); };
 function statusBody() {
   const up = (Date.now() - started) / 1000, c = process.cpuUsage(cpu0);
-  return { server: 'oathwild', build, uptime: Math.round(up), cpuPct: Math.round((c.user + c.system) / 1e4 / Math.max(1, up) * 10) / 10, rssMB: Math.round(process.memoryUsage().rss / 1048576), stepHz: STEP_HZ, ...hub.status() };
+  return { server: 'oathwild', build, editor: editorOn ? { clients: editor.clients } : false, uptime: Math.round(up), cpuPct: Math.round((c.user + c.system) / 1e4 / Math.max(1, up) * 10) / 10, rssMB: Math.round(process.memoryUsage().rss / 1048576), stepHz: STEP_HZ, ...hub.status() };
 }
 function onRequest(req, res) {
   const path = req.url.split('?')[0];
@@ -82,14 +123,17 @@ const perIp = new Map(), MAX_PER_IP = 16;
 let closing = false;
 function onUpgrade(req, socket, head) {
   const path = req.url.split('?')[0];
-  if (closing || (path !== '/ws' && path !== '/ws/oathwild')) { socket.destroy(); return; }
+  const isEdit = path === '/ws/edit' || path === '/ws/oathwild/edit';
+  if (closing || (path !== '/ws' && path !== '/ws/oathwild' && !isEdit)) { socket.destroy(); return; }
+  if (isEdit && !editor) { socket.write('HTTP/1.1 403 Forbidden\r\nContent-Type: text/plain\r\n\r\nThe map editor only runs on the dev world server.'); socket.destroy(); return; }
   if (!originOk(req.headers.origin, req.headers.host)) { socket.write('HTTP/1.1 403 Forbidden\r\n\r\n'); socket.destroy(); return; }
   const ip = ipOf(req);
   if ((perIp.get(ip) || 0) >= MAX_PER_IP) { socket.write('HTTP/1.1 429 Too Many Requests\r\n\r\n'); socket.destroy(); return; }
   wss.handleUpgrade(req, socket, head, ws => {
     perIp.set(ip, (perIp.get(ip) || 0) + 1);
     socket.setNoDelay?.(true);
-    const h = hub.accept({ ip, send: d => { if (ws.readyState === 1) ws.send(d); } });
+    const send = d => { if (ws.readyState === 1) ws.send(d); };
+    const h = isEdit ? editor.accept({ send }) : hub.accept({ ip, send });
     ws.on('message', (d, isBinary) => { if (!isBinary) h.message(d.toString('utf8')); });
     ws.on('close', () => { const k = (perIp.get(ip) || 1) - 1; if (k > 0) perIp.set(ip, k); else perIp.delete(ip); h.close(); });
     ws.on('error', () => {});

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#1a1712">
+<title>Oathwild Map Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="../../../shared/dialog.css">
+<link rel="stylesheet" href="../../../shared/tooltip.css">
+<link rel="stylesheet" href="../css/oathwild.css">
+<link rel="stylesheet" href="editor.css">
+<script type="importmap">{ "imports": { "three": "../../../vendor/three/three.module.js", "three/addons/": "../../../vendor/three/addons/" } }</script>
+</head>
+<body class="ed">
+<canvas id="view" aria-label="The world, seen from the editor's camera"></canvas>
+<div id="ed-labels" aria-hidden="true"></div>
+<div id="ed-ui"></div>
+<div id="loading" class="ow-loading"><div class="ow-loading-logo">MAP EDITOR</div><div class="ow-loading-bar"><i></i></div><p>Raising the hills…</p></div>
+<script type="module" src="js/editor.js"></script>
+</body>
+</html>

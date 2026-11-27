@@ -1,6 +1,36 @@
 {
  "entries": [
   {
+   "id": "2026-11-26-world-feel",
+   "date": "2026-11-26",
+   "title": "Weather, a fairer start, dodging that works, and a camera you can tune",
+   "items": [
+    "Weather: clear skies, clouds, rain, fog and thunderstorms with lightning that lights the ground and thunder that rolls in late. Everyone in a world sees the same sky; the Thornmere Wilds are wetter and stormier than the Vale. Puddles grow in the rain.",
+    "Trees, grass and rain sway together in one wind, from a calm breeze to a storm that bends the forest.",
+    "A Look setting in Settings → Graphics: Classic (as before), Vivid, Cinematic, Moody or your own. Light shafts, softer longer shadows, shining water with foam at the shore, a richer sky and a wet look in the rain. Each effect says what it costs on a phone.",
+    "Dodging works: a monster's big blow now shows a red mark and lands exactly where the mark is, so a roll out of it is safe. Ordinary blows are quick, softer and have no mark.",
+    "A gentler start: monsters of levels 1-4 have less health and hit a little softer, and a new hero starts with more health.",
+    "\"Miss\" only shows when a blow was aimed at someone, not every time you swing at the air.",
+    "Weapon swings leave a trail along the blade: a bright steel streak with sparks for swords and daggers, a heavier trail with dust for axes and maces. Arrows fly as real arrows, and a monster's big blow cracks the ground.",
+    "Towns look better: painted walls, timber, stone and roofs, window boxes, shutters, shop signs, balconies, porches, ivy, lanterns and chimneys.",
+    "The stone bridges stand higher over the water and the Troll Bridge reaches further onto the banks.",
+    "Tune camera in the ☰ menu: move the camera's height, side offset, how far ahead it looks and more while you play, and send your numbers to us.",
+    "Send a lag report in the ☰ menu: if the game stutters, it shows what the last two minutes looked like and sends the details so we can fix it."
+   ]
+  },
+  {
+   "id": "2026-11-26-arena",
+   "date": "2026-11-26",
+   "title": "The Arena: waves, reward chests and champions",
+   "items": [
+    "New arena on the world list: a great arena of its own, with a court of shops outside its gates. Share its code like a world; up to 10 heroes.",
+    "Pick a bracket on the board by your level (1-2 up to 9-10) and fight five waves through four gates: a brute in wave 3, a boss in wave 5, a short breather between them. A level-1 hero can start; brackets above you are marked hard, never locked.",
+    "Win and a reward chest waits for each of you in the court: gear of the bracket's level and gold. The first win of a bracket adds a piece and a magic one for sure.",
+    "Ten champions, rank 10 to the Grand Champion, fight like heroes: their own abilities, rolls and a red mark before every big blow. Beat one for their unique item and a title shown with your name.",
+    "Your hero is the same everywhere: levels, gold, gear and titles from the arena come with you into your worlds."
+   ]
+  },
+  {
    "id": "2026-11-26-combat",
    "date": "2026-11-26",
    "title": "Combat rebuilt: big spells, knockdowns, new class trees",

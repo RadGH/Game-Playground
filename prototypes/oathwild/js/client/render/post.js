@@ -7,6 +7,9 @@
 // warm highlights, cool shadows, greens a touch less loud, blacks barely lifted, contrast kept (no milky haze).
 //
 //   const post = createPost(view, quality)   post.render()   post.setSize(w, h)   post.grade (uniforms)   post.bloom
+//   post.setLook(fx)   the Look setting's effects (render/look-presets.js): rays / contact / depth strengths (null = this
+//                      quality's own default). A pass this chain does not have yet is built ONCE, the first time a preset
+//                      asks for it (→ true, so the caller can cover it with a short fade); after that only numbers move.
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
@@ -15,6 +18,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
+import { DepthBlurShader, SceneDepthPass } from './look-passes.js';
 
 /** The look, in display colours (after tone mapping). Every number here was checked on screenshots (README). */
 export const GRADE = {
@@ -98,8 +102,9 @@ export function createPost(view, quality) {
     gtao.updateGtaoMaterial({ radius: 0.6, distanceExponent: 1.6, thickness: 1.2, scale: 1, samples: 12 });
     composer.addPass(gtao);
   }
-  const rays = high ? new ShaderPass(RaysShader) : null;
+  let rays = high ? new ShaderPass(RaysShader) : null;
   if (rays) composer.addPass(rays);
+  let depth = null;
   const bloom = new UnrealBloomPass(new THREE.Vector2(w / 2, h / 2), BLOOM.strength, BLOOM.radius, BLOOM.threshold);
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
@@ -107,7 +112,7 @@ export function createPost(view, quality) {
   composer.addPass(grade);
   if (!high) composer.addPass(new SMAAPass());
   const post = {
-    composer, bloom, grade: grade.uniforms, gtao, rays,
+    composer, bloom, grade: grade.uniforms, get gtao() { return gtao; }, get rays() { return rays; }, get depth() { return depth; },
     /** Where the sun is on screen and how much we face it (rays only when it is ahead of us). */
     sun(dir) {
       if (!rays) return;
@@ -117,8 +122,37 @@ export function createPost(view, quality) {
       rays.uniforms.uSun.value.set(p.x * 0.5 + 0.5, p.y * 0.5 + 0.5);
       rays.uniforms.uFace.value = p.z < 1 ? facing * facing : 0;
     },
-    render() { composer.render(); },
-    setSize(W, H) { composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(W, H); bloom.resolution.set(W / 2, H / 2); grade.uniforms.uAspect.value = W / Math.max(1, H); gtao?.setSize(W * renderer.getPixelRatio(), H * renderer.getPixelRatio()); },
+    render() { if (depth) { depth.uniforms.uNear.value = camera.near; depth.uniforms.uFar.value = camera.far; } composer.render(); },
+    setLook(fx = {}) {
+      let built = false;
+      const before = p => composer.passes.indexOf(p);
+      // contact shading (GTAO): High has it at 0.35; another strength, or Medium asking for it, builds / sets it
+      if (fx.contact != null && fx.contact > 0 && !gtao) {
+        gtao = new GTAOPass(scene, camera, Math.max(1, view.size.w), Math.max(1, view.size.h));
+        gtao.updateGtaoMaterial({ radius: 0.6, distanceExponent: 1.6, thickness: 1.2, scale: 1, samples: high ? 12 : 8 });
+        composer.insertPass(gtao, 1); built = true;
+      }
+      if (gtao) {
+        if (fx.contact == null) { gtao.enabled = high; gtao.blendIntensity = 0.35; }
+        else { gtao.enabled = fx.contact > 0; gtao.blendIntensity = 0.35 * Math.min(1.25, fx.contact * 1.15); }
+      }
+      // light shafts: High has them faint (RAYS.strength); a preset sets 0..1 of a slightly stronger most (still faint: rule 75)
+      if (fx.rays != null && fx.rays > 0 && !rays) { rays = new ShaderPass(RaysShader); composer.insertPass(rays, before(depth || bloom)); built = true; }
+      if (rays) { const k = fx.rays == null ? (high ? 0.8 : 0) : fx.rays; rays.enabled = k > 0; rays.uniforms.uStrength.value = fx.rays == null ? RAYS.strength : RAYS.strength * 1.25 * k; }
+      // distance blur: needs the scene's depth, so the scene target gains a depth texture the first time
+      if (fx.depth > 0 && !depth) {
+        const pr = renderer.getPixelRatio();
+        const sceneDepth = new SceneDepthPass(scene, camera, Math.max(1, view.size.w * pr), Math.max(1, view.size.h * pr), high ? 4 : 0);
+        composer.passes[0].dispose?.(); composer.passes[0] = sceneDepth;
+        depth = new ShaderPass(DepthBlurShader);
+        depth.uniforms.tDepth.value = sceneDepth.depthTexture;
+        composer.insertPass(depth, before(bloom)); built = true;
+        post.setSize(view.size.w, view.size.h);
+      }
+      if (depth) { depth.enabled = fx.depth > 0; depth.uniforms.uStrength.value = fx.depth || 0; }
+      return built;
+    },
+    setSize(W, H) { composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(W, H); bloom.resolution.set(W / 2, H / 2); grade.uniforms.uAspect.value = W / Math.max(1, H); gtao?.setSize(W * renderer.getPixelRatio(), H * renderer.getPixelRatio()); if (depth) depth.uniforms.uTexel.value.set(1 / Math.max(1, W * renderer.getPixelRatio()), 1 / Math.max(1, H * renderer.getPixelRatio())); },
     dispose() { composer.dispose(); },
   };
   post.setSize(w, h);

@@ -13,7 +13,7 @@
 //   A.npc(npc) — a person from data/npcs.json (drawn while near)
 // Bodies load in the background; until then a simple 3D figure of the right size stands in (no 2D anything).
 import * as THREE from 'three';
-import { createTabard } from '../../../../../avatar-3d/tabard/js/tabard.js';
+import { createTabard, CLIPS } from '../../../../../avatar-3d/tabard/js/tabard.js';
 import { createFalCharacter } from '../../../../../avatar-3d/fal/js/fal.js';
 import { createCritter } from './critters.js';
 import { tabardItems } from '../../game/gear.js';
@@ -116,22 +116,27 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
       flinch(fromX, fromZ, heavy = false) { startFlinch(a, fromX, fromZ, heavy); },
       roll(seconds) { startRoll(a, seconds); },
       windup(seconds) { startWindup(a, seconds); },
-      act(kind) {
+      act(kind, { spell = false } = {}) {
         const b = a.formBody || a.body;
         if (!b) return;
         const map = { attack: 'attack', cast: 'cast', hit: 'hit', death: 'death', channel: 'channel', dodge: 'roll', block: 'ready' };   // a shield block: a snap into guard
-        const clip = map[kind] || kind;
+        let clip = map[kind] || kind, speed = 1;
+        // a basic attack (not a spell's swing): render/swings.js picks the weapon kind's clip + speed and draws its trail
+        if (kind === 'attack' && !spell && !a.dead && A.swingHook) { const s = A.swingHook(a); if (s?.clip) clip = s.clip; if (s?.speed) speed = s.speed; }
         if (kind === 'death') { a.dead = true; a.once = 'death'; b.play('death', 0.15); a.clip = 'death'; a.motion = null; return; }
         if (a.dead) return;
         if (kind === 'dodge') { startRoll(a, a.rollSeconds || 0.3); return; }   // the roll: its clip sped up to the real roll time
         if (a.motion?.knock && kind === 'hit') return;                           // thrown / lying: no flinch clip over it
         if ((kind === 'hit' || kind === 'block') && a.once && performance.now() < a.onceUntil) return;   // a hit never cuts off a swing
-        b.play(clip, 0.12); a.clip = clip; a.once = clip; a.onceUntil = performance.now() + (kind === 'hit' || kind === 'block' ? 350 : 650);
+        b.play(clip, 0.12); a.clip = clip; a.once = clip; a.onceUntil = performance.now() + (kind === 'hit' || kind === 'block' ? 350 : 650 / Math.min(1, speed));   // a slow heavy swing keeps its clip to the end of its stroke
+        // a clip's speed sticks to its action: every swing sets it (a dagger's fast swing must not speed up Cleave)
+        if (kind === 'attack' && b.isTabard) speedClip(b, CLIPS[clip] || clip, speed);
       },
       revive() { a.dead = false; a.once = null; a.clip = null; },
       dispose() { scene.remove(root); if (a.body?.isTabard) { tabardsLive--; a.body.dispose?.(); } },
     };
     a.isMe = me; a.bornAt = performance.now();
+    a.swingTell = s => A.swingHook?.(a, { tell: s });     // a monster's tell: its slash falls as the tell ends
     // a person (hero or townsfolk) is never a grey stand-in: they are simply not drawn until their own body is ready,
     // and the nearest ones get bodies first (budget). A monster gets a stand-in only if its model is slow (> 2 s), so
     // nothing you fight is ever invisible.
@@ -286,9 +291,11 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
     if (a.clip !== clip) { b.play(clip, 0.3); a.clip = clip; }
   }
 
-  return {
+  const A = {
     actors,
     playLoop,
+    /** (a) → { clip, speed } | null: asked before every basic-attack clip (render/swings.js sets it) */
+    swingHook: null,
     get(id) { return actors.get(id) || null; },
     unit(id, info, opts = {}) {
       let a = actors.get(id);
@@ -343,6 +350,7 @@ export function createActors(view, { rules, art, quality = 'medium', maxTabards 
     },
     stats: () => ({ actors: actors.size, tabards: tabardsLive, loading, queued: queue.length }),
   };
+  return A;
 }
 const corpses = [];
 
@@ -397,8 +405,9 @@ function startWindup(a, seconds) {
   const b = a.formBody || a.body;
   a.motion = a.motion || {};
   a.motion.windup = { t0: nowS(), s: Math.max(0.2, seconds) };
-  // the swing clip starts with the tell, so its blow falls as the tell ends
+  // the swing clip starts with the tell, so its blow falls as the tell ends (its slash: render/swings.js, at the end)
   if (b) { b.play('attack', 0.1); a.clip = 'attack'; a.once = 'attack'; a.onceUntil = performance.now() + (seconds + 0.35) * 1000; }
+  a.swingTell?.(seconds);
 }
 /** Speed up a Tabard clip that just started (the library's roll / jump are 1.4-1.5 s; ours last 0.3-0.45 s). */
 function speedClip(b, name, k) {

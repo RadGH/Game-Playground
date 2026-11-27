@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>World Build — big worlds from a brief, checked and streamed</title>
+<link rel="stylesheet" href="../shared/style.css">
+<link rel="stylesheet" href="worldbuild.css">
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+</head>
+<body>
+<header class="topbar wb-top">
+  <a href="../" class="muted">← Playground</a>
+  <h1>World Build</h1>
+  <span class="spacer"></span>
+  <span id="status" class="muted small" role="status">Pick a brief and build.</span>
+</header>
+
+<main class="wb" id="main">
+  <section class="wb-card wb-build" aria-labelledby="build-h">
+    <div class="wb-build-row">
+      <h2 id="build-h">Brief</h2>
+      <label class="wb-field">
+        <span class="small muted">World</span>
+        <select id="brief" aria-label="Brief"></select>
+      </label>
+      <label class="wb-field wb-seed">
+        <span class="small muted">Seed</span>
+        <input id="seed" type="number" min="0" step="1" inputmode="numeric" aria-label="Seed">
+      </label>
+      <button type="button" id="reseed" class="wb-ghost">New seed</button>
+      <button type="button" id="go" class="wb-primary">Build</button>
+    </div>
+    <p id="brief-note" class="small muted wb-note"></p>
+    <ul id="brief-lines" class="wb-lines small"></ul>
+  </section>
+
+  <ol id="steps" class="wb-steps" aria-label="Stages"></ol>
+
+  <section class="wb-card wb-mapcard" aria-labelledby="map-h">
+    <div class="wb-maphead">
+      <h2 id="map-h">Map</h2>
+      <div id="map-tabs" class="wb-tabs" role="tablist" aria-label="Which stage to show"></div>
+    </div>
+    <div class="wb-mapbody">
+      <div class="wb-mapwrap"><canvas id="map" width="1000" height="1000" aria-label="The selected stage's picture; click a spot to look at it"></canvas><div id="marker" class="wb-marker" hidden></div></div>
+      <aside id="spot" class="wb-spot" aria-live="polite">
+        <h3>A spot</h3>
+        <p class="small muted">Click anywhere on the map to see what is there, then fly over it in 3D.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="wb-card" aria-labelledby="stages-h">
+    <h2 id="stages-h">Stages</h2>
+    <div id="pics" class="wb-pics"></div>
+  </section>
+
+  <div class="wb-two">
+    <section class="wb-card" aria-labelledby="report-h">
+      <h2 id="report-h">Checks <span id="report-badge" class="badge"></span></h2>
+      <ul id="report" class="wb-report"><li class="muted small">Build a world to see its checks.</li></ul>
+    </section>
+    <section class="wb-card" aria-labelledby="numbers-h">
+      <h2 id="numbers-h">Numbers</h2>
+      <div id="numbers" class="wb-numbers"><p class="muted small">Build a world to see its numbers.</p></div>
+    </section>
+  </div>
+</main>
+
+<section id="fly" class="wb-fly" hidden aria-label="3D fly view">
+  <canvas id="fly-canvas"></canvas>
+  <div class="wb-flypanel" id="fly-panel">
+    <div class="wb-flyhead">
+      <button type="button" id="fly-back" class="wb-ghost">← Back to the map</button>
+      <label class="wb-field wb-inline"><span class="small muted">Detail</span>
+        <select id="fly-quality" aria-label="Detail"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select>
+      </label>
+    </div>
+    <dl class="wb-flystats" data-fly-stats></dl>
+    <p class="small muted wb-flyhelp">W A S D fly · Q / E down and up · drag to look · wheel for speed · pad sticks and triggers</p>
+    <div class="wb-climb">
+      <button type="button" data-climb="1" aria-label="Fly up">Up</button>
+      <button type="button" data-climb="-1" aria-label="Fly down">Down</button>
+    </div>
+  </div>
+  <p id="fly-loading" class="wb-flyloading">Loading the ground…</p>
+</section>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+{
+  "_doc": "Oathwild's arena (brainstorm 2026-11-27 §2; owner: 'a new hosting option for waves mode where you go to a massive arena and fight waves of monsters of certain level ranges … gear as rewards via chests … starting it should be possible for a lvl 1 character … Include other heroes in the system with special rewards for defeating them'). Read by js/rules/arena.js (the ONE reader: wave plans, scaling, rewards, uniques, champions, the hero's arena record) and server/arena.js (the match). Heroes are shared with the open world (owner answer 1): everything earned here is the hero's. Champions are made-up (owner answer 2): a ten-rank ladder to a Grand Champion. The place itself (floor, stands, gates, the court) is data/arena/*.json + js/world/arena-place.js.",
+  "_goal": "THE TUNING GOAL (rule 81, read by tools/sim-arena.mjs and tests/rules/arena.test.mjs). A hero of a bracket's levels (plain kit to level 3, magic finds from 5) clears it alone in 3-7 minutes with abilities and rolls out of a quarter of the tells (the 'new player' bar, --dodge 0.25) in at least 60% of runs and at the average bar (0.5) in at least 75%; a party of three clears it more often than one; a hero two levels under a bracket's floor mostly loses (that is what 'hard' means on the board). A champion bout at the champion's level is a real fight: the average bar wins 60-90% (the Bard, weak everywhere, loses most), and the fight lasts 15-60 s (measured 17-42 s on 2026-11-26).",
+  "match": {
+    "_doc": "waves: how many a match has. breather: seconds between waves (no shops mid-match). gather: seconds from Start to the first wave (everyone in the arena is walked onto the sand). packGap: seconds between packs inside a wave (they arrive over time, not all at once — owner: packs of 1-2, rarely 3). floorRadius: metres; a hero inside it is in the match. leash: how far from the middle of the floor a monster follows before it gives up (the floor is 60 m across from the middle). aggro: metres a wave monster notices a hero (they come out hunting). breatherHeal: the share of health and mana every hero still standing gets back when a breather starts (the crowd's water-bearers; a lone hero has no healer).",
+    "waves": 5, "breather": 20, "breatherHeal": 1, "gather": 8, "packGap": 14, "floorRadius": 58, "leash": 72, "aggro": 160,
+    "endPause": 6
+  },
+  "waves": {
+    "_doc": "Per wave (1-5): `normals` = ordinary monsters for ONE hero, `brute` = a mini-boss (a tough normal at the brute rank), `boss` = a camp boss of the bracket's regions; `level` = where in the bracket's range its monsters stand (0 = the low end, 1 = the high end). More heroes: normals x (1 + perHero x (heroes - 1)), rounded up (wave 5: the boss alone for one hero, its guards come with a party); the brute and the boss stay one, with more health (scale below).",
+    "list": [
+      { "normals": 2, "level": 0 },
+      { "normals": 2, "level": 0 },
+      { "normals": 1, "brute": true, "level": 0 },
+      { "normals": 3, "level": 0.24 },
+      { "normals": 0, "boss": true, "level": 0.4 }
+    ],
+    "perHero": 0.6
+  },
+  "scale": {
+    "_doc": "The ONE place arena monsters are sized for the party (js/rules/arena.js arenaScale; lessons rule 33). hp/dmg at 1 hero; hpPerHero/dmgPerHero added for each hero after the first. Normals stay as the open world's (the newHero numbers for levels 1-4 come from combat.json, untouched). A brute is the 'champion' rank of Farhold's monsters (x2.6 health) brought down for one hero.",
+    "normal": { "hp": 0.8, "dmg": 0.85, "hpPerHero": 0.1, "dmgPerHero": 0.05 },
+    "brute": { "hp": 0.45, "dmg": 0.75, "hpPerHero": 0.45, "dmgPerHero": 0.04 },
+    "boss": { "hp": 0.35, "dmg": 0.6, "hpPerHero": 0.5, "dmgPerHero": 0.05 }
+  },
+  "brutes": {
+    "_doc": "Monsters that make a good mini-boss for wave 3 (any of the bracket's roster that is in this list; otherwise the toughest normal of the roster).",
+    "ids": ["bounty_hunter", "goblin_shaman", "road_thug", "field_scarecrow", "bristleback", "wraith_knight", "drowned_brute", "earth_elemental", "brown_bear", "orc_grunt", "mountain_lion"]
+  },
+  "brackets": [
+    { "id": "b1", "name": "Novice", "levels": [1, 2] },
+    { "id": "b2", "name": "Bronze", "levels": [2, 4] },
+    { "id": "b3", "name": "Iron", "levels": [3, 5] },
+    { "id": "b4", "name": "Steel", "levels": [4, 6] },
+    { "id": "b5", "name": "Silver", "levels": [5, 7] },
+    { "id": "b6", "name": "Gold", "levels": [6, 8] },
+    { "id": "b7", "name": "Veteran", "levels": [7, 9] },
+    { "id": "b8", "name": "Master", "levels": [8, 10] },
+    { "id": "b9", "name": "Legend", "levels": [9, 10] }
+  ],
+  "board": {
+    "_doc": "How the bracket board marks a bracket for a hero: 'hard' when the hero is more than `hardBelow` levels under its low end (still allowed — owner: not locked), 'easy' when the hero is above its high end (rewards then roll at the bracket's level).",
+    "hardBelow": 0
+  },
+  "rewards": {
+    "_doc": "A reward chest per player after a win (individual loot, the game's rule). gold = goldBase + goldPerLevel x bracket top level, +firstGold on a first clear. items: count per chest; rarity: the weights move toward the good end by `rarityBoost` (normal 60 / magic 30 / rare 9 / legendary 1 at boost 1, data/loot-tables.json) which grows `boostPerBracket` per bracket; a first clear adds one more item and guarantees a magic-or-better piece (minRarity). Items roll at the bracket's top level, or the hero's level if lower (gear you can wear). kinds: what can drop.",
+    "goldBase": 30, "goldPerLevel": 14, "firstGold": 60,
+    "items": 2, "firstItems": 1,
+    "rarityBoost": 1.6, "boostPerBracket": 0.35, "firstMinRarity": "magic",
+    "kinds": { "weapon": 3, "armour": 3, "jewellery": 1.5, "magic": 1 },
+    "championGold": 80, "championGoldPerLevel": 30
+  },
+  "champions": {
+    "_doc": "The ladder (owner answer 2: made-up champions only; ten ranks to a Grand Champion). Each champion is BUILT LIKE A PLAYER (js/rules/hero-ai.js buildCharacter: the class plan, points, talents, gear of its level and `gear` rarity, and its own unique equipped) and FIGHTS like one (hero-ai.js championInput: its bar, rolls out of hero bolts and ground zones at `dodge`, a red mark for `tell` seconds before any ability with a cooldown of `specialCooldown` s or more). `needs`: the bracket that must be cleared first (and the rank before beaten). `hp` / `dmg`: the champion against ONE hero; `party` adds per extra hero. `title`: what a hero who beats them is called (shown with their name). `unique`: their signature item (uniques below).",
+    "specialCooldown": 5, "tell": 0.7,
+    "party": { "hpPerHero": 0.7, "dmgPerHero": 0.08 },
+    "list": [
+      { "id": "garran", "rank": 10, "name": "Garran Ashcroft", "epithet": "the Pit Dog", "level": 2, "plan": ["warrior", "warrior"], "gear": "normal", "hp": 5.6, "dmg": 0.074, "dodge": 0.15, "needs": "b1", "title": "Sand Runner", "unique": "garrans_knuckle", "look": { "body": "male", "skin": { "color": "#c99a73" }, "hair": { "id": "buzz", "color": "#5a3a1e" }, "cloth": "#8c5a2a" }, "lines": { "greet": "Fresh meat! Let's see what the gate let in.", "won": "Back to the sand with you.", "lost": "Hah! Fair hit. The crowd likes you." } },
+      { "id": "marra", "rank": 9, "name": "Marra Quill", "epithet": "the Long Shot", "level": 3, "plan": ["ranger", "ranger", "ranger"], "gear": "normal", "hp": 6.4, "dmg": 0.043, "dodge": 0.25, "needs": "b2", "title": "Gate Breaker", "unique": "quills_longbow", "look": { "body": "female", "skin": { "color": "#e7b48f" }, "hair": { "id": "long_braid", "color": "#b5652b" }, "cloth": "#4e6b34" }, "lines": { "greet": "Stand still. It's kinder.", "won": "Too slow.", "lost": "You closed the gap. Nobody closes the gap." } },
+      { "id": "tobiah", "rank": 8, "name": "Tobiah Strand", "epithet": "the Quick Knife", "level": 4, "plan": ["rogue", "rogue", "rogue", "rogue"], "gear": "magic", "hp": 8.0, "dmg": 0.046, "dodge": 0.3, "needs": "b3", "title": "Crowd Pleaser", "unique": "strands_knife", "look": { "body": "male", "skin": { "color": "#d8a27c" }, "hair": { "id": "undercut", "color": "#1e1a18" }, "cloth": "#2e2e3a" }, "lines": { "greet": "Blink and you'll miss it. Most do.", "won": "Told you.", "lost": "Well. I blinked." } },
+      { "id": "ide", "rank": 7, "name": "Ide Calloway", "epithet": "the Sister of the Sand", "level": 5, "plan": ["cleric", "cleric", "cleric", "cleric", "cleric"], "gear": "magic", "hp": 9.6, "dmg": 0.087, "dodge": 0.3, "needs": "b4", "title": "Iron Hand", "unique": "calloways_mace", "look": { "body": "female", "skin": { "color": "#a8785a" }, "hair": { "id": "bun", "color": "#e8e0d0" }, "cloth": "#e8d9a8" }, "lines": { "greet": "I will pray for you after. Briefly.", "won": "Rest now.", "lost": "The Light favours you today." } },
+      { "id": "oswin", "rank": 6, "name": "Oswin Drave", "epithet": "the Ash Mage", "level": 6, "plan": ["mage", "mage", "mage", "mage", "mage", "mage"], "gear": "magic", "hp": 14.4, "dmg": 0.056, "dodge": 0.35, "needs": "b5", "title": "Bloodied Blade", "unique": "draves_staff", "look": { "body": "male", "skin": { "color": "#e7c0a0" }, "hair": { "id": "side_part", "color": "#8a8a8a" }, "cloth": "#4a3c8c" }, "lines": { "greet": "Fire is honest. Let us be honest.", "won": "Ash to ash.", "lost": "Remarkable. Truly." } },
+      { "id": "kesta", "rank": 5, "name": "Kesta Moor", "epithet": "the Wild Heart", "level": 7, "plan": ["druid", "druid", "druid", "druid", "druid", "druid", "druid"], "gear": "magic", "hp": 4.8, "dmg": 0.025, "dodge": 0.35, "needs": "b6", "title": "Banner Bearer", "unique": "moors_crown", "look": { "body": "female", "skin": { "color": "#c08a64" }, "hair": { "id": "wavy", "color": "#3b2618" }, "cloth": "#5e7a3c" }, "lines": { "greet": "The wolf in me wants to play.", "won": "Run, little rabbit.", "lost": "You have teeth. Good." } },
+      { "id": "lio", "rank": 4, "name": "Lio Tamsk", "epithet": "the Singing Blade", "level": 8, "plan": ["bard", "bard", "bard", "bard", "bard", "bard", "bard", "bard"], "gear": "magic", "hp": 16.0, "dmg": 0.093, "dodge": 0.4, "needs": "b7", "title": "Arena Hero", "unique": "tamsks_pendant", "look": { "body": "male", "skin": { "color": "#e7b48f" }, "hair": { "id": "curly", "color": "#c9a03a" }, "cloth": "#b5523b" }, "lines": { "greet": "A song for the crowd! You're the sad verse.", "won": "And the crowd sings!", "lost": "They'll sing about YOU now. Cheek." } },
+      { "id": "grenna", "rank": 3, "name": "Grenna Holloway", "epithet": "the Storm Wife", "level": 9, "plan": ["shaman", "shaman", "shaman", "shaman", "shaman", "shaman", "shaman", "shaman", "shaman"], "gear": "rare", "hp": 16.0, "dmg": 0.074, "dodge": 0.4, "needs": "b8", "title": "Sand Lion", "unique": "holloways_ring", "look": { "body": "female", "skin": { "color": "#8c6248" }, "hair": { "id": "braids", "color": "#1e1a18" }, "cloth": "#5a6b8c" }, "lines": { "greet": "Smell the rain? That's for you.", "won": "Thunder answers.", "lost": "The storm passes. You remain." } },
+      { "id": "corvin", "rank": 2, "name": "Corvin Dask", "epithet": "the Sun Wall", "level": 10, "plan": ["warrior", "warrior", "warrior", "cleric", "paladin", "paladin", "paladin", "paladin", "paladin", "paladin"], "gear": "rare", "hp": 11.2, "dmg": 0.056, "dodge": 0.4, "needs": "b9", "title": "First Blade", "unique": "dasks_plate", "look": { "body": "male", "skin": { "color": "#d8a27c" }, "hair": { "id": "short", "color": "#c9a03a" }, "cloth": "#d9c060" }, "lines": { "greet": "Nobody has walked past me in three seasons.", "won": "The wall stands.", "lost": "Then go on. The Grand Champion waits." } },
+      { "id": "aldis", "rank": 1, "name": "Aldis Merrow", "epithet": "the Grand Champion", "level": 10, "plan": ["warrior", "warrior", "mage", "mage", "spellblade", "spellblade", "spellblade", "spellblade", "spellblade", "spellblade"], "gear": "rare", "hp": 11.2, "dmg": 0.046, "dodge": 0.5, "needs": "b9", "title": "Grand Champion", "unique": "sunder", "look": { "body": "male", "skin": { "color": "#e7b48f" }, "hair": { "id": "warrior_braids", "color": "#e8e0d0" }, "cloth": "#6b2a2a" }, "lines": { "greet": "Every name on that board came through me. Yours will too, or it won't.", "won": "Come back when you are ready.", "lost": "The sand is yours, Grand Champion." } }
+    ]
+  },
+  "uniques": {
+    "_doc": "Each champion's signature item: an Emberveil base (rolled Legendary at `level`, its own damage / armour) with FIXED enchantments (Farhold affix ids, each at `roll` of its range at that level, x `power`) and a name of its own. Marked Unique on the card, with the line `lore`.",
+    "roll": 0.95, "power": 1.25,
+    "list": {
+      "garrans_knuckle": { "name": "Garran's Knuckle Shield", "base": "shield", "level": 2, "affixes": ["of_con", "of_hp", "block_chance"], "lore": "Dented by a hundred first fights. Garran never lost the shield, only the fights." },
+      "quills_longbow": { "name": "Quill's Longbow", "base": "bow", "level": 3, "affixes": ["of_dex", "crit_chance", "sharp"], "lore": "Marra cut a notch for every champion she dropped from across the sand." },
+      "strands_knife": { "name": "Strand's Quick Knife", "base": "dagger", "level": 4, "affixes": ["of_dex", "crit_damage", "bleed_on_crit"], "lore": "Light enough to forget it is there. That is the trick." },
+      "calloways_mace": { "name": "Calloway's Prayer Mace", "base": "iron_mace", "level": 5, "affixes": ["of_con", "potency", "hp_on_kill"], "lore": "Words of mercy run round the head. She reads them after a fight." },
+      "draves_staff": { "name": "Drave's Ash Staff", "base": "staff", "level": 6, "affixes": ["of_int", "potency", "of_mana_regen"], "lore": "Blackened from tip to heel, and still warm." },
+      "moors_crown": { "name": "Moor's Antler Crown", "base": "light_helm", "level": 7, "affixes": ["of_int", "of_hp", "hp_regen"], "lore": "Shed by a stag that followed Kesta into the arena and never left." },
+      "tamsks_pendant": { "name": "Tamsk's Song Pendant", "base": "necklace", "level": 8, "affixes": ["crit_chance", "of_speed", "cdr"], "lore": "It hums the last bar of every song Lio ever won." },
+      "holloways_ring": { "name": "Holloway's Storm Ring", "base": "ring", "level": 9, "affixes": ["of_int", "potency", "crit_chance"], "lore": "The air tastes of thunder when you slip it on." },
+      "dasks_plate": { "name": "Dask's Sun Plate", "base": "heavy_chest", "level": 10, "affixes": ["of_str", "of_con", "sturdy", "phys_dmg_reduce"], "lore": "Polished every morning. Corvin says the sun likes to see itself." },
+      "sunder": { "name": "Sunder", "base": "longsword", "level": 10, "affixes": ["of_str", "sharp", "crit_damage", "lifeSteal"], "lore": "The Grand Champion's own blade. The sand goes quiet when it is drawn." }
+    }
+  }
+}

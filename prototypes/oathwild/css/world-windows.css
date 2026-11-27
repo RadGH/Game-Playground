@@ -206,6 +206,18 @@
 .ow-set-key:hover, .ow-set-key.pad-focus { border-color: var(--gold); }
 .ow-set-wait { color: var(--ink); border-style: dashed; }
 .ow-set-fixed { color: var(--ink-dim); font-weight: 700; }
+/* the Look panel (js/client/ui/look-panel.js): five preset cards, Custom sliders, effects with their phone cost */
+.ow-look-cards { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.ow-look-card { min-height: 92px; }
+.ow-look-fx > span { flex: 1 1 auto; min-width: 0; }
+.ow-look-fx .ow-range { flex: 0 1 200px; max-width: 220px; }
+.ow-look-val { color: var(--gold); font-weight: 800; font-variant-numeric: tabular-nums; min-width: 3.4em; text-align: right; }
+.ow-look-cost { margin-top: 2px; font-weight: 700; }
+.ow-look-cost-low { color: #9ccf86 !important; }
+.ow-look-cost-medium { color: #e8c170 !important; }
+.ow-look-cost-high { color: #e8946a !important; }
+.ow-look-off { opacity: .6; }
+.ow-look-note { color: var(--ink-dim); font-size: 14px; margin: 10px 0 0; }
 
 /* ---- report a bug ---- */
 .ow-rep-label { display: block; font-weight: 800; margin: 0 0 8px; color: var(--gold); font-size: 15px; font-family: var(--font); }
@@ -223,6 +235,11 @@
   .ow-menu-grid { grid-template-columns: repeat(4, 1fr); }
   .ow-menu-tile { min-height: 64px; font-size: 13px; }
   .ow-set-choices { grid-template-columns: 1fr; }
+  .ow-look-cards { grid-template-columns: 1fr 1fr; }
+  .ow-look-card { min-height: 0; }
+  .ow-look-card small { display: none; }
+  .ow-look-fx { flex-wrap: wrap; }
+  .ow-look-fx .ow-range { flex: 1 1 100%; max-width: none; }
   .ow-set-table th:nth-child(3), .ow-set-table td:nth-child(3) { display: none; }
   .ow-svc-horse-ico { width: 56px; height: 56px; }
   /* the pick pane: pinned at the bottom of the window, opaque, the card scrolls by itself */
@@ -239,3 +256,16 @@
   .ow-trade-skill-ico { width: 54px; height: 54px; }
   .ow-trade-perks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Send a lag report (ui/win-lag.js) */
+.ow-lag { --lag-ok: #6fae6a; --lag-slow: #d8b04a; --lag-stall: #d0503c; }
+.ow-lag-lead { margin: 0 0 8px; font-weight: 800; color: var(--gold); font-family: var(--font); }
+.ow-lag-graph { display: block; width: 100%; height: 96px; border-radius: 8px; background: rgba(0, 0, 0, 0.28); }
+.ow-lag-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 13px; margin: 6px 0 12px; }
+.ow-lag-key { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.ow-lag-key.is-ok { background: var(--lag-ok); } .ow-lag-key.is-slow { background: var(--lag-slow); } .ow-lag-key.is-stall { background: var(--lag-stall); }
+.ow-lag-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0 0 14px; }
+.ow-lag-tile { padding: 10px 12px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; gap: 2px; }
+.ow-lag-tile b { font-size: 20px; font-family: var(--font); }
+.ow-lag-tile span { font-size: 13px; opacity: 0.8; }
+.ow-lag-tile.is-warn b { color: var(--lag-stall); }

@@ -8,6 +8,7 @@
 //   … --dodge 0.5              share of monster tells the bot rolls out of (default 0.5: an average phone player)
 //   … --detail                 one row per monster kind              … --bosses           also one boss vs one hero
 //   … --json                   machine-readable rows
+//   … --foe 1                  monsters this many levels ABOVE the hero (a fresh hero meets level-2 monsters by the village)
 //
 // The goal it is read against (data/combat.json `_goal`): a level-N hero using their abilities kills ONE level-N normal
 // monster in ~6-10 s losing <= 35% health; two is a real fight they win; three is dangerous; weapon alone still wins
@@ -28,6 +29,7 @@ const basic = !!opt('--basic'), dodge = !opt('--nododge'), detail = !!opt('--det
 // the owner played), a set of good magic finds from level 5; --gear normal | magic forces one
 const gear = opt('--gear') ? String(opt('--gear')) : 'auto';
 const gearAt = lvl => gear === 'auto' ? (lvl >= 5 ? 'magic' : 'normal') : gear;
+const foeUp = opt('--foe') ? Number(opt('--foe')) : 0;
 const dodgeSkill = opt('--dodge') ? Number(opt('--dodge')) : 0.5;   // share of tells the bot rolls out of (an average phone player ~ half)
 
 /** Every hostile normal monster kind a hero of `level` meets (the region whose levels hold it; 5 = both). */
@@ -57,7 +59,7 @@ for (const cls of classes) {
     for (const n of counts) {
       const per = [];
       for (const id of kindsFor(lvl)) {
-        const r = runFight(rules, [ch()], Array.from({ length: n }, () => ({ id, level: lvl })), { seed: 11, maxSeconds: 90, basic, dodge, dodgeSkill });
+        const r = runFight(rules, [ch()], Array.from({ length: n }, () => ({ id, level: lvl + foeUp })), { seed: 11, maxSeconds: 90, basic, dodge, dodgeSkill });
         const p = r.players[0];
         per.push({ id, won: r.won, seconds: r.fight ?? r.seconds, left: r.won ? p.hp / p.maxHp : 0, dodges: r.dodges || 0 });
       }

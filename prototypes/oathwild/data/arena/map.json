@@ -1,0 +1,39 @@
+{
+  "_doc": "The arena's own little map (brainstorm 2026-11-27 §2b), in data/map.json's format and read by the same js/world/terrain.js: a level valley with the arena in the middle (a sand floor 120 m across inside tiered stone stands — js/world/arena-place.js turns placements.json `arena` into its walls, gates and seats) and the staging court to the south (shops, trainer, shrine, the bracket board and the reward chests), woods of big trees round it and mountains at the edge. x runs east, z runs SOUTH. Self-contained so it can later sit behind a teleport stone in Larkford (the hosting stays its own place).",
+  "version": 1,
+  "seed": 4441,
+  "bounds": { "minX": -280, "maxX": 280, "minZ": -240, "maxZ": 320, "margin": 40 },
+  "grid": { "cell": 2, "biomeCell": 4, "sampleStep": 2 },
+  "spawn": { "at": [0, 122], "shrine": "arena_shrine" },
+  "limits": { "maxSlope": 38, "bankSlope": 50, "bankBand": 0.8, "wadeDepth": 0.7, "roadMaxGrade": 0.14 },
+  "regions": { "arena_grounds": { "name": "the Arena Grounds", "levels": [1, 10], "base": 9, "amp": 2.5, "ground": "meadow", "forest": 0.35 } },
+  "border": { "_doc": "One region: both sides are the arena grounds.", "west": "arena_grounds", "east": "arena_grounds", "points": [[0, -240], [0, 320]], "blend": 40 },
+  "frame": { "width": 70, "height": 38 },
+  "ridges": [],
+  "hills": [
+    { "id": "west_rise", "name": "the West Rise", "at": [-215, -40], "radius": 95, "height": 12 },
+    { "id": "east_rise", "name": "the East Rise", "at": [215, 10], "radius": 95, "height": 14 },
+    { "id": "north_rise", "name": "the North Rise", "at": [0, -205], "radius": 90, "height": 10 }
+  ],
+  "rivers": [],
+  "marshes": [],
+  "fields": [],
+  "forests": [
+    { "id": "arena_west_wood", "name": "the West Wood", "at": [-190, 60], "radius": 80, "density": 0.75 },
+    { "id": "arena_east_wood", "name": "the East Wood", "at": [185, 120], "radius": 80, "density": 0.75 },
+    { "id": "arena_north_wood", "name": "the North Wood", "at": [-30, -175], "radius": 85, "density": 0.7 },
+    { "id": "arena_south_wood", "name": "the South Wood", "at": [40, 270], "radius": 70, "density": 0.6 }
+  ],
+  "roads": [
+    { "id": "court_street", "name": "Court Street", "class": "road", "town": "arena_court", "width": 7, "points": [[0, 92], [0, 120], [0, 150], [0, 180], [0, 214]] },
+    { "id": "court_cross", "name": "Banner Row", "class": "street", "town": "arena_court", "width": 5, "points": [[-50, 152], [-25, 151], [0, 150], [25, 151], [50, 152]] },
+    { "id": "ring_walk", "name": "the Ring Walk", "class": "trail", "width": 4, "points": [[-12, 100], [-60, 80], [-96, 30], [-104, -20], [-90, -70], [-50, -100], [0, -108], [50, -100], [90, -70], [104, -20], [96, 30], [60, 80], [12, 100]] }
+  ],
+  "crossings": [],
+  "places": {
+    "_doc": "arena = the floor and stands (flat to 100 m so the stands stand on level ground); arena_court = the staging court, a small town of shops planned by js/world/town.js from data/arena/towns.json.",
+    "arena": { "name": "the Grand Arena", "kind": "landmark", "region": "arena_grounds", "at": [0, 0], "radius": 92, "flat": 104, "paint": { "layer": "sand", "radius": 90, "soft": 3 } },
+    "arena_court": { "name": "the Arena Court", "kind": "town", "region": "arena_grounds", "at": [0, 156], "radius": 50, "flat": 66 }
+  },
+  "areas": []
+}

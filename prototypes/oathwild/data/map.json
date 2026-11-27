@@ -98,8 +98,8 @@
   "crossings": [
     { "id": "lark_bridge", "name": "Lark Bridge", "road": "lark_road", "river": "brightwater", "kind": "bridge", "art": "bridge-wood" },
     { "id": "bandit_ford", "name": "the Bandit Ford", "road": "south_road", "river": "brightwater", "kind": "ford" },
-    { "id": "troll_bridge", "name": "the Troll Bridge", "road": "lark_road", "river": "mirewater", "kind": "bridge", "art": "bridge-stone" },
-    { "id": "old_stone_bridge", "name": "Old Stone Bridge", "road": "barrow_road", "river": "mirewater", "kind": "bridge", "art": "bridge-stone" }
+    { "id": "troll_bridge", "name": "the Troll Bridge", "road": "lark_road", "river": "mirewater", "kind": "bridge", "art": "bridge-stone", "deck": 14.9, "ramp": 2, "a": [337.52, -30.54], "b": [363.35, -29.16] },
+    { "id": "old_stone_bridge", "name": "Old Stone Bridge", "road": "barrow_road", "river": "mirewater", "kind": "bridge", "art": "bridge-stone", "deck": 14.9, "ramp": 2 }
   ],
 
   "places": {

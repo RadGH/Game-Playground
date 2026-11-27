@@ -1,0 +1,7 @@
+Use your image generation tool to create ONE new picture and save it in the current working directory as painted.png (1024x1024 PNG). Do nothing else (do not write code, do not edit other files).
+It is a game texture for a fantasy town building kit: TIMBER.
+Subject: ONE thick horizontal wooden BEAM seen from the front, filling the whole square: chunky painted oak, warm mid brown, long bold grain strokes running left to right, a dark painted border along the top and bottom edges with a bright highlight line just inside the top edge, two or three dark knots.
+It must TILE left-to-right: the left edge continues seamlessly into the right edge (the top and bottom edges are the beam's own painted borders).
+Fill the WHOLE picture edge to edge with the material (no background, no border, no drop shadow, no perspective — seen straight on, flat lighting from the top-left).
+Style: hand-painted stylised fantasy MMO texture in the style of the classic 2004 fantasy MMO towns: chunky, readable shapes, bold painted highlights on top edges and dark painted shadows in the cracks, warm saturated but not neon colours, soft brush strokes, NO photo detail, NO noise grain, NO realism, big simple forms readable from far away.
+Hard rules: no text, no letters, no numbers, no watermark, no people, no frame.

@@ -14,6 +14,7 @@ import { createGrass } from './grass.js';
 import { kitModel } from './kit-props.js';
 import { createKitDraw } from './kit-draw.js';
 import { createTrees } from './trees.js';
+import { wind } from './wind.js';
 import { createTownView } from './town-draw.js';
 import { createBridgeView } from './bridge-draw.js';
 import { addContactShade } from './contact.js';
@@ -139,6 +140,9 @@ export function createWorldView(view, { T, placements, art, scattered, book, tow
   let townView = null;
   if (town) pending.push(createTownView({ T, plan: town, quality, tileGroup, chimneys: kit.chimneys }).then(v => { townView = v; }).catch(e => console.warn('town', e)));
   kit.build();
+  // the arena place (brainstorm 2026-11-27 §2b): its walls, stands, gates, crowd from the same layout the server walks
+  let arenaView = null;
+  if (placements.arenaLayout) pending.push(import('./arena-draw.js').then(m => m.createArenaView({ scene: root, L: placements.arenaLayout, quality })).then(v => { arenaView = v; }).catch(e => console.warn('arena', e)));
   if (!new URLSearchParams(location.search).has('envoff')) addContactShade(view, { T, placements });
   // the mist pools in the low ground: its base is set from this map's own heights (the lowest 4% of the land: river bottoms)
   { const hs = Float32Array.from(T.grid.heights).sort(); ATMOS.set({ mist: { base: hs[Math.floor(hs.length * 0.04)] } }); }
@@ -235,10 +239,13 @@ export function createWorldView(view, { T, placements, art, scattered, book, tow
   // ---------------------------------------------------------------- per frame
   let wt = 0;
   return {
+    get arena() { return arenaView; },
     root, tiles, chestMeshes, objectMeshes, shrineMarks, ground, grass, kitStats: kit.stats, chimneys: kit.chimneys, get treeStats() { return treeView?.stats || null; }, get townStats() { return townView?.stats || null; }, ready: () => Promise.allSettled([...pending, ground.ready]),
     update(dt, at) {
       wt += dt;
+      wind.update(dt);   // the ONE wind: trees, tufts, grass and crops all bend to it (./wind.js)
       kit.update(dt, wt);
+      arenaView?.update(dt, wt);
       treeView?.update(wt);
       ground.update(dt, at);
       grass.update(view.camera.position);

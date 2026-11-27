@@ -10,44 +10,30 @@
 // pine/oak/marsh trees/dead trees in the wilds). Jittered grid: one try per `step` metres.
 
 import { makeRng, hashStr } from '../../../../worldgen/js/noise.js';
+import { gameKinds } from '../../../../treekit/js/species.js';
 
 const TREE_KINDS = {
   brightwater_vale: [['oak-a', 4], ['oak-b', 3], ['birch', 3], ['pine-a', 1]],
   thornmere_wilds: [['pine-a', 4], ['pine-b', 4], ['oak-b', 2], ['dead-tree', 0.4]],
+  arena_grounds: [['oak-a', 3], ['oak-b', 3], ['pine-a', 2], ['birch', 2]],      // the arena's own valley (data/arena/map.json)
   marsh: [['marsh-tree', 4], ['willow', 2], ['dead-tree', 1]],
   shore: [['willow', 1]],
 };
 // TREES ARE BIG (owner 2026-11-24: "Think Skyrim or WoW, trees 10-15 times taller than you. That's a tree. Trees aren't
 // just 3x taller than a person. Big trees better" — lessons rule on tree scale). A person is 1.8 m, so a grown tree is
-// 18-27 m and an old giant in the deep woods 35-45 m. `story` = the storybook tree drawn (js/client/render/story-trees.js,
-// Thousandvale's big-leaf builder: a few big leaf clumps, never hundreds of tiny leaves); `h` = its height in metres at
-// scale 1; `trunk` / `crown` = trunk radius at the ground and canopy radius at that height (collision + spacing).
-export const TREE_SPECIES = Object.freeze({
-  'oak-a':      { story: 'oak', h: 21, trunk: 0.95, crown: 8 },
-  'oak-b':      { story: 'oak', h: 24, trunk: 1.05, crown: 9 },
-  'birch':      { story: 'birch', h: 20, trunk: 0.6, crown: 4.6 },
-  'pine-a':     { story: 'pine', h: 26, trunk: 0.6, crown: 6.3 },
-  'pine-b':     { story: 'spruce', h: 27, trunk: 0.6, crown: 4.9 },
-  'willow':     { story: 'willow', h: 16, trunk: 0.95, crown: 8 },
-  'marsh-tree': { story: 'beech', h: 19, trunk: 0.65, crown: 4.7 },
-  'dead-tree':  { story: 'dead_pine', h: 18, trunk: 0.5, crown: 1.5 },
-  // giants: in the heart of a wood, one tree in eight becomes one of these
-  'ancient-oak':   { story: 'ancient_oak', h: 38, trunk: 3.4, crown: 19, giant: true },
-  'giant-spruce':  { story: 'spruce', h: 44, trunk: 1.3, crown: 8, giant: true },
-});
+// 18-27 m and an old giant in the deep woods 35-45 m. The kinds and their sizes are DATA in the Tree Kit
+// (treekit/data/species.json, "oathwild" block — one file for the drawing and the colliders, lessons rule 22):
+// `story` = the tree drawn (treekit/js/build.js: a few big leaf clumps, never hundreds of tiny leaves); `h` = its height
+// in metres at scale 1; `trunk` = the DRAWN trunk's radius 1 m above the ground and `crown` = the drawn canopy's radius
+// at that height, both measured from the built tree by treekit/tools/measure.mjs (collision + spacing).
 // The understory (environment round 2026-11-24, "the missing mid layer"): walk-through plants drawn with the same leaf
 // tufts as the trees — shrubs at the feet of trees, and a forest EDGE that steps down (wood → saplings → shrubs → meadow)
 // instead of a hard line. No colliders: the server never reads these (understory() is called by the client only).
-export const UNDERSTORY_SPECIES = Object.freeze({
-  'shrub':       { story: 'shrub', h: 1.8, shadow: false },
-  'shrub-tall':  { story: 'shrub_tall', h: 2.8, shadow: false },
-  'shrub-berry': { story: 'shrub_berry', h: 1.6, shadow: false },
-  'shrub-dry':   { story: 'shrub_dry', h: 1.5, shadow: false },
-  'sapling':     { story: 'sapling', h: 6.5, shadow: true },
-  'sapling-spruce': { story: 'spruce', h: 6, shadow: true },
-});
-const GIANT_OF = { brightwater_vale: 'ancient-oak', thornmere_wilds: 'giant-spruce' };
-const GIANT_WOOD = { brightwater_vale: 0.3, thornmere_wilds: 0.5 };   // how thick a wood must be for a giant (the vale's woods are thinner)
+const KINDS = gameKinds('oathwild');
+export const TREE_SPECIES = KINDS.trees;
+export const UNDERSTORY_SPECIES = KINDS.understory;
+const GIANT_OF = { brightwater_vale: 'ancient-oak', thornmere_wilds: 'giant-spruce', arena_grounds: 'ancient-oak' };
+const GIANT_WOOD = { brightwater_vale: 0.3, thornmere_wilds: 0.5, arena_grounds: 0.4 };   // how thick a wood must be for a giant (the vale's woods are thinner)
 const DECOR = {
   meadow: [['rock-small', 3], ['rock-medium', 1.2], ['bush-a', 3], ['bush-b', 2], ['boulder', 0.4]],
   wildgrass: [['rock-small', 2], ['rock-medium', 1.5], ['bush-a', 2], ['bush-c', 2], ['boulder-mossy', 0.7], ['stump-a', 1]],
@@ -57,7 +43,11 @@ const DECOR = {
   rock: [['rock-large', 2], ['rock-slab', 1.5], ['cliff-chunk', 0.6]],
 };
 const WALK_THROUGH = new Set(['fern', 'mushrooms', 'reeds', 'bog-plant', 'bush-a', 'bush-b', 'bush-c', 'rock-small']);
+export const DECOR_KINDS = Object.freeze([...new Set(Object.values(DECOR).flat().map(([k]) => k))]);   // every scattered decor id (the map editor's list)
 const RADIUS = { 'rock-small': 0.3, 'rock-medium': 0.6, 'boulder': 1.3, 'boulder-mossy': 1.1, 'rock-large': 1.1, 'rock-slab': 1.2, 'cliff-chunk': 2.5, 'rock-cluster': 0.8, 'stump-a': 0.4, 'log': 0.5, 'log-hollow': 0.6 };
+
+/** Collision radius and solidity of a decor piece (the map editor's added pieces use the scatter's own numbers). */
+export const decorInfo = art => ({ r: RADIUS[art] || 0.5, solid: !WALK_THROUGH.has(art) });
 
 function pick(list, rng) {
   const total = list.reduce((s, [, w]) => s + w, 0);

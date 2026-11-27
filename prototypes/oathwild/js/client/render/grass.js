@@ -1,4 +1,4 @@
-// Grass tufts round the camera, placed entirely on the graphics card (the idea is Farhold's and Thousandvale's
+// Grass tufts round the camera (they lean in the ONE wind, ./wind.js), placed entirely on the graphics card (the idea is Farhold's and Thousandvale's
 // grass-gpu.js: AN INSTANCE IS A SLOT, NOT A TUFT). One patch of slots follows the camera in whole lattice squares; where
 // a tuft stands in its square, which way it turns, how tall it is and whether it flowers all come from a hash of the
 // square's own whole-number coordinates, so the same ground always grows the same tuft and walking moves you past the
@@ -14,6 +14,7 @@
 //   grass.mesh                           one draw call; grass.stats = { slots, triangles }
 import * as THREE from 'three';
 import { sheafGeometry } from '../../../../../proctown/js/propkit-three.js';
+import { wind, WIND_GLSL } from './wind.js';
 
 export function createGrass(view, ground, G, { quality = 'medium' } = {}) {
   const n = Math.ceil(G.radius / G.spacing), side = 2 * n + 1, slots = side * side;
@@ -30,12 +31,13 @@ export function createGrass(view, ground, G, { quality = 'medium' } = {}) {
   const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
   mat.customProgramCacheKey = () => 'ow-grass|' + quality;
   mat.onBeforeCompile = sh => {
-    Object.assign(sh.uniforms, { tOwA: U.tOwA, tOwB: U.tOwB, uOwSplat: U.uOwSplat, tOwHeight: U.tOwHeight, uOwGrid: U.uOwGrid, uOwTime: U.uOwTime, uOwGrassCol: U.uOwGrassCol, uGr, uGrCam });
+    Object.assign(sh.uniforms, { tOwA: U.tOwA, tOwB: U.tOwB, uOwSplat: U.uOwSplat, tOwHeight: U.tOwHeight, uOwGrid: U.uOwGrid, uOwTime: U.uOwTime, uOwGrassCol: U.uOwGrassCol, uGr, uGrCam }, wind.uniforms);
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', `#include <common>
         uniform sampler2D tOwA, tOwB, tOwHeight; uniform vec4 uOwSplat, uOwGrid, uGr; uniform vec3 uGrCam; uniform float uOwTime; uniform vec3 uOwGrassCol[3];
         attribute vec2 aCell; varying vec3 vGrTint;
         ${ground.NOISE}
+        ${WIND_GLSL}
         float owH(vec2 xz) {
           vec2 g = (xz - uOwGrid.xy) / uOwGrid.z; ivec2 c = ivec2(floor(g)); vec2 f = g - vec2(c);
           float h00 = texelFetch(tOwHeight, c, 0).r, h10 = texelFetch(tOwHeight, c + ivec2(1, 0), 0).r;
@@ -59,8 +61,7 @@ export function createGrass(view, ground, G, { quality = 'medium' } = {}) {
         transformed.xz = vec2(transformed.x * cy + transformed.z * sy, -transformed.x * sy + transformed.z * cy);
         transformed *= vec3(0.55, 0.34 + 0.26 * h2 + 0.2 * sa.g, 0.55) * sc;
         float k = position.y * position.y * sc;
-        transformed.x += (sin(uOwTime * 1.8 + xz.x * 0.3 + xz.y * 0.2) * 0.6 + sin(uOwTime * 3.1 + xz.x * 0.5) * 0.3) * 0.12 * k;
-        transformed.z += cos(uOwTime * 1.4 + xz.y * 0.25) * 0.07 * k;
+        transformed.xz += owGrassLean(xz, k);          // the ONE wind (./wind.js): a gust runs over the meadow
         transformed.xz += xz; transformed.y += owH(xz) - 0.03;
         float wsum = max(1e-3, sa.r + sa.g + sa.b + sb.a);
         vec3 g = (uOwGrassCol[0] * sa.r + uOwGrassCol[1] * sa.g + uOwGrassCol[2] * (sa.b + sb.a)) / wsum;

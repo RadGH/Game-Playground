@@ -66,6 +66,9 @@ When work is laid out (rounds, milestones, a feedback list), finish ALL of it be
 | `combined/` | Two full characters talking in one 3D scene |
 | `mechkit/` | Overdrive Frame's mech parts (4 makers, 116 parts with stats), layered baked sprites + paint masks, dress-up page |
 | `citykit/` | Arcline's procedural iso city: three.js models baked to 2D day + night pictures; review page for buildings, walls, turrets, creatures, vehicles |
+| `worldbuild/` | World Build: a brief → shape → regions → places → roads → detail → checks pipeline for big worlds (Oathwild 4 × 4 km sample with the hand map pinned), stage pictures, a streamed 3D fly view, `tools/build.mjs` |
+| `housekit/` | House Kit: Oathwild's modular town houses (Kenney walls + Codex-painted atlas, decorations, landmarks) — Oathwild's town-draw imports it; review page |
+| `treekit/` | Tree Kit: Oathwild's trees from parts (species.json: trunk, roots, branches, leaf clumps, bark, wind), the ONE wind shader, live editing with Claude (`tools/live.mjs` 8670 + `tools/tree-edit.mjs`) — Oathwild imports it |
 
 ## Prototypes (games)
 
@@ -85,6 +88,7 @@ When work is laid out (rounds, milestones, a feedback list), finish ALL of it be
 | `prototypes/overdrive-frame/` | Iso co-op mech action in a neon city; fully prerendered (City Kit + Mech Kit); co-op room server 8620/8621 | live, round 4 |
 | `prototypes/grimring/` | Arena with the Model Library Meshy fighters (1-2 foes at a time) | live |
 | `prototypes/wyrmroad/` | Side-scrolling 3D beat 'em up, Chibi 2.6, story + gear, co-op 1–4 local/online, own server 8640/8641 | live |
+| `prototypes/oathwild/` | Third-person co-op open-world RPG, own server 8660/8661; tools: `editor/` (map editor), with `housekit/`, `treekit/`, `worldbuild/` (README "Tools") | live |
 | `prototypes/tinyrts/` | Symlink to its own repo `~/claude/tinyrts` — commit THERE; keep its `master` green (stable serves it) | playable |
 | `prototypes/lanternfall/` | Side-scrolling pixel action RPG (`docs/HANDOFF.md` = remaining work) | playable |
 | `prototypes/bannerline/` | Lockstep RTS of game modes (lane wars, hunters vs farmers) | done |

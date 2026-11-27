@@ -1,9 +1,70 @@
 # Oathwild
 
-**Status:** combat + class rebuild 2026-11-26 (owner feedback after his first phone play — brainstorm + every point: `docs/BRAINSTORM-2026-11-26.md`): 22 class trees rebuilt to his rules (no paths, one rank per icon, rank II/III as own nodes, one training per weapon/armour kind, big passives, few heals; source `tools/trees/`, check `tests/rules/trees.test.mjs`), abilities are areas with knock-back/knock-down, leap + charge, the exploding Fireball, no plain wands, monster wind-up tells + longer dodge, packs of 1-2, 1v1/1v3 balance sim (`tools/sim-fights.mjs`), spell visuals ×3 with an animation on every key press (`docs/CASE-PALADIN.md`), every tree textured and lifted above the camera, Use button gone, no tooltip on window open. Earlier: town round 2026-11-25, round 1.
+**Status:** 2026-11-26 evening round, published together: arena mode (README "Arena"), weather + storms and the Look setting ("Weather", "Look setting"), swing trails for swords/daggers/axes/maces + arrows + monster blows ("Swing effects"; two-handers, spears, halberd, fists parked), a fairer start (levels 1-4 gentler, more starting health), owner reports #136-138 (Miss only on a real attempt; plain vs SPECIAL monster blows, the blow lands where its mark shows), the camera tuner (☰ → Tune camera) and lag reports (☰ → Send a lag report), houses from the House Kit with painted textures, trees from the Tree Kit bending in one wind, the map editor (dev only) with effect zones, raised stone bridges. Plans: `docs/BRAINSTORM-2026-11-26-world.md`, `docs/BRAINSTORM-2026-11-27-arena-camera.md`. Focus from now on (owner): camera, combat, levelling. Earlier: combat + class rebuild 2026-11-26, town round 2026-11-25, round 1.
 **Play:** https://games.radgh.com/oathwild/ · LAN dev http://192.168.1.34:8401/prototypes/oathwild/ (start the world server first: `tools/game-servers.sh start oathwild-dev`; https for controllers: https://192.168.1.34:8441/prototypes/oathwild/). Stable 8400/8442 pairs with the `oathwild` unit (8660/8662) after publish-stable.
-**Next:** the owner plays the rebuilt combat on his iPhone (frame rate with the ×3 spell effects is unmeasured on a real phone: ~170 draw calls with ten casters); balance gaps the sim still shows — from level 5 up a lone monster barely hurts area-heavy classes, Mage loses ~15% of level-10 matchups by running out the clock, Rogue/Bard weak against three; polish the 14 unlockable classes the way the base 8 were (owner: base 8 first); ~40 flat-colour scenery models still to texture (lessons rule 77 list may only shrink); new hand-made clips (two-handed overhead, bow draw) to replace the code-built moves; the three dead-tree props' server colliders are still kit-sized. (tried and reverted 2026-11-24: compiling every world material on load — where the browser cannot compile in the background it froze the first seconds in the world, worse than the stalls it meant to remove) investigate prediction on very slow frames (2026-11-24: in the software test browser, at a few frames a second, the client sends ~1/3 of its 20 Hz steps and its predicted position overshoots the server by up to 30 m after the key is released, then snaps — fine at real frame rates, but a slow phone could feel it); a person plays it (check the new look on a real phone: Low 139-159 draw calls / ~400k triangles measured; software frame time ~60% above the old flat world); instance the fal building/prop models (≈490 single meshes on Medium); tune the Look group with `?tune`; item pictures drawn from the worn models (rule 20); buff/debuff visuals on bodies; real horse/boss models as the art budget allows.
+**Next:** the owner tunes the camera (☰ → Tune camera → Send to Claude) and sends a lag report when it stutters — Claude applies the camera numbers as defaults and fixes the stalls the report names; the parked swing trails (two-handed, spear, halberd, fists: trails drifted ~1 m after a weapon change in the test — find out whether it's the test or real); a new-player bot in the sim so balance is judged against a person; Rogue/Bard weak against three and in champion bouts, Mage/Rogue run out the clock at level 10; arena stone reads as brickwork, the crowd is simple; one shader still built mid-fight on the first mace hit (rule 29); real-phone frame rate with weather + Look + ×3 spell effects; the world builder's 4 km map is ready when the owner wants a bigger world (worldbuild README "Adopting it in Oathwild").
 **Parked:** Smithing / Alchemy benches and the Tinker class (later round); Chronomancer, Oracle, Dragon Knight, Starcaller; charm/turn spells; Farhold's resource / afterimage / "consumes" spell rules; playing offline without the world server; chat box (the server relays chat, no UI yet); **placeholder art to replace later: `docs/PLACEHOLDERS.md`** (props, 8 monsters, horse, items — about $23 of models when there is budget).
+
+## Arena (2026-11-26 — owner: "a new hosting option for waves mode … a massive arena … other heroes … somewhat like oblivion")
+
+Brainstorm + owner answers: `docs/BRAINSTORM-2026-11-27-arena-camera.md` §2; rulings in PLAN §0 "Focus + arena".
+**How to play:** world list → **New arena** (or join one by its code) → you stand in the **Arena Court** by the shrine
+→ walk to the **Bracket Board** by the gate (or talk to the Arena Master) → pick a bracket → **Start**: everyone in the
+arena walks onto the sand → five waves come out of four gates (the panel on the right says wave x/5, enemies left, the
+breather's count-down and which gate the next pack comes from; gold arrows at the screen's edge point at that gate and at
+enemies you cannot see) → win: a **reward chest** per hero waits by the board in the court. Between matches: the smith
+(gear round YOUR level, repair), the provisioner, the class trainer (classes, paid respec — the shrine is beside him),
+level-up windows. The board's **Champions** tab: ten made-up heroes, rank 10 Garran Ashcroft to rank 1 Aldis Merrow, the
+Grand Champion; each opens after a bracket and the rank before; beat one for their unique item, a title shown with your
+name (switch or hide it there) and the next rank.
+
+| Part | What it is |
+|---|---|
+| `data/arena.json` | Brackets, the wave table, party scaling, rewards, champions (class plans, gear, hp/dmg, dodge, titles, lines) and their uniques; `_goal` = the tuning goal |
+| `data/arena/*.json` + `js/world/arena-place.js` | The place: its own small map (terrain, woods of big trees, the court as a town planned by the town planner); the arena's walls, gates, seats, torches, banners and balcony laid out once — the walls are solid boxes `js/game/ground.js` reads (placements.boxes), so the server walks the drawn walls |
+| `js/rules/arena.js` | Pure: brackets + board marks, rosters, `wavePlan`, `arenaScale` (the ONE party-size multiplier), `rewardShare`, `makeUnique`, champions, the hero's `char.arena` record (clears, firsts, beaten, titles, title) |
+| `js/rules/arena-match.js` | Pure: one match on the combat sim (gather → waves / bout → breathers → won / lost); the SAME code in the server and the sim |
+| `js/rules/hero-ai.js` | A hero played by the computer — the test bot grown up (tests/rules/bot.mjs now re-exports it): champions use `championInput` (a red mark before every big ability, rolls out of heroes' bolts and zones) |
+| `server/arena.js` | The arena mode of a world room (hooks in server/world.js marked `arena`): board, ladder, start, match messages, reward chests (kept in the world save until opened), titles; dev `devArena` clears what is out |
+| `js/client/place.js` | The page swaps the drawn place (world ↔ arena) when you enter, with the same refill the map editor uses |
+| `js/client/render/arena-draw.js` | The arena drawn from the layout with the House Kit's painted atlas: podium wall, ten tiers, outer wall with buttresses and battlements, the Heroes' Gate passage, monster gates whose portcullises rise as a pack comes out, the champions' balcony, torches, swaying banners, a cheering crowd (instanced; 140 / 320 / 520 people by quality), painted sand |
+| `js/client/arena-ui.js`, `ui/win-arena.js`, `ui/win-arena-chest.js`, `css/arena.css` | The match panel, edge markers, banners; the board (Brackets / Champions tabs); the reward chest (full item cards inline) |
+
+**Balance** (`node prototypes/oathwild/tools/sim-arena.mjs`, 8 runs a row = one per base class, hero at the bracket's
+LOW level, plain kit to level 3; 2026-11-26): alone at the new-player bar (rolls out of 25% of tells) brackets are won
+50-100% (Novice 100%, Steel and Master 50%), at the average bar 63-100%; a party of three 88-100%; a match takes 3-4 min
+alone, 5-6 with three. Champion bouts at the champion's level: 63-100% won at both bars, 17-42 s of fighting; the Bard
+loses most bouts and the Rogue the boss waves (both already weak in tools/sim-fights.mjs). Tests:
+`tests/rules/arena.test.mjs` (tables, scaling knob, rewards, uniques, champions, record, a short balance pin),
+`tests/net/arena.test.mjs` (through the real hub: New arena, five waves, chest → bag, losing, a champion bout → unique +
+title, save / reload of the record and an unopened chest, the same hero in the open world), `tests/ui/arena-shots.mjs
+[--phone]` (the player's path in a real browser), walk.mjs lines `worlds-new-arena`, `arena-board`, `arena-ladder`,
+`arena-chest`, `arena-hud`.
+
+## Lag reports (2026-11-26)
+
+Owner: "severe stalls/lag on desktop … How can we capture that info to investigate?" The lag recorder
+(`js/client/lagmeter.js`) runs all the time in the world: the last two minutes of frame times and every stall (a frame
+of 50 ms or more) with what was going on in it — the game's own work vs drawing, new shader programs compiled, new
+models/pictures uploaded, the memory change (a big drop = a browser clean-up pause), draw calls and triangles, the spot
+on the map, the graphics setting, and on Chrome the scripts that ran long. **☰ → Send a lag report** (`ui/win-lag.js`)
+shows a frame graph + numbers and sends the whole record (kind `lag`, about 40 KB) to the report box; every bug report
+also carries the short summary. Reading them: the admin page's Reports tab, or on the droplet
+`ssh rgs` then `sudo -u postgres psql rgs -c "SELECT id, at, text, detail->'lag'->'summary' FROM playground.reports WHERE game='oathwild' AND kind='lag' ORDER BY at DESC LIMIT 5"`
+(the full stall list is `detail->'lag'->'stalls'`). Browser check: `tests/ui/lag-check.mjs [--phone]`.
+
+## Tools for building the world (2026-11-26 round)
+
+All on the VM (dev copy, port 8401 — `http://192.168.1.34:8401/…`); stable copies on 8400 after publish. Also linked
+from the Oathwild card on the playground home page (`http://192.168.1.34:8400/`).
+
+| Tool | Where | What it's for |
+|---|---|---|
+| Map editor | `prototypes/oathwild/editor/` | Fly over the real world; place/move trees, fix bridges, roads, rivers, ground; effect zones and region looks; weather preview; note pins. Live with Claude (`tools/map-edit.mjs`). Needs the dev world server: `tools/game-servers.sh start oathwild-dev`. |
+| House kit | `housekit/` | Every house style, piece and decoration Oathwild's towns use, with all settings; the game draws from the same files. |
+| Tree kit | `treekit/` | Trees built from parts, species gallery, forest in the wind; live with Claude (`treekit/tools/tree-edit.mjs`). |
+| World builder | `worldbuild/` | The generator for the planned 4 × 4 km world: each step's picture, the check report, a 3D fly view. Command line: `worldbuild/tools/build.mjs`. |
+| Older map tools | `tools/map-preview.mjs`, `tools/kit-gallery.html`, `tools/tree-gallery.html`, `tools/town-preview.mjs` | Map picture, scenery kit gallery, story-tree gallery, town picture. |
 
 A third-person open-world fantasy RPG for 1–10 players in one shared, saved world. The heart of it is levelling:
 every level you pick a class (27 to choose from, unlimited per character), each class is a mastery tree of spells,
@@ -12,6 +73,186 @@ Radley Sustaire.
 
 - Owner rulings and the plan: `docs/PLAN.md` (§0 first). Code map and contracts: `docs/ARCH.md`.
 - The rules in plain words: `docs/RULES.md`. Every class, where it came from, and its tree: `docs/CLASSES.md`.
+
+## Map editor (2026-11-26 — owner: "Can we create a map editor so i can add more trees or fix bridges, possibly give you realtime access to update what i see")
+
+**Open it:** start the dev world server (`tools/game-servers.sh start oathwild-dev`), then
+http://192.168.1.34:8401/prototypes/oathwild/editor/ (`?at=x,z` starts at a spot, `?quality=low|medium|high`). It draws
+the world with the game's own renderer and its full look — sky, sun and shadows, the after-effects (grade, bloom, SMAA,
+GTAO on High), atmos mist + cloud shade, water, grass, ambient life, effect zones — with a Quality switch (the game's
+Low / Medium / High). The game has no time of day or weather yet, so there is no slider for them; the top bar keeps an
+empty `data-slot="weather"` spot for the weather helper.
+
+**Moving:** WASD fly, Q / E down / up, Shift faster, right-drag (or drag with the Look tool) to turn, wheel forward,
+**M** the map from above (click to fly there). Phone: drag to turn, the stick to fly, ▲ ▼ up / down; Look, Trees,
+Effects and Notes tools. Layers ▾: road / river lines, colliders (red circles and orange boxes = what stops a walker),
+level areas, tree and rock names, effect zone rings, "fly to where Claude edits".
+
+**Tools** (keys): Trees **T** (place any tree or rock kind + size, drag to move, click to remove, brush an area: set a
+density, add more, or clear) · Bridges **B** (pick a crossing: drag its two end handles, snap them to the road, deck
+height, width, level run onto each end, bridge or ford, wood or stone; "work it out again" forgets the hand values) ·
+Roads **R** (drag a road's or river's points, add / remove points — roads are re-graded and crossings worked out again)
+· Ground **G** (raise / lower / flatten / smooth brush; a drag is one undo step) · Things **H** (drag shrines, chests,
+camps, roaming packs, people, props; turn them; put back) · Effects **F** (zones of ground fog, fireflies, falling
+leaves, dust motes, light shafts, marsh glow, embers, or colour only — size, soft edge, amount, and the air inside:
+mist, saturation, contrast, brightness, bloom, tint) · Looks **L** (per region: brightness, saturation, contrast,
+warmth, bloom, mist, fog colour, sun colour — fading across the border) · Notes **N** (pin a message; orange = open,
+green = done). Ctrl+Z / Ctrl+Y undo / redo (one list on the server, everyone's changes). The Look tool's panel lists
+recent changes and any edit whose target is gone.
+
+**How edits are kept** (`js/world/edits.js` explains every field):
+- `data/edits.json` — the layer on top of generated things: trees removed (by an id from where they stand:
+  `t<x·10>_<z·10>`), trees added, brushed areas, rock edits, ground strokes (applied to the raw ground before rivers,
+  places and roads are cut in, so roads stay graded), moved things (`group:id`, props by where place-world put them),
+  effect zones, region looks, notes. The world pipeline can regenerate the map: these keep applying; one whose target
+  is gone is listed (editor + `map-edit.mjs report`), never dropped, until someone takes it out.
+- `data/map.json` — roads, rivers and crossings are hand data: edited in place, keeping the file's hand layout (only
+  the changed lines are rewritten). Crossings may carry `a`, `b` (ends), `deck`, `width`, `ramp` (level run, m).
+- One code path everywhere: `js/world/boot.js` applies the layer, `js/world/live.js` `worldScene()` gives the trees and
+  rocks, `rebuildWorld()` + `swapInto()` rebuild after an edit and put the new world into the same objects — used by the
+  server (`server/main.mjs`), the game page (`js/client/live-edits.js`) and the editor. Colliders and drawing agree.
+
+**Live:** the editor talks to the **dev** world server on `/ws/edit` (`server/editor.js`): each change is checked,
+written, the server's world rebuilt (≈2 s), and sent to every open editor and every connected game page, which redraw
+it without a reload (zones and looks without rebuilding anything). The line is **dev only**: stable and the live droplet
+refuse it (HTTP 403) unless started with `--editor` — never do that on the droplet; edits reach players through the normal
+publish (`tools/go-live.sh oathwild`). History: `saves/<build>/edit-log.jsonl`; undo / redo keep 200 steps in memory
+(a server restart starts a fresh undo list).
+
+**Claude's side — `tools/map-edit.mjs`** (same edits, from the command line; a blue marker shows where it last acted,
+and editors with "fly to where Claude edits" follow it):
+
+```
+node prototypes/oathwild/tools/map-edit.mjs notes                      # open notes (--all for every note)
+node prototypes/oathwild/tools/map-edit.mjs note done n12 "Added six oaks here"
+node prototypes/oathwild/tools/map-edit.mjs tree add oak-b -150 60 1.2   # tree remove <id | x,z>, tree area x z r density [add|set] [kind]
+node prototypes/oathwild/tools/map-edit.mjs bridge list                  # bridge set troll_bridge deck=14.9 ramp=2 a=337.5,-30.5 b=363.4,-29.2
+node prototypes/oathwild/tools/map-edit.mjs ground raise 60 -120 10 2    # raise|lower|flatten|smooth x z r [amount] [y]
+node prototypes/oathwild/tools/map-edit.mjs effect add fireflies 256 -246 r=30 amount=1.2   # effect list|set|move|remove
+node prototypes/oathwild/tools/map-edit.mjs look set thornmere_wilds saturation=1.18 fogColour=#c8d4d0
+node prototypes/oathwild/tools/map-edit.mjs probe 60 -120                # height, walk height, colliders, trees near a spot
+node prototypes/oathwild/tools/map-edit.mjs undo | redo | history | report | state | marker x z [what]
+```
+To see what the owner sees, open the editor in game-eye (`?at=x,z`). Pictures: `tests/ui/editor-shots.mjs [--phone]
+[--live]` (`--live` plants a tree through the CLI and waits for it to appear in the open page, then undoes it).
+Tests: `tests/world/edits.test.mjs` (every edit kind, same layer server/browser, orphans, map.json layout),
+`tests/net/editor.test.mjs` (real server: write, rebuild, broadcast to editors + game pages, undo, CLI, stable refuses).
+
+**Starter effect zones** (data/edits.json): mist over the Thornmere Mire, fireflies at the Druid Circle, embers over
+the bandits' fire.
+
+### How the look is put together (for the next helper: look presets, weather)
+Per frame `view.render()` (js/client/render/view.js) runs: **1.** `view.applyLook(view.tuning)` — the `?tune` Look group
+(data/tuning.json) sets exposure, sky light, sun, fill, atmos mist + clouds, bloom and the grade uniforms; **2.**
+`view.afterLook()` — set by `render/zones.js`: `lookAt()` (js/world/edits.js, pure) blends the region looks across the
+border and adds every effect zone the player stands in (mist, saturation, contrast, exposure, bloom, tint), then writes
+exposure, `ATMOS` mist, fog colour, sun colour and the grade uniforms (`post.grade` uSat / uCon / uWarm / uCool,
+`post.bloom.strength`); **3.** post.js draws (Low has no post: there only exposure, mist, fog and sun change). All are
+uniform / value sets — nothing recompiles (rule 29). The numbers are plain data (`edits.looks[region]` absolute values,
+zone fields as additions), so a preset can multiply or offset them in ONE place: wrap or extend `applyLook` in
+zones.js (the `base` it blends from is the game's numbers after step 1). Particles: two instanced quad meshes with a
+fixed pool per quality (Low 240 / Medium 640 / High 1100), spent on zones within 70 m.
+
+## Weather (world-tools round 2026-11-26)
+
+Owner: "Can we have weather from thousand vale, it has lightning and storm effects." The weather is the **server's**,
+per region, so everyone in a world sees the same storm.
+
+- **What the weather is** — `js/world/weather.js` (pure; server, browser and tests) with its numbers in
+  `js/world/weather-data.js`. World Forge (`worldgen/js/weather.js`) gives each region its odds from a climate
+  (Brightwater Vale: mostly fair, the odd shower; Thornmere Wilds: wetter, foggier, more storms — `bias` leans each one).
+  Kinds: Clear, Fair, Cloudy, Overcast, Drizzle, Rain, Thunderstorm, Fog (Snowfall / Blizzard kept for a high or
+  northern region later: `snow: true` on its climate). A weather holds 10–26 real minutes (no day clock yet, so this
+  stands in for "a few in-game hours") and rolls into the next over 50 s. Across the region border the two weathers
+  blend over 45 m.
+- **Saved and sent** — `ws.weather` rides in the world save; the world-state message carries `wx` (per region
+  `[from, to, how far, seconds, held]`) and `wxs` (the seed lightning is timed by). The browser rolls a change on between
+  messages from the world clock.
+- **Lightning is the same for everyone** — one roll per second of world time from the world's seed
+  (`strikesBetween`); each player hears the thunder after their own distance (343 m a second).
+- **Drawing** — `js/client/render/weather.js`: Farhold's rain on the graphics card (`prototypes/farhold/js/rain.js`, used
+  by path: streaks leaning with the wind, splashes and rings, grey sheets of rain in the distance, blown leaves in a
+  gale), a cloud layer inside the sky (Thousandvale's painted cloudy sky round the horizon — `img/sky/cloudy.webp`,
+  copied from `thousandvale/assets/sky/` — plus Farhold's cloud deck crossing overhead downwind, grey veil in a storm),
+  a bolt with branches, a light made once with the view that flashes the ground (rule 29), the sky lit from inside,
+  thunder (`sfx` `thunder`), gloom (less sun and sky fill, slate-grey fog, slightly lower exposure and colour), fog that
+  pulls the view in and thickens the valley mist, cloud shadows that come and go with the cover, puddles on level ground
+  that grow the longer it rains and mirror the sky, and the rain / storm sound bed (`ambience.rain.*`, `ambience.storm`).
+  Motes fade and butterflies shelter in the rain (`render/ambient.js` `wet`, `bedOverride`).
+- **Wind** — the weather drives the ONE wind (`render/wind.js`, tree kit round): every frame `setFromWeather({ strength: wind × 1.55, gust })`, so a storm bends the woods hardest and the rain leans the same way as the trees and grass. (Farhold's wind stands in only if the one wind is missing.)
+- **Cost** — all pooled and made at start, drawn once hidden in the first frames so nothing compiles when the first storm
+  arrives. Low: 1,600 rain streaks, no splashes, sheets, puddles or blown leaves. Medium 4,200 / 160 splashes / 40
+  puddles; High 7,000 / 300 / 72. Measured numbers: `tests/ui/weather-shots.mjs`.
+- **Dev** — `{ t: 'devWeather', key: 'storm', region?, lock?, instant?, secs? }` or `{ t: 'devWeather', release: true }`
+  (dev world server only). Map editor: `mountWeatherPicker(slot, { weather, onForce })` from
+  `js/client/weather-picker.js` (preview here, or hold one for the dev world). Tests: `tests/net/weather.test.mjs`
+  (through the real hub: a forced storm reaches every client, save round-trip, the clock, the border blend, strikes),
+  `tests/ui/weather-shots.mjs` (pictures + numbers per weather, shader programs built while the weather changes = 0,
+  frame time).
+
+## Look setting (world-tools round 2026-11-26)
+
+Owner: "shaders like visual effects like used in minecraft with mods … Can we have some shader options to adjust the
+look." ☰ Settings → Graphics → **Look** (per device, kept in `localStorage` with the other settings — rule 43), and the
+same panel in the map editor (`js/client/ui/look-panel.js`).
+
+- **Presets** (`js/client/render/look-presets.js`): **Classic** (today's picture, bit for bit), **Vivid** (storybook
+  colour, rich sky, shining water), **Cinematic** (warm light, cool shade, light shafts, soft lens in the distance),
+  **Moody** (deeper shadows, quieter colour, heavier skies), **Custom** (starts from the look you had; every slider).
+- **Colour and light** are factors on the Look tuning numbers (`data/tuning.json` group Look) through a stand-in tuning
+  object (`js/client/render/look.js`), so the map editor's region looks, the effect zones and the weather all keep
+  working on top. Switching changes numbers only — nothing is rebuilt.
+- **Effects** (each shows its phone cost; the heavy ones are off on Low): light shafts, soft long shadows, contact
+  shading, distance blur, water shine (reflections, shoreline foam, finer ripples — `render/water-look.js`), rich sky,
+  wet look in rain. Waving grass and leaves are not a setting: the one wind moves them in every preset.
+- **How it is wired**: `view.setLookFx(fx)` (render/view.js) — sky richness (`rich` uniform in the sky shader), the
+  sun's shadow reach (+70%) and softness (wider filter), water shine (`WATER_LOOK` uniform; the water carries its depth
+  per corner from the terrain's water grid), and `post.setLook(fx)` (render/post.js) — light shafts (High's faint rays,
+  up to 25% stronger, or built on Medium), contact shading (High's GTAO, or built on Medium), distance blur (a 12-tap
+  blur by depth; the scene is then drawn into its own target with a depth texture, `look-passes.js SceneDepthPass`).
+  The wet look is `ATMOS.set({ wet })` (render/atmos.js, a uniform on every fogged material) = how soaked the ground is
+  (render/weather.js) × the preset's `wet`. All of these are in the shaders from the start at strength 0, so Classic
+  draws exactly what it did; a pass a quality never had is built once on pick behind a short dark fade
+  (`.ow-look-fade`), and `view.afterQuality` re-fits the Look and the weather when the graphics setting changes.
+- **Map editor**: a compact Look menu and the Weather menu in its top bar (`mountLookPicker`, `mountWeatherPicker`);
+  the editor keeps the Look with the game's own settings on that device.
+- Tests: `tests/world/look-presets.test.mjs` (Classic returns the very same numbers, presets move only Look numbers,
+  bloom ≤ 0.15 and no black lift in any preset, Custom clamps and round-trips), `tests/ui/preset-shots.mjs` (each preset
+  picked through the real Settings buttons, pictures + numbers, difference from today, shader programs built on a
+  second round of switching = 0, the pick survives a reload, phone settings picture), `tests/walk.mjs` settings line.
+
+## Swing effects (owner report #138, 2026-11-26)
+
+Owner: "make even auto attacks … have more particle effects … like the Cleave ability but with a little less detail …
+indicate the swing direction and motion … different versions for different type of weapons if they have different
+animations." Every basic attack now leaves a light trail along the blade's real stroke, sparks thrown off the tip, and a
+burst on the body it hits, landing when the blade does.
+
+- **Shipped:** swords and daggers (steel-white trail, sparks off the tip, a burst on contact) and axes / maces /
+  hammers (warm trail, dust and chips). Bows: a flash at the hand as the arrow leaves, and arrows now fly as the Spell
+  Kit arrow (shaft + streak) instead of a dot. Magic weapons keep their own caster attack (it already has a launch
+  flash). Monsters: a light reddish crescent at their reach; a **special** blow (the ones with a red ground mark) gets
+  the heavy red-orange slash when its tell ends.
+- **Built but parked** (`data/swing-visuals.json` `parked`): two-handers, halberd, dagger quick-slash, spear, bare
+  hands (cross + jab clips). In the in-game check their trails drifted about 1 m off the real blade (cause not found;
+  any clip speed other than 1 broke the match too, so everything plays at normal speed). Those weapons keep the old
+  look until their row passes `swing-shots`; daggers use the sword's trail meanwhile.
+- **Follows the clip, not a fixed delay.** `tools/measure-swings.mjs` plays each kind's clip on a real hero holding a
+  sample weapon and records the grip and blade direction 60 times a second; the stroke it finds goes in the data as
+  `path` + `contact`. `render/swings.js` draws the ribbon along that path on the clip's own clock, in the body's frame,
+  so the hip twist / lunge (`render/moves.js` blade / heavy / quick / thrust / jab, timed to the same stroke) and the
+  hero's facing carry it. Re-time a clip or add one → run the tool again. The shared sword clip strikes at 0.40–0.54 s:
+  high over the right shoulder, down across the front to the left hip.
+- **Plumbing:** `actor.act('attack')` asks `actors.swingHook` (render/swings.js) for the kind's clip and speed and starts
+  the trail; a spell's swing passes `{ spell: true }` and gets none. Monster tells call it too (`a.swingTell`). The kit
+  side is `kit.pathSwing()` (avatar-3d/spellkit). No lights, pooled ribbons and particles only; layers marked
+  `quality: "high"` are skipped on Low.
+- **Checks:** `node --test prototypes/oathwild/tests/world/swings.test.mjs` (every weapon base maps to a look, every
+  trail has a measured path that runs the way its blade moves, textured, no lights, lighter than Cleave);
+  `flock /tmp/oathwild-browser.lock node prototypes/oathwild/tests/ui/swing-shots.mjs [--phone]` (pictures per kind in
+  `test-results/oathwild-swings/`, the trail's tip against the real blade tip in the game, shader programs, draw calls).
+- **Not done:** the parked kinds above; a real spear thrust, two-handed overhead chop and bow draw need new clips;
+  monster crescents and the bow flash have no pictures checked yet.
 
 ## The rules core (`js/rules/`, pure — runs in Node, the server and the browser)
 

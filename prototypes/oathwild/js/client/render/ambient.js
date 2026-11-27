@@ -191,7 +191,9 @@ export function createAmbient(view, { T, trees = [], chimneys = [], quality = 'm
       }
       birds.instanceMatrix.needsUpdate = true;
 
-      // butterflies: home on a meadow spot near you, flutter round it in loops
+      // butterflies: home on a meadow spot near you, flutter round it in loops (they shelter in the rain: amb.wet, set by render/weather.js)
+      motes.material.opacity = 0.55 * (1 - Math.min(1, (amb.wet || 0) * 1.5));
+      if (flies) flies.visible = (amb.wet || 0) < 0.3;
       if (flies) {
         for (let i = 0; i < NF; i++) {
           const h = flyHome[i];
@@ -210,8 +212,10 @@ export function createAmbient(view, { T, trees = [], chimneys = [], quality = 'm
 
       // ambience bed
       soundT -= dt;
-      if (sound && soundT <= 0) { soundT = 2; const want = bedFor(at.x, at.z); if (want !== bed) { bed = want; try { sound().ambience?.(want); } catch { /* no sound yet */ } } }
+      if (sound && soundT <= 0) { soundT = 2; const want = amb.bedOverride?.(at.x, at.z) || bedFor(at.x, at.z); if (want !== bed) { bed = want; try { sound().ambience?.(want); } catch { /* no sound yet */ } } }
     },
+    bedOverride: null,          // (x, z) => an ambience id or null: the weather's rain / storm bed (render/weather.js) wins over the place's
+    wet: 0,                     // 0..1 how hard it is raining: motes fade, butterflies shelter
     stats: { motes: NM, leaves: NL, smoke: NC * PUFFS, birds: NB, butterflies: NF, chimneys: chimneys.length },
     dispose() { for (const p of parts) { scene.remove(p); p.geometry.dispose(); p.material.dispose(); } try { if (bed) sound?.()?.stopLoop?.(bed, 0.6); } catch { /* fine */ } },
   };

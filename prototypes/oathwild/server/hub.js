@@ -11,7 +11,7 @@ import { makeRng, hashStr } from '../js/rules/farhold.js';
 
 export const MAX_CHARS = 8, MAX_WORLDS_PER_PLAYER = 6, PUBLIC_LIST_MAX = 40;
 
-export function createHub({ rules, W, ground, store, now = () => Date.now(), build = 'dev', seed = Date.now(), randomToken, redeem = null, log = () => {} }) {
+export function createHub({ rules, W, ground, arenaPlace = null, store, now = () => Date.now(), build = 'dev', seed = Date.now(), randomToken, redeem = null, log = () => {} }) {
   const rooms = new Map();            // code -> world room (only the open ones)
   const emptySince = new Map();
   const awayTimers = new Map();       // key -> { code, at }
@@ -21,8 +21,11 @@ export function createHub({ rules, W, ground, store, now = () => Date.now(), bui
   const keyOfToken = new Map();
   const stats = { sockets: 0, bad: 0, limited: 0, worldsMade: 0 };
   let open = 0;
+  const conns = new Set();             // every open socket (the dev map editor's changes go to all of them: broadcast)
 
   // ---------------------------------------------------------------- saved players and worlds
+  // the place a room stands in: the open world, or the arena (brainstorm 2026-11-27 §2a — its own hosting option)
+  const placeFor = kind => (kind === 'arena' ? { W: arenaPlace.W, ground: arenaPlace.ground } : { W, ground });
   function profile(key) {
     const p = store.loadPlayer(key) || { key, name: null, chars: [], worlds: [] };
     p.chars = Array.isArray(p.chars) ? p.chars : [];
@@ -49,7 +52,8 @@ export function createHub({ rules, W, ground, store, now = () => Date.now(), bui
     const rec = store.loadWorld(code);
     if (!rec) return null;
     const m = rec.meta;
-    return { code, name: m.name, public: !!m.public, players: 0, seats: MAX_PLAYERS, names: [], quests: Object.values(rec.state?.quests || {}).filter(q => q.done).length, mine: !!key && m.owner === key, updated: m.updated || null };
+    const kind = m.kind || 'world';
+    return { code, name: m.name, public: !!m.public, players: 0, seats: MAX_PLAYERS, names: [], quests: Object.values(rec.state?.quests || {}).filter(q => q.done).length, mine: !!key && m.owner === key, updated: m.updated || null, kind, ...(kind === 'arena' ? { arena: { kind: 'arena', wins: rec.state?.arena?.wins | 0, matches: rec.state?.arena?.matches | 0, busy: null } } : {}) };
   }
   function worldList(key) {
     const p = profile(key);
@@ -68,7 +72,8 @@ export function createHub({ rules, W, ground, store, now = () => Date.now(), bui
     if (rooms.has(code)) return rooms.get(code);
     const rec = store.loadWorld(code);
     if (!rec) return null;
-    const R = createWorldRoom({ rules, W, ground, meta: rec.meta, state: rec.state, log, persist, seed: rec.state?.seed || hashStr(code), dev: build === 'dev' });
+    if (rec.meta.kind === 'arena' && !arenaPlace) return null;
+    const R = createWorldRoom({ rules, ...placeFor(rec.meta.kind), meta: rec.meta, state: rec.state, log, persist, seed: rec.state?.seed || hashStr(code), dev: build === 'dev' });
     rooms.set(code, R);
     log('world.open', { code });
     return R;
@@ -77,6 +82,7 @@ export function createHub({ rules, W, ground, store, now = () => Date.now(), bui
   // ---------------------------------------------------------------- sockets
   function accept(conn) {
     stats.sockets++; open++;
+    conns.add(conn);
     const buckets = createBuckets(now);
     const S = { token: null, key: null, room: null, name: null };
     const send = obj => conn.send(JSON.stringify(obj));
@@ -113,7 +119,7 @@ export function createHub({ rules, W, ground, store, now = () => Date.now(), bui
       if (msg.t === 'hello') { S.helloing = hello(msg).finally(() => { S.helloing = null; }); return S.helloing; }
       if (S.helloing) await S.helloing;            // only while a hello (an account ticket) is still being checked
       if (!S.key) return fail('hello', 'Say hello first.');
-      if (S.room && (msg.t === 'in' || msg.t === 'act' || msg.t === 'devTp' || msg.t === 'devGear' || msg.t === 'devDummy' || msg.t === 'devKnock' || msg.t === 'devDown' || msg.t === 'devGold' || msg.t === 'devXp')) return S.room.message(S.key, msg);   // devTp / devGear: the room ignores them outside dev builds
+      if (S.room && (msg.t === 'in' || msg.t === 'act' || msg.t === 'devTp' || msg.t === 'devGear' || msg.t === 'devDummy' || msg.t === 'devKnock' || msg.t === 'devDown' || msg.t === 'devGold' || msg.t === 'devXp' || msg.t === 'devWeather' || msg.t === 'devArena')) return S.room.message(S.key, msg);   // devTp / devGear: the room ignores them outside dev builds
       switch (msg.t) {
         case 'chars': return send({ t: 'chars', list: profile(S.key).chars.map(summary) });
         case 'charNew': {
@@ -142,17 +148,19 @@ export function createHub({ rules, W, ground, store, now = () => Date.now(), bui
         case 'worldNew': {
           const p = profile(S.key);
           const mine = store.worldCodes().map(c => store.loadWorld(c)).filter(r => r?.meta.owner === S.key);
-          if (mine.length >= MAX_WORLDS_PER_PLAYER) return fail('full', `You can own ${MAX_WORLDS_PER_PLAYER} worlds. Remove one first.`);
+          if (mine.length >= MAX_WORLDS_PER_PLAYER) return fail('full', `You can own ${MAX_WORLDS_PER_PLAYER} worlds and arenas. Remove one first.`);
+          const kind = msg.kind === 'arena' ? 'arena' : 'world';
+          if (kind === 'arena' && !arenaPlace) return fail('arena', 'Arenas are not open on this server yet.');
           let code; do { code = newCode(rand); } while (rooms.has(code) || store.loadWorld(code));
-          const name = cleanName(msg.name, 28) || 'A New Oath';
-          const meta = { code, name, public: !!msg.public, owner: S.key, created: new Date(now()).toISOString(), players: [S.key] };
-          const R = createWorldRoom({ rules, W, ground, meta, state: null, log, persist, seed: hashStr(code), dev: build === 'dev' });
+          const name = cleanName(msg.name, 28) || (kind === 'arena' ? 'The Grand Arena' : 'A New Oath');
+          const meta = { code, name, public: !!msg.public, owner: S.key, created: new Date(now()).toISOString(), players: [S.key], kind };
+          const R = createWorldRoom({ rules, ...placeFor(kind), meta, state: null, log, persist, seed: hashStr(code), dev: build === 'dev' });
           rooms.set(code, R);
           R.save();
           p.worlds = [code, ...p.worlds.filter(c => c !== code)];
           store.savePlayer(S.key, p);
           stats.worldsMade++;
-          log('world.new', { code, public: !!msg.public });
+          log('world.new', { code, public: !!msg.public, kind });
           return send({ t: 'worlds', list: worldList(S.key), made: code });
         }
         case 'worldDel': {
@@ -188,7 +196,7 @@ export function createHub({ rules, W, ground, store, now = () => Date.now(), bui
       }
     }
     function close() {
-      open--;
+      open--; conns.delete(conn);
       if (S.room && S.key) {
         // keep the hero in the world for a moment: a phone that slept or a reload comes straight back (game-standards §2)
         S.room.away(S.key);
@@ -219,7 +227,9 @@ export function createHub({ rules, W, ground, store, now = () => Date.now(), bui
     return { worlds: rooms.size, players, sockets: open, avgStepMs: steps ? Math.round(stepMs / steps * 1000) / 1000 : 0, maxStepMs: Math.round(maxStepMs * 100) / 100, bytesOut, ...stats };
   }
   function detail() { return [...rooms.values()].map(R => R.listing()); }
+  /** One message to every connected page (title screen or in a world) — the dev map editor's live changes. */
+  function broadcast(obj) { const d = JSON.stringify(obj); for (const c of conns) { try { c.send(d); } catch { /* gone */ } } }
   function shutdown() { for (const R of rooms.values()) { try { R.save(); } catch { /* keep going */ } } }
-  return { accept, step, status, detail, shutdown, rooms, profile, openRoom };
+  return { accept, step, status, detail, shutdown, rooms, profile, openRoom, broadcast };
 }
 export { blankCharacter, CHARACTER_VERSION };

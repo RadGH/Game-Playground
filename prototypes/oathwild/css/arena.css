@@ -1,0 +1,82 @@
+/* Oathwild — the arena (js/client/arena-ui.js, ui/win-arena.js, ui/win-arena-chest.js; brainstorm 2026-11-27 §2).
+   The match panel takes the quest tracker's place (the arena has no quests); the edge markers float over the view
+   and never take a tap (rule 15); the banner sits high, away from the crosshair. */
+body.in-arena .hud-tracker { display: none; }
+.arena-panel { position: absolute; right: calc(12px + var(--safe-r)); top: calc(215px + var(--safe-t)); width: min(260px, 34vw); padding: 10px 12px 11px; display: grid; gap: 5px;
+  background: linear-gradient(180deg, rgba(40, 30, 20, .82), rgba(26, 21, 15, .72)); border: 1px solid var(--edge); border-radius: var(--r); box-shadow: var(--shadow); text-shadow: 0 1px 3px #000; pointer-events: none; }
+.arena-panel h4 { margin: 0; display: flex; gap: 6px; align-items: center; font-family: var(--font-head); color: var(--gold); font-size: 14px; letter-spacing: .02em; }
+.arena-panel h4 svg { color: var(--gold-deep); }
+.arena-panel p { margin: 0; font-size: 14px; color: var(--ink-dim); }
+.arena-row { display: flex; justify-content: space-between; gap: 8px; font-size: 15px; color: var(--ink); }
+.arena-row b { color: #fff4dc; }
+.arena-sub { font-size: 13px; color: var(--ink-dim); min-height: 17px; }
+.arena-left { color: #ffb19c; font-weight: 800; }
+.arena-pips { display: flex; gap: 5px; margin-top: 2px; }
+.arena-pips i { flex: 1; height: 7px; border-radius: 4px; background: rgba(255, 240, 210, .14); border: 1px solid rgba(255, 220, 160, .18); }
+.arena-pips i.brute { border-color: rgba(240, 138, 108, .6); } .arena-pips i.boss { border-color: rgba(232, 193, 112, .9); }
+.arena-pips i.done { background: linear-gradient(#a4d884, #5f9a40); }
+.arena-pips i.now { background: linear-gradient(#f2d37a, #b8902f); animation: arena-pulse 1.2s ease-in-out infinite; }
+@keyframes arena-pulse { 50% { opacity: .55; } }
+.arena-champ { margin-top: 2px; }
+.arena-edge { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.arena-mark { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.arena-mark i { position: absolute; left: -11px; top: -11px; width: 22px; height: 22px; clip-path: polygon(100% 50%, 10% 0, 30% 50%, 10% 100%); background: #f08a6c; filter: drop-shadow(0 1px 2px #000); }
+.arena-mark.gate i { background: var(--gold); width: 28px; height: 28px; left: -14px; top: -14px; }
+.arena-mark.foe.on::before, .arena-mark.gate.on::before { content: ''; position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; border: 3px solid var(--gold); border-radius: 50%; box-shadow: 0 0 8px rgba(232, 193, 112, .8); }
+.arena-mark span { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); white-space: nowrap; font: 700 13px var(--font); color: var(--gold); text-shadow: 0 1px 3px #000, 0 0 6px #000; }
+.arena-banner { position: absolute; left: 50%; top: calc(24% + var(--safe-t)); transform: translateX(-50%); display: grid; justify-items: center; gap: 2px; padding: 8px 22px 10px; pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(20, 14, 8, .78), rgba(20, 14, 8, 0) 72%); text-shadow: 0 2px 6px #000; }
+.arena-banner b { font: 800 30px var(--font-head); color: var(--gold); letter-spacing: .04em; }
+.arena-banner span { font-size: 15px; color: var(--ink); font-weight: 700; }
+.arena-banner.go { animation: arena-in .45s ease-out; }
+@keyframes arena-in { from { opacity: 0; transform: translateX(-50%) scale(1.25); } }
+@media (max-width: 760px) {
+  /* under the minimap and its place name, on the right (the party list owns the left side): nothing covered (rule 15) */
+  .arena-panel { right: calc(8px + var(--safe-r)); top: calc(148px + var(--safe-t)); width: min(220px, 46vw); padding: 6px 9px 7px; gap: 3px; }
+  .arena-row { flex-wrap: wrap; gap: 0 6px; }
+  .arena-panel h4 { font-size: 13px; } .arena-row { font-size: 14px; } .arena-sub { font-size: 12px; }
+  .arena-banner { top: calc(28% + var(--safe-t)); } .arena-banner b { font-size: 24px; }
+}
+
+/* ---- the board (two tabs) */
+.win-arena .ow-win-body { display: grid; gap: 12px; }
+.ar-busy { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 8px; background: rgba(240, 138, 108, .12); border: 1px solid rgba(240, 138, 108, .4); color: var(--ink); }
+.ar-split { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: 14px; align-items: start; }
+.ar-list { display: grid; gap: 6px; }
+.ar-card, .ar-rank { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "name chip" "won won"; gap: 3px 8px; text-align: left; padding: 9px 11px; border-radius: 8px; cursor: pointer;
+  background: var(--panel-2); border: 1px solid var(--edge-soft); color: var(--ink); font: inherit; min-height: 44px; }
+.ar-rank { grid-template-columns: 34px 1fr auto; grid-template-areas: "n name chip"; align-items: center; }
+.ar-card[aria-pressed="true"], .ar-rank[aria-pressed="true"] { border-color: var(--gold); background: var(--panel-3); box-shadow: 0 0 0 1px rgba(232, 193, 112, .35) inset; }
+.ar-card:hover, .ar-rank:hover, .ar-card.pad-focus, .ar-rank.pad-focus { border-color: var(--gold-deep); }
+.ar-card-name { grid-area: name; display: grid; } .ar-card-name b { font-family: var(--font-head); font-size: 15px; color: var(--gold); } .ar-card-name small { color: var(--ink-dim); font-size: 13px; }
+.ar-card-won { grid-area: won; font-size: 13px; color: var(--good); display: flex; gap: 4px; align-items: center; } .ar-card-won i { color: var(--ink-faint); font-style: normal; }
+.ar-rank-n { grid-area: n; font: 800 18px var(--font-head); color: var(--ink-faint); text-align: center; }
+.ar-rank.beaten .ar-rank-n { color: var(--good); } .ar-rank.open .ar-rank-n { color: var(--gold); } .ar-rank.locked { opacity: .82; }
+.ar-chip { grid-area: chip; align-self: start; padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 800; white-space: nowrap; border: 1px solid; }
+.ar-chip.fair { color: var(--gold); border-color: rgba(232, 193, 112, .5); } .ar-chip.hard { color: var(--bad); border-color: rgba(240, 138, 108, .55); } .ar-chip.easy { color: var(--good); border-color: rgba(143, 208, 106, .5); }
+.ar-detail { padding: 12px 14px; border-radius: 10px; background: var(--panel-2); border: 1px solid var(--edge-soft); display: grid; gap: 10px; }
+.ar-detail h3 { margin: 0; font: 700 20px var(--font-head); color: var(--gold); } .ar-detail h3 small { font: 600 14px var(--font); color: var(--ink-dim); margin-left: 6px; }
+.ar-mark { margin: 0; padding: 7px 10px; border-radius: 7px; font-weight: 700; } .ar-mark.fair { background: rgba(232, 193, 112, .1); color: var(--ink); } .ar-mark.hard { background: rgba(240, 138, 108, .12); color: #ffd0c2; } .ar-mark.easy { background: rgba(143, 208, 106, .1); color: #d8f5c8; }
+.ar-waves { margin: 0; padding-left: 20px; display: grid; gap: 3px; color: var(--ink); } .ar-waves b { color: var(--gold); margin-right: 4px; }
+.ar-note { margin: 0; color: var(--ink-dim); font-size: 14px; }
+.ar-reward { display: grid; gap: 6px; } .ar-reward h4 { margin: 0; display: flex; gap: 6px; align-items: center; font: 700 15px var(--font-head); color: var(--ink); }
+.ar-reward ul { margin: 0; padding-left: 20px; display: grid; gap: 3px; color: var(--ink); }
+.ar-unique .tipcard, .ar-unique > * { max-width: 100%; }
+.ar-detail blockquote { margin: 0; padding: 6px 12px; border-left: 3px solid var(--gold-deep); color: var(--ink); font-style: italic; }
+.ar-titles { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; color: var(--ink-dim); }
+.ar-title-list { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+@media (max-width: 760px) { .ar-split { grid-template-columns: 1fr; } }
+
+/* ---- the reward chest */
+.win-arena-chest .ow-win-body { display: grid; gap: 10px; }
+.ac-banner { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 9px; color: var(--ink); }
+.ac-banner span { display: grid; } .ac-banner b { font: 700 16px var(--font-head); color: var(--gold); } .ac-banner small { color: var(--ink-dim); font-size: 13px; }
+.ac-banner.first { background: rgba(143, 208, 106, .12); border: 1px solid rgba(143, 208, 106, .45); }
+.ac-banner.champ { background: rgba(232, 193, 112, .14); border: 1px solid rgba(232, 193, 112, .55); }
+.ac-xp { margin: 0; color: var(--xp); font-weight: 800; }
+.ac-list { display: grid; gap: 10px; }
+.ac-gold { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--edge-soft); } .ac-gold b { flex: 1; font-size: 16px; }
+.ac-item { display: grid; gap: 6px; padding: 8px; border-radius: 9px; background: var(--panel-2); border: 1px solid var(--edge-soft); }
+.ac-item.rarity-magic { border-color: rgba(111, 168, 255, .5); } .ac-item.rarity-rare { border-color: rgba(241, 211, 90, .55); } .ac-item.rarity-legendary, .ac-item.rarity-unique { border-color: rgba(255, 154, 60, .6); }
+.ac-item > .ow-btn { justify-self: end; }
+.scr-worlds-card.is-arena .scr-worlds-icon { color: var(--gold); }

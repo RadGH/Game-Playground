@@ -152,3 +152,15 @@ h1, h2, h3 { font-family: var(--font-head); font-weight: 700; letter-spacing: .0
 }
 .ow-motif { display: inline-block; border-radius: 50%; background: radial-gradient(circle at 50% 40%, #2a2f5a, #14183a); border: 1px solid #e6c14a; overflow: hidden; }
 .ow-motif svg { width: 100%; height: 100%; display: block; }
+
+/* the Look setting: a short dark fade while a new after-effect is built (js/client/render/look.js) */
+.ow-look-fade { position: fixed; inset: 0; z-index: 40; background: #0d0b08; opacity: 0; pointer-events: none; transition: opacity .35s ease; }
+.ow-look-fade.ow-look-fade-on { opacity: .85; transition: none; }
+
+/* The camera tuner (☰ → Tune camera; shared/tune.js panel, main.js): on a phone it docks at the TOP so the stick,
+   Attack and Dodge below stay usable while you tune, and the top of the HUD steps aside while it is open. */
+@media (max-width: 600px) {
+  .ow-cam-tuner .tune-panel { top: max(8px, env(safe-area-inset-top)); bottom: auto; height: 44vh; }
+  body.ow-cam-tuning #hud .hud-me, body.ow-cam-tuning #hud .hud-party, body.ow-cam-tuning #hud .hud-target,
+  body.ow-cam-tuning #hud .hud-menu, body.ow-cam-tuning #hud .hud-mini, body.ow-cam-tuning #hud .hud-tracker { visibility: hidden; }
+}

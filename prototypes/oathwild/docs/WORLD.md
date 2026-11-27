@@ -141,6 +141,8 @@ it was done. Quest items are not carried: they come out of a quest container's l
 | `encounters.js` | `spawnCampFor(world, placements, campId, { heroes, flags })`, `spawnZone(world, zone)`, `heroScale`: camps and roam zones on top of `js/rules/combat.js`, bosses sized to the number of heroes. |
 | `quests.js` | The quest engine: `accept`, `notify` (feed combat `death` events and talk / reach / take / use), `escortTick`, `talkTo` / `choose` (dialogue with offers, choices, services), `claimReward` (per player), `questLog` (the UI model), `markerOf`, `npcPresent` / `npcAt`, `servicesOf`, `liveObjects`. |
 | `boot.js` | `bootWorld({ regions })` → `{ data, terrain, book }` (the only file that reads files). |
+| `edits.js` | The map editor's layer (`data/edits.json`): removed / added / brushed trees and rocks, ground strokes, moved things, effect zones, region looks, notes; `applyOp` checks one edit; orphans reported. README "Map editor". |
+| `live.js` | `worldScene(W)` (trees + rocks with the layer, used by server and browser alike), `rebuildWorld` + `swapInto` (rebuild after a live edit into the same objects). |
 
 Data: `data/map.json` (hand-shaped map), `data/placements.json` (written by `tools/place-world.mjs --write` from its
 LAYOUT — edit there), `data/quests.json`, `data/npcs.json`. Camp, chest and shrine **positions** live in

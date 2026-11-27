@@ -412,6 +412,61 @@
    ]
   },
   {
+   "id": "housekit",
+   "group": "world",
+   "title": "House Kit",
+   "href": "housekit/",
+   "folder": "housekit",
+   "summary": "The modular houses of Oathwild's towns on their own page, built by the very code the game uses: Kenney wall pieces dressed with Codex-painted textures (timber, plaster, stone, shingles, slate, thatch) and decorations — window boxes, shutters, shop signs, porches, balconies, dormers, jetties, ivy, lanterns, woodpiles — plus an inn, tower, smithy and chapel. One house with every knob, a gallery, a street on a hill, and every piece labelled.",
+   "status": "prototype",
+   "date": "2026-11-26",
+   "isNew": true,
+   "tags": [
+    "3d",
+    "buildings",
+    "town",
+    "procedural",
+    "review"
+   ]
+  },
+  {
+   "id": "worldbuild",
+   "group": "world",
+   "title": "World Build",
+   "href": "worldbuild/",
+   "folder": "worldbuild",
+   "summary": "Big game worlds from a plain brief: regions with themes and level bands, mountains, rivers, lakes, the sea, towns, camps, dungeons and landmarks — shaped, placed, joined by graded roads with a bridge at every crossing, then checked (every place walkable from the start, nothing on a road, rivers only run downhill, levels rise smoothly). Pins Oathwild's hand-made map unchanged inside a 4 x 4 km world. Each stage has its own picture; click any spot to fly over it in 3D, with the ground, trees and towns streamed in by tile.",
+   "status": "prototype",
+   "date": "2026-11-26",
+   "isNew": true,
+   "tags": [
+    "worldgen",
+    "map",
+    "procedural",
+    "streaming",
+    "3d"
+   ]
+  },
+  {
+   "id": "treekit",
+   "group": "world",
+   "title": "Tree Kit",
+   "href": "treekit/",
+   "folder": "treekit",
+   "summary": "Oathwild's big storybook trees built from parts as data — trunk shape and flutes, roots, branch levels, big leaf clumps, bark and leaf colours, age, wind stiffness — by the very builder the game uses. One tree with every knob and its seed, every species at its game height beside a 1.8 m person, and a forest patch in the one wind (strength, direction, rolling gusts, weather, a storm button). Live with Claude: changes from the command line redraw the open page within a second, and notes pinned on a tree go straight to Claude.",
+   "status": "prototype",
+   "date": "2026-11-26",
+   "isNew": true,
+   "tags": [
+    "3d",
+    "trees",
+    "wind",
+    "procedural",
+    "review",
+    "live"
+   ]
+  },
+  {
    "id": "voice-lab",
    "group": "language",
    "title": "Voice Lab",
@@ -1013,16 +1068,34 @@
    "title": "Oathwild",
    "href": "prototypes/oathwild/",
    "folder": "prototypes/oathwild",
-   "summary": "A third-person fantasy RPG for one to ten players in one shared, saved world: pick a class every level from 27 (as many as you like per hero), aim weapons and spells over the shoulder with ground markers, loot corpses and chests, and quest through Brightwater Vale and the Thornmere Wilds.",
+   "summary": "A third-person fantasy RPG for one to ten players in one shared, saved world: pick a class every level from 27 (as many as you like per hero), aim weapons and spells over the shoulder with ground markers, loot corpses and chests, and quest through Brightwater Vale and the Thornmere Wilds. New arena mode with five-wave brackets and ten champions; weather with storms; a Look setting. Its world-building tools: map editor (live with Claude), house kit, tree kit, world builder.",
    "status": "prototype",
-   "statusNote": "Round 1",
-   "date": "2026-11-23",
+   "statusNote": "Arena, weather, tools",
+   "date": "2026-11-26",
    "isNew": true,
    "tags": [
     "rpg",
     "3d",
     "co-op",
     "open world"
+   ],
+   "links": [
+    {
+     "label": "Map editor",
+     "href": "prototypes/oathwild/editor/"
+    },
+    {
+     "label": "House kit",
+     "href": "housekit/"
+    },
+    {
+     "label": "Tree kit",
+     "href": "treekit/"
+    },
+    {
+     "label": "World builder",
+     "href": "worldbuild/"
+    }
    ]
   },
   {

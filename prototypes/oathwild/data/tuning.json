@@ -10,13 +10,14 @@
     "unit": "m"
   },
   "cameraSide": {
-    "value": 0.75,
+    "value": 0.5,
     "min": 0,
     "max": 2,
     "step": 0.05,
     "label": "Over-the-shoulder offset",
     "group": "Camera",
-    "unit": "m"
+    "unit": "m",
+    "note": "Owner 2026-11-26: 'too far to the side'. Was 0.75 m."
   },
   "cameraLag": {
     "value": 14,
@@ -26,6 +27,61 @@
     "label": "Camera follow sharpness",
     "group": "Camera",
     "unit": ""
+  },
+  "cameraLookAhead": {
+    "value": 12,
+    "min": 2,
+    "max": 40,
+    "step": 0.5,
+    "label": "Look-ahead: how far in front the camera aims",
+    "group": "Camera",
+    "unit": "m",
+    "note": "Owner 2026-11-26: 'focuses too far in front of the character'. Was fixed at 30 m; lower = the hero sits nearer the middle of the screen."
+  },
+  "cameraLookDown": {
+    "value": 0.35,
+    "min": 0,
+    "max": 1,
+    "step": 0.05,
+    "label": "Tilt toward the ground when looking down",
+    "group": "Camera",
+    "unit": "×"
+  },
+  "cameraPitchMin": {
+    "value": -0.55,
+    "min": -1.2,
+    "max": 0,
+    "step": 0.05,
+    "label": "Furthest you can look up",
+    "group": "Camera",
+    "unit": "rad"
+  },
+  "cameraPitchMax": {
+    "value": 1.1,
+    "min": 0.3,
+    "max": 1.45,
+    "step": 0.05,
+    "label": "Furthest you can look down",
+    "group": "Camera",
+    "unit": "rad"
+  },
+  "cameraZoomMin": {
+    "value": 2.2,
+    "min": 1,
+    "max": 5,
+    "step": 0.1,
+    "label": "Closest zoom",
+    "group": "Camera",
+    "unit": "m"
+  },
+  "cameraZoomMax": {
+    "value": 9,
+    "min": 5,
+    "max": 20,
+    "step": 0.5,
+    "label": "Furthest zoom",
+    "group": "Camera",
+    "unit": "m"
   },
   "mouseSpeed": {
     "value": 0.0024,

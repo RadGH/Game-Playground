@@ -1,0 +1,7 @@
+Use your image generation tool to create ONE new picture and save it in the current working directory as painted.png (1024x1024 PNG). Do nothing else (do not write code, do not edit other files).
+It is a game texture for a fantasy town building kit: STONE.
+Subject: a wall of BIG CUT STONE BLOCKS in neat staggered courses (4 courses top to bottom, blocks about twice as wide as tall), warm grey-beige stone, each block with a bright painted top-left bevel and dark painted mortar lines, slight colour variation block to block.
+It must TILE SEAMLESSLY in both directions: the left edge continues into the right edge and the top edge into the bottom edge, with no visible seam, no frame and no vignette.
+Fill the WHOLE picture edge to edge with the material (no background, no border, no drop shadow, no perspective — seen straight on, flat lighting from the top-left).
+Style: hand-painted stylised fantasy MMO texture in the style of the classic 2004 fantasy MMO towns: chunky, readable shapes, bold painted highlights on top edges and dark painted shadows in the cracks, warm saturated but not neon colours, soft brush strokes, NO photo detail, NO noise grain, NO realism, big simple forms readable from far away.
+Hard rules: no text, no letters, no numbers, no watermark, no people, no frame.

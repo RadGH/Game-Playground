@@ -41,7 +41,8 @@ export function createGround(T, placements = null, scattered = null, town = null
   for (const c of town?.circles || []) add(c.x, c.z, c.r);                                   // the fountain
   // oriented boxes (town houses, stalls, terrace walls): pushed out of along the shallower side
   const bgrid = new Map(), boxes = [];
-  for (const b of town?.boxes || []) {
+  // (placements.boxes: walls laid out by hand or by a place builder — the arena's stands and gate passage, js/world/arena-place.js)
+  for (const b of [...(town?.boxes || []), ...(placements?.boxes || [])]) {
     const c = Math.cos(b.facing), sn = Math.sin(b.facing), R = Math.hypot(b.hw, b.hd);
     const bx = { x: b.x, z: b.z, hw: b.hw, hd: b.hd, c, s: sn, R };
     boxes.push(bx);

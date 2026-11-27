@@ -1,0 +1,262 @@
+{
+  "_about": "Tree Kit species (treekit/README.md). One row per tree; lengths in the tree's own units before a game scales it. Edit with treekit/index.html or treekit/tools/tree-edit.mjs. The \"oathwild\" block is the game's tree kinds; their trunk / crown are MEASURED from the drawn tree by treekit/tools/measure.mjs (run on every save) — never hand-edit those two.",
+  "version": 1,
+  "species": {
+    "oak": {
+      "label": "Oak",
+      "form": "round",
+      "size": { "height": 12.5, "age": 1 },
+      "trunk": { "radius": 0.56, "topRadius": 0.379, "flare": 0.75, "twist": 0.6, "flutes": 0.1, "lean": 0.04, "bend": 0.05, "crownStart": 0.42 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.6, 1.22, 0.92], "bands": false },
+      "wind": { "stiffness": 0.6, "sway": 0.45, "flutter": 1 },
+      "branches": { "count": 3, "from": 0.82, "to": 0.95, "rise": 0.25, "thickness": 0.62, "tip": 0.28 },
+      "crown": { "radius": 4.8, "clumps": 5, "clumpSize": 1, "squash": 0.78 },
+      "leaves": { "picture": "broadleaf", "tint": [0.88, 1.22, 0.5], "tuftSize": 1, "tuftCount": 1 }
+    },
+    "beech": {
+      "label": "Beech",
+      "form": "tall",
+      "size": { "height": 15, "age": 1 },
+      "trunk": { "radius": 0.495, "topRadius": 0.319, "flare": 0.6, "twist": 0.35, "flutes": 0.07, "lean": 0.03, "bend": 0.03, "crownStart": 0.45 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [2.2, 2.6, 3.1], "bands": false },
+      "wind": { "stiffness": 0.45, "sway": 0.6, "flutter": 1 },
+      "branches": { "rise": 0.25, "thickness": 0.62, "tip": 0.28 },
+      "crown": { "radius": 3.7, "clumps": 4, "clumpSize": 1 },
+      "leaves": { "picture": "broadleaf", "tint": [1.02, 1.22, 0.45], "tuftSize": 1, "tuftCount": 1 }
+    },
+    "birch": {
+      "label": "Birch",
+      "form": "tall",
+      "size": { "height": 13, "age": 1 },
+      "trunk": { "radius": 0.384, "topRadius": 0.217, "flare": 0.45, "twist": 0.2, "flutes": 0.05, "lean": 0.03, "bend": 0.03, "crownStart": 0.4 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [4.6, 6.4, 8.4], "bands": true },
+      "wind": { "stiffness": 0.2, "sway": 1, "flutter": 1.3 },
+      "branches": { "rise": 0.25, "thickness": 0.62, "tip": 0.28 },
+      "crown": { "radius": 3, "clumps": 4, "clumpSize": 1 },
+      "leaves": { "picture": "broadleaf", "tint": [1.1, 1.26, 0.42], "tuftSize": 1, "tuftCount": 1 }
+    },
+    "silver_birch": {
+      "label": "Silver birch",
+      "form": "tall",
+      "size": { "height": 13, "age": 1 },
+      "trunk": { "radius": 0.497, "topRadius": 0.281, "flare": 0.45, "twist": 0.2, "flutes": 0.05, "lean": 0.03, "bend": 0.03, "crownStart": 0.4 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [4.6, 6.4, 8.4], "bands": true },
+      "wind": { "stiffness": 0.2, "sway": 1, "flutter": 1.3 },
+      "branches": { "rise": 0.25, "thickness": 0.62, "tip": 0.28 },
+      "crown": { "radius": 3, "clumps": 4, "clumpSize": 1 },
+      "leaves": { "picture": "broadleaf", "tint": [1.1, 1.26, 0.42], "tuftSize": 1, "tuftCount": 1 }
+    },
+    "ancient_oak": {
+      "label": "Ancient oak",
+      "form": "round",
+      "size": { "height": 24, "age": 1 },
+      "trunk": { "radius": 2.193, "topRadius": 1.192, "flare": 0.9, "twist": 0.9, "flutes": 0.16, "lean": 0.04, "bend": 0.05, "crownStart": 0.36 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.45, 1.12, 0.88], "bands": false },
+      "wind": { "stiffness": 0.85, "sway": 0.28, "flutter": 0.8 },
+      "branches": { "count": 5, "from": 0.82, "to": 0.95, "rise": 0.25, "thickness": 0.62, "tip": 0.28 },
+      "crown": { "radius": 12, "clumps": 7, "clumpSize": 1, "squash": 0.72 },
+      "leaves": { "picture": "broadleaf", "tint": [0.8, 1.16, 0.6], "tuftSize": 1, "tuftCount": 1, "accent": { "kind": "glow", "color": [2.6, 2.2, 1], "n": 22 } }
+    },
+    "willow": {
+      "label": "Willow",
+      "form": "weep",
+      "size": { "height": 11, "age": 1 },
+      "trunk": { "radius": 0.637, "topRadius": 0.411, "flare": 0.8, "twist": 0.8, "flutes": 0.12, "lean": 0.04, "bend": 0.05, "crownStart": 0.4 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.5, 1.25, 0.95], "bands": false },
+      "wind": { "stiffness": 0.4, "sway": 0.5, "flutter": 1.5 },
+      "branches": { "count": 4, "from": 0.82, "to": 0.95, "rise": 0.25, "thickness": 0.62, "tip": 0.28 },
+      "crown": { "radius": 5.5, "clumps": 5, "clumpSize": 1, "squash": 0.55, "strands": 22, "strandLength": 0.5 },
+      "leaves": { "picture": "broadleaf", "tint": [0.98, 1.22, 0.48], "tuftSize": 1, "tuftCount": 1 }
+    },
+    "pine": {
+      "label": "Pine",
+      "form": "crown",
+      "size": { "height": 19, "age": 1 },
+      "trunk": { "radius": 0.416, "topRadius": 0.153, "flare": 0.6, "twist": 0.4, "flutes": 0.08, "lean": 0.015, "bend": 0.012, "crownStart": 0.44 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.65, 1.15, 0.85], "bands": false },
+      "wind": { "stiffness": 0.55, "sway": 0.5, "flutter": 0.7 },
+      "crown": { "radius": 4.6, "tiers": 4 },
+      "leaves": { "picture": "needle", "tint": [0.8, 1.1, 0.72], "tuftSize": 1, "tuftCount": 1 }
+    },
+    "fir": {
+      "label": "Fir",
+      "form": "tiers",
+      "size": { "height": 16, "age": 1 },
+      "trunk": { "radius": 0.399, "topRadius": 0.096, "flare": 0.5, "twist": 0.2, "flutes": 0.05, "lean": 0.015, "bend": 0.012, "crownStart": 0.24 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.25, 1, 0.8], "bands": false },
+      "wind": { "stiffness": 0.6, "sway": 0.5, "flutter": 0.7 },
+      "crown": { "radius": 4, "tiers": 5 },
+      "leaves": { "picture": "needle", "tint": [0.78, 1.12, 0.8], "tuftSize": 1, "tuftCount": 1 }
+    },
+    "spruce": {
+      "label": "Spruce",
+      "form": "tiers",
+      "size": { "height": 21, "age": 1 },
+      "trunk": { "radius": 0.449, "topRadius": 0.098, "flare": 0.5, "twist": 0.2, "flutes": 0.05, "lean": 0.015, "bend": 0.012, "crownStart": 0.22 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.2, 0.98, 0.82], "bands": false },
+      "wind": { "stiffness": 0.6, "sway": 0.42, "flutter": 0.7 },
+      "crown": { "radius": 3.8, "tiers": 6 },
+      "leaves": { "picture": "needle", "tint": [0.68, 1.02, 0.86], "tuftSize": 1, "tuftCount": 1 }
+    },
+    "dead_snag": {
+      "label": "Dead snag",
+      "form": "snag",
+      "size": { "height": 8.5, "age": 1 },
+      "trunk": { "radius": 0.328, "topRadius": 0.15, "flare": 0.8, "twist": 1.2, "flutes": 0.14, "lean": 0.07, "bend": 0.06 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.7, 1.75, 1.9], "bands": false },
+      "wind": { "stiffness": 0.9, "sway": 0.5, "flutter": 0 },
+      "branches": { "count": 3, "tall": false }
+    },
+    "dead_pine": {
+      "label": "Dead pine",
+      "form": "snag",
+      "size": { "height": 15, "age": 1 },
+      "trunk": { "radius": 0.393, "topRadius": 0.094, "flare": 0.6, "twist": 0.7, "flutes": 0.1, "lean": 0.07, "bend": 0.06 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.8, 1.85, 2], "bands": false },
+      "wind": { "stiffness": 0.9, "sway": 0.4, "flutter": 0 },
+      "branches": { "count": 5, "tall": true }
+    },
+    "palm_fan": {
+      "label": "Fan palm",
+      "form": "palm",
+      "size": { "height": 7, "age": 1 },
+      "trunk": { "radius": 0.183, "topRadius": 0.129, "flare": 0.5, "twist": 0, "flutes": 0, "lean": 0.16, "bend": 0.06 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.8, 1.45, 1.05], "bands": false },
+      "wind": { "stiffness": 0.3, "sway": 0.65, "flutter": 1.4 },
+      "crown": { "fronds": 8, "frondLength": 3.1 },
+      "leaves": { "picture": "frond", "tint": [0.98, 1.22, 0.5] }
+    },
+    "shrub": {
+      "label": "Shrub",
+      "form": "round",
+      "size": { "height": 1.8, "age": 1 },
+      "trunk": { "radius": 0.07, "topRadius": 0.04, "flare": 0.3, "twist": 0, "flutes": 0, "lean": 0.04, "bend": 0.05, "crownStart": 0.08 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.4, 1.1, 0.85], "bands": false },
+      "wind": { "stiffness": 0.5, "sway": 1.3, "flutter": 1.2 },
+      "branches": { "count": 0, "from": 0.82, "to": 0.95, "rise": 0.25, "thickness": 0.62, "tip": 0.28 },
+      "crown": { "radius": 1.3, "clumps": 4, "clumpSize": 1, "squash": 0.7 },
+      "leaves": { "picture": "broadleaf", "tint": [0.8, 1.12, 0.48], "tuftSize": 1, "tuftCount": 1 }
+    },
+    "shrub_tall": {
+      "label": "Tall shrub",
+      "form": "round",
+      "size": { "height": 2.8, "age": 1 },
+      "trunk": { "radius": 0.09, "topRadius": 0.05, "flare": 0.3, "twist": 0, "flutes": 0, "lean": 0.04, "bend": 0.05, "crownStart": 0.12 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.4, 1.1, 0.85], "bands": false },
+      "wind": { "stiffness": 0.5, "sway": 1.2, "flutter": 1.2 },
+      "branches": { "count": 0, "from": 0.82, "to": 0.95, "rise": 0.25, "thickness": 0.62, "tip": 0.28 },
+      "crown": { "radius": 1.5, "clumps": 4, "clumpSize": 1, "squash": 0.95 },
+      "leaves": { "picture": "broadleaf", "tint": [0.9, 1.18, 0.5], "tuftSize": 1, "tuftCount": 1 }
+    },
+    "shrub_berry": {
+      "label": "Berry shrub",
+      "form": "round",
+      "size": { "height": 1.6, "age": 1 },
+      "trunk": { "radius": 0.07, "topRadius": 0.04, "flare": 0.3, "twist": 0, "flutes": 0, "lean": 0.04, "bend": 0.05, "crownStart": 0.08 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.4, 1.1, 0.85], "bands": false },
+      "wind": { "stiffness": 0.5, "sway": 1.3, "flutter": 1.2 },
+      "branches": { "count": 0, "from": 0.82, "to": 0.95, "rise": 0.25, "thickness": 0.62, "tip": 0.28 },
+      "crown": { "radius": 1.2, "clumps": 3, "clumpSize": 1, "squash": 0.72 },
+      "leaves": { "picture": "broadleaf", "tint": [0.74, 1.04, 0.5], "tuftSize": 1, "tuftCount": 1, "accent": { "kind": "blossom", "color": [2.3, 0.75, 0.9], "n": 9 } }
+    },
+    "shrub_dry": {
+      "label": "Dry shrub",
+      "form": "round",
+      "size": { "height": 1.5, "age": 1 },
+      "trunk": { "radius": 0.07, "topRadius": 0.04, "flare": 0.3, "twist": 0, "flutes": 0, "lean": 0.04, "bend": 0.05, "crownStart": 0.08 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.4, 1.1, 0.85], "bands": false },
+      "wind": { "stiffness": 0.5, "sway": 1.3, "flutter": 1.2 },
+      "branches": { "count": 0, "from": 0.82, "to": 0.95, "rise": 0.25, "thickness": 0.62, "tip": 0.28 },
+      "crown": { "radius": 1.15, "clumps": 3, "clumpSize": 1, "squash": 0.7 },
+      "leaves": { "picture": "broadleaf", "tint": [1.15, 1.1, 0.5], "tuftSize": 1, "tuftCount": 1 }
+    },
+    "sapling": {
+      "label": "Sapling",
+      "form": "round",
+      "size": { "height": 6.5, "age": 1 },
+      "trunk": { "radius": 0.16, "topRadius": 0.1, "flare": 0.5, "twist": 0.3, "flutes": 0.06, "lean": 0.04, "bend": 0.05, "crownStart": 0.4 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.6, 1.22, 0.92], "bands": false },
+      "wind": { "stiffness": 0.3, "sway": 0.95, "flutter": 1.2 },
+      "branches": { "count": 2, "from": 0.82, "to": 0.95, "rise": 0.25, "thickness": 0.62, "tip": 0.28 },
+      "crown": { "radius": 2.4, "clumps": 4, "clumpSize": 1, "squash": 0.85 },
+      "leaves": { "picture": "broadleaf", "tint": [0.95, 1.24, 0.5], "tuftSize": 1, "tuftCount": 1 }
+    },
+    "story_fern_a": {
+      "label": "Tree fern (small)",
+      "form": "fern",
+      "size": { "height": 3, "age": 1 },
+      "trunk": { "radius": 0.22, "topRadius": 0.183, "flare": 0.5, "twist": 0.15, "flutes": 0.12, "lean": 0.06, "bend": 0.02 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.5, 1.15, 0.85], "bands": false },
+      "wind": { "stiffness": 0.4, "sway": 0.9, "flutter": 1.3 },
+      "crown": { "fronds": 9, "frondLength": 2.3 },
+      "leaves": { "picture": "frond", "tint": [0.85, 1.2, 0.52] }
+    },
+    "story_fern_b": {
+      "label": "Tree fern (tall)",
+      "form": "fern",
+      "size": { "height": 3.5, "age": 1 },
+      "trunk": { "radius": 0.218, "topRadius": 0.182, "flare": 0.5, "twist": 0.15, "flutes": 0.12, "lean": 0.06, "bend": 0.02 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.5, 1.15, 0.85], "bands": false },
+      "wind": { "stiffness": 0.4, "sway": 0.9, "flutter": 1.3 },
+      "crown": { "fronds": 10, "frondLength": 2.6 },
+      "leaves": { "picture": "frond", "tint": [0.8, 1.18, 0.55] }
+    },
+    "story_fern_c": {
+      "label": "Tree fern (wide)",
+      "form": "fern",
+      "size": { "height": 2.7, "age": 1 },
+      "trunk": { "radius": 0.215, "topRadius": 0.179, "flare": 0.5, "twist": 0.15, "flutes": 0.12, "lean": 0.06, "bend": 0.02 },
+      "roots": { "count": 0, "reach": 2.2, "thickness": 0.4, "rise": 0.5 },
+      "bark": { "tint": [1.5, 1.15, 0.85], "bands": false },
+      "wind": { "stiffness": 0.4, "sway": 0.9, "flutter": 1.3 },
+      "crown": { "fronds": 11, "frondLength": 2.1 },
+      "leaves": { "picture": "frond", "tint": [0.92, 1.22, 0.5] }
+    }
+  },
+  "detail": [
+    { "sides": 8, "rings": 7, "limbSides": 5, "cards": 8, "cardRows": 3, "core": 1, "accent": 1, "strandsK": 1, "frondSegs": 4 },
+    { "sides": 6, "rings": 4, "limbSides": 4, "cards": 5, "cardRows": 2, "core": 0, "accent": 0.5, "strandsK": 0.5, "frondSegs": 2 },
+    { "sides": 5, "rings": 3, "limbSides": 0, "cards": 0, "cardRows": 2, "core": 0, "accent": 0, "strandsK": 0, "frondSegs": 1 }
+  ],
+  "oathwild": {
+    "trees": {
+      "oak-a": { "tree": "oak", "height": 21, "trunk": 0.89, "crown": 8.27 },
+      "oak-b": { "tree": "oak", "height": 24, "trunk": 1.03, "crown": 9.46 },
+      "birch": { "tree": "birch", "height": 20, "trunk": 0.62, "crown": 4.73 },
+      "pine-a": { "tree": "pine", "height": 26, "trunk": 0.65, "crown": 6.33 },
+      "pine-b": { "tree": "spruce", "height": 27, "trunk": 0.65, "crown": 4.99 },
+      "willow": { "tree": "willow", "height": 16, "trunk": 0.84, "crown": 8.09 },
+      "marsh-tree": { "tree": "beech", "height": 19, "trunk": 0.69, "crown": 4.81 },
+      "dead-tree": { "tree": "dead_pine", "height": 18, "trunk": 0.48, "crown": 4.24 },
+      "ancient-oak": { "tree": "ancient_oak", "height": 38, "giant": true, "trunk": 3.4, "crown": 17.89 },
+      "giant-spruce": { "tree": "spruce", "height": 44, "giant": true, "trunk": 1.13, "crown": 8.13 }
+    },
+    "understory": {
+      "shrub": { "tree": "shrub", "height": 1.8, "shadow": false },
+      "shrub-tall": { "tree": "shrub_tall", "height": 2.8, "shadow": false },
+      "shrub-berry": { "tree": "shrub_berry", "height": 1.6, "shadow": false },
+      "shrub-dry": { "tree": "shrub_dry", "height": 1.5, "shadow": false },
+      "sapling": { "tree": "sapling", "height": 6.5, "shadow": true },
+      "sapling-spruce": { "tree": "spruce", "height": 6, "shadow": true }
+    }
+  }
+}

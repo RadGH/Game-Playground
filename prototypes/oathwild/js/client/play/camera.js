@@ -33,11 +33,11 @@ export function createCamera(view, { heightAt, tuning = {}, settings, solidsNear
     look(dx, dy, { pad = false } = {}) {
       const k = (pad ? T('padSpeed') || 0.0028 : T('mouseSpeed') || 0.0024) * (settings.sens || 1);
       st.yaw -= dx * k;
-      st.pitch = Math.max(-0.55, Math.min(1.1, st.pitch + dy * k * (settings.invertY ? -1 : 1)));
+      st.pitch = Math.max(T('cameraPitchMin') ?? -0.55, Math.min(T('cameraPitchMax') ?? 1.1, st.pitch + dy * k * (settings.invertY ? -1 : 1)));
     },
-    zoom(steps) { st.wantDist = Math.max(2.2, Math.min(9, st.wantDist + steps * 0.6)); },
+    zoom(steps) { st.wantDist = Math.max(T('cameraZoomMin') ?? 2.2, Math.min(T('cameraZoomMax') ?? 9, st.wantDist + steps * 0.6)); },
     setYaw(y) { st.yaw = y; },
-    setPitch(p) { st.pitch = Math.max(-0.55, Math.min(1.1, p)); },   // tests and look checks (radians; 0 = level, + looks down)
+    setPitch(p) { st.pitch = Math.max(T('cameraPitchMin') ?? -0.55, Math.min(T('cameraPitchMax') ?? 1.1, p)); },   // tests and look checks (radians; 0 = level, + looks down)
     forward() { return { x: Math.sin(st.yaw), z: Math.cos(st.yaw) }; },
     right() { return { x: -Math.cos(st.yaw), z: Math.sin(st.yaw) }; },
     update(dt, hero, { snap = false } = {}) {
@@ -60,7 +60,10 @@ export function createCamera(view, { heightAt, tuning = {}, settings, solidsNear
       const g = heightAt(px, pz) + 0.45;
       if (py < g) py = g;                                   // never under the ground: rise instead
       cam.position.set(px, py, pz);
-      w.set(st.at.x + f.x * cp * 30, st.at.y - sp * 30 * 0.35, st.at.z + f.z * cp * 30);
+      // the point it aims at: `cameraLookAhead` m in front of the shoulder point (was a fixed 30 m — owner 2026-11-26: 'focuses
+      // too far in front of the character'), tilted toward the ground by `cameraLookDown` as you look down
+      const ahead = T('cameraLookAhead') ?? 30, down = T('cameraLookDown') ?? 0.35;
+      w.set(st.at.x + f.x * cp * ahead, st.at.y - sp * ahead * down, st.at.z + f.z * cp * ahead);
       cam.lookAt(w);
       if (settings.fov && Math.abs(cam.fov - settings.fov) > 0.5 && innerWidth >= innerHeight) { cam.fov = settings.fov; cam.updateProjectionMatrix(); }
     },

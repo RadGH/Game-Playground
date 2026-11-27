@@ -1,0 +1,192 @@
+{
+  "_doc": "A small quick world (1.6 x 1.2 km, nothing pinned): three regions round a river valley that runs to the sea. Used by the tests (every rule on several seeds) and as the phone default on the page.",
+  "id": "valley-small",
+  "name": "Small valley, 1.6 x 1.2 km",
+  "seed": 7,
+  "size": {
+    "bounds": {
+      "minX": -800,
+      "maxX": 800,
+      "minZ": -600,
+      "maxZ": 600
+    },
+    "cell": 2,
+    "margin": 40
+  },
+  "relief": {
+    "base": 14,
+    "roll": 16,
+    "detail": 1.2
+  },
+  "sea": {
+    "edges": [
+      "south"
+    ],
+    "from": 140,
+    "shelf": 70,
+    "depth": 10,
+    "wobble": 60
+  },
+  "start": {
+    "at": [
+      -300,
+      120
+    ],
+    "name": "the valley mouth"
+  },
+  "ranges": [
+    {
+      "id": "north_ridge",
+      "name": "the North Ridge",
+      "points": [
+        [
+          -700,
+          -470
+        ],
+        [
+          -100,
+          -520
+        ],
+        [
+          600,
+          -450
+        ]
+      ],
+      "height": 140,
+      "width": 220,
+      "sharpness": 0.6,
+      "passes": [
+        [
+          -120,
+          -500,
+          0.6
+        ]
+      ]
+    }
+  ],
+  "lakes": [
+    {
+      "id": "still_pool",
+      "name": "Still Pool",
+      "at": [
+        380,
+        -120
+      ],
+      "radius": 70,
+      "depth": 4
+    }
+  ],
+  "rivers": [
+    {
+      "id": "vale_river",
+      "name": "the Vale River",
+      "from": [
+        -150,
+        -420
+      ],
+      "to": "sea",
+      "width": 10,
+      "depth": 2
+    },
+    {
+      "id": "pool_brook",
+      "name": "Pool Brook",
+      "from": [
+        520,
+        -380
+      ],
+      "to": "lake:still_pool",
+      "width": 7,
+      "depth": 1.4
+    }
+  ],
+  "streams": {
+    "catchment": 0.06,
+    "max": 6,
+    "minLength": 180,
+    "width": [
+      4,
+      7
+    ]
+  },
+  "regions": [
+    {
+      "id": "meadows",
+      "name": "the Low Meadows",
+      "theme": "farmland",
+      "at": [
+        -320,
+        150
+      ],
+      "levels": [
+        1,
+        4
+      ],
+      "towns": [
+        {
+          "name": "Millford",
+          "size": "village"
+        }
+      ],
+      "camps": 2,
+      "dungeons": 0,
+      "shrines": 1,
+      "landmarks": [
+        {
+          "kind": "standing_stones"
+        }
+      ],
+      "fields": 4
+    },
+    {
+      "id": "pinewood",
+      "name": "the Pinewood",
+      "theme": "oldwood",
+      "at": [
+        320,
+        80
+      ],
+      "levels": [
+        3,
+        7
+      ],
+      "towns": [
+        {
+          "size": "hamlet"
+        }
+      ],
+      "camps": 2,
+      "dungeons": 1,
+      "shrines": 1,
+      "landmarks": [
+        {
+          "kind": "old_tree"
+        }
+      ],
+      "fields": 1
+    },
+    {
+      "id": "ridge",
+      "name": "the Ridge",
+      "theme": "moor",
+      "at": [
+        -100,
+        -330
+      ],
+      "levels": [
+        5,
+        9
+      ],
+      "towns": 0,
+      "camps": 1,
+      "dungeons": 1,
+      "shrines": 1,
+      "landmarks": [
+        {
+          "kind": "peak"
+        }
+      ],
+      "fields": 0
+    }
+  ]
+}

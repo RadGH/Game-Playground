@@ -18,14 +18,19 @@ export const ALLOW = Object.freeze([
   // shared code and art
   'shared', 'vendor', 'assets',
   // experiments
-  'armory', 'avatar-2d', 'avatar-3d', 'citykit', 'combined', 'conversations', 'highdef-3d', 'icons', 'items', 'library', 'model-library',
-  'lingo', 'mechkit', 'meters', 'namegen', 'proctown', 'sfx', 'universe', 'voice-lab', 'worldgen',
+  'armory', 'avatar-2d', 'avatar-3d', 'citykit', 'combined', 'conversations', 'highdef-3d', 'housekit', 'icons', 'items', 'library', 'model-library',
+  'lingo', 'mechkit', 'meters', 'namegen', 'proctown', 'sfx', 'treekit', 'universe', 'voice-lab', 'worldgen',
   // prototypes (prototypes/tinyrts is a symlink to another repo, so a published copy cannot hold it)
   'prototypes/thousandvale', 'prototypes/farhold', 'prototypes/emberveil', 'prototypes/bannerline',
   'prototypes/frontier-foundry', 'prototypes/lanternfall', 'prototypes/lodestar', 'prototypes/kindlewild', 'prototypes/stoneward', 'prototypes/oddhaven', 'prototypes/voidwright', 'prototypes/spirehold',
   'prototypes/tumblefair', 'prototypes/knockabout', 'prototypes/roverlands', 'prototypes/rogueloot',
   // the Spell Lab (avatar-3d/spellkit) reads Oathwild's spell visuals — only that one file of the game is served
   'prototypes/oathwild/data/spell-visuals.json',
+  // World Build (worldbuild/) pins Oathwild's hand-made map and draws with its terrain, town, tree and bridge code:
+  // those files of the game are served (the game's own server keeps the rest)
+  'worldbuild',
+  'prototypes/oathwild/js/world', 'prototypes/oathwild/js/client/render', 'prototypes/oathwild/img/ground',
+  'prototypes/oathwild/data/map.json', 'prototypes/oathwild/data/towns.json', 'prototypes/oathwild/data/placements.json', 'prototypes/oathwild/data/ground.json',
 ]);
 /** Paths inside the allow-list that are still refused. */
 export const DENY = Object.freeze([

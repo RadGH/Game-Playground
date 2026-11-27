@@ -33,6 +33,7 @@
 // below) is exactly the walked surface.
 
 import { makeNoise2D, fbm, smoothstep, clamp, lerp, hashStr } from '../../../../worldgen/js/noise.js';
+import { applyGroundStrokes } from './edits.js';
 
 export const BIOMES = Object.freeze(['meadow', 'wildgrass', 'forest', 'field', 'village', 'road', 'trail', 'boardwalk', 'water', 'shore', 'marsh', 'rock']);
 export const BIOME_ID = Object.freeze(Object.fromEntries(BIOMES.map((b, i) => [b, i])));
@@ -95,7 +96,9 @@ function segCross(p1, p2, q1, q2) {
 
 // ---------------------------------------------------------------- build
 
-export function createTerrain(map, { seed = map.seed } = {}) {
+// `ground` = the editor's ground strokes (data/edits.json, js/world/edits.js): applied to the raw ground before rivers,
+// places and roads are cut in, so roads stay graded and bridges still meet them.
+export function createTerrain(map, { seed = map.seed, ground = [] } = {}) {
   const B = map.bounds, G = map.grid, LIM = map.limits;
   const cell = G.cell, step = G.sampleStep;
   const nx = Math.round((B.maxX - B.minX) / cell) + 1, nz = Math.round((B.maxZ - B.minZ) / cell) + 1;
@@ -139,6 +142,7 @@ export function createTerrain(map, { seed = map.seed } = {}) {
     }
     H[idx(i, k)] = h;
   }
+  if (ground?.length) applyGroundStrokes(H, { nx, nz, cell, minX: B.minX, minZ: B.minZ }, ground);
 
   const sampleH = (x, z) => heightOn(H, x, z);
   function heightOn(arr, x, z) {
@@ -268,13 +272,23 @@ export function createTerrain(map, { seed = map.seed } = {}) {
           const p = pts[Math.max(0, q < 0 ? pts.length - 1 : q)];
           return p;
         };
-        const pa = along(sAt - reach), pb = along(sAt + reach);
+        // the editor may pin a crossing's ends (a, b), deck height, width and the level run past each end (`ramp`,
+        // metres of road held at the deck before it grades away); otherwise all are worked out from the river
         const kind = decl?.kind || 'undeclared';
-        const deck = kind === 'ford' ? surface - 0.35 : Math.max(sampleH(pa.x, pa.z), sampleH(pb.x, pb.z), surface + 1.2) + 0.15;
+        let pa, pb, s0 = sAt - reach, s1 = sAt + reach, span = reach;
+        if (decl?.a && decl?.b) {
+          pa = { x: decl.a[0], z: decl.a[1] }; pb = { x: decl.b[0], z: decl.b[1] };
+          const sOf = p => { let best = sAt, bd = Infinity; for (const q of pts) { const d = Math.hypot(q.x - p.x, q.z - p.z); if (d < bd) { bd = d; best = q.s; } } return best; };
+          const sa = sOf(pa), sb = sOf(pb);
+          s0 = Math.min(sa, sb); s1 = Math.max(sa, sb);
+          span = Math.max(Math.hypot(pa.x - c.x, pa.z - c.z), Math.hypot(pb.x - c.x, pb.z - c.z));
+        } else { pa = along(sAt - reach); pb = along(sAt + reach); }
+        const deck = Number.isFinite(decl?.deck) ? decl.deck : kind === 'ford' ? surface - 0.35 : Math.max(sampleH(pa.x, pa.z), sampleH(pb.x, pb.z), surface + 1.2) + 0.15;
         const ang = Math.atan2(pb.x - pa.x, pb.z - pa.z);
-        bridges.push({ id: decl?.id || `undeclared_${r.id}_${rv.id}`, name: decl?.name || null, road: r.id, river: rv.id, kind, art: decl?.art || null, at: [round2(c.x), round2(c.z)], a: [round2(pa.x), round2(pa.z)], b: [round2(pb.x), round2(pb.z)], width: r.width + 1, deck: round2(deck), surface: round2(surface), facing: round2(ang), s: sAt, reach });
+        bridges.push({ id: decl?.id || `undeclared_${r.id}_${rv.id}`, name: decl?.name || null, road: r.id, river: rv.id, kind, art: decl?.art || null, at: [round2(c.x), round2(c.z)], a: [round2(pa.x), round2(pa.z)], b: [round2(pb.x), round2(pb.z)], width: Number.isFinite(decl?.width) ? decl.width : r.width + 1, deck: round2(deck), surface: round2(surface), facing: round2(ang), s: sAt, reach: span });
         // (1.5 m past each end too, so the road never rises through the last planks — owner #129 follow-up)
-        for (let q = 0; q < pts.length; q++) if (Math.abs(pts[q].s - sAt) <= reach + (kind === "ford" ? 0 : 1.5)) pinned[q] = deck;
+        const ramp = kind === 'ford' ? 0 : (Number.isFinite(decl?.ramp) ? decl.ramp : 1.5);
+        for (let q = 0; q < pts.length; q++) if (pts[q].s >= s0 - ramp && pts[q].s <= s1 + ramp) pinned[q] = deck;
       }
     }
     // the profile: ground along the line, kept above marsh water, smoothed, grade-limited

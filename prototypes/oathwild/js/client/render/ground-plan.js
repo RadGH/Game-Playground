@@ -85,6 +85,14 @@ export function paintGround(T, { placements, art, cfg, res = 1, trees = [] }) {
     add(i0, k0, (1 - u) * (1 - v)); add(i0 + 1, k0, u * (1 - v)); add(i0, k0 + 1, (1 - u) * v); add(i0 + 1, k0 + 1, u * v);
   }
 
+  // a place may ask for its own ground (map.json places[id].paint = { layer, radius, soft }): the arena's sand floor and
+  // its gate passage (data/arena/map.json). Grass tufts grow only on the grass layers, so none comes up through it.
+  for (const p of Object.values(T.places)) {
+    const P = p.paint; if (!P || L[P.layer] == null) continue;
+    const r = P.radius, soft = P.soft ?? 2;
+    for (let k = 0; k < nz; k++) { const z = cz(k); if (Math.abs(z - p.at[1]) > r + soft) continue; for (let i = 0; i < nx; i++) { const x = cx(i), d = Math.hypot(x - p.at[0], z - p.at[1]); if (d > r + soft) continue; const m = d <= r ? 1 : 1 - (d - r) / soft, o = (k * nx + i) * CH; for (let c = 0; c < CH; c++) W[o + c] *= 1 - m; W[o + L[P.layer]] += m; } }
+  }
+
   // helpers: a coverage mask laid over everything below it
   const over = (layer, mask) => {
     for (let j = 0; j < nx * nz; j++) {

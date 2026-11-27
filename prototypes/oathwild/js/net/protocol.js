@@ -9,7 +9,7 @@
 //   charNew { name, look, background, attributes, cls }  → chars | err
 //   charDel { id }                              → chars
 //   worlds                                      → worlds { list }                (public worlds + the ones I played)
-//   worldNew { name, public }                   → worlds (and the new code)
+//   worldNew { name, public, kind? }            → worlds (and the new code); kind 'arena' = a new arena (server/arena.js)
 //   join { code, char }                         → enter { … }                    (into a world with one character)
 //   leave                                       → left
 //   in { q, mx, mz, ax, ay, az, dx, dy, dz, at?, b, c, h, rv? }   per 50 ms step: movement + aim + buttons + cast slot
@@ -63,12 +63,14 @@ export const ACTS = {
   horse: [['npc', S, 64]], respec: [['kind', S, 16]], enchant: [['item', S, 64], ['affix', S, 64]], disenchant: [['item', S, 64]],
   travel: [['shrine', S, 64]], home: [['shrine', S, 64]], respawn: [], train: [['npc', S, 64], ['cls', S, 32]],
   chat: [['text', S, 200]],
+  // the arena (server/arena.js): the bracket board, the champions' ladder, start a match / bout, wear a title
+  'arena-board': [], 'arena-ladder': [], 'arena-start': [['bracket', S, 16], ['champion', S, 32]], 'arena-title': [['title', S, 40]],
 };
 
 const MSGS = {
   hello: [['v', N], ['token', S, 64], ['device', S, 64], ['ticket', S, 256]],
   chars: [], charNew: [['name', S, 40], ['look', O], ['background', S, 32], ['attributes', O], ['cls', S, 32], ['body', S, 16]], charDel: [['id', S, 64]],
-  worlds: [], worldNew: [['name', S, 40], ['public', B]], worldDel: [['code', S, 8]],
+  worlds: [], worldNew: [['name', S, 40], ['public', B], ['kind', S, 8]], worldDel: [['code', S, 8]],
   join: [['code', S, 8], ['char', S, 64]], leave: [],
   devTp: [['x', N], ['z', N]],               // dev builds only (screenshots); the world room ignores it elsewhere
   devGear: [['base', S, 24], ['style', S, 24], ['el', S, 12], ['slot', S, 8]],   // dev builds only: hold a styled magic weapon
@@ -77,6 +79,8 @@ const MSGS = {
   devXp: [['levels', N]],                   // dev builds only: the experience for 1-5 more levels (level-up window checks)
   devDummy: [['n', N], ['hp', N]],          // dev builds only: still target dummies ahead (hp: a weak one, for a corpse)
   devKnock: [['push', N], ['down', N]],       // dev builds only: throw the monsters near you (tests/ui/knock-shot.mjs)
+  devArena: [['clear', B]],                 // dev builds only: the arena match's monsters / champion fall at once (screenshots, the screen walk)
+  devWeather: [['key', S, 16], ['region', S, 48], ['lock', B], ['instant', B], ['secs', N], ['release', B]],   // dev builds only: force / release the weather (js/world/weather.js)
   in: [['q', N], ['mx', N], ['mz', N], ['ax', N], ['ay', N], ['az', N], ['dx', N], ['dy', N], ['dz', N], ['at', A, 3], ['b', N], ['c', N], ['h', B], ['rv', S, 64], ['tg', S, 64]],
   act: [['a', S, 24]],                       // + the fields of that action (ACTS[a])
   ping: [['at', N]],
@@ -108,7 +112,7 @@ export function parseFrame(text) {
 }
 
 /** Per-type rate limits: tokens per second and a burst. Inputs come 20 a second (+ slack for a catch-up burst). */
-const RATES = { in: [30, 60], act: [12, 30], ping: [2, 4], hello: [1, 3], chars: [2, 5], charNew: [1, 3], charDel: [1, 3], worlds: [2, 5], worldNew: [0.2, 2], worldDel: [0.5, 2], join: [1, 4], leave: [1, 3], devTp: [2, 4], devGear: [4, 8], devDummy: [1, 3], devKnock: [1, 3], devDown: [1, 3], devGold: [1, 3], devXp: [1, 3] };
+const RATES = { in: [30, 60], act: [12, 30], ping: [2, 4], hello: [1, 3], chars: [2, 5], charNew: [1, 3], charDel: [1, 3], worlds: [2, 5], worldNew: [0.2, 2], worldDel: [0.5, 2], join: [1, 4], leave: [1, 3], devTp: [2, 4], devGear: [4, 8], devDummy: [1, 3], devKnock: [1, 3], devWeather: [2, 4], devArena: [2, 4], devDown: [1, 3], devGold: [1, 3], devXp: [1, 3] };
 export function createBuckets(now = () => Date.now()) {
   const B = new Map();
   return {

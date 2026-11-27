@@ -6,7 +6,9 @@
 //   const R = createWorldRoom({ rules, W, ground, scattered, meta, state, log, persist })
 //   R.join({ key, char, send }) → player     R.leave(key)     R.message(key, msg)     R.step()     R.save()
 //
-// `meta` = { code, name, public, owner, created } · `state` = world-state.js record (or null for a new world)
+// `meta` = { code, name, public, owner, created, kind? } · `state` = world-state.js record (or null for a new world)
+// meta.kind 'arena' (brainstorm 2026-11-27 §2a): W is the arena place (js/world/arena-place.js) and server/arena.js runs
+// the matches, the board, the ladder and the reward chests through the hooks marked `arena` below.
 // `persist({ world, chars })` is called with what to write (the hub writes files).
 import {
   createWorld, addPlayer, removePlayer, refreshPlayer, step as simStep, respawnPlayer, die, castRefusal, spellPowerRange, spawnMonster, walkSpeedOf, knockUnit,
@@ -27,6 +29,9 @@ import { notify, escortTick, npcCall, talkTo, choose, npcAt, npcPresent, service
 import { spawnCampFor, spawnZone } from '../js/world/encounters.js';
 import { equip, unequip, buyPrice, sellPrice, shopStock } from '../js/game/gear.js';
 import { STEP, MAX_PLAYERS, VIEW_METRES, EVENT_METRES, UF, unpackButtons } from '../js/net/protocol.js';
+import { normWeather, stepWeather, forceWeather, releaseWeather, weatherWire, WEATHER_CHOICES } from '../js/world/weather.js';
+import { createArenaMode } from './arena.js';
+import { titleOf } from '../js/rules/arena.js';
 
 const R2 = v => Math.round(v * 100) / 100;
 const dist2 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -39,6 +44,8 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
   const ws = state ? fromJSON(state) : createWorldState({ id: meta.code, name: meta.name, seed });
   ws.found = Array.isArray(ws.found) ? ws.found : [];
   ws.at = ws.at && typeof ws.at === 'object' ? ws.at : {};               // where each character last stood in this world
+  // the weather, per region (js/world/weather.js): saved with the world, sent in the world state, the same for everyone
+  ws.weather = normWeather(ws.weather, { seed: ws.seed, regions: T.regionIds || Object.keys(data.map.regions || {}) });
   const world = createWorld(rules, { seed: (ws.seed * 7919 + Math.floor(ws.time)) >>> 0, flags: ws.flags });
   const players = new Map();          // key -> P
   const unitMeta = new Map();         // monster id -> { camp, zone }
@@ -72,6 +79,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
   }
   function nearPlayer(at, r) { for (const P of players.values()) { const u = unitOf(P); if (u && Math.hypot(u.x - at[0], u.z - at[1]) < r) return true; } return false; }
   function populate(first = false) {
+    if (arena) return;                                  // the arena's monsters come in waves (server/arena.js), never from camps
     for (const id of campsToRespawn(rules, ws, ws.time)) {
       if (activeCamps.has(id)) continue;
       const c = placements.camps.find(x => x.id === id);
@@ -85,6 +93,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
       fillZone(Z);
     }
   }
+  let arena = meta.kind === 'arena' && W.arena ? true : null;   // the arena mode (server/arena.js), made below once the room's pieces exist
   populate(true);
 
   // ------------------------------------------------------------------ players
@@ -117,6 +126,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     u.safeUntil = world.t + 4;                       // arriving: a short grace (lessons rule 39)
     const P = { key, char, unitId: u.id, send, away: 0, inputs: [], last: null, ack: 0, seen: new Map(), loot: new Set(), meDirty: true, prevButtons: 0, chSlot: -1, target: null, joinedAt: world.t, name: name || char.name, saveAt: 0 };
     players.set(key, P);
+    arena?.onJoin(P, u);
     note(ws, `${char.name} arrived.`);
     broadcast({ t: 'say', text: `${char.name} has joined the world.`, kind: 'join' }, key);
     log('world.join', { code: meta.code, key, char: char.name, players: players.size });
@@ -126,7 +136,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
   function sendEnter(P) {
     P.seen.clear();
     P.meDirty = true;
-    P.send(JSON.stringify({ t: 'enter', world: { code: meta.code, name: meta.name, public: !!meta.public }, you: P.unitId, char: P.char, wt: world.t, step: STEP }));
+    P.send(JSON.stringify({ t: 'enter', world: { code: meta.code, name: meta.name, public: !!meta.public, kind: meta.kind || 'world' }, you: P.unitId, char: P.char, wt: world.t, step: STEP }));
     sendWorld(P);
   }
   function leave(key, { quiet = false } = {}) {
@@ -134,6 +144,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     if (!P) return;
     const u = unitOf(P);
     if (u) ws.at[P.char.id] = [R2(u.x), R2(u.z)];
+    arena?.onLeave(P);
     removePlayer(world, P.unitId);
     players.delete(key);
     persist({ world: saveRecord(), chars: [{ key, char: P.char }] });
@@ -193,6 +204,9 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
       changed(P);
       return;
     }
+    // dev builds only: force the weather (tests/net/weather.test.mjs, env shots, the map editor's weather picker):
+    // { key: 'storm', region?: one region (else all), lock?: stays until released (default true), release?: let it roll again }
+    if (msg.t === 'devWeather' && dev) { setWeather(msg.release ? null : msg.key, { region: msg.region || null, lock: msg.lock !== false, instant: !!msg.instant, seconds: msg.secs, by: P.char.name }); return; }
     // dev builds only: throw every monster within 15 m (knockback + knockdown; tests/ui/knock-shot.mjs)
     if (msg.t === 'devKnock' && dev) {
       const u = unitOf(P); if (!u) return;
@@ -210,6 +224,8 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
       }
       return;
     }
+    // dev builds only: everything out in the arena match falls (a wave, or the champion): screenshots and the screen walk
+    if (msg.t === 'devArena' && dev) { arena?.devClear?.(); return; }
     if (msg.t === 'act') act(P, msg);
   }
 
@@ -253,6 +269,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
   function sweep(group) { for (const b of group) if (b.kind === 'corpse' && b.eligible.every(id => isEmptyFor(b, id))) world.containers.delete(b.id); }
 
   function act(P, m) {
+    if (arena && arena.act(P, m)) return;
     const u = unitOf(P);
     const c = P.char;
     switch (m.a) {
@@ -376,7 +393,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
         if (m.a === 'buy' || m.a === 'sell') {
           const shop = sv.find(s => s.kind === 'shop'); if (!shop) return err(P, 'Nothing for sale here.');
           if (m.a === 'buy') {
-            const stock = stockOf(m.npc, shop);
+            const stock = stockOf(m.npc, shopFor(c, shop));
             const i = stock.findIndex(it => it.id === m.item); if (i < 0) return err(P, 'That is sold out.');
             const price = buyPrice(rules, c, stock[i]);
             if ((c.gold || 0) < price) return err(P, `That costs ${price} gold; you have ${c.gold || 0}.`);
@@ -409,7 +426,9 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
         return;
       }
       case 'respec': {
-        if (!nearShrine(u)) return err(P, 'Changing your path happens at a shrine.');
+        // at a shrine, or beside a person who offers it (the arena court's class trainer)
+        const byTeacher = !!u && Object.values(book.npcs).some(n => n.services?.some(sv => sv.kind === 'respec') && n.at && near(u, npcAt(book, ws, n.id) || n.at, TALK_METRES + 2));
+        if (!nearShrine(u) && !byTeacher) return err(P, 'Changing your path happens at a shrine.');
         const kind = m.kind === 'full' ? 'full' : 'points';
         const r = respec(rules, c, kind); if (!r.ok) return err(P, r.why);
         say(P, kind === 'full' ? `Everything was reset for ${r.price} gold. Choose your classes again as you level.` : `Your points were given back for ${r.price} gold.`, 'good');
@@ -446,17 +465,20 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
   // in a fight: hit or was hit within data/combat.json combatState.seconds (the same window combat.js uses; it ends —
   // lessons rule 40). Trade skills (enchanting) work anywhere but here (owner 2026-11-25).
   function fighting(u) { return !!u && world.t - (u.lastFight ?? -999) < rules.data.combat.combatState.seconds; }
+  // a shop whose `levels` is 'hero' (the arena court) stocks round the buyer's own level
+  function shopFor(c, shop) { return shop.levels === 'hero' ? { ...shop, levels: [Math.max(1, (c.level || 1) - 1), Math.min(10, (c.level || 1) + 1)], band: c.level || 1 } : shop; }
   function stockOf(npc, shop) {
     const day = Math.floor(ws.time / 1800);       // the stock changes every half hour of world time
-    const k = `${npc}:${day}`;
+    const k = `${npc}:${day}${shop.band ? `:${shop.band}` : ''}`;
     if (!stockCache.has(k)) stockCache.set(k, shopStock(rules, shop, hashStr(`${ws.seed}:${k}`)));
     return stockCache.get(k);
   }
   function openService(P, npc, open) {
     const c = P.char;
     const kind = open.kind;
+    if (arena && (kind === 'arena' || kind === 'ladder')) return arena.open(P, kind);
     if (kind === 'shop') {
-      const stock = stockOf(npc, open);
+      const stock = stockOf(npc, shopFor(c, open));
       return win(P, { kind: 'shop', npc, name: book.npcs[npc]?.name, stock: stock.map(it => ({ item: it, price: buyPrice(rules, c, it) })), sell: (c.bag || []).map(it => ({ id: it.id, price: sellPrice(rules, c, it) })) });
     }
     if (kind === 'repair') return win(P, { kind: 'repair', npc, name: book.npcs[npc]?.name, items: [...Object.values(c.gear || {}), ...(c.bag || [])].filter(Boolean).map(it => ({ id: it.id, price: repairPrice(rules, it) })).filter(x => x.price > 0) });
@@ -548,6 +570,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     const before = new Map();
     for (const u of world.units.values()) before.set(u.id, { x: u.x, z: u.z });
     for (const P of players.values()) { const u = unitOf(P); if (u) inputs[u.id] = inputFor(P, u); }
+    if (arena) Object.assign(inputs, arena.inputs());     // a champion plays its own step (js/rules/hero-ai.js)
     // deep water: everyone in it swims (slower, no dodge); a rider slips off the horse
     for (const u of world.units.values()) {
       u.swimming = ground.swimming(u.x, u.z);
@@ -562,6 +585,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
       u.x = s.x; u.z = s.z;
     }
     handleEvents(events);
+    if (arena) arena.step(events);
     if (tick % 10 === 0) slowTick();
     sendAll(events);
     const ms = performance.now() - t0;
@@ -620,6 +644,8 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
       if (ev?.length) questEvents(ev);
       if (escorts(book, ws).length) wsDirty = true;
     }
+    if (stepWeather(ws.weather, 0.5, { seed: ws.seed })) wsDirty = true;
+    arena?.slow();
     populate();
     for (const [id, box] of extra) if (box.kind === 'chest' && box.eligible.every(p => isEmptyFor(box, p))) extra.delete(id);
   }
@@ -627,7 +653,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
   // ------------------------------------------------------------------ what each player is sent
   function unitInfo(u) {
     const info = { id: u.id, k: u.kind, n: u.name, lv: u.level, side: u.side, mh: u.maxHp, mm: u.maxMp ?? null, ms: u.maxStamina ?? null };
-    if (u.kind === 'player') { info.look = u.char.look || null; info.gear = gearLook(u.char); info.form = u.form?.id || null; info.body = u.form?.body?.creature || null; info.horse = !!u.char.horse; }
+    if (u.kind === 'player') { info.look = u.char.look || null; info.gear = gearLook(u.char); info.form = u.form?.id || null; info.body = u.form?.body?.creature || null; info.horse = !!u.char.horse; const ti = titleOf(rules, u.char); if (ti) info.ti = ti; if (u.champion) info.champ = u.champion; }   // ti: an arena title shown with the name
     else { info.def = u.defId; info.art = u.art; info.rank = u.rank || 'normal'; info.owner = u.owner || null; if (u.temper && u.temper !== 'hostile') info.tp = u.temper; }   // tp: a peaceful animal (yellow tag)
     return info;
   }
@@ -731,17 +757,32 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
       t: 'wstate', flags: ws.flags, my: ws.playerFlags[P.char.id] || [], quests: ws.quests, shrines: ws.shrines, found: ws.found, camps: ws.camps,
       players: [...players.values()].map(Q => ({ id: Q.unitId, name: Q.char.name, level: Q.char.level, cls: Q.char.classOrder })), time: R2(ws.time),
       esc: escorts(book, ws).map(e => ({ npc: e.npc, at: e.at })),
+      wx: weatherWire(ws.weather), wxs: ws.seed >>> 0,                    // the weather per region + the seed lightning is timed by
     }));
+  }
+  /** Force (or, with key null, release) the weather: dev command + the map editor. → false for an unknown weather. */
+  function setWeather(key, { region = null, lock = true, instant = false, seconds = 8, by = null } = {}) {
+    if (key == null) releaseWeather(ws.weather, { region });
+    else if (!forceWeather(ws.weather, key, { region, lock, instant, seconds: Number.isFinite(seconds) ? seconds : 8 })) return false;
+    wsDirty = true;
+    log('world.weather', { code: meta.code, key, region, lock, by });
+    const name = key ? WEATHER_CHOICES.find(c => c.key === key)?.name : null;
+    broadcast({ t: 'say', text: name ? `Weather: ${name}${region ? '' : ' everywhere'}${lock ? ' (held)' : ''}.` : 'The weather is free to change again.', kind: 'info' });
+    return true;
   }
 
   // ------------------------------------------------------------------ saving
   function saveRecord() { return { meta: { ...meta, updated: new Date().toISOString(), players: [...new Set([...(meta.players || []), ...[...players.values()].map(P => P.key)])] }, state: toJSON(ws) }; }
   function save() { persist({ world: saveRecord(), chars: [...players.values()].map(P => ({ key: P.key, char: P.char })) }); }
 
-  function listing() { return { code: meta.code, name: meta.name, public: !!meta.public, players: players.size, seats: MAX_PLAYERS, names: [...players.values()].map(P => P.char.name), quests: Object.values(ws.quests).filter(q => q.done).length }; }
+  function listing() { return { code: meta.code, name: meta.name, public: !!meta.public, players: players.size, seats: MAX_PLAYERS, names: [...players.values()].map(P => P.char.name), quests: Object.values(ws.quests).filter(q => q.done).length, kind: meta.kind || 'world', ...(arena ? { arena: arena.listing() } : {}) }; }
+
+  if (meta.kind === 'arena' && W.arena) {
+    arena = createArenaMode({ rules, world, ws, W, players, unitOf, say, err, broadcast, changed, extra, log, meta, ground, persist: () => save() });
+  }
 
   return {
-    join, leave, away, message, step, save, listing, stats, meta, ws, world,
+    join, leave, away, message, step, save, listing, stats, meta, ws, world, setWeather, get arena() { return arena; },
     get size() { return players.size; }, players,
     // tests
     _test: { unitOf, act: (key, m) => act(players.get(key), m), populate, zones, activeCamps, extra, ground },

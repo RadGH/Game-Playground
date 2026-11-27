@@ -69,19 +69,22 @@ function writeSaved(game, T) {
 /**
  * The panel. Hidden until the ` key (Backquote) or, with ?tune in the address, a small "Tune" button.
  * onChange(key, value) is called after every move, for values a game must push somewhere (a shader uniform).
+ * Opt-in (2026-11-26, Oathwild's camera tuner): `groups` shows only those groups, `title` names the panel, `key: null`
+ * gives it no hot key, and `send(text) → Promise<bool>` adds a "Send to Claude" button that hands over the Save block
+ * (a game sends it to its report box). A panel made with none of these is the same as before.
  */
-export function tunePanel({ game, tuning: T, onChange = null, key = 'Backquote', button = null } = {}) {
+export function tunePanel({ game, tuning: T, onChange = null, key = 'Backquote', button = null, groups: only = null, title = 'Tuning', send = null } = {}) {
   if (!T?.[META]) throw new Error('tunePanel: pass the object from loadTuning()');
   T[META].game = game;
   for (const [k, v] of Object.entries(readSaved(game))) if (k in T[META].entries) T[k] = clamp(v, T[META].entries[k]);
   ensureCss();
-  const { entries } = T[META];
+  const entries = only ? Object.fromEntries(Object.entries(T[META].entries).filter(([, e]) => only.includes(e.group))) : T[META].entries;
   const root = document.createElement('div');
   root.className = 'tune-root'; root.hidden = true;
-  root.innerHTML = `<div class="tune-panel" role="dialog" aria-label="Tuning">
-    <header class="tune-head"><h2>Tuning</h2><span class="tune-count"></span><button class="tune-x" aria-label="Close">×</button></header>
+  root.innerHTML = `<div class="tune-panel" role="dialog" aria-label="${esc(title)}">
+    <header class="tune-head"><h2>${esc(title)}</h2><span class="tune-count"></span><button class="tune-x" aria-label="Close">×</button></header>
     <div class="tune-list"></div>
-    <footer class="tune-foot"><button class="tune-reset-all">Reset all</button><button class="tune-save">Save</button></footer>
+    <footer class="tune-foot"><button class="tune-reset-all">Reset all</button><button class="tune-save">Save</button>${send ? '<button class="tune-send">Send to Claude</button>' : ''}</footer>
     <div class="tune-out" hidden><p>Copied. Paste this to Claude to keep these numbers:</p><textarea readonly rows="5"></textarea></div>
   </div>`;
   const list = root.querySelector('.tune-list');
@@ -125,8 +128,15 @@ export function tunePanel({ game, tuning: T, onChange = null, key = 'Backquote',
     out.querySelector('p').textContent = ok ? 'Copied. Paste this to Claude to keep these numbers:' : 'Copy this and paste it to Claude to keep these numbers:';
   });
   // keys never reach the game while the panel is open and a slider has focus
+  if (send) root.querySelector('.tune-send').addEventListener('click', async ev => {
+    const b = ev.currentTarget, rows = Object.values(entries).filter(e => T[e.key] !== e.value).map(e => `${e.key} ${e.value} → ${T[e.key]}`);
+    const text = [`Tuned in the panel: ${game}${only ? ` (${only.join(', ')})` : ''}`, ...(rows.length ? rows : ['(nothing changed)'])].join('\n');
+    b.disabled = true; b.textContent = 'Sending…';
+    const ok = await Promise.resolve(send(text)).catch(() => false);
+    b.textContent = ok ? 'Sent ✓' : 'Saved — will send later'; setTimeout(() => { b.disabled = false; b.textContent = 'Send to Claude'; }, 2500);
+  });
   root.addEventListener('keydown', ev => { if (ev.code === 'Escape') { open(false); ev.stopPropagation(); } else if (ev.target.matches('input,textarea')) ev.stopPropagation(); });
-  window.addEventListener('keydown', ev => { if (ev.code === key && !ev.target.matches?.('input[type=text],textarea')) { ev.preventDefault(); open(); } });
+  if (key) window.addEventListener('keydown', ev => { if (ev.code === key && !ev.target.matches?.('input[type=text],textarea')) { ev.preventDefault(); open(); } });
   document.body.append(root);
   if (button ?? /[?&]tune\b/.test(location.search)) {
     btn = document.createElement('button'); btn.className = 'tune-open'; btn.textContent = 'Tune';

@@ -18,7 +18,10 @@
 // window.gameEye.state() → { screen, view, world, me, players, target, windows } for Claude's game-eye and the tests.
 import { bootRules } from '../rules/boot.js';
 import { bootWorld } from '../world/boot.js';
-import { scatter, understory } from '../world/scatter.js';
+import { understory } from '../world/scatter.js';
+import { worldScene } from '../world/live.js';
+import { installLiveEdits } from './live-edits.js';
+import { installArena } from './arena-ui.js';
 import { createGround } from '../game/ground.js';
 import { createNet } from './net.js';
 import { installTips } from './ui/tip.js';
@@ -133,18 +136,27 @@ async function boot() {
   app.W = await bootWorld({ regions: rules.data.regions });
   progress(0.6, 'Planting the Hartwood…');
   await new Promise(r => setTimeout(r, 0));
-  app.scattered = scatter(app.W.terrain, app.W.data.placements);
+  app.scattered = worldScene(app.W);                       // trees + decor with the map editor's layer (js/world/edits.js)
   app.scattered.trees.push(...(app.W.town?.trees || []));                  // the towns' own big trees are drawn with the rest
   app.scattered.understory = understory(app.W.terrain, app.W.data.placements, app.scattered.trees);   // drawing only (no colliders)
   app.ground = createGround(app.W.terrain, app.W.data.placements, app.scattered, app.W.town);
   progress(0.85, 'Lighting the shrines…');
-  try { app.tuning = await loadTuning(new URL('../../data/tuning.json', import.meta.url), { game: 'oathwild' }); tunePanel({ game: 'oathwild', tuning: app.tuning }); } catch (e) { console.warn('tuning', e); app.tuning = {}; }
+  try { app.tuning = await loadTuning(new URL('../../data/tuning.json', import.meta.url), { game: 'oathwild' }); tunePanel({ game: 'oathwild', tuning: app.tuning });
+    // the camera tuner (owner 2026-11-26: "create camera edit mode so i can fine tune the knobs"): ☰ → Tune camera, or ?camera;
+    // the world stays live beside it; "Send to Claude" puts the changed numbers in the report box (kind 'tune')
+    app.cameraTuner = tunePanel({ game: 'oathwild', tuning: app.tuning, groups: ['Camera'], title: 'Camera', key: null, button: false,
+      send: async text => (await import('./ui/win-report.js')).sendReport({ kind: 'tune', text, ...(await import('./ui/win-report.js')).context(app) }) });
+    // on a phone it docks at the top (css/oathwild.css .ow-cam-tuner) so the stick, Attack and Dodge stay usable below it,
+    // and the top of the HUD (bars, minimap) steps aside while it is open
+    app.cameraTuner.element.classList.add('ow-cam-tuner');
+    new MutationObserver(() => document.body.classList.toggle('ow-cam-tuning', !app.cameraTuner.element.hidden)).observe(app.cameraTuner.element, { attributes: true, attributeFilter: ['hidden'] });
+  } catch (e) { console.warn('tuning', e); app.tuning = {}; }
   installTips(app);
   app.news = createWhatsNew({ url: new URL('../../data/changelog.json', import.meta.url), key: 'oathwild', title: "What's new in Oathwild" });
   app.news.onUnread?.(n => { app.news.unread = n; app.emit('news', n); });
   // the server line: signed in players hand over a one-time ticket, so their characters follow their account
   app.net = createNet({ getTicket: async () => { try { const u = await account.user(); return u ? await account.ticket('oathwild') : null; } catch { return null; } } });
-  for (const t of ['me', 'wstate', 'win', 'say', 'err', 'enter', 'leveled', 'chars', 'worlds', 's', 'left', 'state', 'open', 'outdated']) app.net.on(t, m => app.emit(t, m));
+  for (const t of ['worldEdit', 'me', 'wstate', 'win', 'say', 'err', 'enter', 'leveled', 'chars', 'worlds', 's', 'left', 'state', 'open', 'outdated', 'arena']) app.net.on(t, m => app.emit(t, m));
   app.on('me', m => { app.me = m; });
   // snapshots carry each unit's description once: keep every one from 'enter' until the play screen takes them
   app.snapBuf = [];
@@ -152,6 +164,8 @@ async function boot() {
   app.on('s', m => { if (app.snapBuf) { app.snapBuf.push(m); if (app.snapBuf.length > 600) app.snapBuf.shift(); } });
   app.on('wstate', m => { app.ws = m; });
   app.on('outdated', () => toast('A newer version of Oathwild is out. Reload the page.', 'bad', 8000));
+  installLiveEdits(app);                                   // dev map editor: its changes redraw here without a reload
+  installArena(app);                                       // the arena: match panel, edge markers, the board and its windows (arena-ui.js)
   app.net.connect().catch(() => {});
   // the controller walks every menu (lessons rule 27); in the world the hero has it unless a window is open
   app.padnav = createPadNav({ busy: () => app.screenName === 'play' && !windowsOpen(), back: () => { const w = topWin(); if (w) { w.close(); return true; } document.querySelector('#ui [data-back]')?.click(); return true; } });

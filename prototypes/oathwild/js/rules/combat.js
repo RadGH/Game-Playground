@@ -92,8 +92,9 @@ export function refreshPlayer(world, id, { full = false } = {}) {
   const mpShare = full || !u.maxMp ? 1 : u.mp / u.maxMp;
   u.sheet = s;
   u.level = s.level;
-  u.maxHp = s.maxHp; u.maxMp = s.maxMp; u.maxStamina = s.maxStamina;
-  u.hp = Math.max(full ? s.maxHp : 1, Math.round(s.maxHp * hpShare));
+  // u.boost (an arena champion, js/rules/arena.js championScale): its health for the bout; damage in hit()
+  u.maxHp = Math.round(s.maxHp * (u.boost?.hp || 1)); u.maxMp = s.maxMp; u.maxStamina = s.maxStamina;
+  u.hp = Math.max(full ? u.maxHp : 1, Math.round(u.maxHp * hpShare));
   u.mp = Math.round(s.maxMp * mpShare);
   if (full) u.stamina = s.maxStamina;
   u.stamina = Math.min(u.stamina, s.maxStamina);
@@ -143,9 +144,12 @@ export function spawnMonster(world, monsterId, level, at, { rank = 'normal', cam
     threat: side === 'monsters' ? new Map() : undefined,
   });
   const MS = CF(rules).monsterScale;
-  u.maxHp = u.hp = Math.round(u.hp * bossK * (side === 'monsters' ? MS.hp : power));
+  // the first levels are gentler for a new hero (combat.json monsterScale.newHero, owner 2026-11-26)
+  const NH = MS.newHero, li = Math.max(0, Math.round(level) - 1);
+  const nhHp = side === 'monsters' && NH?.hp && li < NH.hp.length ? NH.hp[li] : 1, nhDmg = side === 'monsters' && NH?.dmg && li < NH.dmg.length ? NH.dmg[li] : 1;
+  u.maxHp = u.hp = Math.round(u.hp * bossK * nhHp * (side === 'monsters' ? MS.hp : power));
   if (side !== 'monsters') u.dmg = u.dmg.map(v => Math.max(1, Math.round(v * power)));
-  else u.dmg = u.dmg.map(v => Math.max(1, Math.round(v * MS.dmg * (rank === 'boss' ? (MS.bossDmg ?? 1) : 1))));
+  else u.dmg = u.dmg.map(v => Math.max(1, Math.round(v * nhDmg * MS.dmg * (rank === 'boss' ? (MS.bossDmg ?? 1) : 1))));
   u.aggroRange = def.aggroRange ?? CF(rules).monsters.noticeDefault;
   // temperament (owner 2026-11-25, "where are all the wild life?"): hostile hunts you; defensive never starts a fight
   // but answers a blow (cattle, boars); skittish never fights and runs from a hero who comes close (deer, raccoons)
@@ -534,7 +538,7 @@ function targetsOf(world, u) {
 function foesNear(world, u, at, r) { return targetsOf(world, u).filter(t => dist(t, at) <= r + bodyR(t)); }
 function alliesNear(world, u, r) {
   const out = [u];
-  if (r > 0) for (const a of world.units.values()) if (a !== u && a.kind === 'player' && a.alive && !a.downed && dist(a, u) <= r) out.push(a);
+  if (r > 0) for (const a of world.units.values()) if (a !== u && a.kind === 'player' && a.side === u.side && a.alive && !a.downed && dist(a, u) <= r) out.push(a);
   return out;
 }
 const bodyR = t => (t.scale || 1) * 0.5;
@@ -783,7 +787,7 @@ export function hit(world, u, t, row, ctx = {}) {
     const saved = u.derived.damage, savedCrit = u.derived.critChance;
     u.derived.damage = ctx.powerRange || u.sheet.melee;
     u.derived.critChance = savedCrit + (row.critBonus || 0);
-    res = rules.rpg.strike(u, t, world.rng, { multiplier: Math.max(0, mult), element: row.element || 'physical', skill: ctx.spell || null, pen: row.pen || 0, ranged: row.shape === 'bolt', noDamage: mult === 0 });
+    res = rules.rpg.strike(u, t, world.rng, { multiplier: Math.max(0, mult * (u.boost?.dmg || 1)), element: row.element || 'physical', skill: ctx.spell || null, pen: row.pen || 0, ranged: row.shape === 'bolt', noDamage: mult === 0 });
     u.derived.damage = saved; u.derived.critChance = savedCrit;
   } else {
     // a monster or a pet. rpg.strike multiplies the attacker's buffs and the target's debuffs itself
@@ -816,7 +820,7 @@ export function hit(world, u, t, row, ctx = {}) {
   }
   if (row.onHit?.taunt && t.threat !== undefined) tauntThreat(t, u, row.onHit.taunt);
   // statuses the row carries
-  const hitPower = avg(ctx.powerRange || u.sheet?.melee || u.dmg || [4, 6]) * Math.max(mult, 0.3);
+  const hitPower = avg(ctx.powerRange || u.sheet?.melee || u.dmg || [4, 6]) * Math.max(mult, 0.3) * (u.boost?.dmg || 1);   // (a champion's bleeds and burns are sized like its blows)
   for (const a of row.applies || []) {
     const sr = rules.statuses[a.id];
     if (!sr) continue;
@@ -873,7 +877,7 @@ function allyOnAim(world, u, dir, range) {
   const lim = Math.cos(CF(world.rules).aimAssist.degrees * Math.PI / 180);
   let best = null, bestD = Infinity;
   for (const a of world.units.values()) {
-    if (a === u || a.kind !== 'player' || !a.alive || a.downed) continue;
+    if (a === u || a.kind !== 'player' || a.side !== u.side || !a.alive || a.downed) continue;
     const dx = a.x - u.x, dz = a.z - u.z, d = Math.hypot(dx, dz);
     if (d > range || d < 0.01) continue;
     if ((dx * dir.x + dz * dir.z) / d < lim) continue;
@@ -937,7 +941,7 @@ function toggleForm(world, u, row, spellId) {
   emit(world, { t: 'form', who: u.id, on: true, form: row.form.id, body: row.form.body?.creature || null });
   if (row.form.pack) {
     for (let i = 0; i < (row.form.pack.count || 1); i++) {
-      const pet = spawnMonster(world, row.form.pack.pet, u.level, [u.x + (i + 1), u.z - 1], { side: u.side, owner: u.id, power: (row.petPower || 1) * (1 + (u.sheet.petPct || 0) / 100), lifetime: row.form.pack.seconds || 30 });
+      const pet = spawnMonster(world, row.form.pack.pet, u.level, [u.x + (i + 1), u.z - 1], { side: u.side, owner: u.id, power: (row.petPower || 1) * (1 + (u.sheet.petPct || 0) / 100) * (u.boost?.dmg || 1), lifetime: row.form.pack.seconds || 30 });
       if (pet) { pet.kind = 'pet'; pet.formPack = spellId; emit(world, { t: 'summon', who: u.id, pet: pet.id, def: pet.defId }); }
     }
   }
@@ -958,7 +962,7 @@ function summon(world, u, row, spellId) {
   // casting it again replaces what this spell had called
   for (const p of [...world.units.values()]) if (p.owner === u.id && p.fromSpell === spellId) { world.units.delete(p.id); emit(world, { t: 'unsummon', pet: p.id }); }
   for (let i = 0; i < count; i++) {
-    const pet = spawnMonster(world, def, u.level, [u.x + 1.5 * Math.cos(i), u.z + 1.5 * Math.sin(i)], { side: u.side, owner: u.id, power: (row.petPower || 1) * (1 + (u.sheet.petPct || 0) / 100), lifetime: row.summon?.lifetime || null });
+    const pet = spawnMonster(world, def, u.level, [u.x + 1.5 * Math.cos(i), u.z + 1.5 * Math.sin(i)], { side: u.side, owner: u.id, power: (row.petPower || 1) * (1 + (u.sheet.petPct || 0) / 100) * (u.boost?.dmg || 1), lifetime: row.summon?.lifetime || null });
     if (!pet) continue;
     pet.fromSpell = spellId;
     emit(world, { t: 'summon', who: u.id, pet: pet.id, def });
@@ -968,7 +972,7 @@ function summon(world, u, row, spellId) {
 function reviveNearAim(world, u, row, dir) {
   const range = row.range || 8;
   let best = null;
-  for (const a of world.units.values()) if (a.kind === 'player' && a.downed && dist(a, u) <= range && (!best || dist(a, u) < dist(best, u))) best = a;
+  for (const a of world.units.values()) if (a.kind === 'player' && a.side === u.side && a.downed && dist(a, u) <= range && (!best || dist(a, u) < dist(best, u))) best = a;
   if (!best) { emit(world, { t: 'refused', who: u.id, why: 'Nobody fallen within reach.' }); return; }
   reviveUnit(world, best, row.revive.share, u);
 }
@@ -981,7 +985,7 @@ function reviveUnit(world, a, share, by) {
 function tickRevive(world, u, targetId, dt) {
   const D = CF(world.rules).death;
   const a = world.units.get(targetId);
-  if (!a?.downed || dist(a, u) > D.reviveRange) { u.reviving = null; return; }
+  if (!a?.downed || a.side !== u.side || dist(a, u) > D.reviveRange) { u.reviving = null; return; }
   if (!u.reviving || u.reviving.id !== targetId) u.reviving = { id: targetId, held: 0 };
   u.reviving.held += dt;
   if (u.reviving.held >= D.reviveSeconds) { reviveUnit(world, a, D.reviveShare, u); u.reviving = null; }
@@ -1077,7 +1081,7 @@ function stepMonster(world, m, dt) {
         if (dist(m, m.home) > m.wander * 2) { const hx = m.home.x - m.x, hz = m.home.z - m.z, H = Math.hypot(hx, hz) || 1; ax = ax * 0.4 + hx / H * 0.6; az = az * 0.4 + hz / H * 0.6; }
         m.facing = Math.atan2(ax, az);
         m.x += ax * m.speed * dt; m.z += az * m.speed * dt;
-        if (dist(m, m.home) > C.leashMetres) { clearThreat(m); m.returning = true; }
+        if (dist(m, m.home) > (m.leash ?? C.leashMetres)) { clearThreat(m); m.returning = true; }
       }
       return;
     }
@@ -1094,7 +1098,7 @@ function stepMonster(world, m, dt) {
   }
   m.lastFight = world.t;
   // leash: dragged too far from home, it gives up and heals
-  if (dist(m, m.home) > C.leashMetres) {
+  if (dist(m, m.home) > (m.leash ?? C.leashMetres)) {      // (m.leash: an arena monster follows across the whole floor)
     clearThreat(m); m.hp = m.maxHp; m.statuses = {}; m.returning = true;
     emit(world, { t: 'leash', who: m.id });
     return;
@@ -1121,11 +1125,16 @@ export function windupOf(rules, m) {
   return m.ranged ? (C.windupRanged ?? C.windup ?? 0.55) : (C.windup ?? 0.55);
 }
 function startWindup(world, m, target) {
-  const C = CF(world.rules).monsters;
-  const secs = windupOf(world.rules, m);
-  m.windup = { target: target.id, until: world.t + secs, started: world.t };
+  const C = CF(world.rules).monsters, SP = C.special;
+  // plain blow or special (owner report #137): every `every`-th blow is a special — the only one with a mark on the ground
+  m.blows = (m.blows || 0) + 1;
+  const every = m.rank === 'boss' ? (SP?.bossEvery ?? 2) : (SP?.every ?? 3);
+  const special = !SP || m.blows % every === 0;
+  const secs = special ? Math.max(windupOf(world.rules, m), SP?.windup ?? 0) : (SP.plainWindup ?? 0.3);
+  m.windup = { target: target.id, until: world.t + secs, started: world.t, special };
   m.facing = Math.atan2(target.x - m.x, target.z - m.z);
-  emit(world, { t: 'windup', who: m.id, to: target.id, seconds: round2(secs), ranged: !!m.ranged, reach: round2(m.ranged ? m.ranged.range : (m.reach || 2.2) + (C.windupReachSlack ?? 0.6)), arc: round2((C.windupArcDegrees ?? 110) * Math.PI / 180) });
+  const reach = m.ranged ? m.ranged.range : (m.reach || 2.2) + (C.windupReachSlack ?? 0.6) + (special ? SP?.reachBonus ?? 0 : 0);
+  emit(world, { t: 'windup', who: m.id, to: target.id, seconds: round2(secs), ranged: !!m.ranged, special, reach: round2(reach), arc: round2((C.windupArcDegrees ?? 110) * Math.PI / 180), facing: round2(m.facing) });
 }
 function stepWindup(world, m, ctl, dt) {
   const rules = world.rules;
@@ -1145,20 +1154,22 @@ function stepWindup(world, m, ctl, dt) {
   m.swingAt = world.t + Math.max(C.recoverMin ?? 0.35, (m.attackEvery || 1.5) - windupOf(rules, m));
   if (!target || !target.alive || target.downed) { emit(world, { t: 'windupEnd', who: m.id, cancelled: true }); return; }
   const applies = m.onHit ? m.onHit.map(id => ({ id, over: {} })) : [];
+  const SP = C.special, special = !!w.special, mult = SP ? (special ? SP.damage ?? 1 : SP.plainDamage ?? 1) : 1;
   const fx = Math.sin(m.facing), fz = Math.cos(m.facing);
   if (m.ranged) {
     // the shot leaves where it faces now: a hero who rolled aside since the tell began is not where it flies
     const aim = norm2(target.x - m.x, target.z - m.z);
-    const k = aim.x * fx + aim.z * fz > Math.cos((C.windupArcDegrees ?? 110) * Math.PI / 360) ? aim : { x: fx, z: fz };
-    world.projectiles.push({ id: newId(world, 'b'), owner: m.id, x: m.x, z: m.z, dx: k.x, dz: k.z, speed: CF(rules).projectile.arrow * 0.6, left: m.ranged.range + 2, row: { mult: 1, element: m.ranged.element || 'physical', ranged: true, applies }, ctx: { basic: true }, pierce: 0, hit: new Set(), bounces: 0, keep: 1 });
+    // a special shot flies down the line its mark showed (#137); a plain one at the hero, if still in front (it can be side-stepped in flight)
+    const k = !special && aim.x * fx + aim.z * fz > Math.cos((C.windupArcDegrees ?? 110) * Math.PI / 360) ? aim : { x: fx, z: fz };
+    world.projectiles.push({ id: newId(world, 'b'), owner: m.id, x: m.x, z: m.z, dx: k.x, dz: k.z, speed: CF(rules).projectile.arrow * 0.6, left: m.ranged.range + 2, row: { mult, element: m.ranged.element || 'physical', ranged: true, applies }, ctx: { basic: true }, pierce: 0, hit: new Set(), bounces: 0, keep: 1 });
     emit(world, { t: 'projectile', who: m.id, to: target.id });
     return;
   }
   // the blow lands on whoever is still in front of it and within reach (+ a little slack)
   const dx = target.x - m.x, dz = target.z - m.z, d = Math.hypot(dx, dz);
-  const inReach = d <= (m.reach || 2.2) + bodyR(target) + (C.windupReachSlack ?? 0.6);
+  const inReach = d <= (m.reach || 2.2) + bodyR(target) + (C.windupReachSlack ?? 0.6) + (special ? SP?.reachBonus ?? 0 : 0);
   const inArc = d < 0.8 || (dx * fx + dz * fz) / d >= Math.cos((C.windupArcDegrees ?? 110) * Math.PI / 360);
-  if (inReach && inArc) hit(world, m, target, { mult: 1, element: 'physical', applies }, { basic: true });
+  if (inReach && inArc) hit(world, m, target, { mult, element: 'physical', applies }, { basic: true, special });
   else emit(world, { t: 'miss', who: m.id, to: target.id, dodged: true, whiff: true });
 }
 
@@ -1199,7 +1210,8 @@ function stepPet(world, p, dt) {
   const ctl = control(p);
   if (dist(p, owner) > C.leashMetres) { p.x = owner.x + 1; p.z = owner.z; return; }
   // fight what is fighting the owner, or what the owner last hit
-  const foes = [...world.units.values()].filter(m => m.kind === 'monster' && m.alive && dist(m, owner) < 20 && (m.threat?.has(owner.id) || m.threat?.has(p.id)));
+  // (an arena champion — a hero on the other side — is fought whenever it is near: it keeps no threat list)
+  const foes = [...world.units.values()].filter(m => m.side !== p.side && m.alive && !m.downed && dist(m, owner) < 20 && ((m.kind === 'monster' && (m.threat?.has(owner.id) || m.threat?.has(p.id))) || m.kind === 'player'));
   const target = foes.sort((a, b) => dist(a, p) - dist(b, p))[0];
   if (!target) { if (dist(p, owner) > C.followMetres && ctl.move) moveToward(p, owner, p.speed * dt); return; }
   const reach = p.ranged ? p.ranged.range * 0.8 : (p.reach || 2.2) + bodyR(target);

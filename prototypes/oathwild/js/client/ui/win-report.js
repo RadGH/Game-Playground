@@ -38,7 +38,7 @@ export function open(app, opts = {}) {
 
 export function context(app) {
   let state = null; try { state = window.gameEye?.state?.() ?? null; } catch { state = null; }
-  return { page: 'oathwild', build: app.build, server: app.net?.build || null, world: app.world?.code || null, at: new Date().toISOString(), state, ua: navigator.userAgent, size: [innerWidth, innerHeight], device: app.device, who: app.me?.char?.name || null };
+  return { page: 'oathwild', build: app.build, server: app.net?.build || null, world: app.world?.code || null, at: new Date().toISOString(), state, ua: navigator.userAgent, size: [innerWidth, innerHeight], device: app.device, who: app.me?.char?.name || null, lag: app.lag?.summary?.() ?? null };   // every bug report carries the lag summary (lagmeter.js)
 }
 
 function screenshot() {

@@ -168,6 +168,15 @@ The rules that matter (full list: `prototypes/thousandvale/ops/SECURITY.md`):
 
 Some games have a Node server of their own, with the same stable/dev split: a published copy on one port, the working tree on the next. Oddhaven: 8560 stable, 8561 dev, https 8562/8563 (`prototypes/oddhaven/ops/`, user units `oddhaven` and `oddhaven-dev`, publish with `prototypes/oddhaven/tools/publish-oddhaven.sh`). A page on 8400/8401/8442/8441 finds the room server on the matching port; the room server also serves the page.
 
+## Tree Kit live channel — 8670 (dev only, LAN)
+
+`node treekit/tools/live.mjs` (port **8670**, plain http): the Tree Kit page and Claude's `treekit/tools/tree-edit.mjs`
+share one working copy of the tree species through it (an event stream the page listens on + small POSTs), and it
+serves the playground's files too, so `http://<LAN IP>:8670/treekit/` is the page with the channel built in (the 8401
+page finds it as well; an https page cannot reach plain http, so use the 8670 address there). Not a systemd unit: start
+it when the owner wants to edit trees live, stop it after (about 50 MB). 8671-8679 are kept free for the kits' other
+dev channels. Details: `treekit/README.md`.
+
 ## Game servers are off unless needed (owner 2026-11-16)
 
 The owner plays everything on games.radgh.com, and this VM and its host are short on memory (the 12 per-game servers

@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { installAtmos, ATMOS } from './atmos.js';
 import { createPost } from './post.js';
+import { WATER_LOOK } from './water-look.js';
 
 installAtmos();   // height mist + cloud shadows on every fogged material (before any of them compiles)
 // ?envoff: this round's look switched off (old sun, no sky light, no after-effects, no mist / cloud shade / hills) — for
@@ -48,12 +49,13 @@ export function createView(canvas, { quality = 'medium' } = {}) {
     top: { value: new THREE.Color(SKY.top) }, mid: { value: new THREE.Color(SKY.mid) }, low: { value: fogColour }, below: { value: new THREE.Color(SKY.ground) },
     glow: { value: new THREE.Color(SKY.glow) }, sunCol: { value: new THREE.Color(SKY.sunColour) }, sunDir: { value: sunDir },
     cloud: { value: new THREE.Color(SKY.cloud) }, cloudShade: { value: new THREE.Color(SKY.cloudShade) }, time: { value: 0 },
+    rich: { value: 0 },                                           // the Look's `sky` effect: fuller clouds, warmer sun glow (0 = today's sky)
   };
   const skyMat = new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false, uniforms: skyU,
     vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
     fragmentShader: `
-      uniform vec3 top, mid, low, below, glow, sunCol, sunDir, cloud, cloudShade; uniform float time; varying vec3 vP;
+      uniform vec3 top, mid, low, below, glow, sunCol, sunDir, cloud, cloudShade; uniform float time, rich; varying vec3 vP;
       float hs(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
       float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(hs(i), hs(i + vec2(1, 0)), f.x), mix(hs(i + vec2(0, 1)), hs(i + vec2(1, 1)), f.x), f.y); }
       float fbm(vec2 p){ float a = 0.0, w = 0.55; for (int i = 0; i < 4; i++) { a += vn(p) * w; p = p * 2.03 + 7.7; w *= 0.5; } return a; }
@@ -62,11 +64,11 @@ export function createView(canvas, { quality = 'medium' } = {}) {
         vec3 c = h > 0.0 ? mix(low, mid, smoothstep(0.0, 0.22, h)) : mix(low, below, 1.0 - smoothstep(-0.12, 0.0, h));
         c = mix(c, top, smoothstep(0.18, 0.85, h));
         float s = max(dot(d, sunDir), 0.0);
-        c = mix(c, glow, pow(s, 6.0) * 0.45 * (1.0 - smoothstep(0.3, 0.9, h)) + pow(s, 24.0) * 0.35);
+        c = mix(c, glow, (pow(s, 6.0) * 0.45 * (1.0 - smoothstep(0.3, 0.9, h)) + pow(s, 24.0) * 0.35) * (1.0 + rich * 0.5));
         if (h > 0.015) {
           vec2 cp = d.xz / (h + 0.12) * 1.6 + vec2(time * 0.006, time * 0.0025);
           float n = fbm(cp);
-          float cov = smoothstep(0.52, 0.78, n) * smoothstep(0.015, 0.2, h);
+          float cov = smoothstep(0.52 - rich * 0.07, 0.78 - rich * 0.04, n) * smoothstep(0.015, 0.2, h);
           float lit = 0.75 + 0.25 * smoothstep(0.5, 0.9, fbm(cp + sunDir.xz * 0.08));
           vec3 cc = mix(cloudShade, cloud, lit) + glow * pow(s, 8.0) * 0.3;
           c = mix(c, cc, cov * 0.85);
@@ -136,16 +138,18 @@ export function createView(canvas, { quality = 'medium' } = {}) {
       renderer.shadowMap.enabled = Q.shadows;
       sun.castShadow = Q.shadows;
       if (Q.shadows) { sun.shadow.mapSize.set(Q.shadowSize, Q.shadowSize); sun.shadow.map?.dispose(); sun.shadow.map = null; }
-      shadowBox = Q.shadowBox;
+      shadowBox = Q.shadowBox * (1 + 0.7 * (view.lookFx.shadows || 0));   // the Look's soft long shadows reach further …
       const sc = sun.shadow.camera;
       sc.left = -shadowBox; sc.right = shadowBox; sc.top = shadowBox; sc.bottom = -shadowBox; sc.near = 10; sc.far = 320; sc.updateProjectionMatrix();
-      sun.shadow.radius = Q.soft ? 3 : 1;
+      sun.shadow.radius = (Q.soft ? 3 : 1) + 2.5 * (view.lookFx.shadows || 0);   // … with softer edges
       scene.fog.near = Q.far * 0.3; scene.fog.far = Q.far;
       camera.far = Q.far + 60; camera.updateProjectionMatrix();
       sky.scale.setScalar(camera.far * 0.9);
       hills.scale.setScalar(camera.far * 0.84);
       post?.dispose(); post = ENV_OFF ? null : createPost(view, view.quality); view.post = post;
+      post?.setLook(view.lookFx);                     // the Look's passes for this quality (built now, with the new chain)
       view.resize();
+      view.afterQuality?.(view.quality);              // the Look and the weather re-fit themselves to the new setting
     },
     resize() {
       const w = innerWidth, h = innerHeight;
@@ -170,6 +174,24 @@ export function createView(canvas, { quality = 'medium' } = {}) {
       hills.position.set(x, y - 6, z);
     },
     tuning: null,                                     // app.tuning (data/tuning.json, the Look group): read every frame
+    /** The Look setting's effects (render/look-presets.js fx; null = the quality's own default). */
+    lookFx: { rays: null, shadows: 0, contact: null, depth: 0, water: 0, sky: 0, wet: 0 },
+    /**
+     * Apply the Look's effects: numbers only (sky, shadows' reach + softness, water shine), except a pass this quality
+     * has never had (light shafts / contact shading / distance blur on Medium) — built once, here. → true when one was built.
+     */
+    setLookFx(fx = {}) {
+      view.lookFx = { ...view.lookFx, ...fx };
+      skyU.rich.value = view.lookFx.sky || 0;
+      WATER_LOOK.uniforms.uOwShine.value = view.lookFx.water || 0;
+      const Q = QUALITY[view.quality] || QUALITY.medium;
+      if (Q.shadows) {
+        shadowBox = Q.shadowBox * (1 + 0.7 * (view.lookFx.shadows || 0));
+        const sc = sun.shadow.camera; sc.left = -shadowBox; sc.right = shadowBox; sc.top = shadowBox; sc.bottom = -shadowBox; sc.updateProjectionMatrix();
+        sun.shadow.radius = (Q.soft ? 3 : 1) + 2.5 * (view.lookFx.shadows || 0);
+      }
+      return post ? post.setLook(view.lookFx) : false;
+    },
     /** The Look numbers from the tuning panel, applied live (uniform and value sets only: nothing recompiles). */
     applyLook(L) {
       if (!L || L.lookExposure == null || ENV_OFF) return;
@@ -184,7 +206,7 @@ export function createView(canvas, { quality = 'medium' } = {}) {
     },
     shakeOffset: null,                                // the spell kit's camera shake (play.js sets it; zero when Settings → Camera shake is off)
     render() {
-      clock += 1 / 60; skyU.time.value = clock; ATMOS.tick(clock); view.applyLook(view.tuning);
+      clock += 1 / 60; skyU.time.value = clock; ATMOS.tick(clock); view.applyLook(view.tuning); view.afterLook?.(); view.afterWeather?.();   // afterLook: region looks + effect zones (render/zones.js) on top of the tuning numbers; afterWeather: the weather's gloom / fog / lightning (render/weather.js) last
       const sh = view.shakeOffset; if (sh) camera.position.addScaledVector(sh, 1.4);
       if (post) { post.sun(sunDir); post.render(); } else renderer.render(scene, camera);
       if (sh) camera.position.addScaledVector(sh, -1.4);

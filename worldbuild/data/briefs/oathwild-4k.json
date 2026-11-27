@@ -1,0 +1,671 @@
+{
+  "_doc": "A World Build brief: the world described in plain terms (worldbuild/README.md 'The brief'). Units are metres; x runs east, z runs SOUTH (north is -z, the top of every picture); points are [x, z]. This one is the owner's 4 x 4 km plan for Oathwild (2026-11-26: 'plan on 4 x 4 km; keep Brightwater Vale + Thornmere Wilds and grow the world around them'). The hand-made map is pinned with its own coordinates unchanged (pin.at [0, 0]), so every camp, chest, NPC and quest position in Oathwild's data still means the same spot.",
+  "id": "oathwild-4k",
+  "name": "Oathwild, 4 x 4 km",
+  "seed": 4242,
+  "size": {
+    "bounds": {
+      "minX": -1800,
+      "maxX": 2200,
+      "minZ": -2400,
+      "maxZ": 1600
+    },
+    "cell": 2,
+    "margin": 40
+  },
+  "relief": {
+    "base": 16,
+    "roll": 22,
+    "detail": 1.4
+  },
+  "sea": {
+    "_doc": "Sea along the south edge: the land falls under the water over `shelf` metres from a coast line `from` metres in from the edge, wobbling by `wobble`.",
+    "edges": [
+      "south"
+    ],
+    "from": 330,
+    "shelf": 160,
+    "depth": 16,
+    "wobble": 140
+  },
+  "start": {
+    "at": [
+      -252,
+      -16
+    ],
+    "name": "Larkford"
+  },
+  "pin": {
+    "_doc": "Oathwild's hand-made map, pasted in unchanged. `keep` = the area kept byte for byte ('play' = the map's bounds minus its 40 m out-of-bounds margin); the `seam` metres outside it blend into the new world. `edits` = the map editor's layer (its ground strokes, tree fixes and moves apply here as in the game). `gates` are the roads that leave it: each starts exactly at the end of one of its roads (lessons rule 65) and is the only change allowed inside the kept area. `rivers` say which of its rivers come in from the new world or run out into it. Roads leave from the Wilds side only (levels 6-9 there): a road out of the Vale (levels 1-5) would lead straight into level 10+ country; the Vale's rivers still run in and out.",
+    "name": "Brightwater Vale and Thornmere Wilds",
+    "map": "prototypes/oathwild/data/map.json",
+    "towns": "prototypes/oathwild/data/towns.json",
+    "placements": "prototypes/oathwild/data/placements.json",
+    "edits": "prototypes/oathwild/data/edits.json",
+    "at": [
+      0,
+      0
+    ],
+    "keep": "play",
+    "seam": 260,
+    "gates": [
+      {
+        "id": "gate_northeast",
+        "name": "the Mirewater Path",
+        "road": "grove_trail",
+        "end": "end",
+        "via": [
+          [
+            268,
+            -300
+          ]
+        ],
+        "edge": [
+          276,
+          -360
+        ],
+        "class": "trail",
+        "width": 4
+      },
+      {
+        "id": "gate_east",
+        "name": "the Amber Road",
+        "road": "lark_road",
+        "end": "end",
+        "via": [
+          [
+            528,
+            100
+          ]
+        ],
+        "edge": [
+          560,
+          148
+        ],
+        "class": "road",
+        "width": 6
+      }
+    ],
+    "rivers": [
+      {
+        "river": "brightwater",
+        "end": "in"
+      },
+      {
+        "river": "brightwater",
+        "end": "out"
+      },
+      {
+        "river": "mirewater",
+        "end": "in"
+      }
+    ]
+  },
+  "ranges": [
+    {
+      "id": "frostcrown",
+      "name": "the Frostcrown",
+      "points": [
+        [
+          -1700,
+          -2150
+        ],
+        [
+          -1100,
+          -2230
+        ],
+        [
+          -500,
+          -2120
+        ],
+        [
+          100,
+          -2200
+        ],
+        [
+          700,
+          -2080
+        ]
+      ],
+      "height": 430,
+      "width": 480,
+      "sharpness": 0.7,
+      "passes": [
+        [
+          -480,
+          -2110,
+          0.55
+        ]
+      ]
+    },
+    {
+      "id": "greyspine",
+      "name": "the Greyspine",
+      "points": [
+        [
+          -820,
+          -1450
+        ],
+        [
+          -760,
+          -900
+        ],
+        [
+          -860,
+          -380
+        ],
+        [
+          -780,
+          250
+        ]
+      ],
+      "height": 150,
+      "width": 260,
+      "sharpness": 0.5,
+      "passes": [
+        [
+          -830,
+          -640,
+          0.6
+        ],
+        [
+          -800,
+          120,
+          0.5
+        ]
+      ]
+    },
+    {
+      "id": "cinder_cones",
+      "name": "the Cinder Cones",
+      "points": [
+        [
+          1250,
+          -2250
+        ],
+        [
+          1650,
+          -2120
+        ],
+        [
+          2050,
+          -2250
+        ]
+      ],
+      "height": 360,
+      "width": 360,
+      "sharpness": 0.85,
+      "passes": [
+        [
+          1460,
+          -2190,
+          0.7
+        ],
+        [
+          1850,
+          -2190,
+          0.5
+        ]
+      ]
+    },
+    {
+      "id": "elder_hills",
+      "name": "the Elder Hills",
+      "points": [
+        [
+          900,
+          -1050
+        ],
+        [
+          1500,
+          -900
+        ],
+        [
+          2000,
+          -1150
+        ]
+      ],
+      "height": 90,
+      "width": 300,
+      "sharpness": 0.35,
+      "passes": [
+        [
+          1480,
+          -910,
+          0.6
+        ]
+      ]
+    },
+    {
+      "id": "red_bluffs",
+      "name": "the Red Bluffs",
+      "points": [
+        [
+          -1650,
+          -900
+        ],
+        [
+          -1350,
+          -300
+        ],
+        [
+          -1550,
+          300
+        ]
+      ],
+      "height": 120,
+      "width": 240,
+      "sharpness": 0.9
+    }
+  ],
+  "lakes": [
+    {
+      "id": "mirror_lake",
+      "name": "Mirror Lake",
+      "at": [
+        1320,
+        820
+      ],
+      "radius": 190,
+      "depth": 7
+    },
+    {
+      "id": "reedmere",
+      "name": "Reedmere",
+      "at": [
+        1830,
+        980
+      ],
+      "radius": 140,
+      "depth": 5
+    },
+    {
+      "id": "stillwater",
+      "name": "Stillwater",
+      "at": [
+        960,
+        1040
+      ],
+      "radius": 110,
+      "depth": 5
+    },
+    {
+      "id": "elder_pool",
+      "name": "the Elder Pool",
+      "at": [
+        1700,
+        -620
+      ],
+      "radius": 90,
+      "depth": 5
+    },
+    {
+      "id": "frost_tarn",
+      "name": "Frost Tarn",
+      "at": [
+        -420,
+        -1640
+      ],
+      "radius": 80,
+      "depth": 6
+    }
+  ],
+  "rivers": [
+    {
+      "id": "brightwater_upper",
+      "name": "the Brightwater",
+      "from": [
+        -420,
+        -1900
+      ],
+      "to": "pin:brightwater",
+      "width": 10,
+      "depth": 2
+    },
+    {
+      "id": "mirewater_upper",
+      "name": "the Mirewater",
+      "from": [
+        520,
+        -1500
+      ],
+      "to": "pin:mirewater",
+      "width": 9,
+      "depth": 1.8
+    },
+    {
+      "id": "brightwater_lower",
+      "name": "the Brightwater",
+      "from": "pin:brightwater",
+      "to": "sea",
+      "width": 14,
+      "depth": 2.4
+    },
+    {
+      "id": "longwater",
+      "name": "the Longwater",
+      "from": [
+        1150,
+        -1700
+      ],
+      "to": "lake:mirror_lake",
+      "width": 14,
+      "depth": 2.4
+    },
+    {
+      "id": "longwater_lower",
+      "name": "the Longwater",
+      "from": "lake:mirror_lake",
+      "to": "sea",
+      "width": 16,
+      "depth": 2.6
+    },
+    {
+      "id": "redrun",
+      "name": "the Redrun",
+      "from": [
+        -1250,
+        -1650
+      ],
+      "to": "sea",
+      "width": 12,
+      "depth": 2.2
+    }
+  ],
+  "streams": {
+    "_doc": "Smaller rivers found by where rain gathers: a stream starts where `catchment` square km drain through a spot; at most `max` of them, each at least `minLength` metres.",
+    "catchment": 0.1,
+    "max": 26,
+    "minLength": 260,
+    "width": [
+      4,
+      8
+    ]
+  },
+  "regions": [
+    {
+      "id": "amberfield",
+      "name": "Amberfield Downs",
+      "theme": "farmland",
+      "at": [
+        1050,
+        0
+      ],
+      "levels": [
+        10,
+        14
+      ],
+      "weight": 1.1,
+      "towns": [
+        {
+          "name": "Harrowby",
+          "size": "town"
+        },
+        {
+          "name": "Wheatley",
+          "size": "village"
+        },
+        {
+          "size": "hamlet"
+        }
+      ],
+      "camps": 3,
+      "dungeons": 1,
+      "shrines": 2,
+      "landmarks": [
+        {
+          "kind": "standing_stones"
+        },
+        {
+          "kind": "old_tree"
+        }
+      ],
+      "fields": 9
+    },
+    {
+      "id": "greyfell",
+      "name": "the Greyfell Moors",
+      "theme": "moor",
+      "at": [
+        -60,
+        -900
+      ],
+      "levels": [
+        10,
+        16
+      ],
+      "weight": 1.2,
+      "towns": [
+        {
+          "name": "Fellwick",
+          "size": "village"
+        },
+        {
+          "size": "hamlet"
+        }
+      ],
+      "camps": 4,
+      "dungeons": 1,
+      "shrines": 2,
+      "landmarks": [
+        {
+          "kind": "standing_stones"
+        },
+        {
+          "kind": "peak"
+        },
+        {
+          "kind": "ruin"
+        }
+      ],
+      "fields": 2
+    },
+    {
+      "id": "elderwood",
+      "name": "the Elderwood",
+      "theme": "oldwood",
+      "at": [
+        1500,
+        -950
+      ],
+      "levels": [
+        14,
+        19
+      ],
+      "weight": 1.2,
+      "towns": [
+        {
+          "name": "Oakhollow",
+          "size": "village"
+        }
+      ],
+      "camps": 4,
+      "dungeons": 2,
+      "shrines": 2,
+      "landmarks": [
+        {
+          "kind": "old_tree"
+        },
+        {
+          "kind": "ruin"
+        },
+        {
+          "kind": "lakeside",
+          "near": "elder_pool"
+        }
+      ],
+      "fields": 1
+    },
+    {
+      "id": "mirrorfens",
+      "name": "the Mirror Fens",
+      "theme": "fen",
+      "at": [
+        1500,
+        900
+      ],
+      "levels": [
+        14,
+        19
+      ],
+      "weight": 1,
+      "towns": [
+        {
+          "name": "Reedby",
+          "size": "village"
+        },
+        {
+          "size": "hamlet"
+        }
+      ],
+      "camps": 3,
+      "dungeons": 1,
+      "shrines": 2,
+      "landmarks": [
+        {
+          "kind": "lakeside",
+          "near": "mirror_lake"
+        },
+        {
+          "kind": "ruin"
+        }
+      ],
+      "fields": 2
+    },
+    {
+      "id": "saltcliff",
+      "name": "the Saltcliff Coast",
+      "theme": "coast",
+      "at": [
+        -450,
+        900
+      ],
+      "levels": [
+        13,
+        18
+      ],
+      "weight": 1.1,
+      "towns": [
+        {
+          "name": "Gullhaven",
+          "size": "town",
+          "by": "sea"
+        },
+        {
+          "name": "Sandford",
+          "size": "village"
+        }
+      ],
+      "camps": 3,
+      "dungeons": 1,
+      "shrines": 2,
+      "landmarks": [
+        {
+          "kind": "lighthouse"
+        },
+        {
+          "kind": "ruin"
+        }
+      ],
+      "fields": 3
+    },
+    {
+      "id": "redrock",
+      "name": "the Redrock Barrens",
+      "theme": "badlands",
+      "at": [
+        -1350,
+        -450
+      ],
+      "levels": [
+        17,
+        23
+      ],
+      "weight": 1.1,
+      "towns": [
+        {
+          "name": "Dustwell",
+          "size": "village"
+        }
+      ],
+      "camps": 4,
+      "dungeons": 2,
+      "shrines": 2,
+      "landmarks": [
+        {
+          "kind": "arch"
+        },
+        {
+          "kind": "ruin"
+        }
+      ],
+      "fields": 0
+    },
+    {
+      "id": "frostcrown",
+      "name": "the Frostcrown Peaks",
+      "theme": "alpine",
+      "at": [
+        -650,
+        -1780
+      ],
+      "levels": [
+        20,
+        26
+      ],
+      "weight": 1.2,
+      "towns": [
+        {
+          "name": "Highcairn",
+          "size": "village"
+        }
+      ],
+      "camps": 3,
+      "dungeons": 2,
+      "shrines": 2,
+      "landmarks": [
+        {
+          "kind": "peak"
+        },
+        {
+          "kind": "lakeside",
+          "near": "frost_tarn"
+        }
+      ],
+      "fields": 0
+    },
+    {
+      "id": "cinderwaste",
+      "name": "the Cinder Waste",
+      "theme": "ashland",
+      "at": [
+        1650,
+        -1780
+      ],
+      "levels": [
+        22,
+        28
+      ],
+      "weight": 1.35,
+      "towns": [
+        {
+          "name": "Ashgate",
+          "size": "hamlet"
+        }
+      ],
+      "camps": 3,
+      "dungeons": 2,
+      "shrines": 1,
+      "landmarks": [
+        {
+          "kind": "vent"
+        },
+        {
+          "kind": "ruin"
+        }
+      ],
+      "fields": 0
+    }
+  ],
+  "_levels": "Level bands chain from the Wilds (5-10): Amberfield and the Greyfell open at 10, each region opens near the level of the one you walk in from (World Build's 'levels' check fails a road where the band jumps more than 6)."
+}

@@ -14,7 +14,9 @@
 //   const G = createGround(view, { T, placements, art, cfg, quality, tileGroup })
 //   G.splat  (ground-plan.js result)   G.heightTex   G.U (shared uniforms: uOwTime …)   G.update(dt)   G.ready
 import * as THREE from 'three';
+import { wind, WIND_GLSL } from './wind.js';
 import { paintGround, planFields } from './ground-plan.js';
+import { hookWaterLook, addWaterDepth, WATER_LOOK } from './water-look.js';
 import { sheafGeometry, unitGeometry, partMatrix } from '../../../../../proctown/js/propkit-three.js';
 
 const IMG = new URL('../../../img/ground/', import.meta.url);
@@ -201,8 +203,9 @@ export function createGround(view, { T, placements, art, cfg, quality = 'medium'
   const marshMat = low
     ? new THREE.MeshLambertMaterial({ color: '#5a7a58', map: waterTex, transparent: true, opacity: 0.78, depthWrite: false, emissive: '#18281a' })
     : new THREE.MeshStandardMaterial({ color: '#4f6e4c', map: waterTex, normalMap: rippleTex, normalScale: new THREE.Vector2(0.3, 0.3), roughness: 0.32, envMapIntensity: 1.0, transparent: true, opacity: 0.82, depthWrite: false, emissive: '#152416' });
+  hookWaterLook(waterMat); hookWaterLook(marshMat);   // the Look's water shine: built in from the start, strength 0 = today's water
   for (let k0 = 0; k0 < G.nz - 1; k0 += stepCells) for (let i0 = 0; i0 < G.nx - 1; i0 += stepCells) {
-    const verts = [], uvs = [], vertsM = [], uvsM = [];
+    const verts = [], uvs = [], vertsM = [], uvsM = [], deps = [], depsM = [];
     const i1 = Math.min(G.nx - 1, i0 + stepCells), k1 = Math.min(G.nz - 1, k0 + stepCells);
     for (let k = k0; k < k1; k++) for (let i = i0; i < i1; i++) {
       const ids = [k * G.nx + i, k * G.nx + i + 1, (k + 1) * G.nx + i, (k + 1) * G.nx + i + 1];
@@ -215,13 +218,17 @@ export function createGround(view, { T, placements, art, cfg, quality = 'medium'
       const marsh = T.biomeAt(x0 + 1, z0 + 1) === 'marsh';
       const V = marsh ? vertsM : verts, Uv = marsh ? uvsM : uvs;
       V.push(x0, y[0], z0, x0, y[2], z1, x1, y[1], z0, x1, y[1], z0, x0, y[2], z1, x1, y[3], z1);
+      // metres of water under each corner (the Look's shoreline foam, render/water-look.js) — the terrain's own numbers
+      const dp = [[x0, z0, y[0]], [x0, z1, y[2]], [x1, z0, y[1]], [x1, z0, y[1]], [x0, z1, y[2]], [x1, z1, y[3]]].map(([x, z, s]) => s - T.heightAt(x, z));
+      (marsh ? depsM : deps).push(...dp);
       Uv.push(x0 / 16, z0 / 16, x0 / 16, z1 / 16, x1 / 16, z0 / 16, x1 / 16, z0 / 16, x0 / 16, z1 / 16, x1 / 16, z1 / 16);
     }
-    for (const [V, Uv, mat] of [[verts, uvs, waterMat], [vertsM, uvsM, marshMat]]) {
+    for (const [V, Uv, mat, D] of [[verts, uvs, waterMat, deps], [vertsM, uvsM, marshMat, depsM]]) {
       if (!V.length) continue;
       const geo = new THREE.BufferGeometry();
       geo.setAttribute('position', new THREE.Float32BufferAttribute(V, 3));
       geo.setAttribute('uv', new THREE.Float32BufferAttribute(Uv, 2));
+      addWaterDepth(geo, D);
       geo.computeVertexNormals();
       const m = new THREE.Mesh(geo, mat); m.renderOrder = 2; m.name = 'water';
       tileGroup(G.minX + (i0 + stepCells / 2) * G.cell, G.minZ + (k0 + stepCells / 2) * G.cell).add(m);
@@ -270,13 +277,14 @@ export function createGround(view, { T, placements, art, cfg, quality = 'medium'
     m.customProgramCacheKey = () => 'ow-crop|' + (m === sheafMat ? 's' : 'p');
     m.onBeforeCompile = sh => {
       sh.uniforms.uOwTime = U.uOwTime;
-      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uOwTime;')
+      Object.assign(sh.uniforms, wind.uniforms);
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uOwTime;\n' + WIND_GLSL)
         .replace('#include <begin_vertex>', `#include <begin_vertex>
           #ifdef USE_INSTANCING
-            float shPh = instanceMatrix[3].x * 0.31 + instanceMatrix[3].z * 0.23;
+            // crop sheaves lean in the ONE wind (./wind.js), the same way as the grass and the trees
             float shK = ${m === sheafMat ? 'position.y * position.y' : '0.0'};
-            transformed.x += (sin(uOwTime * 1.6 + shPh) * 0.6 + sin(uOwTime * 2.9 + shPh * 1.7) * 0.3) * 0.11 * shK;
-            transformed.z += cos(uOwTime * 1.3 + shPh * 0.8) * 0.06 * shK;
+            vec2 shL = owGrassLean(instanceMatrix[3].xz, shK);
+            transformed += (transpose(mat3(instanceMatrix)) * vec3(shL.x, 0.0, shL.y)) / max(1e-3, dot(instanceMatrix[0].xyz, instanceMatrix[0].xyz));
           #endif`);
     };
   }
@@ -328,6 +336,7 @@ export function createGround(view, { T, placements, art, cfg, quality = 'medium'
       if (at) for (const f of fieldMeshes) f.im.visible = Math.hypot(f.x - at.x, f.z - at.z) - f.r < cropFar;
       U.uOwTime.value = wt;
       waterTex.offset.set(wt * 0.012, wt * 0.02);
+      WATER_LOOK.tick(wt);
       if (waterMat.normalMap) waterMat.normalMap.offset.set(wt * 0.018, -wt * 0.011);
     },
   };

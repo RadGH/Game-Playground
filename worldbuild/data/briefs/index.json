@@ -1,0 +1,21 @@
+{
+ "_doc": "The briefs the World Build page offers (file names in this folder). `phone` = the default on a small screen (a 4 km world needs a desktop's memory).",
+ "briefs": [
+  {
+   "file": "oathwild-4k.json",
+   "name": "Oathwild, 4 x 4 km",
+   "note": "Brightwater Vale + Thornmere Wilds pinned, eight new regions round them. About a minute to build; desktop."
+  },
+  {
+   "file": "pinned-2k.json",
+   "name": "Oathwild pinned, 2.4 x 2 km",
+   "note": "The hand-made map with three new regions. About 15 seconds."
+  },
+  {
+   "file": "valley-small.json",
+   "name": "Small valley, 1.6 x 1.2 km",
+   "note": "Nothing pinned, three regions. A few seconds; fine on a phone.",
+   "phone": true
+  }
+ ]
+}

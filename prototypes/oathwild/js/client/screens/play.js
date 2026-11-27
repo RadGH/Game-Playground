@@ -1,14 +1,19 @@
 // The world: the 3D view of the shared world, your predicted hero, everyone else on the server's clock, the camera
 // and the crosshair, spells with their ground indicators, interaction (talk, loot, open, use, shrines, revive), the HUD
 // and the windows the server opens. Entered from the world list with the server's 'enter' message.
+import { createLagMeter } from '../lagmeter.js';
 import * as THREE from 'three';
 import { createAmbient } from '../render/ambient.js';
 import { createView } from '../render/view.js';
-import { createWorldView } from '../render/world.js';
+import { makeWorldView } from '../live-edits.js';
+import { createZones } from '../render/zones.js';
+import { createWeatherView } from '../render/weather.js';
+import { createLook } from '../render/look.js';
 import { createActors } from '../render/actors.js';
 import { createFx } from '../render/fx.js';
 import { createCasterFx } from '../render/caster-fx.js';
 import { createSpellLook } from '../render/spell-look.js';
+import { createSwings } from '../render/swings.js';
 import { createMoves } from '../render/moves.js';
 import { attackPlan } from '../../rules/casters.js';
 import { createCamera } from '../play/camera.js';
@@ -23,20 +28,30 @@ import { npcAt, npcPresent, liveObjects, questStatus, npcCall } from '../../worl
 import { STEP, BTN, UF, packButtons } from '../../net/protocol.js';
 import { windowsOpen, closeAll, findWin } from '../ui/kit.js';
 import { fmt } from '../../../../../shared/format.js';
+import { usePlace } from '../place.js';
 
 const WIN_OF = { loot: 'loot', talk: 'talk', shop: 'shop', repair: 'repair', stable: 'stable', trainer: 'trainer', respec: 'respec', travel: 'travel', locked: 'locked' };
 const AIMED = new Set(['ground', 'cone', 'line']);
 
 export async function show(app, { enter = null } = {}) {
   if (!enter) { app.go(app.world ? 'worlds' : 'title'); return { close() {} }; }
+  await usePlace(app, enter.world?.kind);            // an arena is its own place (js/client/place.js): swap it in before anything reads app.W
   const W = app.W, T = W.terrain, book = W.book, placements = W.data.placements;
   const heightAt = (x, z) => app.ground.y(x, z);
   // ---------------------------------------------------------------- the 3D view (made once per page)
   if (!app.view) {
     app.view = createView(document.getElementById('view'), { quality: app.settings.quality });
-    app.worldView = createWorldView(app.view, { T, placements, art: app.art, scattered: app.scattered, book, town: app.W.town, quality: app.settings.quality });
+    app.worldView = makeWorldView(app);                // (live-edits.js: the dev map editor can swap it for a new one)
     app.actors = createActors(app.view, { rules: app.rules, art: app.art, quality: app.settings.quality, maxTabards: app.settings.quality === 'low' ? 6 : 16 });
     app.fx = await createFx(app.view, { heightAt, quality: app.settings.quality });
+    // the weather (render/weather.js): made with the view, before the first frame (its lightning light is made once)
+    app.weather = createWeatherView(app.view, { heightAt, T, quality: app.settings.quality, sound: () => (app.settings.sfxOn ? app.sound : null), seed: 7 });
+    app.view.afterWeather = () => app.weather.apply();
+    // the Look setting (render/look.js; ☰ Settings → Graphics): its colour factors ride on the Look tuning numbers
+    app.lookStyle = createLook(app);   // (app.look is the spell look, render/spell-look.js)
+    app.lookStyle.applyFx();
+    app.view.afterQuality = q => { app.weather?.setQuality(q); app.lookStyle?.applyFx(); };
+
     // a quest object that is an animal (Chestnut the mare): a real body instead of the world's fallback box
     const mountIds = new Set((app.art.mounts || []).map(m => m.id));
     for (const o of placements.objects || []) {
@@ -48,9 +63,13 @@ export async function show(app, { enter = null } = {}) {
   const view = app.view, actors = app.actors, fx = app.fx;
   const IDLES = W.data.towns?.idles || {};                 // townspeople's work routines (data/towns.json)
   const villagers = W.town ? createVillagers({ plan: W.town, actors: app.actors, heightAt, quality: app.settings.quality }) : null;
-  view.tuning = app.tuning;          // the Look numbers (lighting, grade, bloom, mist, clouds) live from the ?tune panel
+  view.tuning = app.lookStyle ? app.lookStyle.tuning(app.tuning) : app.tuning;   // the Look numbers (lighting, grade, bloom, mist, clouds) live from the ?tune panel, with the player's Look preset on top
   // ambient life round the camera (motes, leaves, chimney smoke, birds, butterflies) and the ambience bed for where you stand
+  // effect zones and region looks from data/edits.json (render/zones.js — the same module the map editor draws with)
+  app.zones = createZones(view, { T, edits: W.data.edits, quality: app.settings.quality });
   const ambient = createAmbient(view, { T, trees: app.scattered.trees, chimneys: app.worldView.chimneys || [], quality: app.settings.quality, sound: () => (app.settings.sfxOn ? app.sound : null) });
+  // rain and storms bring their own sound bed (render/weather.js numbers; ambient checks it every 2 s)
+  ambient.bedOverride = () => { const n = app.weather?.numbers; if (!n || n.rain < 0.15) return null; return n.lightning > 0.5 ? 'ambience.storm' : n.rain > 0.55 ? 'ambience.rain.heavy' : 'ambience.rain.light'; };
   // a wand / tome / staff / sceptre's own attack: how each style looks (data/casters.json look)
   fx.looks = app.rules.data.casters?.look || {};
   const handV = new THREE.Vector3();
@@ -68,8 +87,14 @@ export async function show(app, { enter = null } = {}) {
   const moves = createMoves(actors);
   const rowFor = (spell, who) => { try { return (who === S.meId && castRow(app.rules, app.me.char, spell)) || spellRow(app.rules, spell, { rank: 1 }); } catch { try { return spellRow(app.rules, spell, { rank: 1 }); } catch { return null; } } };
   const handsOf = id => { const b = actors.get(id)?.body?.bones; return b?.hand_l && b?.hand_r && actors.shown?.(id) !== false ? [b.hand_l, b.hand_r] : null; };
-  const look = createSpellLook({ fx, actors, moves, heightAt, rowOf: rowFor, unitOf: id => S.units.get(id), handsOf, meId: () => S.meId, shakeOn: () => app.settings.shake !== false });
-  app.look = look;
+  // basic-attack swings: the weapon kind's clip and a trail along its real stroke (render/swings.js, owner report #138)
+  const swings = fx.swingData ? createSwings({ fx, actors, moves, data: fx.swingData, unitOf: id => S.units.get(id), meId: () => S.meId }) : null;
+  if (swings) actors.swingHook = swings.hook;
+  // the kit's materials were compiled before the world's lights and fog were set: compile them again once the world is
+  // up, so the first swing or spell of a fight builds no shader (lessons rule 29; swing-shots counts them)
+  setTimeout(() => { try { if (alive) fx.kit?.warm?.(); } catch { /* decoration */ } }, 3000);
+  const look = createSpellLook({ fx, actors, moves, heightAt, rowOf: rowFor, unitOf: id => S.units.get(id), handsOf, meId: () => S.meId, shakeOn: () => app.settings.shake !== false, swings });
+  app.look = look; app.swings = swings;
   /** the hand of whoever stands where a bolt starts (the bolt is drawn from it) */
   const handNear = (x, z) => {
     let best = null, bd = 2.2;
@@ -107,6 +132,10 @@ export async function show(app, { enter = null } = {}) {
 
   // ---------------------------------------------------------------- server messages
   const offs = [];
+  // the world clock for the weather (strike times, a change rolling in between world-state messages)
+  let wxClock = { t: app.ws?.time ?? 0, at: performance.now() }, wxSent = app.ws?.time ?? null;
+  offs.push(app.on('s', m => { if (m.wt0 != null) wxClock = { t: m.wt0, at: performance.now() }; }));
+  offs.push(app.on('wstate', m => { wxSent = m.time ?? null; if (m.time != null) wxClock = { t: m.time, at: performance.now() }; }));
   const onSnap = m => {
     const now = performance.now() / 1000;
     const off = m.wt - now;
@@ -154,13 +183,16 @@ export async function show(app, { enter = null } = {}) {
     actors.get(e.who)?.windup(e.seconds);
     u.swungAt = u.actedAt = performance.now() / 1000 + e.seconds;       // its 'hit' event will not start a second swing
     endTell(e.who);
+    // only a SPECIAL blow shows a mark (owner report #137), and it points where the server will strike: the facing it sent
+    if (e.special === false) return;
     const t = S.units.get(e.to);
-    const dir = t ? { x: t.x - u.x, z: t.z - u.z } : { x: Math.sin(u.facing), z: Math.cos(u.facing) };
+    const dir = e.facing != null ? { x: Math.sin(e.facing), z: Math.cos(e.facing) } : t ? { x: t.x - u.x, z: t.z - u.z } : { x: Math.sin(u.facing), z: Math.cos(u.facing) };
     const l = Math.hypot(dir.x, dir.z) || 1; dir.x /= l; dir.z /= l;
     const h = e.ranged
-      ? fx.indicator('line', { at: { x: u.x, z: u.z }, dir, length: Math.min(e.reach || 20, l + 2), width: 1.2, kind: 'hostile' })
+      ? fx.indicator('line', { at: { x: u.x, z: u.z }, dir, length: e.reach || 20, width: 1.2, kind: 'hostile' })
+      : e.ring ? fx.indicator('circle', { at: { x: e.ring.at[0], z: e.ring.at[1] }, radius: e.ring.radius, kind: 'hostile' })     // a champion's ability placed on the ground: the mark is where it lands
       : fx.indicator('cone', { at: { x: u.x, z: u.z }, dir, length: e.reach || 3, angle: e.arc || 1.9, radius: e.reach || 3, kind: 'hostile' });
-    tells.set(e.who, { h, until: performance.now() / 1000 + e.seconds + 0.08, dir });
+    tells.set(e.who, { h, until: performance.now() / 1000 + e.seconds + 0.08, dir, fixed: !!e.ring });
   }
   function endTell(id) { const T = tells.get(id); if (T) { T.h?.stop(); tells.delete(id); } }
   function updateTells() {
@@ -168,11 +200,12 @@ export async function show(app, { enter = null } = {}) {
     for (const [id, T] of tells) {
       const u = S.units.get(id);
       if (!u || now > T.until) { endTell(id); continue; }
-      T.h?.set({ at: { x: u.x, z: u.z }, dir: T.dir });
+      if (!T.fixed) T.h?.set({ at: { x: u.x, z: u.z }, dir: T.dir });
     }
   }
   function onEvent(e) {
     const me = S.meId;
+    swings?.event(e);                    // swing looks: a special blow marked, a plain hit's sparks on the blade's moment
     switch (e.t) {
       case 'hit': {
         const p = posOf(e.to);
@@ -203,7 +236,8 @@ export async function show(app, { enter = null } = {}) {
       }
       case 'hop': cfx.hop(e); break;
       case 'rider': if (e.who === me && e.rider === 'siphon' && e.amt > 0) { const p = posOf(e.who); if (p) app.play.hud.number(p[0], p[1], p[2], `+${fmt(e.amt)} mana`, 'heal'); } break;
-      case 'miss': { const p = posOf(e.to || e.who); if (p && (e.who === me || e.to === me)) app.play.hud.number(p[0], p[1], p[2], e.dodged ? 'Dodged' : e.evade ? 'Evaded' : 'Miss', 'miss'); if (e.who && !e.to) { const u = S.units.get(e.who); if (u && performance.now() / 1000 - (u.swungAt || 0) > 0.35) { u.swungAt = u.actedAt = performance.now() / 1000; actors.get(e.who)?.act('attack'); } } if (e.who === me) app.sfx('melee.swing'); break; }
+      // owner report #136 (2026-11-26): "Miss" only when a blow went at someone; a swing at the air just swings
+      case 'miss': { const p = posOf(e.to || e.who); if (p && e.to && (e.who === me || e.to === me)) app.play.hud.number(p[0], p[1], p[2], e.dodged ? 'Dodged' : e.evade ? 'Evaded' : 'Miss', 'miss'); if (e.who && !e.to) { const u = S.units.get(e.who); if (u && performance.now() / 1000 - (u.swungAt || 0) > 0.35) { u.swungAt = u.actedAt = performance.now() / 1000; actors.get(e.who)?.act('attack'); } } if (e.who === me) app.sfx('melee.swing'); break; }
       case 'cast': {
         look.cast(e);                    // body, wind-up, release and the spell at its true shape and size
         if (e.who === me) { lastCastAt = performance.now() / 1000; app.sfx('cast.start'); }
@@ -333,7 +367,8 @@ export async function show(app, { enter = null } = {}) {
     const add = (o, x, z) => { const d = Math.hypot(x - me.x, z - me.z); if (d <= maxD) out.push({ ...o, x, z, d, y: heightAt(x, z) }); };
     const D = app.rules.data.combat.death;
     for (const u of S.units.values()) if (u.info.k === 'player' && u.downed && u.id !== S.meId) add({ kind: 'revive', id: u.id, name: u.info.n, r: D.reviveRange + 0.5, bias: -99, h: 0.6, text: `Hold to bring ${u.info.n} back`, progress: S.revive?.id === u.id ? S.revive.held / D.reviveSeconds : null }, u.x, u.z);
-    for (const b of S.lootBoxes) add({ kind: 'loot', id: b.id, name: b.name || 'the remains', r: R, bias: -1, h: 0.7, text: `Search ${b.name || 'the remains'}` }, b.x, b.z);
+    for (const b of S.lootBoxes) add({ kind: 'loot', id: b.id, name: b.name || 'the remains', r: R, bias: -1, h: 0.7, text: b.kind === 'reward' ? `Open ${b.name}` : `Search ${b.name || 'the remains'}` }, b.x, b.z);
+    for (const o of app.arenaUi?.spots() || []) add(o, o.x, o.z);       // the arena's bracket board (js/client/arena-ui.js)
     for (const n of S.npcs) add({ kind: 'talk', id: n.id, name: n.name, r: NPC_R, bias: 0, h: 1.85, text: `Talk to ${npcCall(book.npcs[n.id] || n)}` }, n.x, n.z);
     for (const c of placements.chests) add({ kind: 'chest', id: c.id, name: c.name || 'the chest', r: OBJ_R, bias: 0, h: 0.9, text: `Open ${c.name || 'the chest'}` }, c.at[0], c.at[1]);
     for (const o of S.liveObjects || []) { const ob = book.objects[o.object]; if (ob) add({ kind: 'use', id: o.object, name: ob.name, r: OBJ_R + 0.5, bias: -0.5, h: 1.2, text: `${o.kind === 'use' ? 'Use' : 'Search'} ${ob.name}` }, ob.at[0], ob.at[1]); }
@@ -390,6 +425,7 @@ export async function show(app, { enter = null } = {}) {
     else if (it.kind === 'chest') app.act('chest', { id: it.id });
     else if (it.kind === 'use') app.act('use', { id: it.id });
     else if (it.kind === 'shrine') { input.unlock(); app.openWindow('shrine', { id: it.id, name: it.name }); }
+    else if (it.kind === 'arena') { input.unlock(); app.arenaUi.use(it); }
   }
 
   // ---------------------------------------------------------------- the HUD
@@ -531,6 +567,7 @@ export async function show(app, { enter = null } = {}) {
   function frame(t) {
     if (!alive) return;
     raf = requestAnimationFrame(frame);
+    lag?.begin(t);
     const dt = Math.min(0.1, (t - lastT) / 1000); lastT = t;
     input.poll(dt);
     // one-shot presses are taken here (frame rate) and handed to the next step
@@ -649,7 +686,7 @@ export async function show(app, { enter = null } = {}) {
       // tag at all, its name only while targeted, its bar only once it is hurt
       const calm = u.info.tp && u.hostile;
       if (calm && S.target !== u.id && u.hp >= u.mh) continue;
-      S.tags.push({ id: u.id, x: u.x, y: u.y, z: u.z, h: actors.get(u.id)?.height || 1.8, name: u.info.k === 'monster' ? (calm ? u.info.n : `${u.info.n} · ${u.info.lv}`) : u.info.n, cls, hp: calm ? (u.hp < u.mh ? u.hp / Math.max(1, u.mh) : null) : u.hostile || u.info.k === 'player' ? u.hp / Math.max(1, u.mh) : null });
+      S.tags.push({ id: u.id, x: u.x, y: u.y, z: u.z, h: actors.get(u.id)?.height || 1.8, name: u.info.k === 'monster' ? (calm ? u.info.n : `${u.info.n} · ${u.info.lv}`) : u.info.ti ? `${u.info.n}, ${u.info.ti}` : u.info.n, cls, hp: calm ? (u.hp < u.mh ? u.hp / Math.max(1, u.mh) : null) : u.hostile || u.info.k === 'player' ? u.hp / Math.max(1, u.mh) : null });
     }
     for (const n of S.npcs) if (Math.hypot(n.x - pred.state.x, n.z - pred.state.z) < 22 && actors.shown('npc:' + n.id)) S.tags.push({ id: 'npc:' + n.id, x: n.x, y: heightAt(n.x, n.z), z: n.z, h: 1.85, name: `${n.mark ? n.mark + ' ' : ''}${n.name}`, cls: `npc${n.mark ? ' quest' : ''}`, hp: null });
     if ((slowTick += dt) > 0.5) {
@@ -675,7 +712,11 @@ export async function show(app, { enter = null } = {}) {
     if (fx.kit) { fx.kit.shakeOn = app.settings.shake !== false; view.shakeOffset = fx.kit.shakeOffset; }
     fx.update(wdt);
     app.worldView.update(dt, { x: pred.state.x, z: pred.state.z });
+    // the weather here (the server's, per region) before the ambience, so its rain bed wins over the place's
+    const wxN = app.weather.update(dt, { wire: app.ws?.wx || null, seed: app.ws?.wxs ?? 1, time: wxClock.t + (performance.now() - wxClock.at) / 1000, sentAt: wxSent, at: { x: pred.state.x, z: pred.state.z } });
+    ambient.wet = wxN.rain;
     ambient.update(dt, { x: pred.state.x, z: pred.state.z });
+    app.zones?.update(dt, { x: pred.state.x, z: pred.state.z });
     // an automatic graphics pick that runs slow steps down once (from 8 s in, over 6 s: under ~24 frames a second)
     if (app.settings.qualityAuto !== false && !slowChecked && app.settings.quality !== 'low') {
       watchT += dt;
@@ -690,7 +731,9 @@ export async function show(app, { enter = null } = {}) {
       }
     }
     app.play.hud.update(dt, { ...S, meUnit: me, cooldowns: S.cooldowns }, project);
+    lag?.mid();
     view.render();
+    lag?.end();
   }
   function syncNpcs() {
     const ws = wsLike();
@@ -725,17 +768,21 @@ export async function show(app, { enter = null } = {}) {
     return steps[0][0];
   }
   const lerpAngle = (a, b, k) => { let d = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI; if (d < -Math.PI) d += Math.PI * 2; return a + d * k; };
+  // the lag recorder (owner 2026-11-26: stalls on desktop) — ☰ → Send a lag report; every bug report carries its summary
+  const lag = app.lag = createLagMeter({ ...app, play: { me: () => pred?.state ?? null } }, view);
+  if (/[?&]camera\b/.test(location.search)) setTimeout(() => app.cameraTuner?.open(), 800);   // ?camera opens the camera tuner
   raf = requestAnimationFrame(frame);
   if (!touchy) setTimeout(() => { if (!windowsOpen()) app.toast('Click the world to look around. Esc for the menu.', 'info', 4000); }, 600);
 
   return {
     view: 'ready',
     close() {
-      alive = false; cancelAnimationFrame(raf);
+      alive = false; cancelAnimationFrame(raf); lag?.stop();
       for (const off of offs) off();
       stopAim();
       landFx?.stop(); landFx = null;
       ambient.dispose();
+      app.zones?.dispose(); app.zones = null;
       for (const id of [...S.units.keys()]) actors.drop(id);
       for (const n of S.npcs) actors.drop('npc:' + n.id);
       villagers?.dispose();

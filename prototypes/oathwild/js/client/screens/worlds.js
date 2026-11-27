@@ -33,6 +33,7 @@ export async function show(app, opts = {}) {
       <div class="scr-worlds-btns">
         <button type="button" class="ow-btn ow-ghost" data-act="code">${glyph('door', 18)}<span>Join by code</span></button>
         <button type="button" class="ow-btn ow-ghost" data-act="new">${glyph('plus', 18)}<span>New world</span></button>
+        <button type="button" class="ow-btn ow-ghost" data-act="arena">${glyph('sword', 18)}<span>New arena</span></button>
         <button type="button" class="ow-btn ow-primary scr-worlds-join" data-act="join">${glyph('next', 20)}<span>Enter</span></button>
       </div>
     </footer>
@@ -44,9 +45,10 @@ export async function show(app, opts = {}) {
 
   function row(w) {
     const full = w.players >= w.seats;
-    return `<button type="button" class="scr-worlds-card" role="option" data-code="${esc(w.code)}" aria-selected="${w.code === st.sel}">
-      <span class="scr-worlds-icon">${glyph(w.public ? 'globe' : 'lockOpen', 22)}</span>
-      <span class="scr-worlds-text"><b>${esc(w.name)}</b><small>${w.mine ? 'Yours · ' : ''}${w.public ? 'Public' : 'Invite only'} · code ${esc(w.code)} · ${fmt(w.quests || 0)} quests done</small></span>
+    const arena = w.kind === 'arena';
+    return `<button type="button" class="scr-worlds-card${arena ? ' is-arena' : ''}" role="option" data-code="${esc(w.code)}" aria-selected="${w.code === st.sel}">
+      <span class="scr-worlds-icon">${glyph(arena ? 'sword' : w.public ? 'globe' : 'lockOpen', 22)}</span>
+      <span class="scr-worlds-text"><b>${esc(w.name)}</b><small>${arena ? 'Arena · ' : ''}${w.mine ? 'Yours · ' : ''}${w.public ? 'Public' : 'Invite only'} · code ${esc(w.code)} · ${arena ? `${fmt(w.arena?.wins || 0)} matches won${w.arena?.busy ? ` · now: ${esc(w.arena.busy)}` : ''}` : `${fmt(w.quests || 0)} quests done`}</small></span>
       <span class="scr-worlds-count${full ? ' ow-bad' : w.players ? ' ow-good' : ''}">${glyph('people', 16)} ${fmt(w.players)}/${fmt(w.seats)}</span>
     </button>`;
   }
@@ -58,10 +60,10 @@ export async function show(app, opts = {}) {
     list.innerHTML = (played.length ? `<h2 class="scr-worlds-head">Your worlds</h2>${played.map(row).join('')}` : '')
       + `<h2 class="scr-worlds-head">Public worlds</h2>${pub.length ? pub.map(row).join('') : '<p class="ow-empty">No public worlds are open right now. Start one — others can find it here.</p>'}`;
     const w = selected();
-    if (!w) { detail.innerHTML = `<div class="scr-worlds-hint"><h2>A world of your own</h2><p>Up to 10 heroes share one world. What you finish together stays done; each hero keeps their own gear and levels.</p></div>`; return; }
+    if (!w) { detail.innerHTML = `<div class="scr-worlds-hint"><h2>A world of your own</h2><p>Up to 10 heroes share one world. What you finish together stays done; each hero keeps their own gear and levels.</p><h2>Or an arena</h2><p>Waves of monsters by level range, champions to beat, a reward chest after every win. The same heroes: what you earn there is yours in the world too.</p></div>`; return; }
     detail.innerHTML = `<h2>${esc(w.name)}</h2>
       <p class="scr-worlds-meta">${w.public ? 'Public' : 'Invite only'} · ${fmt(w.players)} of ${fmt(w.seats)} playing${w.names?.length ? `: ${esc(w.names.join(', '))}` : ''}</p>
-      <p class="scr-worlds-meta">${fmt(w.quests || 0)} quests finished in this world</p>
+      <p class="scr-worlds-meta">${w.kind === 'arena' ? `An arena: waves of monsters by level, champions to beat, a reward chest for every win · ${fmt(w.arena?.wins || 0)} matches won here` : `${fmt(w.quests || 0)} quests finished in this world`}</p>
       <div class="scr-worlds-code"><span>Code</span><b>${esc(w.code)}</b></div>
       <div class="scr-worlds-qr" aria-label="QR code to join"></div>
       <div class="scr-worlds-share">
@@ -97,16 +99,17 @@ export async function show(app, opts = {}) {
     if (!app.net.send({ t: 'join', code, char: opts.char })) { done(); st.joining = false; st.msg = 'Not connected to the world server yet.'; draw(); }
   }
 
-  function newWorld() {
+  function newWorld(kind = 'world') {
+    const arena = kind === 'arena';
     const w = openWin({
-      id: 'scr-worlds-new', title: 'A new world', size: 'narrow', cls: 'scr-worlds-form',
-      render: () => `<label class="scr-worlds-label" for="scr-worlds-name">Name</label>
-        <input id="scr-worlds-name" class="ow-input" maxlength="28" autocomplete="off" value="${esc(opts.name ? `${opts.name}'s Vale` : 'A New Oath')}">
+      id: 'scr-worlds-new', title: arena ? 'A new arena' : 'A new world', size: 'narrow', cls: 'scr-worlds-form',
+      render: () => `${arena ? '<p class="scr-worlds-why">A great arena and its court: pick a bracket for your level, fight five waves, open your reward chest. Champions wait for those who climb.</p>' : ''}<label class="scr-worlds-label" for="scr-worlds-name">Name</label>
+        <input id="scr-worlds-name" class="ow-input" maxlength="28" autocomplete="off" value="${esc(arena ? (opts.name ? `${opts.name}'s Arena` : 'The Grand Arena') : opts.name ? `${opts.name}'s Vale` : 'A New Oath')}">
         <div class="scr-worlds-toggle" role="radiogroup" aria-label="Who can join">
           <button type="button" class="ow-btn" data-pub="1" aria-pressed="true">${glyph('globe', 18)}<span>Public</span></button>
           <button type="button" class="ow-btn" data-pub="0" aria-pressed="false">${glyph('lockOpen', 18)}<span>Invite only</span></button>
         </div>
-        <p class="scr-worlds-why ow-dim">Public worlds are listed for everyone; invite-only worlds need the code.</p>
+        <p class="scr-worlds-why ow-dim">Public ${arena ? 'arenas' : 'worlds'} are listed for everyone; invite-only ones need the code.</p>
         <p class="scr-worlds-err ow-bad" role="status"></p>`,
       foot: `<button type="button" class="ow-btn ow-ghost" data-close>Cancel</button><button type="button" class="ow-btn ow-primary" data-make>${glyph('check', 18)}<span>Make it</span></button>`,
     });
@@ -118,7 +121,7 @@ export async function show(app, opts = {}) {
       if (t.dataset.make != null) {
         t.disabled = true;
         try {
-          const r = await app.net.request({ t: 'worldNew', name: w.el.querySelector('input').value, public: pub }, 'worlds');
+          const r = await app.net.request({ t: 'worldNew', name: w.el.querySelector('input').value, public: pub, kind }, 'worlds');
           w.close(); st.list = r.list || []; st.sel = r.made; st.made = r.made; draw();
           if (r.made) join(r.made);
         } catch (err) { t.disabled = false; w.el.querySelector('.scr-worlds-err').textContent = err.message; }
@@ -152,6 +155,7 @@ export async function show(app, opts = {}) {
     if (act === 'refresh') return load();
     if (act === 'join') return join(st.sel);
     if (act === 'new') return newWorld();
+    if (act === 'arena') return newWorld('arena');
     if (act === 'code') return byCode();
     if (act === 'copy') {
       const link = inviteUrl(st.sel);

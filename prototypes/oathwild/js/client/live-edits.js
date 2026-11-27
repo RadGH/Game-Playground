@@ -7,6 +7,7 @@
 //   installLiveEdits(app)               (main.js)
 //   makeWorldView(app) / dropWorldView(app, wv)   build / throw away the drawn world (play.js and the editor use these)
 import { createWorldView } from './render/world.js';
+import { createDungeonView } from './render/dungeon-draw.js';
 import { understory } from '../world/scatter.js';
 import { createGround } from '../game/ground.js';
 import { worldScene, rebuildWorld, swapInto, refill } from '../world/live.js';
@@ -14,12 +15,14 @@ import { worldScene, rebuildWorld, swapInto, refill } from '../world/live.js';
 /** The drawn world, remembering which scene objects it added (grass and contact shade sit on the scene itself). */
 export function makeWorldView(app, { quality = app.settings.quality } = {}) {
   const scene = app.view.scene, before = new Set(scene.children);
-  const wv = createWorldView(app.view, { T: app.W.terrain, placements: app.W.data.placements, art: app.art, scattered: app.scattered, book: app.W.book, town: app.W.town, quality });
+  // a dungeon place (js/world/dungeon/place.js) is drawn from its plan: no land, sky, grass, trees or water
+  const wv = app.W.dungeon ? createDungeonView(app.view, { W: app.W, quality }) : createWorldView(app.view, { T: app.W.terrain, placements: app.W.data.placements, art: app.art, scattered: app.scattered, book: app.W.book, town: app.W.town, quality });
   wv.owned = scene.children.filter(o => !before.has(o));
   return wv;
 }
 export function dropWorldView(app, wv) {
   if (!wv) return;
+  wv.dispose?.();                                         // (the dungeon puts the sky, sun and fog back)
   for (const o of wv.owned || []) {
     app.view.scene.remove(o);
     // geometry only: materials and textures are shared with caches (GLB models, kit pieces) that a new view reuses
@@ -50,7 +53,7 @@ export function installLiveEdits(app) {
     running = false;
   }
   async function apply(m) {
-    if (app.place === 'arena') return;                    // (the arena is its own place: the open world's edits wait until you are back)
+    if (app.place === 'arena' || app.W.dungeon) return;   // (the arena and a dungeon are their own places: the open world's edits wait until you are back)
     app.W.data.edits = m.edits;
     if (m.touched === 'zones' || m.touched === 'looks') { app.zones?.setEdits(m.edits); app.emit('worldChanged', m); return; }
     await rebuildAppWorld(app, m);

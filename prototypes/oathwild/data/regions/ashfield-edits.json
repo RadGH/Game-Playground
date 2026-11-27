@@ -1,0 +1,17 @@
+{
+  "_doc": "Ashfield's look, in the map editor's layer format (js/world/edits.js normEdits; the client's render/zones.js draws `zones`, `looks` colours the region): a cold blue-green grade, thick ground fog over the Old Graveyard, thinner mist in the fields, embers at the robbers' fire. Suggested numbers (brainstorm §2 'Fog + spook'); tune in the map editor.",
+  "version": 1,
+  "nextId": 5,
+  "trees": { "remove": [], "add": [], "areas": [] },
+  "decor": { "remove": [], "add": [] },
+  "ground": [],
+  "moves": {},
+  "zones": [
+    { "id": "z1", "kind": "fog", "name": "Ground fog over the Old Graveyard", "at": [-60, -10], "r": 120, "soft": 40, "amount": 1.4, "mist": 0.0045, "saturation": -0.1, "tint": "#9fb5ae", "tintAmount": 0.07 },
+    { "id": "z2", "kind": "fog", "name": "Mist in the Ashfield", "at": [40, 60], "r": 160, "soft": 60, "amount": 0.8, "mist": 0.0025, "saturation": -0.05, "tint": "#a8b8b4", "tintAmount": 0.04 },
+    { "id": "z3", "kind": "fog", "name": "Fog on Mausoleum Hill", "at": [-108, -60], "r": 50, "soft": 20, "amount": 1.6, "mist": 0.005, "saturation": -0.12, "tint": "#8fa8a4", "tintAmount": 0.08 },
+    { "id": "z4", "kind": "embers", "name": "Embers over the robbers' fire", "at": [-100, 124], "r": 6, "soft": 3, "amount": 1 }
+  ],
+  "looks": { "ashfield": { "exposure": 0.82, "saturation": 0.72, "contrast": 1.12, "warm": -0.08, "bloom": 0.12, "mist": 0.0035, "fogColour": "#7b8c88", "sunColour": "#b4c2c8" } },
+  "notes": []
+}

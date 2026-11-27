@@ -13,9 +13,17 @@ import { tipAttrs } from '../ui/tip.js';
 import { uiIcon, glyph, spellIcon } from '../ui/icons.js';
 import { hintFor } from '../input/bindings.js';
 import { createMinimap } from './minimap.js';
+import { followed, guideFor, markQuest, questRegion, regionLabel, tone, loadRoutes } from './quest-guide.js';
+import { Vector3 } from 'three';
 
 const set = (el, prop, v) => { if (el && el[prop] !== v) el[prop] = v; };
 const width = (el, k) => { const v = `${Math.max(0, Math.min(1, k)) * 100}%`; if (el && el.style.width !== v) el.style.width = v; };
+
+// the phone's Use button: one word per kind of thing (the full sentence is its label for screen readers)
+const SHORT = {
+  talk: () => 'Talk', loot: it => (/^Open/.test(it.text) ? 'Open' : 'Loot'), chest: () => 'Open', use: it => (/^Search/.test(it.text) ? 'Search' : 'Use'),
+  shrine: () => 'Shrine', arena: it => (/chest/i.test(it.text) ? 'Open' : 'Board'), gate: () => 'Travel', grave: () => 'Dig', revive: () => 'Revive',
+};
 
 export function createHud(app, play) {
   const root = document.getElementById('hud');
@@ -36,6 +44,7 @@ export function createHud(app, play) {
   <button type="button" class="hud-menu" data-act="menu" aria-label="Menu">${uiIcon("menu", 26)}</button>
   <div class="hud-mini"><canvas width="168" height="168" aria-label="Minimap"></canvas><div class="hud-mini-place"></div></div>
   <div class="hud-tracker"></div>
+  <div class="hud-goal" hidden aria-hidden="true"><i></i><b></b></div>
   <div class="hud-cross" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b></div>
   <button type="button" class="hud-prompt" data-act="use" hidden></button>
   <div class="hud-cast" hidden><i></i><span></span></div>
@@ -58,15 +67,29 @@ export function createHud(app, play) {
     tgHp: $('.hud-target .hud-fill'), tgHpT: $('.hud-target .hud-hp span'), tgAuras: $('[data-auras="target"]'),
     tracker: $('.hud-tracker'), prompt: $('.hud-prompt'), cast: $('.hud-cast'), slots: $('.hud-slots'), xp: $('.hud-xp i'), xpT: $('.hud-xp span'),
     levelup: $('.hud-levelup'), wins: $('.hud-wins'), log: $('.hud-log'), down: $('.hud-down'), plates: $('.hud-plates'), nums: $('.hud-nums'), cross: $('.hud-cross'),
-    net: $('.hud-net'), miniPlace: $('.hud-mini-place'),
+    net: $('.hud-net'), miniPlace: $('.hud-mini-place'), goal: $('.hud-goal'), goalDist: $('.hud-goal b'),
   };
+  // the tracker: tap a quest to make it the marked one (the gold diamond); tap the marked one for the Quests window
+  el.tracker.addEventListener('click', e => {
+    const b = e.target.closest('[data-mark]'); if (!b) return;
+    if (b.classList.contains('on')) { app.openWindow('quests', { sel: b.dataset.mark }); return; }
+    markQuest(app, b.dataset.mark, lastLog); lastTrack = '';
+  });
+  loadRoutes(app);
   root.querySelector('[data-act="menu"]').onclick = () => app.openWindow('menu', { where: 'play' });
   el.levelup.onclick = () => app.openWindow('levelup');
   for (const n of root.querySelectorAll('button')) n.style.pointerEvents = 'auto';
   // the interact prompt is a button too: tap / click = Use, hold = bring a fallen friend back (phones have no E key)
-  const holdUse = on => { const T = app.input?.touch; if (!T) return; if (on) { T.held.add('interact'); T.presses.add('interact'); } else T.held.delete('interact'); };
-  el.prompt.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); holdUse(true); });
-  for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) el.prompt.addEventListener(ev, () => holdUse(false));
+  // Use acts when the finger LIFTS (a tap), like any button; holding it down keeps 'interact' held (bringing a fallen
+  // friend back). Acting on the finger going DOWN opened the travel window at once and the tap's own click then landed
+  // on the window's backdrop and closed it again (found 2026-11-27 by tests/ui/travel-shots.mjs --phone).
+  const T0 = () => app.input?.touch;
+  let downAt = -1e9, downOn = false;
+  el.prompt.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); downAt = performance.now(); downOn = true; T0()?.held.add('interact'); });
+  el.prompt.addEventListener('pointerup', e => { e.stopPropagation(); if (downOn) T0()?.presses.add('interact'); downOn = false; T0()?.held.delete('interact'); });
+  for (const ev of ['pointercancel', 'pointerleave']) el.prompt.addEventListener(ev, () => { downOn = false; T0()?.held.delete('interact'); });
+  // a device that sends only a click (no pointer events) still uses it — never twice for one tap
+  el.prompt.addEventListener('click', e => { e.stopPropagation(); if (performance.now() - downAt < 1500) return; T0()?.presses.add('interact'); });
   const minimap = createMinimap(app, root.querySelector('.hud-mini canvas'));
 
   // ---- window buttons (bottom right; on phones they live in the ☰ menu)
@@ -150,7 +173,40 @@ export function createHud(app, play) {
     setTimeout(drawLog, LOG_FADE_MS + 50); setTimeout(drawLog, LOG_GONE_MS + 50);
   }
 
-  let slow = 0, lastTrack = '';
+  let slow = 0, lastTrack = '', lastLog = null;
+  // the marked quest's next spot here (quest-guide.js), the other tracked goals, and the floating marker over the spot
+  let guide = null, guideTitle = '', others = [];
+  const metres = d => (d < 100 ? Math.round(d) : Math.round(d / 5) * 5);
+  const v3 = new Vector3();
+  /** The goal marker: over its spot when on screen, else on the screen's edge pointing the way (rule 67). Fades within ~8 m. */
+  function drawGoal(project) {
+    const me = playMe();
+    const cam = app.view?.camera, size = app.view?.size;
+    if (!guide?.at || !me || !cam || !size) { el.goal.hidden = true; return; }
+    const d = Math.hypot(guide.at[0] - me.x, guide.at[1] - me.z);
+    const fade = Math.max(0, Math.min(1, (d - 3) / 5));
+    if (fade <= 0) { el.goal.hidden = true; return; }
+    const y = (app.ground?.y?.(guide.at[0], guide.at[1]) ?? 0) + 3.2;
+    let p = project(guide.at[0], y, guide.at[1]), edge = false, ang = 0;
+    if (!p) {
+      v3.set(guide.at[0], y, guide.at[1]).project(cam);
+      let nx = v3.x, ny = v3.y;
+      if (v3.z > 1) { nx = -nx; ny = -ny; }                                   // behind the camera: the other way
+      const m = Math.max(Math.abs(nx), Math.abs(ny)) || 1;
+      nx /= m; ny /= m;
+      const W = size.w, H = size.h, pad = 46;
+      p = { x: Math.min(W - pad, Math.max(pad, (nx + 1) / 2 * W)), y: Math.min(H - pad, Math.max(pad + 80, (1 - ny) / 2 * H)) };
+      edge = true; ang = Math.atan2(-ny, nx);
+    }
+    el.goal.hidden = false;
+    el.goal.classList.toggle('edge', edge);
+    el.goal.style.opacity = String(fade);
+    el.goal.style.transform = `translate(${Math.round(p.x)}px, ${Math.round(p.y)}px) translate(-50%, -50%)`;
+    el.goal.style.setProperty('--ang', `${ang}rad`);
+    set(el.goalDist, 'textContent', `${fmt(metres(d))} m`);
+    el.goal.dataset.quest = guideTitle;
+  }
+  const playMe = () => app.play?.S?.drawnMe || null;
   const hud = {
     root, number, log, drawBar, minimap, drawWins,
     /** Every frame. `S` = the play state (units, me, target …), `cam` = the camera. */
@@ -185,7 +241,8 @@ export function createHud(app, play) {
         }
       }
       for (const [id, P] of plates) if (!seen.has(id)) { P.d.hidden = true; if (!S.units.has(id) && !String(id).startsWith('npc:')) { P.d.remove(); plates.delete(id); } }
-      minimap.draw(S);
+      minimap.draw(S, { guide, others, points: S.points });
+      drawGoal(project);
       slow += dt;
       if (slow < 0.066) return;                         // text and bars ~15 times a second
       slow = 0;
@@ -231,18 +288,28 @@ export function createHud(app, play) {
       const pend = app.me?.pending || 0;
       el.levelup.hidden = !pend;
       if (pend) set(el.levelup, 'innerHTML', `${glyph('level', 18)}<span>Level up${pend > 1 ? ` (${pend})` : ''}</span><span class="hud-key">${esc(hintFor(app.bindings, 'levelup', app.device))}</span>`);
-      // quest tracker: tracked quests, else the main quest + the newest active ones
+      // quest tracker (≤ 3 quests: name, region, the step with its counts, distance; coloured by level) + the guide
       if (app.ws && app.W) {
         const wsLike = { quests: app.ws.quests || {}, flags: app.ws.flags || [], playerFlags: { [c.id]: app.ws.my || [] } };
         const L = questLog(app.W.book, wsLike, { playerId: c.id, level: c.level, flags: app.me?.flags || [] });
-        const tracked = app.settings.tracked;
-        const list = [...L.ready, ...L.active].filter(q => !tracked?.length || tracked.includes(q.id)).slice(0, 4);
-        const k = JSON.stringify(list.map(q => [q.id, q.progress, q.steps.find(s => s.current)?.text, q.status]));
+        lastLog = L;
+        const pos = S.drawnMe;
+        const { list, marked } = followed(app, L);
+        const rows = list.map(q => ({ q, g: guideFor(app, q, pos), region: questRegion(app, q) }));
+        guide = marked ? rows.find(r => r.q.id === marked.id)?.g || null : null;
+        guideTitle = marked?.title || '';
+        others = rows.filter(r => r.q.id !== marked?.id && r.g?.at && !r.g.far).map(r => ({ at: r.g.at, radius: r.g.radius, title: r.q.title }));
+        const k = JSON.stringify([rows.map(r => [r.q.id, r.q.progress, r.q.steps.find(s => s.current)?.text, r.q.status, r.region, r.g?.via, r.g?.label]), marked?.id, c.level]);
         if (k !== lastTrack) {
           lastTrack = k;
-          el.tracker.innerHTML = list.length ? `<h4>Quests</h4>${list.map(q => `<div class="hud-q ${q.kind}"><b>${esc(q.title)}</b><span>${esc(q.status === 'ready' ? `Return to ${q.turnIn?.name || 'the quest giver'}` : q.steps.find(s => s.current)?.text || '')}</span>${q.progress ? `<em>${esc(q.progress)}</em>` : ''}</div>`).join('')}` : '';
-          S.questMarkers = [...L.ready, ...L.active].map(q => q.marker && { ...q.marker, title: q.title, main: q.kind === 'main' }).filter(Boolean);
+          el.tracker.innerHTML = rows.length ? `<h4>Quests</h4>${rows.map(({ q, g, region }) => {
+            const step = q.status === 'ready' ? `Return to ${q.turnIn?.name || 'the quest giver'}` : q.steps.find(s => s.current)?.text || '';
+            const where = g?.far ? g.via : regionLabel(app, region);
+            return `<button type="button" class="hud-q ${q.kind} lv-${tone(q.level, q.level, c.level)}${q.id === marked?.id ? ' on' : ''}" data-mark="${esc(q.id)}" aria-label="${esc(q.title)}"><b><i class="hud-q-dia"></i>${esc(q.title)}</b><small><span class="hud-q-where">${esc(where)}</span><span class="hud-q-dist" data-dist="${esc(q.id)}"></span></small><span class="hud-q-step">${esc(step)}${q.progress ? ` <em>${esc(q.progress)}</em>` : ''}</span></button>`;
+          }).join('')}` : '';
+          for (const n of el.tracker.querySelectorAll('button')) n.style.pointerEvents = 'auto';
         }
+        for (const r of rows) { const n = el.tracker.querySelector(`[data-dist="${CSS.escape(r.q.id)}"]`); if (n) set(n, 'textContent', r.g?.dist != null ? ` · ${fmt(metres(r.g.dist))} m` : ''); }
       }
       // place name under the minimap
       const place = S.placeName || '';
@@ -250,7 +317,14 @@ export function createHud(app, play) {
       // interact prompt (under the crosshair, never on it)
       const it = S.interact;
       el.prompt.hidden = !it;
-      if (it) set(el.prompt, 'innerHTML', `<span class="hud-key">${esc(hintFor(app.bindings, 'interact', app.device) || 'Tap')}</span> ${esc(it.text)}${it.progress != null ? `<i style="--k:${Math.round(it.progress * 100)}%"></i>` : ''}`);   // lint-ok: a computed progress number
+      // on a phone it is a small round button above Dodge with one word (owner 2026-11-27: "a smaller button with less
+      // text above Dodge and only when the interaction is available"); with keys or a pad, the key and the full line
+      const touch = document.body.classList.contains('ow-touch');
+      const word = SHORT[it?.kind] ? SHORT[it.kind](it) : 'Use';
+      if (it) set(el.prompt, 'innerHTML', touch
+        ? `<b>${esc(word)}</b>${it.progress != null ? `<i style="--k:${Math.round(it.progress * 100)}%"></i>` : ''}`   // lint-ok: a computed progress number
+        : `<span class="hud-key">${esc(hintFor(app.bindings, 'interact', app.device) || 'Tap')}</span> ${esc(it.text)}${it.progress != null ? `<i style="--k:${Math.round(it.progress * 100)}%"></i>` : ''}`);   // lint-ok: a computed progress number
+      if (it) el.prompt.setAttribute('aria-label', it.text);
       // channel / revive bar
       // downed panel
       const down = me.downed;
@@ -272,6 +346,8 @@ export function createHud(app, play) {
       el.net.hidden = st === 'open';
       if (st !== 'open') set(el.net, 'textContent', 'Connection lost — reconnecting…');
     },
+    /** The marked quest's spot in this region (tests and game-eye read it). */
+    get guide() { return guide; },
     crosshair(kind) { el.cross.className = `hud-cross ${kind || ''}`; },
     castBar(name, k) { el.cast.hidden = k == null; if (k != null) { set(el.cast.querySelector('span'), 'textContent', name); el.cast.querySelector('i').style.width = `${Math.round(k * 100)}%`; } },
     destroy() { root.innerHTML = ''; minimap.destroy?.(); },

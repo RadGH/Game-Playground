@@ -6,9 +6,13 @@
 //   C.look(dx, dy) (mouse px or pad units)  C.zoom(steps)  C.update(dt, hero{x,y,z})
 //   C.forward() → {x, z} ground direction the camera faces    C.right() → {x, z}
 //   C.aim({ units, range, exclude, assistDeg }) → { point:{x,y,z}, unit|null, dir:{x,z}, dist }
+// Indoors (a dungeon place: dungeonWalk() gives its walk grid) the boom is js/world/dungeon/camera.js cameraBoom — a
+// small ball swept back from the shoulder against walls, columns, shut gates and the ceiling — eased every frame: in
+// quickly when something comes between (never film through stone), back out slowly when the view clears.
 import * as THREE from 'three';
+import { cameraBoom } from '../../world/dungeon/camera.js';
 
-export function createCamera(view, { heightAt, tuning = {}, settings, solidsNear = null }) {
+export function createCamera(view, { heightAt, tuning = {}, settings, solidsNear = null, dungeonWalk = null }) {
   const cam = view.camera;
   const T = k => tuning[k];
   const st = { yaw: Math.PI, pitch: 0.18, dist: settings.cameraDist || 4.6, wantDist: settings.cameraDist || 4.6, at: new THREE.Vector3(), ready: false };
@@ -41,7 +45,8 @@ export function createCamera(view, { heightAt, tuning = {}, settings, solidsNear
     forward() { return { x: Math.sin(st.yaw), z: Math.cos(st.yaw) }; },
     right() { return { x: -Math.cos(st.yaw), z: Math.sin(st.yaw) }; },
     update(dt, hero, { snap = false } = {}) {
-      st.dist += (st.wantDist - st.dist) * Math.min(1, dt * (st.dist < st.wantDist - 0.05 && solidsNear ? 3 : 8));   // back out slowly after a wall
+      const inside = dungeonWalk?.() || null;
+      if (!inside) st.dist += (st.wantDist - st.dist) * Math.min(1, dt * (st.dist < st.wantDist - 0.05 && solidsNear ? 3 : 8));   // back out slowly after a wall
       const f = C.forward(), r = C.right();
       const side = (settings.hand === 'left' ? -1 : 1) * (T('cameraSide') ?? 0.75);
       // the point the camera looks past: above the hero's shoulder
@@ -52,7 +57,14 @@ export function createCamera(view, { heightAt, tuning = {}, settings, solidsNear
       const cp = Math.cos(st.pitch), sp = Math.sin(st.pitch);
       // a wall, a solid prop or a tree trunk between the shoulder and the camera: come in in front of it at once
       // (never film the inside of a house), then ease back out as the view clears
-      if (solidsNear) {
+      if (inside) {
+        // the yaw / pitch here are cameraBoom's own (the camera sits behind along -forward, above by +pitch)
+        const boom = cameraBoom(inside, st.at, st.yaw, st.pitch, st.wantDist);
+        const k = snap ? 1 : Math.min(1, dt * (boom < st.dist ? 16 : 2.2));
+        st.dist += (boom - st.dist) * k;
+        if (st.dist > boom + 0.1) st.dist = boom + 0.1;                    // the ball keeps 0.25 m clear: this stays out of the stone
+        st.dist = Math.max(0.6, st.dist);
+      } else if (solidsNear) {
         const free = clearDist(f, cp, sp);
         if (free < st.dist) st.dist = free;
       }

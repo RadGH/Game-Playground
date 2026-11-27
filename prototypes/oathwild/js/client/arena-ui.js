@@ -108,7 +108,13 @@ export function installArena(app) {
     el.innerHTML = `<h4>${glyph('sword', 16)} ${esc(v.name || 'Match')}</h4>
       <div class="arena-row"><span>${wave}</span>${v.state === 'wave' || v.state === 'bout' ? `<span class="arena-left">${left}</span>` : ''}</div>
       <div class="arena-row arena-sub">${line}</div>
-      ${v.kind !== 'champion' ? `<div class="arena-pips">${Array.from({ length: v.of || 5 }, (_, i) => `<i class="${i + 1 < v.wave || (i + 1 === v.wave && v.state === 'breather') || v.state === 'won' ? 'done' : i + 1 === v.wave ? 'now' : ''}${i === 2 ? ' brute' : ''}${i === 4 ? ' boss' : ''}"></i>`).join('')}</div>` : ''}`;
+      ${v.kind !== 'champion' ? `<div class="arena-pips" aria-label="Waves">${Array.from({ length: v.of || 5 }, (_, i) => {
+        // one symbol per wave (owner 2026-11-27: "better symbols for the progress indicator"): a tick when beaten, the
+        // wave being fought glows; the brute wave shows a skull, the boss wave a crown, the rest a sword
+        const done = i + 1 < v.wave || (i + 1 === v.wave && v.state === 'breather') || v.state === 'won', now = !done && i + 1 === v.wave;
+        const kind = i === 4 ? 'boss' : i === 2 ? 'brute' : 'wave';
+        return `<i class="${done ? 'done' : now ? 'now' : ''} ${kind}">${glyph(done ? 'check' : kind === 'boss' ? 'crown' : kind === 'brute' ? 'skull' : 'sword', 15)}</i>`;
+      }).join('')}</div>` : ''}`;
   }
   // the edge markers (every frame): the gate of the next pack, and every enemy of the match off screen
   function frame() {

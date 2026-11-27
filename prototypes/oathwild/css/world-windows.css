@@ -173,6 +173,36 @@
 .ow-map-key { list-style: none; padding: 0; margin: 10px 0; display: flex; flex-direction: column; gap: 8px; }
 .ow-map-key li { display: flex; align-items: center; gap: 10px; }
 .ow-map-key .ow-map-pin { width: 22px; height: 22px; }
+/* the marked quest (gold diamond) and the roads out of the region */
+.ow-map-dia { display: block; width: 11px; height: 11px; transform: rotate(45deg); background: #ffcf4a; border: 1.5px solid #3a2a10; }
+.ow-map-guide .ow-map-pin { border-color: #ffcf4a; background: #3a2a10; box-shadow: 0 0 0 2px rgba(255, 207, 74, .35), 0 2px 6px rgba(0, 0, 0, .5); }
+.ow-map-guide .ow-map-label { color: #ffe9a8; }
+.ow-map-gate .ow-map-pin { border-color: #f3e2b8; background: #4a3420; color: #fff0d0; border-radius: 7px; }
+
+/* ---- the Places tab: every place you know of and how to get there (win-map.js placesTab) ---- */
+.ow-map.ow-map-places .ow-win-body { display: block; overflow-y: auto; padding: 0; }
+.ow-pl { display: grid; gap: 10px; padding: 0 14px 14px; }
+.ow-pl-bar { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; gap: 8px 14px; padding: 12px 0 10px; background: var(--panel); border-bottom: 1px solid var(--edge-soft); }
+.ow-pl-seg { display: flex; gap: 4px; }
+.ow-pl-seg .ow-btn[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); background: var(--panel-3); }
+.ow-pl-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ow-pl-row { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 12px; padding: 8px 10px 8px 8px; border-radius: 10px; background: rgba(0, 0, 0, .16); border: 1px solid var(--edge-soft); }
+.ow-pl-here { border-color: var(--gold-deep); background: linear-gradient(90deg, rgba(185, 138, 58, .16), rgba(0, 0, 0, .12)); }
+.ow-pl-pic { width: 64px; height: 64px; border-radius: 8px; display: grid; place-items: end start; padding: 5px; color: #fff4dc;
+  background: var(--art) center / cover no-repeat, linear-gradient(150deg, hsl(var(--hue) 34% 34%), hsl(var(--hue) 30% 16%)); border: 1px solid rgba(232, 193, 112, .35); box-shadow: inset 0 -18px 18px rgba(0, 0, 0, .35); }
+.ow-pl-pic svg { filter: drop-shadow(0 1px 2px #000); }
+.ow-pl-unfound .ow-pl-pic { filter: grayscale(.7) brightness(.8); }
+.ow-pl-text { min-width: 0; display: grid; gap: 2px; }
+.ow-pl-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.ow-pl-top b { font-size: 16px; color: #fff2d2; }
+.ow-pl-unfound .ow-pl-top b { color: var(--ink-dim); }
+.ow-pl-lv { font-size: 13px; font-weight: 800; padding: 0 7px; border-radius: 6px; background: rgba(0, 0, 0, .3); }
+.ow-pl-lv.lv-low { color: #bdb6a8; } .ow-pl-lv.lv-fair { color: #f2dc8a; } .ow-pl-lv.lv-hard { color: #ffa47e; }
+.ow-pl-text small { color: var(--ink-dim); font-size: 13px; }
+.ow-pl-how { margin: 2px 0 0; font-size: 14px; line-height: 1.3; color: var(--ink); }
+.ow-pl-how.good { color: var(--good); } .ow-pl-how.here { color: var(--gold); font-weight: 700; } .ow-pl-how.far { color: #e2d3b2; }
+.ow-pl-foot { margin: 0; text-align: right; font-size: 13px; }
+.ow-q-mk i { display: block; width: 11px; height: 11px; transform: rotate(45deg); background: #ffcf4a; border: 1.5px solid #3a2a10; margin: 3px; }
 
 /* ---- the ☰ menu ---- */
 .ow-menu .ow-win-body { display: flex; flex-direction: column; gap: 14px; }
@@ -232,6 +262,10 @@
   .ow-shop-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
   .ow-map-wrap { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
   .ow-map-side { border-left: 0; border-top: 1px solid var(--edge-soft); max-height: 34vh; }
+  .ow-pl { padding: 0 10px 12px; }
+  .ow-pl-row { grid-template-columns: 52px 1fr; gap: 10px; }
+  .ow-pl-pic { width: 52px; height: 52px; }
+  .ow-pl-row > .ow-btn { grid-column: 2; justify-self: start; }
   .ow-menu-grid { grid-template-columns: repeat(4, 1fr); }
   .ow-menu-tile { min-height: 64px; font-size: 13px; }
   .ow-set-choices { grid-template-columns: 1fr; }

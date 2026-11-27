@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Icon Kit · Playground</title>
+  <link rel="stylesheet" href="../shared/style.css">
+  <link rel="stylesheet" href="css/iconkit.css">
+  <link rel="stylesheet" href="css/review.css">
+</head>
+<body>
+  <header class="ikr-top">
+    <a class="ikr-home" href="../">← Home</a>
+    <h1>Icon Kit</h1>
+    <div class="ikr-art" role="group" aria-label="Which art to show">
+      <button type="button" data-art="best" class="is-on">Painted</button>
+      <button type="button" data-art="placeholder">Drawn</button>
+    </div>
+  </header>
+  <nav class="ikr-tabs" role="tablist" aria-label="Icon Kit views">
+    <button type="button" role="tab" data-tab="builder">Builder</button>
+    <button type="button" role="tab" data-tab="compare">Compare</button>
+    <button type="button" role="tab" data-tab="status">Status</button>
+    <button type="button" role="tab" data-tab="classes">Class sheet</button>
+    <button type="button" role="tab" data-tab="oathwild">In game: Oathwild</button>
+    <button type="button" role="tab" data-tab="library">Old library</button>
+    <button type="button" role="tab" data-tab="matrix">Glyph matrix</button>
+  </nav>
+  <main id="view" class="ikr-view" aria-live="polite"><p class="ikr-loading">Loading the kit…</p></main>
+  <noscript>JavaScript is needed to view the Icon Kit.</noscript>
+  <script type="module" src="js/review.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "_doc": "Ashfield Crossing's people, in data/npcs.json's format (js/world/quests.js). Nobody here is in the main story, so everyone is called by their job (role: true). Spots come from ashfield-towns.json.",
+  "npcs": {
+    "ash_priest": { "name": "Priest", "role": true, "title": "Keeper of Ashfield Chapel", "place": "ashfield_crossing", "at": [130, 14],
+      "body": { "kind": "tabard", "sex": "male", "age": "old", "outfit": "robe", "colour": "#d8d0b8", "fallback": "male" },
+      "lines": [{ "flag": "ash_chapel_cleared", "say": ["The chapel yard is quiet. I said the words over it again, for whatever they are worth now."] },
+        { "say": ["Mind the gate after dark. The dead don't keep to their beds any more, and nobody knows why."] }],
+      "services": [{ "kind": "trainer", "classes": ["cleric"] }] },
+    "ash_gravedigger": { "name": "Gravedigger", "role": true, "title": "Forty years with a spade", "place": "ashfield_crossing", "at": [100, 31],
+      "body": { "kind": "tabard", "sex": "male", "age": "old", "outfit": "cloth", "colour": "#5a5040", "fallback": "male" },
+      "lines": [{ "flag": "ashfield_shortcut_open", "say": ["The old grave in the Paupers' Field goes all the way down now. I wouldn't, but you might."] },
+        { "say": ["I fill them in, they dig themselves out. It's honest work, but it's never finished."] }] },
+    "ash_widow": { "name": "Widow", "role": true, "title": "Lives by the chapel", "place": "ashfield_crossing", "at": [123, 12],
+      "body": { "kind": "tabard", "sex": "female", "age": "middle", "outfit": "cloth", "colour": "#2e2a33", "fallback": "female" },
+      "lines": [{ "flag": "ash_locket_back", "say": ["I wear it every day now. Thank you for bringing it home."] },
+        { "say": ["My husband lies in the Old Families. Lay, I should say. Someone dug him up."] }] },
+    "ash_hunter": { "name": "Hunter", "role": true, "title": "Keeps the fold", "place": "ashfield_crossing", "at": [143, 15],
+      "body": { "kind": "tabard", "sex": "female", "age": "middle", "outfit": "leather", "colour": "#4a5a3a", "fallback": "female" },
+      "lines": [{ "say": ["Wolves I can handle. Wolves don't come back after you've killed them."] }] },
+    "ash_innkeeper": { "name": "Innkeeper", "role": true, "title": "The Lantern Inn", "place": "ashfield_crossing", "at": [100, 13],
+      "body": { "kind": "tabard", "sex": "female", "age": "middle", "outfit": "cloth", "colour": "#8a5a3a", "fallback": "female" },
+      "lines": [{ "say": ["We keep the lanterns lit all night. Old habit. Good habit, these days."] }] },
+    "ash_vendor": { "name": "Shopkeeper", "role": true, "title": "Candles, oil and charms", "place": "ashfield_crossing", "at": [131, 33],
+      "body": { "kind": "tabard", "sex": "male", "age": "young", "outfit": "cloth", "colour": "#7a6a3a", "fallback": "male" },
+      "lines": [{ "say": ["Lamp oil, candles, a charm against the cold. Mostly lamp oil. Everybody wants lamp oil."] }],
+      "services": [{ "kind": "shop", "sells": ["weapon", "armour", "jewellery", "magic"], "levels": [3, 8] }, { "kind": "repair", "text": "Mend my gear." }] }
+  }
+}

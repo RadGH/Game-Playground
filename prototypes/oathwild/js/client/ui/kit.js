@@ -84,6 +84,13 @@ export function openWin({ id, title: heading = '', sub = '', cls = '', size = ''
       if (foot && w.footEl) { const f = typeof foot === 'function' ? foot(w.footEl, w) : foot; if (typeof f === 'string') w.footEl.innerHTML = f; }
       if (kept) restoreView(el, kept); else w.body.scrollTop = 0;
       w._lastTab = w.tab;
+      // a window that fills (nearly) the whole screen goes full screen (owner 2026-11-27: "menus should be fullscreen if
+      // they occupy more than 90% of the screen") — no thin margin and rounded frame left round its edges; once full it
+      // stays full while open (so it never flips back and forth as its contents change)
+      if (!shade.classList.contains('ow-full') && shade.isConnected) {
+        const r = el.getBoundingClientRect();
+        if (r.width >= innerWidth * 0.9 && r.height >= innerHeight * 0.9) shade.classList.add('ow-full');
+      }
       w.onRender?.(w);
     },
     setTab(t) { w.tab = t; w.render(); },

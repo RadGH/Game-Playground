@@ -23,6 +23,9 @@ export const WEATHER_SETUP = Object.freeze({
     brightwater_vale: { temperature: 0.62, moisture: 0.5, elevation: 0.55, biome: 5, bias: { rain: 1.5, drizzle: 1.3, storm: 4 } },
     // the deep wood and the mere: wetter, foggier, and where the big storms come in
     thornmere_wilds: { temperature: 0.6, moisture: 0.74, elevation: 0.6, biome: 8, water: 1, bias: { rain: 1.4, fog: 1.3, storm: 5 } },
+    // Ashfield (regions, owner 2026-11-27: "the graveyard should be spooky with fog"): grey skies, ground fog most of the
+    // time, drizzle; never a clear, fair or cloudy (blue-sky) day
+    ashfield: { temperature: 0.48, moisture: 0.78, elevation: 0.62, biome: 8, bias: { fog: 14, overcast: 6, drizzle: 2.5, cloudy: 0, clear: 0, fair: 0, storm: 1.2 } },
   },
   // any region not listed above (a new one from the world builder) gets this climate until it is given its own
   fallback: { temperature: 0.58, moisture: 0.55, elevation: 0.6, biome: 8, bias: { storm: 3 } },

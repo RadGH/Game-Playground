@@ -1,0 +1,19 @@
+{
+  "_doc": "Ashfield Crossing as a small town (js/world/town.js planTowns, the open world's own planner and house kit): a few houses line the Ashfield Road and Chapel Lane round the four hand-placed buildings (inn, chapel, gravedigger's hut, the candle shop); the hamlet's people stand at their spots.",
+  "idles": { "shopkeeper": [["idle", 4, 7], ["PickUp_Table", 2.2, 2.2], ["idle", 3, 5], ["talk", 4, 6], ["Interact", 1.6, 1.6]], "elder": [["idle", 5, 8], ["talk", 3, 5]], "digger": [["Interact", 1.4, 1.4], ["idle", 2, 3], ["Fixing_Kneeling", 5, 7], ["idle", 2, 3]], "guard": [["ready", 3, 5], ["idle", 4, 6]] },
+  "ashfield_crossing": {
+    "seed": 7319, "radius": 36, "streets": ["ashfield_road", "chapel_lane"],
+    "styles": [["stone", 3], ["timber", 2], ["plaster", 1]], "fences": [["wood", 3], ["stone", 1]], "villagers": 3, "lampEvery": 12,
+    "rules": { "widths": [[2, 3], [3, 1]], "depths": [[2, 2], [3, 1]], "storeys": [[1, 2], [2, 3]], "gapEvery": [2, 3], "outskirts": 0.5 },
+    "keep": [[106, 34, 5], [146, 31, 3], [116, 22, 5]],
+    "spots": [
+      { "npc": "ash_priest", "at": [130, 14], "face": 3.6, "idle": "elder" },
+      { "npc": "ash_widow", "at": [123, 12], "face": 2.6, "idle": "elder" },
+      { "npc": "ash_gravedigger", "at": [100, 31], "face": 0.4, "idle": "digger" },
+      { "npc": "ash_innkeeper", "at": [100, 13], "face": 3.0, "idle": "shopkeeper" },
+      { "npc": "ash_vendor", "at": [131, 33], "face": -0.4, "idle": "shopkeeper" },
+      { "npc": "ash_hunter", "at": [143, 15], "face": -2.0, "idle": "guard" }
+    ],
+    "stops": [{ "at": [110, 27], "kind": "square", "face": 0 }, { "at": [124, 27], "kind": "square", "face": 3.14 }]
+  }
+}

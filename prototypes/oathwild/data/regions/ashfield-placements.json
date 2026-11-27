@@ -1,0 +1,64 @@
+{
+  "_doc": "Ashfield's hand placements in data/placements.json's format. js/world/regions/graveyard.js adds the rest at boot: the cemetery wall, iron railings, the ruined chapel's walls and the catacomb entrances as solid `boxes` (js/game/ground.js), the ruin's pillars as props, `y` heights, and spots for roam zones that list none. Camps here = data/regions/ashfield.json rules.camps (where + level band); the quest objects are the story graves' rings, the robbed grave, the sexton's journal, the stolen locket and the collapsed grave.",
+  "version": 1,
+  "encounters": { "heroScale": { "boss": { "1": { "hp": 0.4, "dmg": 0.5 }, "2": { "hp": 0.55, "dmg": 0.65 }, "3": { "hp": 0.7, "dmg": 0.75 }, "4": { "hp": 0.85, "dmg": 0.88 }, "5": { "hp": 1, "dmg": 1 } } }, "weaken": {} },
+  "buildings": [
+    { "id": "ash_inn", "name": "The Lantern Inn", "art": "inn", "role": "inn", "at": [98, 5], "facing": 3.14, "footprint": 10, "region": "ashfield" },
+    { "id": "ash_chapel", "name": "Ashfield Chapel", "art": "cottage-stone", "look": "chapel", "role": "chapel", "at": [133, 6], "facing": 3.14, "footprint": 9, "region": "ashfield" },
+    { "id": "ash_gravedigger_hut", "name": "The Gravedigger's Hut", "art": "cottage-log", "role": "house", "at": [95, 39], "facing": 0, "footprint": 7, "region": "ashfield" },
+    { "id": "ash_shop", "name": "Candles and Oil", "art": "cottage-thatch", "role": "shop", "at": [135, 41], "facing": 0, "footprint": 7, "region": "ashfield" }
+  ],
+  "props": [
+    { "art": "lamp-post", "at": [146, 31], "facing": 0, "r": 0.4, "name": "the Lantern Post", "waypoint": "ashfield_lantern" },
+    { "art": "signpost", "at": [36, -15], "facing": -1.57, "r": 0.4, "name": "Old Graveyard" },
+    { "art": "signpost", "at": [164, 35], "facing": 1.57, "r": 0.4, "name": "East Road: Brightwater Vale" },
+    { "art": "wheelbarrow", "at": [101, 43], "facing": 0.6, "r": 0.6, "walk": true },
+    { "art": "woodpile", "at": [88, 34], "facing": 1.57, "r": 0.8 },
+    { "art": "tent-large", "at": [-108, 116], "facing": 0.6, "r": 2.4 },
+    { "art": "tent-small", "at": [-90, 114], "facing": -0.5, "r": 1.6 },
+    { "art": "campfire", "at": [-100, 124], "facing": 0, "r": 0.8, "walk": true },
+    { "art": "stolen-goods", "at": [-95, 128], "facing": 0.3, "r": 0.8 },
+    { "art": "fence-rail", "at": [70, 104], "facing": 0.5, "r": 0.5 },
+    { "art": "fence-rail", "at": [76, 100], "facing": 0.5, "r": 0.5 },
+    { "art": "haystack", "at": [90, 108], "facing": 0.2, "r": 1.2 }
+  ],
+  "objects": [
+    { "id": "ring_grave_harlow", "name": "the Harlow grave", "kind": "container", "item": "the Harlow family ring", "art": null, "fallback": "open-grave", "at": [-31, 54] },
+    { "id": "ring_grave_fenwick", "name": "the Fenwick grave", "kind": "container", "item": "the Fenwick family ring", "art": null, "fallback": "open-grave", "at": [-80, 62] },
+    { "id": "ring_grave_marlowe", "name": "the Marlowe grave", "kind": "container", "item": "the Marlowe family ring", "art": null, "fallback": "open-grave", "at": [6, -82] },
+    { "id": "robbed_grave", "name": "Bram Carrow's grave", "kind": "use", "art": null, "fallback": "open-grave", "at": [4, 64] },
+    { "id": "sexton_journal", "name": "the sexton's journal", "kind": "container", "item": "the sexton's journal", "art": "loot-sack", "at": [-12, -67] },
+    { "id": "stolen_locket", "name": "a robber's sack", "kind": "container", "item": "the widow's locket", "art": "loot-sack", "at": [-96, 129] },
+    { "id": "collapsed_grave", "name": "the collapsed grave", "kind": "use", "art": null, "fallback": "collapsed-grave", "at": [-112, 47] }
+  ],
+  "shrines": [
+    { "id": "ashfield_shrine", "name": "Ashfield Shrine", "art": "shrine-respawn", "at": [106, 34], "facing": 0.6, "services": ["respawn", "travel", "respec"], "region": "ashfield" }
+  ],
+  "chests": [
+    { "id": "chapel_coffer", "name": "Chapel Coffer", "art": "chest-rare", "at": [-15, -71], "table": "chest_camp", "facing": 0 },
+    { "id": "hill_reliquary", "name": "Hill Reliquary", "art": "chest-epic", "at": [-90, -58], "table": "chest_camp", "facing": 0.8 },
+    { "id": "robbers_cache", "name": "Robbers' Cache", "art": "chest-rare", "at": [-106, 128], "table": "chest_camp", "facing": 0.5 }
+  ],
+  "camps": [
+    { "id": "chapel_yard", "name": "The Chapel Yard Cult", "region": "ashfield", "at": [-15, -62], "levels": [3, 5], "clear": 8 },
+    { "id": "paupers_dead", "name": "The Paupers' Field Dead", "region": "ashfield", "at": [-100, 25], "levels": [3, 5], "clear": 4 },
+    { "id": "families_dead", "name": "The Old Families' Dead", "region": "ashfield", "at": [-12, 45], "levels": [4, 6], "clear": 4 },
+    { "id": "mausoleum_hill", "name": "Mausoleum Hill", "region": "ashfield", "at": [-98, -52], "levels": [6, 8], "clear": 5 },
+    { "id": "robbers_camp", "name": "The Grave Robbers' Camp", "region": "ashfield", "at": [-100, 122], "levels": [4, 5], "clear": 14 },
+    { "id": "ghoul_pasture", "name": "Ghouls at the Fold", "region": "ashfield", "at": [58, 122], "levels": [3, 4], "clear": 10 }
+  ],
+  "roam": [
+    { "id": "ash_walkers", "name": "the walking dead of the Old Graveyard", "at": [-60, -10], "radius": 80, "levels": [4, 6], "packs": 6, "notice": 14, "region": "ashfield", "inside": "graveyard",
+      "roster": [{ "id": "skeleton_warrior", "weight": 3, "pack": [1, 1] }, { "id": "zombie", "weight": 3, "pack": [1, 2] }, { "id": "hollowborn", "weight": 1, "pack": [1, 1] }] },
+    { "id": "ash_outer_ghouls", "name": "ghouls in the south fields", "at": [0, 130], "radius": 45, "levels": [3, 5], "packs": 3, "notice": 14, "region": "ashfield",
+      "roster": [{ "id": "barrow_ghoul", "weight": 2, "pack": [1, 1] }, { "id": "barn_rat", "weight": 1, "pack": [2, 3] }] },
+    { "id": "ash_north_wood", "name": "the dead in the North Dead Wood", "at": [105, -115], "radius": 45, "levels": [4, 5], "packs": 3, "notice": 14, "region": "ashfield",
+      "roster": [{ "id": "zombie", "weight": 2, "pack": [1, 2] }, { "id": "barrow_ghoul", "weight": 1, "pack": [1, 1] }] },
+    { "id": "ash_rats", "name": "grave rats", "kind": "wildlife", "at": [-100, 40], "radius": 32, "levels": [3, 4], "packs": 3, "notice": 9, "region": "ashfield", "inside": "graveyard",
+      "roster": [{ "id": "barn_rat", "weight": 1, "pack": [1, 3] }] },
+    { "id": "ash_bats", "name": "bats on Mausoleum Hill", "kind": "wildlife", "at": [-105, -62], "radius": 28, "levels": [6, 7], "packs": 2, "notice": 12, "region": "ashfield", "inside": "graveyard",
+      "roster": [{ "id": "cave_bat", "weight": 1, "pack": [1, 2] }] },
+    { "id": "ash_sheep", "name": "the fold's sheep", "kind": "wildlife", "at": [86, 92], "radius": 18, "levels": [3, 3], "packs": 3, "notice": 6, "region": "ashfield",
+      "roster": [{ "id": "sheep", "weight": 1, "pack": [2, 4] }] }
+  ]
+}

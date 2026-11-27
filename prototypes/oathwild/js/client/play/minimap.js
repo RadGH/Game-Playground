@@ -1,7 +1,9 @@
 // The minimap: the ground painted once from the terrain's biome grid (the same data as the world), then each frame a
 // 90 m circle around you, north up, with roads, your facing, the party, nearby enemies, people, shrines and quest
 // objectives (lessons rule 67: every objective shows where it is — on screen, off screen and on a map: off the
-// minimap's edge an objective sits on the rim pointing the way).
+// minimap's edge an objective sits on the rim pointing the way). The marked quest's next spot (play/quest-guide.js —
+// the goal, or the travel point / shrine toward another region's goal) is a gold diamond, or a gold arrow on the rim;
+// the other tracked quests' goals are pale rings / rim dots; travel points out of the region are small gates.
 import { BIOMES } from '../../world/terrain.js';
 
 const PAL = { meadow: '#7fae55', wildgrass: '#6a9a4c', forest: '#4a7638', field: '#cdb06a', village: '#b39b78', road: '#d8bd8c', trail: '#c2a77a', boardwalk: '#9a7650', water: '#4f93b8', shore: '#c9bb90', marsh: '#5f7f60', rock: '#8e877a' };
@@ -22,7 +24,8 @@ export function createMinimap(app, canvas) {
   const shrines = app.W.data.placements.shrines;
   return {
     base,
-    draw(S) {
+    /** `G` = { guide, others, points } from the HUD (quest-guide.js). */
+    draw(S, G = {}) {
       const me = S.drawnMe; if (!me) return;
       const W = canvas.width, H = canvas.height, k = (W / 2) / R;
       ctx.save();
@@ -41,11 +44,35 @@ export function createMinimap(app, canvas) {
         if (u.info.k === 'monster') dot(u.x, u.z, u.info.rank === 'boss' ? 4 : 2.4, '#e2553f');
         else if (u.info.k === 'player') dot(u.x, u.z, 3.2, '#7fd0ff', '#fff');
       }
-      // quest objectives: inside → a ring, outside → on the rim
-      for (const m of S.questMarkers || []) {
+      // travel points out of this region: a small arch
+      for (const p of G.points || []) {
+        if (Math.hypot(p.at[0] - me.x, p.at[1] - me.z) > R - 4) continue;
+        const [px, py] = at(p.at[0], p.at[1]);
+        ctx.strokeStyle = '#2a1d0c'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(px, py + 2, 5, Math.PI, 0); ctx.lineTo(px + 5, py + 5); ctx.moveTo(px - 5, py + 2); ctx.lineTo(px - 5, py + 5); ctx.stroke();
+        ctx.strokeStyle = '#f3e2b8'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px, py + 2, 5, Math.PI, 0); ctx.lineTo(px + 5, py + 5); ctx.moveTo(px - 5, py + 2); ctx.lineTo(px - 5, py + 5); ctx.stroke();
+      }
+      // the other tracked goals: inside → a pale ring, outside → a dot on the rim
+      for (const m of G.others || []) {
         const dx = m.at[0] - me.x, dz = m.at[1] - me.z, d = Math.hypot(dx, dz);
-        if (d <= R - 6) { const [px, py] = at(m.at[0], m.at[1]); ctx.strokeStyle = m.main ? '#ffcf4a' : '#f4e2a0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px, py, Math.max(4, (m.radius || 6) * k), 0, Math.PI * 2); ctx.stroke(); }
-        else { const px = W / 2 + dx / d * (W / 2 - 8), py = H / 2 + dz / d * (H / 2 - 8); ctx.fillStyle = m.main ? '#ffcf4a' : '#f4e2a0'; ctx.beginPath(); ctx.arc(px, py, 4.5, 0, Math.PI * 2); ctx.fill(); }
+        ctx.strokeStyle = ctx.fillStyle = '#f4e2a0';
+        if (d <= R - 6) { const [px, py] = at(m.at[0], m.at[1]); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px, py, Math.max(4, (m.radius || 6) * k), 0, Math.PI * 2); ctx.stroke(); }
+        else { ctx.beginPath(); ctx.arc(W / 2 + dx / d * (W / 2 - 8), H / 2 + dz / d * (H / 2 - 8), 3.5, 0, Math.PI * 2); ctx.fill(); }
+      }
+      // the marked quest: a gold diamond on its spot (its area as a faint ring), or a gold arrow on the rim
+      const g = G.guide;
+      if (g?.at) {
+        const dx = g.at[0] - me.x, dz = g.at[1] - me.z, d = Math.hypot(dx, dz);
+        if (d <= R - 8) {
+          const [px, py] = at(g.at[0], g.at[1]);
+          if ((g.radius || 0) * k > 8) { ctx.strokeStyle = 'rgba(255,207,74,.55)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(px, py, g.radius * k, 0, Math.PI * 2); ctx.stroke(); }
+          ctx.beginPath(); ctx.moveTo(px, py - 7); ctx.lineTo(px + 6, py); ctx.lineTo(px, py + 7); ctx.lineTo(px - 6, py); ctx.closePath();
+          ctx.fillStyle = '#ffcf4a'; ctx.fill(); ctx.strokeStyle = '#3a2a10'; ctx.lineWidth = 1.5; ctx.stroke();
+        } else {
+          const a = Math.atan2(dz, dx), rr = W / 2 - 9;
+          ctx.save(); ctx.translate(W / 2 + Math.cos(a) * rr, H / 2 + Math.sin(a) * rr); ctx.rotate(a);
+          ctx.beginPath(); ctx.moveTo(7, 0); ctx.lineTo(-5, -6); ctx.lineTo(-2, 0); ctx.lineTo(-5, 6); ctx.closePath();
+          ctx.fillStyle = '#ffcf4a'; ctx.fill(); ctx.strokeStyle = '#3a2a10'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore();
+        }
       }
       // me: an arrow along where I face
       ctx.translate(W / 2, H / 2); ctx.rotate(-(S.meFacing || 0) + Math.PI);

@@ -1,0 +1,56 @@
+{
+  "_doc": "Ashfield's ground (data/regions/ashfield.json), in data/map.json's format and read by the same js/world/terrain.js. About 360 x 360 m of play inside mountains: Ashfield Crossing (the hamlet at the end of the east road) on the east, the walled Old Graveyard in the middle-west on rolling ground with Mausoleum Hill in its north-west corner, outer fields with a sheep fold to the south-east, the grave robbers' camp south of the cemetery's broken wall, dead woods in the corners. Paths inside the cemetery are trails (the graves keep off them). x runs east, z runs SOUTH.",
+  "version": 1,
+  "seed": 7311,
+  "bounds": { "minX": -220, "maxX": 220, "minZ": -220, "maxZ": 220, "margin": 40 },
+  "grid": { "cell": 2, "biomeCell": 4, "sampleStep": 2 },
+  "spawn": { "at": [158, 27], "shrine": "ashfield_shrine" },
+  "limits": { "maxSlope": 38, "bankSlope": 50, "bankBand": 0.8, "wadeDepth": 0.7, "roadMaxGrade": 0.14 },
+  "regions": { "ashfield": { "name": "Ashfield", "levels": [3, 8], "base": 10, "amp": 2.6, "ground": "wildgrass", "forest": 0.1 } },
+  "border": { "_doc": "One region: both sides are Ashfield.", "west": "ashfield", "east": "ashfield", "points": [[0, -220], [0, 220]], "blend": 40 },
+  "frame": { "width": 55, "height": 30 },
+  "ridges": [],
+  "hills": [
+    { "id": "mausoleum_hill", "name": "Mausoleum Hill", "at": [-108, -60], "radius": 52, "height": 8 },
+    { "id": "north_rise", "name": "the North Rise", "at": [110, -120], "radius": 70, "height": 9 },
+    { "id": "fold_rise", "name": "the Fold Rise", "at": [40, 150], "radius": 50, "height": 4 }
+  ],
+  "rivers": [],
+  "marshes": [],
+  "fields": [],
+  "forests": [
+    { "id": "north_dead_wood", "name": "the North Dead Wood", "at": [110, -120], "radius": 70, "density": 0.55 },
+    { "id": "west_dead_wood", "name": "the West Dead Wood", "at": [-175, 130], "radius": 60, "density": 0.5 },
+    { "id": "east_dead_wood", "name": "the East Dead Wood", "at": [175, 140], "radius": 50, "density": 0.45 },
+    { "id": "corner_wood", "name": "the Corner Wood", "at": [-170, -160], "radius": 55, "density": 0.5 }
+  ],
+  "roads": [
+    { "id": "ashfield_road", "name": "the Ashfield Road", "class": "road", "town": "ashfield_crossing", "width": 6, "points": [[178, 31], [160, 28], [140, 24], [116, 22], [95, 18], [72, 8], [50, -4], [26, -10]] },
+    { "id": "chapel_lane", "name": "Chapel Lane", "class": "street", "town": "ashfield_crossing", "width": 4, "points": [[112, -12], [114, 4], [116, 22], [119, 44], [124, 60]] },
+    { "id": "fold_track", "name": "the Fold Track", "class": "trail", "width": 3, "points": [[124, 60], [110, 80], [86, 98], [64, 108]] },
+    { "id": "main_walk", "name": "the Main Walk", "class": "trail", "width": 3.5, "points": [[30, -10], [-20, -10], [-60, -10], [-100, -10], [-146, -10]] },
+    { "id": "cross_walk", "name": "the Cross Walk", "class": "trail", "width": 3, "points": [[-60, -97], [-60, -50], [-60, -10], [-60, 40], [-60, 77]] },
+    { "id": "chapel_path", "name": "the Chapel Path", "class": "trail", "width": 3, "points": [[-30, -10], [-22, -28], [-16, -44], [-15, -50]] },
+    { "id": "hill_path", "name": "the Hill Path", "class": "trail", "width": 3, "points": [[-60, -34], [-80, -44], [-96, -56], [-108, -64], [-113, -67]] },
+    { "id": "paupers_path", "name": "the Paupers' Path", "class": "trail", "width": 3, "points": [[-60, 30], [-85, 36], [-104, 42], [-107, 60], [-106, 79], [-104, 95], [-100, 110]] },
+    { "id": "families_walk", "name": "the Families' Walk", "class": "trail", "width": 2.5, "points": [[-60, 35], [-30, 33], [0, 35], [24, 36]] }
+  ],
+  "crossings": [],
+  "places": {
+    "_doc": "ashfield_crossing = the hamlet (a small town planned by js/world/town.js from ashfield-towns.json); the ruin, the crypt gate and the camps get level ground.",
+    "ashfield_crossing": { "name": "Ashfield Crossing", "kind": "town", "region": "ashfield", "at": [116, 22], "radius": 36, "flat": 44, "relief": 0.4 },
+    "old_graveyard": { "name": "the Old Graveyard", "kind": "landmark", "region": "ashfield", "at": [-60, -10], "radius": 95 },
+    "ruined_chapel": { "name": "the Ruined Chapel", "kind": "landmark", "region": "ashfield", "at": [-15, -62], "radius": 14, "flat": 16 },
+    "crypt_gate": { "name": "the Crypt Gate", "kind": "landmark", "region": "ashfield", "at": [-116, -70], "radius": 8, "flat": 11 },
+    "collapsed_grave": { "name": "the Collapsed Grave", "kind": "landmark", "region": "ashfield", "at": [-112, 47], "radius": 4, "flat": 6 },
+    "robbers_camp": { "name": "the Grave Robbers' Camp", "kind": "camp", "region": "ashfield", "at": [-100, 122], "radius": 20, "flat": 20 },
+    "ghoul_pasture": { "name": "the Sheep Fold", "kind": "landmark", "region": "ashfield", "at": [62, 114], "radius": 28 },
+    "east_road_gate": { "name": "the East Road", "kind": "pass", "region": "ashfield", "at": [170, 31], "radius": 6 }
+  },
+  "areas": [
+    { "id": "ash_hamlet", "name": "Ashfield Crossing", "at": [116, 22], "radius": 50, "levels": [3, 3] },
+    { "id": "ash_hill", "name": "Mausoleum Hill", "at": [-105, -60], "radius": 45, "levels": [6, 8] },
+    { "id": "ash_graveyard", "name": "the Old Graveyard", "at": [-60, -10], "radius": 100, "levels": [4, 6] },
+    { "id": "ash_fields", "name": "the Ashfield", "at": [0, 0], "radius": 400, "levels": [3, 5] }
+  ]
+}

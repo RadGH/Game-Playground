@@ -53,12 +53,20 @@ export function addXp(rules, char, n) {
 
 /** XP one player gets for a kill. */
 export function killXp(rules, { monsterXp, monsterLevel, playerLevel, helpers = 1 }) {
-  const g = L(rules).levelGap;
-  const gap = monsterLevel - playerLevel;
-  if (gap <= -g.greyBelow) return 0;
-  const k = Math.max(g.min, Math.min(g.max, 1 + gap * g.perLevel));
+  const k = levelGapFactor(rules, monsterLevel - playerLevel);
+  if (!k) return 0;
+  const boost = L(rules).lowLevelBoost?.byLevel || [];
+  const low = boost[Math.max(0, playerLevel - 1)] ?? 1;
   const share = Math.max(L(rules).groupShare.floor, 1 - L(rules).groupShare.minus * (helpers - 1));
-  return Math.max(1, Math.round(monsterXp * L(rules).killXpMult * k * share));
+  return Math.max(1, Math.round(monsterXp * L(rules).killXpMult * k * low * share));
+}
+
+/** x on kill XP for a monster `gap` levels above (+) or below (−) you: 0 at greyBelow or more below, +25% cap above. */
+export function levelGapFactor(rules, gap) {
+  const g = L(rules).levelGap;
+  if (gap <= -g.greyBelow) return 0;
+  if (gap < 0) return Math.max(0, 1 + gap * g.belowPerLevel);
+  return Math.min(g.max, 1 + gap * g.abovePerLevel);
 }
 
 // ---------------------------------------------------------------- creating a character

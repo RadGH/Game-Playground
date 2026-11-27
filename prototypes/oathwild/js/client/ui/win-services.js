@@ -216,7 +216,7 @@ function travelBody(app, here) {
   const home = app.me?.home;
   const rows = (app.W?.data.placements.shrines || []).map(s => {
     const found = known.includes(s.id);
-    const region = app.W.terrain.regionAt(s.at[0], s.at[1]) === 'thornmere_wilds' ? 'Thornmere Wilds' : 'Brightwater Vale';
+    const region = app.W.regionRow?.name || (app.W.terrain.regionAt(s.at[0], s.at[1]) === 'thornmere_wilds' ? 'Thornmere Wilds' : 'Brightwater Vale');
     return `<li class="ow-svc-shrine${found ? '' : ' ow-svc-unfound'}">
       <span class="ow-svc-shrine-ico">${glyph('shrine', 22)}</span>
       <span class="ow-svc-shrine-text"><b>${found ? esc(s.name) : 'Not found yet'}</b><small>${esc(region)}${s.id === home ? ' · you return here after a fall' : ''}${s.id === here ? ' · you are here' : ''}</small></span>
@@ -224,7 +224,13 @@ function travelBody(app, here) {
       ${found && s.id === here && s.id !== home ? `<button type="button" class="ow-btn ow-small" data-home="${esc(s.id)}">Rest here</button>` : ''}
     </li>`;
   }).join('');
-  return `<ul class="ow-svc-shrines">${rows}</ul>`;
+  // shrines found in the world's other regions (owner 2026-11-27: regions with waypoints): travel loads that region
+  const far = (app.ws?.far || []).map(s => `<li class="ow-svc-shrine">
+      <span class="ow-svc-shrine-ico">${glyph('shrine', 22)}</span>
+      <span class="ow-svc-shrine-text"><b>${esc(s.name)}</b><small>${esc(s.regionName)} · another region</small></span>
+      <button type="button" class="ow-btn ow-small ow-primary" data-go="${esc(s.id)}">Travel</button>
+    </li>`).join('');
+  return `<ul class="ow-svc-shrines">${rows}${far}</ul>`;
 }
 function wireTravel(app, body, w) {
   body.querySelectorAll('[data-go]').forEach(b => { b.onclick = () => { app.act('travel', { shrine: b.dataset.go }); w.close(); }; });

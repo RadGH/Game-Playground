@@ -17,6 +17,11 @@ function build({ title, text = '', body = '', buttons, onKey }) {
   root.innerHTML = `<div class="gdlg">${title ? `<h2 class="gdlg-title">${esc(title)}</h2>` : ''}${text ? `<p class="gdlg-text">${esc(text)}</p>` : ''}${body}
     <div class="gdlg-btns">${buttons.map((b, i) => `<button type="button" class="gdlg-btn ${b.cls || ''}" data-i="${i}">${esc(b.label)}</button>`).join('')}</div></div>`;
   document.body.append(root);
+  // the click that belongs to the tap which OPENED a dialog must not answer it: on a phone the finger lifts, the dialog
+  // appears, and the tap's own click then lands on the backdrop (= Cancel) or a button under the finger. Nobody can
+  // mean a click in the first 350 ms (Oathwild travel window, 2026-11-27).
+  const openedAt = performance.now();
+  root.addEventListener('click', e => { if (performance.now() - openedAt < 350) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
   const prev = document.activeElement;
   const focusables = () => [...root.querySelectorAll('button:not([disabled]), input, textarea, select')];
   root.addEventListener('keydown', e => {

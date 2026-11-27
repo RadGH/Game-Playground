@@ -29,6 +29,7 @@ import { createEditor, mapText } from './editor.js';
 import { writeFileSync, appendFileSync, mkdirSync, renameSync } from 'node:fs';
 import { createGround } from '../js/game/ground.js';
 import { bootArena } from '../js/world/arena-place.js';
+import { bootAllRegions } from '../js/world/regions/boot-all.js';
 import { MAX_FRAME, STEP_HZ } from '../js/net/protocol.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url)), GAME = resolve(HERE, '..'), PLAY = resolve(GAME, '..', '..');
@@ -54,6 +55,9 @@ const ground = createGround(W.terrain, W.data.placements, scattered, W.town);
 // the arena (brainstorm 2026-11-27 §2a): its own small place, booted the same way (data/arena/*, js/world/arena-place.js)
 const arenaW = await bootArena({ regions: rules.data.regions });
 const arenaPlace = { W: arenaW, ground: createGround(arenaW.terrain, arenaW.data.placements, worldScene(arenaW), arenaW.town) };
+// the world's other regions (owner 2026-11-27: regions with travel points): Ashfield, the Catacombs — booted once, one
+// quest book for them all (js/world/regions/boot-all.js)
+const { index: regionIndex, places } = await bootAllRegions({ regions: rules.data.regions, home: { W, ground } });
 if (scattered.report.orphans.length) log('editor.orphans', { n: scattered.report.orphans.length, first: scattered.report.orphans.slice(0, 5) });
 log('server.boot', { ms: Date.now() - t0, saves: savesDir });
 
@@ -81,7 +85,7 @@ if (editorOn) {
     broadcastGame: m => hub.broadcast(m),
   });
 }
-const hub = createHub({ rules, W, ground, arenaPlace, store, build, log, randomToken: () => randomBytes(18).toString('base64url'), redeem: createRedeemer({ game: 'oathwild', log }) });
+const hub = createHub({ rules, W, ground, arenaPlace, places, regionIndex, store, build, log, randomToken: () => randomBytes(18).toString('base64url'), redeem: createRedeemer({ game: 'oathwild', log }) });
 const started = Date.now(), cpu0 = process.cpuUsage();
 
 const ipOf = req => {

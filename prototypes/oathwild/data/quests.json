@@ -13,7 +13,7 @@
         { "id": "look_bell", "kind": "use", "objects": ["larkford_bell"], "item": "the cracked bell", "text": "Look closely at the cracked shrine bell." }
       ],
       "done": ["Ash in the crack, you say? Grey ash, from a flame that should never go out.", "Then the Old Hill Shrine has gone dark. Someone put it out. And that, friend, is a very bad sign."],
-      "rewards": { "xp": 75, "gold": 8 }
+      "rewards": { "xp": 20, "gold": 8 }
     },
     "tracks_by_the_river": {
       "title": "Tracks by the River", "kind": "main", "region": "brightwater_vale", "level": 2,
@@ -26,10 +26,10 @@
         { "id": "satchel", "kind": "collect", "objects": ["torn_satchel"], "item": "a torn satchel", "text": "Find what the night visitors dropped." }
       ],
       "done": ["A wooden token with a hollow mouth carved in it. The Hollow Choir.", "They are a story mothers tell. A choir that sings the lights out. Apparently they are also real."],
-      "rewards": { "xp": 105, "gold": 12 }
+      "rewards": { "xp": 30, "gold": 12 }
     },
     "the_ford_road": {
-      "title": "The Ford Road", "kind": "main", "region": "brightwater_vale", "level": 4,
+      "title": "The Ford Road", "kind": "main", "region": "brightwater_vale", "level": 3,
       "giver": "captain_edda", "turnIn": "captain_edda", "requires": { "quests": ["tracks_by_the_river"] },
       "summary": "The bandits at the ford sell to anyone. Their chief keeps a ledger.",
       "offer": ["The bandits at the ford have been selling to the Choir. Candles, rope, lamp oil.", "Their chief writes everything down. He cannot help himself. Bring me that ledger, and bring the chief down."],
@@ -39,10 +39,10 @@
         { "id": "ledger", "kind": "collect", "objects": ["bandit_ledger"], "item": "the chief's ledger", "text": "Take the chief's ledger from his tent." }
       ],
       "done": ["Forty candles, two barrels of oil... and a name. 'The Speaker, at the Old Hill.'", "So that is where they sing. Thank you. The vale owes you."],
-      "rewards": { "xp": 165, "gold": 20, "pick": [{ "base": "sword", "label": "a fine sword" }, { "base": "staff", "label": "a fine staff" }, { "base": "shortbow", "label": "a fine bow" }], "worldFlags": ["bandits_broken"] }
+      "rewards": { "xp": 50, "gold": 20, "pick": [{ "base": "sword", "label": "a fine sword" }, { "base": "staff", "label": "a fine staff" }, { "base": "shortbow", "label": "a fine bow" }], "worldFlags": ["bandits_broken"] }
     },
     "the_hollow_choir": {
-      "title": "The Hollow Choir", "kind": "main", "region": "brightwater_vale", "level": 5,
+      "title": "The Hollow Choir", "kind": "main", "region": "brightwater_vale", "level": 3,
       "giver": "captain_edda", "turnIn": "elder_maren", "requires": { "quests": ["the_ford_road"] },
       "summary": "The Choir's Speaker holds the Old Hill Shrine. Break the Choir and light the flame again.",
       "offer": ["The Old Hill Shrine. Their Speaker is there, singing the flame out.", "Climb the Old Hill Path, break the Choir, and light the shrine again. Then go to the elder. She will want to hear it from you."],
@@ -53,10 +53,10 @@
         { "id": "relight", "kind": "use", "objects": ["hill_shrine_flame"], "item": "the shrine flame", "text": "Light the Old Hill Shrine's flame again.", "worldFlags": ["choir_broken"] }
       ],
       "done": ["The flame is lit? I felt it, I think. Like a window opening in winter.", "But the Speaker said something before the end, didn't they? 'The King under the Thornmere is waking.' The ranger-captain at Thornwatch must hear of this."],
-      "rewards": { "xp": 195, "gold": 30, "pick": [{ "base": "medium_chest", "label": "a fine mail shirt" }, { "base": "light_chest", "label": "a fine leather jerkin" }, { "base": "cloth_chest", "label": "fine robes" }] }
+      "rewards": { "xp": 60, "gold": 30, "pick": [{ "base": "medium_chest", "label": "a fine mail shirt" }, { "base": "light_chest", "label": "a fine leather jerkin" }, { "base": "cloth_chest", "label": "fine robes" }] }
     },
     "through_the_gate": {
-      "title": "Through the Thornmere Gate", "kind": "main", "region": "thornmere_wilds", "level": 5,
+      "title": "Through the Thornmere Gate", "kind": "main", "region": "thornmere_wilds", "level": 3,
       "giver": "elder_maren", "turnIn": "ranger_captain_fen", "requires": { "quests": ["the_hollow_choir"] },
       "summary": "Carry the Speaker's warning east, through the gap in the Thornback Ridge, to Thornwatch.",
       "offer": ["Follow the Lark Road east, through the Thornmere Gate. Ranger-Captain Fen Asher keeps the lodge at Thornwatch.", "The Wilds are older than the vale, and less polite. Touch the gate shrine on the way, so it knows you."],
@@ -67,10 +67,10 @@
           "say": ["A king under the Thornmere? There is only one, and he is supposed to be very, very dead."] }
       ],
       "done": ["The Barrow King swore the first oath to guard the vale, long ago, and broke it. The druids bound him for it.", "If he is waking, the druids will know why. Welcome to Thornwatch. Mind the mud."],
-      "rewards": { "xp": 195, "gold": 15 }
+      "rewards": { "xp": 60, "gold": 15 }
     },
     "words_of_the_grove": {
-      "title": "Words of the Grove", "kind": "main", "region": "thornmere_wilds", "level": 6,
+      "title": "Words of the Grove", "kind": "main", "region": "thornmere_wilds", "level": 3,
       "giver": "ranger_captain_fen", "turnIn": "archdruid_teodor", "requires": { "quests": ["through_the_gate"] },
       "summary": "Ask the druids how the Barrow King was bound, and how to bind him again.",
       "offer": ["Take the Grove Trail north to the Druid Circle. Archdruid Teodor is older than my lodge and twice as stubborn.", "Ask him how the King was bound. And be polite to the trees."],
@@ -81,10 +81,10 @@
         { "id": "tablet", "kind": "collect", "objects": ["oath_tablet"], "item": "the heartwood tablet", "text": "Take the heartwood tablet from the circle's altar." }
       ],
       "done": ["Three seal-stones ring the barrow. Lit, they hold him. Someone has let them go dark.", "Light them again, and he will be weaker when you face him. And you will face him, I think."],
-      "rewards": { "xp": 225, "gold": 20 }
+      "rewards": { "xp": 70, "gold": 20 }
     },
     "seal_stones": {
-      "title": "The Seal-Stones", "kind": "main", "region": "thornmere_wilds", "level": 8,
+      "title": "The Seal-Stones", "kind": "main", "region": "thornmere_wilds", "level": 4,
       "giver": "archdruid_teodor", "turnIn": "archdruid_teodor", "requires": { "quests": ["words_of_the_grove"] },
       "summary": "Light the three seal-stones around the Undead Barrow and thin out its guards.",
       "offer": ["Follow the Barrow Road east over the Old Stone Bridge. The three seal-stones stand on the downs round the barrow.", "The dead guard them. Put some of them back to sleep, and light the stones."],
@@ -94,10 +94,10 @@
         { "id": "seals", "kind": "use", "objects": ["barrow_seal_1", "barrow_seal_2", "barrow_seal_3"], "item": "seal-stones", "text": "Light the three seal-stones around the barrow.", "worldFlags": ["seals_lit"] }
       ],
       "done": ["I felt them catch, one, two, three. The King will feel it too. He is weaker now, and angry.", "Rest, mend your gear, and gather your friends. Then go down into the dark."],
-      "rewards": { "xp": 285, "gold": 30, "pick": [{ "base": "ring", "label": "a fine ring" }, { "base": "necklace", "label": "a fine necklace" }] }
+      "rewards": { "xp": 85, "gold": 30, "pick": [{ "base": "ring", "label": "a fine ring" }, { "base": "necklace", "label": "a fine necklace" }] }
     },
     "the_barrow_king": {
-      "title": "The Barrow King", "kind": "main", "region": "thornmere_wilds", "level": 9,
+      "title": "The Barrow King", "kind": "main", "region": "thornmere_wilds", "level": 5,
       "giver": "archdruid_teodor", "turnIn": "ranger_captain_fen", "requires": { "quests": ["seal_stones"] },
       "summary": "Defeat the oathbreaker in his barrow and bring his crown to Thornwatch.",
       "offer": ["He sits on his stone throne with his crown on his knees, waiting for the seals to fail.", "End him. Bring the crown to Fen Asher; it must not stay in the dark."],
@@ -106,8 +106,8 @@
         { "id": "king", "kind": "kill", "targets": [{ "camp": "barrow", "monster": "barrow_king", "count": 1, "label": "The Barrow King" }], "text": "Defeat the Barrow King." },
         { "id": "crown", "kind": "collect", "objects": ["barrow_crown"], "item": "the oathbreaker's crown", "text": "Take the Barrow King's crown from his throne." }
       ],
-      "done": ["So that is the crown that started it all. Look, here, under the rim: a star with four points, and a word. 'Frostreach.'", "He did not swear alone. There were four oaths, sworn in four places. The others are north, past the snows. That is a road for another day."],
-      "rewards": { "xp": 315, "gold": 50, "pick": [{ "base": "longsword", "label": "a rare longsword", "rarity": "rare" }, { "base": "wand", "label": "a rare wand", "rarity": "rare" }, { "base": "bow", "label": "a rare bow", "rarity": "rare" }, { "base": "kite_shield", "label": "a rare shield", "rarity": "rare" }], "worldFlags": ["hook_frostreach"] }
+      "done": ["So that is the crown that started it all. Look, here, under the rim: a star with four points, and a word. 'Frostreach.'", "He did not swear alone. There were four oaths, sworn in four places. The others are north, past the snows. That is a road for another day.", "And there is a letter here from the priest at Ashfield Crossing, east along the Lark Road: their old cemetery has not been quiet for a month. Whatever woke the King has woken more than one grave."],
+      "rewards": { "xp": 95, "gold": 50, "pick": [{ "base": "longsword", "label": "a rare longsword", "rarity": "rare" }, { "base": "wand", "label": "a rare wand", "rarity": "rare" }, { "base": "bow", "label": "a rare bow", "rarity": "rare" }, { "base": "kite_shield", "label": "a rare shield", "rarity": "rare" }], "worldFlags": ["hook_frostreach"] }
     },
 
     "wolves_at_the_fold": {
@@ -120,7 +120,7 @@
         { "id": "wolves", "kind": "kill", "targets": [{ "monster": "vale_wolf", "count": 6, "label": "Vale Wolves", "near": "hartwood" }], "text": "Hunt Vale Wolves at the edge of the Hartwood." }
       ],
       "done": ["Six! My lambs thank you, and so do I. Here, it is not much, but it is honest."],
-      "rewards": { "xp": 52, "gold": 6, "items": [{ "base": "light_boots", "label": "sturdy boots", "rarity": "normal" }], "worldFlags": ["fold_safe"] }
+      "rewards": { "xp": 15, "gold": 6, "items": [{ "base": "light_boots", "label": "sturdy boots", "rarity": "normal" }], "worldFlags": ["fold_safe"] }
     },
     "pip_in_the_hartwood": {
       "title": "A Boy in the Hartwood", "kind": "side", "region": "brightwater_vale", "level": 1, "minLevel": 1,
@@ -132,7 +132,7 @@
         { "id": "find", "kind": "escort", "npc": "pip_rowe", "to": "larkford", "radius": 40, "ask": "There is pie at home, lad.", "say": ["Pie? ...All right. But you go first. In case of wolves."], "text": "Find the farmer's boy at the Hartwood's edge and walk him home to Larkford." }
       ],
       "done": ["There you are! Oh, you muddy little - thank you. Thank you so much."],
-      "rewards": { "xp": 52, "gold": 5, "worldFlags": ["pip_home"] }
+      "rewards": { "xp": 15, "gold": 5, "worldFlags": ["pip_home"] }
     },
     "the_millers_sacks": {
       "title": "The Miller's Sacks", "kind": "side", "region": "brightwater_vale", "level": 2,
@@ -150,7 +150,7 @@
           ] }
       ],
       "done": ["Two sacks? One got 'eaten by scarecrows'? ...Never mind. Two is better than none."],
-      "rewards": { "xp": 74, "gold": 12, "byChoice": { "share": { "gold": 6, "items": [{ "base": "silver_amulet", "label": "The weaver's knitted charm", "rarity": "magic" }] }, "return": { "gold": 18 } } }
+      "rewards": { "xp": 20, "gold": 12, "byChoice": { "share": { "gold": 6, "items": [{ "base": "silver_amulet", "label": "The weaver's knitted charm", "rarity": "magic" }] }, "return": { "gold": 18 } } }
     },
     "the_runaway_mare": {
       "title": "The Runaway Mare", "kind": "side", "region": "brightwater_vale", "level": 2,
@@ -162,10 +162,10 @@
         { "id": "calm", "kind": "use", "objects": ["runaway_mare"], "item": "Chestnut", "text": "Calm Chestnut the mare near Watch Knoll." }
       ],
       "done": ["She came trotting in with her tail up like nothing happened. Horses!", "From now on, you get the friend price on any horse in my stable."],
-      "rewards": { "xp": 74, "gold": 10, "worldFlags": ["stable_friend"], "flagsText": ["Horses from the stable master cost less"] }
+      "rewards": { "xp": 20, "gold": 10, "worldFlags": ["stable_friend"], "flagsText": ["Horses from the stable master cost less"] }
     },
     "wanted_rook_varrow": {
-      "title": "Wanted: Rook Varrow", "kind": "side", "region": "brightwater_vale", "level": 3,
+      "title": "Wanted: Rook Varrow", "kind": "side", "region": "brightwater_vale", "level": 2,
       "giver": "captain_edda", "turnIn": "captain_edda",
       "summary": "A poacher and pickpocket with a price on his head hides north-east of the village.",
       "offer": ["See the wanted board? Rook Varrow. Poacher, pickpocket, and very rude.", "He hides past the Poacher's Path, north-east of the bridge. Bring him in, or at least stop him."],
@@ -174,10 +174,10 @@
         { "id": "rook", "kind": "kill", "targets": [{ "camp": "rook_hideout", "monster": "rook_varrow", "count": 1, "label": "Rook Varrow" }], "text": "Stop Rook Varrow at his hideout." }
       ],
       "done": ["That is one name off the board. The bounty is yours, fair and square."],
-      "rewards": { "xp": 96, "gold": 25 }
+      "rewards": { "xp": 30, "gold": 25 }
     },
     "lights_on_the_water": {
-      "title": "Lights on the Water", "kind": "side", "region": "brightwater_vale", "level": 3,
+      "title": "Lights on the Water", "kind": "side", "region": "brightwater_vale", "level": 2,
       "giver": "fisher_wynn", "turnIn": "fisher_wynn", "requires": { "quests": ["tracks_by_the_river"] },
       "summary": "Not every light on the river belongs to the Choir. Someone else is hiding something at Lantern Reach.",
       "offer": ["The Choir's lights stopped, but another one still bobs on the water some nights. A small one. Sneaky.", "There is a hollow under the old willow at Lantern Reach. I am too old to crawl in there. Would you?"],
@@ -192,10 +192,10 @@
           ] }
       ],
       "done": ["The innkeeper? Ha! So that is the little light. Thank you for settling my nerves."],
-      "rewards": { "xp": 96, "gold": 14, "byChoice": { "report": { "gold": 28 }, "keep": { "gold": 8, "items": [{ "base": "gold_signet", "label": "The innkeeper's spare signet ring", "rarity": "magic" }] } } }
+      "rewards": { "xp": 30, "gold": 14, "byChoice": { "report": { "gold": 28 }, "keep": { "gold": 8, "items": [{ "base": "gold_signet", "label": "The innkeeper's spare signet ring", "rarity": "magic" }] } } }
     },
     "goblin_trouble": {
-      "title": "Goblin Trouble", "kind": "side", "region": "brightwater_vale", "level": 4,
+      "title": "Goblin Trouble", "kind": "side", "region": "brightwater_vale", "level": 3,
       "giver": "captain_edda", "turnIn": "captain_edda",
       "summary": "The goblins of the Gobbet Hills are raiding the north fields.",
       "offer": ["Goblins in the Gobbet Hills, north-west. They raid the north fields for turnips. Turnips!", "Their warchief has grown bold. Clear the warren and bring the warchief down."],
@@ -204,11 +204,11 @@
         { "id": "warren", "kind": "kill", "targets": [{ "camp": "goblin_warren", "monster": "goblin_warrior", "count": 3, "label": "Goblin Warriors" }, { "camp": "goblin_warren", "monster": "goblin_warchief", "count": 1, "label": "Goblin Warchief" }], "text": "Clear the Goblin Warren and defeat its warchief." }
       ],
       "done": ["The north fields can keep their turnips. Well done."],
-      "rewards": { "xp": 118, "gold": 22, "items": [{ "base": "buckler", "label": "a goblin-made buckler (it is better than it looks)", "rarity": "magic" }] }
+      "rewards": { "xp": 35, "gold": 22, "items": [{ "base": "buckler", "label": "a goblin-made buckler (it is better than it looks)", "rarity": "magic" }] }
     },
 
     "the_grove_trial": {
-      "title": "The Grove Trial", "kind": "side", "region": "thornmere_wilds", "level": 6,
+      "title": "The Grove Trial", "kind": "side", "region": "thornmere_wilds", "level": 3,
       "giver": "archdruid_teodor", "turnIn": "archdruid_teodor", "requires": { "quests": ["through_the_gate"] },
       "summary": "A blight has taken a grove south of the circle. Clear it and wake the spirit pools, and the grove will trust you.",
       "offer": ["A grove south of here has gone sour. Thornlings and root-callers, twisted by something.", "Clear the blight and wake the two spirit pools beside it. Do it, and the grove will trust you. The grove warden teaches only those the grove trusts."],
@@ -218,10 +218,10 @@
         { "id": "pools", "kind": "use", "objects": ["spirit_pool_1", "spirit_pool_2"], "item": "spirit pools", "text": "Wake the two spirit pools by the grove." }
       ],
       "done": ["The grove breathes again. The grove warden is waiting for you by the stones. She will teach Druids to call the wolf and the bear."],
-      "rewards": { "xp": 162, "gold": 18, "worldFlags": ["grove_trial"], "flagsText": ["The grove warden comes to the Druid Circle"] }
+      "rewards": { "xp": 50, "gold": 18, "worldFlags": ["grove_trial"], "flagsText": ["The grove warden comes to the Druid Circle"] }
     },
     "the_toll_bridge": {
-      "title": "The Toll Bridge", "kind": "side", "region": "thornmere_wilds", "level": 7,
+      "title": "The Toll Bridge", "kind": "side", "region": "thornmere_wilds", "level": 4,
       "giver": "ranger_captain_fen", "turnIn": "ranger_captain_fen", "requires": { "quests": ["through_the_gate"] },
       "summary": "A troll has moved under the bridge on the Lark Road and charges a toll. In teeth.",
       "offer": ["A troll took the bridge over the Mirewater. It asks a toll. If you cannot pay, it takes teeth.", "Nobody gets to the mire or the east downs while it sits there. Move it. Permanently."],
@@ -230,10 +230,10 @@
         { "id": "troll", "kind": "kill", "targets": [{ "camp": "troll_bridge", "monster": "bridge_troll", "count": 1, "label": "Bridge Troll" }], "text": "Defeat the Bridge Troll." }
       ],
       "done": ["The bridge is open! I owe you a drink, and the carters owe you a song."],
-      "rewards": { "xp": 184, "gold": 30, "items": [{ "base": "medium_helm", "label": "a troll-dented helm (still good)", "rarity": "magic" }] }
+      "rewards": { "xp": 55, "gold": 30, "items": [{ "base": "medium_helm", "label": "a troll-dented helm (still good)", "rarity": "magic" }] }
     },
     "bounty_old_scarback": {
-      "title": "Bounty: Old Scarback", "kind": "side", "region": "thornmere_wilds", "level": 7,
+      "title": "Bounty: Old Scarback", "kind": "side", "region": "thornmere_wilds", "level": 4,
       "giver": "hunter_sorrel", "turnIn": "hunter_sorrel", "requires": { "quests": ["through_the_gate"] },
       "summary": "A huge, scarred bear has been savaging hunters in the Bearwood.",
       "offer": ["Old Scarback. A bear bigger than a cart, with a scar from ear to tail.", "He has torn up four hunters. I do not hate bears. I hate this one. His den is off the Bearwood Trail."],
@@ -242,10 +242,10 @@
         { "id": "bear", "kind": "kill", "targets": [{ "camp": "scarback_den", "monster": "scarback", "count": 1, "label": "Old Scarback" }], "text": "Hunt Old Scarback in his den." }
       ],
       "done": ["Rest easy, old monster. And thank you, hunter."],
-      "rewards": { "xp": 184, "gold": 28, "items": [{ "base": "light_chest", "label": "a bearskin jerkin", "rarity": "magic" }] }
+      "rewards": { "xp": 55, "gold": 28, "items": [{ "base": "light_chest", "label": "a bearskin jerkin", "rarity": "magic" }] }
     },
     "a_voice_in_the_mire": {
-      "title": "A Voice in the Mire", "kind": "side", "region": "thornmere_wilds", "level": 7,
+      "title": "A Voice in the Mire", "kind": "side", "region": "thornmere_wilds", "level": 4,
       "giver": "hunter_sorrel", "turnIn": "mother_sallow", "requires": { "quests": ["through_the_gate"] },
       "summary": "Travellers hear a voice from a black stone at the mire's western edge. It offers bargains.",
       "offer": ["There is a black stone at the edge of the mire that talks. It offers deals to the curious.", "Go and see. Do NOT promise it anything. ...You are going to promise it something, aren't you."],
@@ -260,10 +260,10 @@
           ] }
       ],
       "done": ["The stone hums to itself, pleased. Somewhere far off, a frog stops singing."],
-      "rewards": { "xp": 184, "gold": 0, "flagsText": ["The Warlock pact can be sealed at the Black Stone"] }
+      "rewards": { "xp": 55, "gold": 0, "flagsText": ["The Warlock pact can be sealed at the Black Stone"] }
     },
     "lost_in_the_mire": {
-      "title": "Lost in the Mire", "kind": "side", "region": "thornmere_wilds", "level": 8,
+      "title": "Lost in the Mire", "kind": "side", "region": "thornmere_wilds", "level": 4,
       "giver": "quartermaster_bree", "turnIn": "quartermaster_bree", "requires": { "quests": ["through_the_gate"] },
       "summary": "The herbalist went into the mire for herbs two days ago.",
       "offer": ["The herbalist went into the mire for bog-lily two days ago. She always comes back in one.", "Herb Hollow, along the Mire Way. Bring her to the Mire Shrine; she can find her way from there."],
@@ -272,10 +272,10 @@
         { "id": "tamsin", "kind": "escort", "npc": "herbalist_tamsin", "to": "mire_shrine", "radius": 12, "ask": "Follow me, I know the dry way.", "say": ["Oh thank goodness. Lead on. I will be right behind you. Right behind. Do not walk fast."], "text": "Find the herbalist at Herb Hollow and lead her to the Mire Shrine.", "worldFlags": ["tamsin_safe"] }
       ],
       "done": ["She is back, with a basket of bog-lily and a new fear of frogs. Thank you."],
-      "rewards": { "xp": 206, "gold": 26, "pick": [{ "base": "medium_boots", "label": "fine boots" }, { "base": "medium_gauntlets", "label": "fine gauntlets" }] }
+      "rewards": { "xp": 60, "gold": 26, "pick": [{ "base": "medium_boots", "label": "fine boots" }, { "base": "medium_gauntlets", "label": "fine gauntlets" }] }
     },
     "the_gravecutters_contract": {
-      "title": "The Gravecutter's Contract", "kind": "side", "region": "thornmere_wilds", "level": 8,
+      "title": "The Gravecutter's Contract", "kind": "side", "region": "thornmere_wilds", "level": 4,
       "giver": "sable", "turnIn": "sable", "requires": { "quests": ["through_the_gate"] },
       "summary": "A hooded stranger pays well for one quiet job: the orc raider Redtusk.",
       "offer": ["Redtusk. Orc raider. Burns farms over the ridge and comes back here to count his loot.", "I want him gone, quietly. Do this and I will show you the Gravecutter's ways - if you have the hands for it."],
@@ -284,10 +284,10 @@
         { "id": "redtusk", "kind": "kill", "targets": [{ "camp": "redtusk_camp", "monster": "redtusk", "count": 1, "label": "Redtusk" }], "text": "Remove Redtusk from his camp." }
       ],
       "done": ["Clean work. Here is your fee. And your contract: show it to me again when you are ready to learn."],
-      "rewards": { "xp": 206, "gold": 40, "flags": ["gravecutter_contract"], "flagsText": ["A Gravecutter contract (opens the Gravecutter class for Rogues)"] }
+      "rewards": { "xp": 60, "gold": 40, "flags": ["gravecutter_contract"], "flagsText": ["A Gravecutter contract (opens the Gravecutter class for Rogues)"] }
     },
     "the_lost_tome": {
-      "title": "The Lost Tome", "kind": "side", "region": "thornmere_wilds", "level": 9,
+      "title": "The Lost Tome", "kind": "side", "region": "thornmere_wilds", "level": 5,
       "giver": "scholar_ilsabet", "turnIn": "scholar_ilsabet", "requires": { "quests": ["words_of_the_grove"] },
       "summary": "The scholar's teacher left a tome in the Undead Barrow. She wants it back, and so might you.",
       "offer": ["My teacher went into the barrow to study the dead and left his tome on a sarcophagus. He was not brave twice.", "Fetch it? Read it first if you like. Everyone who reads it learns something about the dead."],
@@ -296,10 +296,10 @@
         { "id": "tome", "kind": "collect", "objects": ["barrow_tome_case"], "item": "the barrow tome", "text": "Take the tome from the sarcophagus at the barrow.", "worldFlags": ["tome_found"] }
       ],
       "done": ["You read it, didn't you? Good. Mages who read it can learn the Necromancer's art from me."],
-      "rewards": { "xp": 228, "gold": 30, "items": [{ "named": "barrow_lantern", "base": "tome", "label": "the Barrow-Lantern Tome (a shadow tome that casts a column)" }], "flags": ["barrow_tome"], "flagsText": ["The barrow tome (opens the Necromancer class for Mages)"] }
+      "rewards": { "xp": 70, "gold": 30, "items": [{ "named": "barrow_lantern", "base": "tome", "label": "the Barrow-Lantern Tome (a shadow tome that casts a column)" }], "flags": ["barrow_tome"], "flagsText": ["The barrow tome (opens the Necromancer class for Mages)"] }
     },
     "the_drowned_ruins": {
-      "title": "The Drowned Ruins", "kind": "side", "region": "thornmere_wilds", "level": 10,
+      "title": "The Drowned Ruins", "kind": "side", "region": "thornmere_wilds", "level": 5,
       "giver": "quartermaster_bree", "turnIn": "quartermaster_bree", "requires": { "quests": ["lost_in_the_mire"] },
       "summary": "The Marsh Hag keeps a woodcutter in a cage in the Drowned Ruins.",
       "offer": ["The herbalist saw a man in a cage in the Drowned Ruins. A woodcutter, missing a week.", "The Marsh Hag keeps him for... I do not want to say. Get him out. Deal with her."],
@@ -309,7 +309,7 @@
         { "id": "cage", "kind": "use", "objects": ["woodcutter_cage"], "item": "the woodcutter's cage", "text": "Open the woodcutter's cage." }
       ],
       "done": ["The woodcutter walked in an hour ago, soaked and singing. He says to tell you his axe is yours whenever you need firewood."],
-      "rewards": { "xp": 250, "gold": 45, "pick": [{ "base": "battleaxe", "label": "a rare axe", "rarity": "rare" }, { "base": "orb", "label": "a rare orb", "rarity": "rare" }, { "base": "heavy_chest", "label": "rare plate", "rarity": "rare" }] }
+      "rewards": { "xp": 75, "gold": 45, "pick": [{ "base": "battleaxe", "label": "a rare axe", "rarity": "rare" }, { "base": "orb", "label": "a rare orb", "rarity": "rare" }, { "base": "heavy_chest", "label": "rare plate", "rarity": "rare" }] }
     }
   }
 }

@@ -1,6 +1,27 @@
 {
  "entries": [
   {
+   "id": "2026-11-27-regions",
+   "date": "2026-11-27",
+   "title": "Ashfield, the Catacombs, and a world of regions",
+   "items": [
+    "The world now has regions, each with its own level range. Walk to the end of the Lark Road east of the Vale and you can travel to Ashfield. A loading screen shows where you are going.",
+    "Ashfield (levels 3-8): a lantern-lit hamlet at a crossroads with six new quests, and a huge walled cemetery in the fog. Every gravestone has a name. Some graves are open: dig in for coins and rings, but sometimes a skeleton, or someone with a name, climbs out.",
+    "The Catacombs (levels 6-8), under the Mausoleum Hill: ossuaries, enormous halls of columns where goblins have dug in, a troll, and the Deep King on his throne. Monsters only notice you when they can see you, so walls and pillars hide you.",
+    "Brightwater Vale is now levels 1-5 from end to end, and you level up faster early on. The whole Vale story takes you to about level 6, ready for Ashfield.",
+    "XP works like other online RPGs: monsters 5 or more levels below you give nothing, ones above you give up to 25% more. In a group everyone gets the full XP, so a high-level friend can help you along.",
+    "Shrines you find work as waypoints between regions: travel from any shrine to any shrine your world has found.",
+   "The map (M) opens on Places: every region, town and waypoint, sorted by level, with how to get there if you have not found it yet. The region map is the second tab.",
+   "Quest waypoints: the quest you mark gets a gold diamond on the minimap and the map, and a marker in the world with its distance. If it is in another region, it points to the road that leads there.",
+   "The quest tracker shows up to three quests with their region, step and distance, on phones too. Tap one to mark it.",
+    "Goblins, boars, wolves, bears and other monsters that looked tiny are now the size they should be.",
+   "On phones the Use button is now a small round button above Dodge with one word (Talk, Open, Travel…), only when something is in reach.",
+   "The arena panel is see-through, and the waves show as symbols: a tick for waves beaten, a skull for the brute wave and a crown for the boss.",
+   "The place name under the minimap fits on one line on phones.",
+   "Menus that cover nearly the whole screen now open full screen, and spell pictures in lists are round and centred again."
+   ]
+  },
+  {
    "id": "2026-11-27-gear",
    "date": "2026-11-27",
    "title": "Gear that is worth finding",

@@ -145,6 +145,9 @@ export function createWorldView(view, { T, placements, art, scattered, book, tow
   // the arena place (brainstorm 2026-11-27 §2b): its walls, stands, gates, crowd from the same layout the server walks
   let arenaView = null;
   if (placements.arenaLayout) pending.push(import('./arena-draw.js').then(m => m.createArenaView({ scene: root, L: placements.arenaLayout, quality })).then(v => { arenaView = v; }).catch(e => console.warn('arena', e)));
+  // the Old Graveyard (Ashfield, brainstorm 2026-11-27 §2): stones, wall, railings, chapel, crypt, open graves, crows
+  let graveyardView = null;
+  if (placements.graveyardLayout) pending.push(import('./graveyard-draw.js').then(m => m.createGraveyardView({ scene: root, G: placements.graveyardLayout, T, quality, view, objectMeshes })).then(v => { graveyardView = v; }).catch(e => console.warn('graveyard', e)));
   if (!new URLSearchParams(location.search).has('envoff')) addContactShade(view, { T, placements });
   // the mist pools in the low ground: its base is set from this map's own heights (the lowest 4% of the land: river bottoms)
   { const hs = Float32Array.from(T.grid.heights).sort(); ATMOS.set({ mist: { base: hs[Math.floor(hs.length * 0.04)] } }); }
@@ -242,12 +245,14 @@ export function createWorldView(view, { T, placements, art, scattered, book, tow
   let wt = 0;
   return {
     get arena() { return arenaView; },
+    get graveyard() { return graveyardView; },
     root, tiles, chestMeshes, objectMeshes, rewardMeshes, shrineMarks, ground, grass, kitStats: kit.stats, chimneys: kit.chimneys, get treeStats() { return treeView?.stats || null; }, get townStats() { return townView?.stats || null; }, ready: () => Promise.allSettled([...pending, ground.ready]),
     update(dt, at) {
       wt += dt;
       wind.update(dt);   // the ONE wind: trees, tufts, grass and crops all bend to it (./wind.js)
       kit.update(dt, wt);
       arenaView?.update(dt, wt);
+      graveyardView?.update(dt, wt, at);
       treeView?.update(wt);
       ground.update(dt, at);
       grass.update(view.camera.position);

@@ -1,0 +1,346 @@
+{
+ "_doc": "The Catacombs under the Old Graveyard (brainstorm 2026-11-27-regions \u00a73). Read by js/world/dungeon/plan.js planDungeon(spec, seed) and js/world/dungeon/encounters.js. Sizes are metres (2 m tiles). Levels sit in ONE space, each lower than the last, joined by long ramps (no gaps). rooms = the main line in order; branches = side rooms (after = the room they hang off; none = a random room of that level). Room flags: entrance (an id the region links to), exit, gate (shut until the lever in the named room is pulled), secret (hidden door), chasm (a pit across the room with one bridge), boss.",
+ "id": "catacombs",
+ "name": "The Catacombs",
+ "notice": {
+  "range": 16,
+  "pathFactor": 1.6
+ },
+ "giveUpTiles": 40,
+ "levels": [
+  {
+   "name": "The Ossuary",
+   "monsterLevel": 6,
+   "y": 0,
+   "rooms": [
+    {
+     "id": "crypt-gate",
+     "kind": "entrance",
+     "entrance": "main"
+    },
+    {
+     "kind": "crypt"
+    },
+    {
+     "id": "bone-hall",
+     "kind": "ossuary",
+     "size": [
+      30,
+      24
+     ]
+    },
+    {
+     "kind": "crypt"
+    },
+    {
+     "id": "deep-ossuary",
+     "kind": "ossuary",
+     "size": [
+      30,
+      28
+     ]
+    }
+   ],
+   "branches": [
+    {
+     "kind": "crypt"
+    },
+    {
+     "kind": "chapel",
+     "id": "old-chapel"
+    },
+    {
+     "kind": "crypt",
+     "id": "hidden-crypt",
+     "secret": true,
+     "hoard": true
+    }
+   ],
+   "encounters": [
+    {
+     "rooms": [
+      "crypt"
+     ],
+     "pack": [
+      "skeleton_warrior",
+      "skeleton_warrior",
+      "crypt_zombie"
+     ],
+     "perRoom": [
+      1,
+      1
+     ]
+    },
+    {
+     "rooms": [
+      "ossuary"
+     ],
+     "pack": [
+      "skeleton_warrior",
+      "skeleton_archer",
+      "crypt_zombie",
+      "crypt_zombie"
+     ],
+     "perRoom": [
+      2,
+      2
+     ]
+    },
+    {
+     "rooms": [
+      "chapel"
+     ],
+     "pack": [
+      "barrow_ghoul",
+      "barrow_ghoul",
+      "skeleton_archer"
+     ],
+     "perRoom": [
+      1,
+      1
+     ]
+    },
+    {
+     "room": "deep-ossuary",
+     "named": "The Bone Warden",
+     "lead": "skeleton_warrior",
+     "pack": [
+      "skeleton_warrior",
+      "skeleton_archer"
+     ]
+    },
+    {
+     "room": "old-chapel",
+     "named": "The Sexton",
+     "lead": "the_sexton",
+     "pack": [
+      "crypt_zombie",
+      "crypt_zombie"
+     ]
+    }
+   ],
+   "patrols": [
+    {
+     "pack": [
+      "skeleton_warrior",
+      "skeleton_warrior"
+     ],
+     "count": 2
+    }
+   ]
+  },
+  {
+   "name": "The Pillared Deep",
+   "monsterLevel": 7,
+   "y": -10,
+   "rooms": [
+    {
+     "id": "first-columns",
+     "kind": "pillared_hall",
+     "size": [
+      44,
+      36
+     ]
+    },
+    {
+     "id": "chasm-hall",
+     "kind": "pillared_hall",
+     "size": [
+      52,
+      40
+     ],
+     "chasm": true
+    },
+    {
+     "id": "deep-hall",
+     "kind": "troll_pit",
+     "size": [
+      44,
+      44
+     ]
+    }
+   ],
+   "branches": [
+    {
+     "id": "warren-mouth",
+     "kind": "goblin_den",
+     "after": "first-columns",
+     "wing": "warren"
+    },
+    {
+     "id": "warren-den",
+     "kind": "goblin_den",
+     "after": "warren-mouth",
+     "wing": "warren",
+     "size": [
+      24,
+      22
+     ]
+    },
+    {
+     "id": "warren-chief",
+     "kind": "goblin_den",
+     "after": "warren-den",
+     "wing": "warren",
+     "size": [
+      26,
+      24
+     ]
+    },
+    {
+     "id": "fallen-grave",
+     "kind": "entrance",
+     "entrance": "collapsed",
+     "collapsed": true
+    }
+   ],
+   "encounters": [
+    {
+     "rooms": [
+      "pillared_hall"
+     ],
+     "pack": [
+      "hollowborn",
+      "hollowborn",
+      "barrow_ghoul"
+     ],
+     "perRoom": [
+      2,
+      3
+     ]
+    },
+    {
+     "rooms": [
+      "goblin_den"
+     ],
+     "pack": [
+      "goblin_warrior",
+      "goblin_warrior",
+      "goblin_sneak",
+      "goblin_shaman"
+     ],
+     "perRoom": [
+      1,
+      2
+     ]
+    },
+    {
+     "room": "warren-chief",
+     "named": "Gritch the Digger",
+     "lead": "goblin_warchief",
+     "pack": [
+      "goblin_warrior",
+      "goblin_shaman"
+     ]
+    },
+    {
+     "room": "deep-hall",
+     "named": "The Deep Troll",
+     "lead": "bridge_troll",
+     "pack": []
+    }
+   ],
+   "patrols": [
+    {
+     "pack": [
+      "goblin_warrior",
+      "goblin_sneak"
+     ],
+     "count": 1
+    },
+    {
+     "pack": [
+      "hollowborn",
+      "hollowborn"
+     ],
+     "count": 1
+    }
+   ]
+  },
+  {
+   "name": "The Barrow Throne",
+   "monsterLevel": 8,
+   "y": -20,
+   "rooms": [
+    {
+     "id": "guard-hall",
+     "kind": "hall",
+     "size": [
+      32,
+      30
+     ]
+    },
+    {
+     "id": "throne",
+     "kind": "boss_hall",
+     "size": [
+      56,
+      46
+     ],
+     "gate": {
+      "lever": "lever-chapel"
+     },
+     "boss": true,
+     "exit": "surface"
+    }
+   ],
+   "branches": [
+    {
+     "id": "lever-chapel",
+     "kind": "chapel",
+     "after": "guard-hall"
+    },
+    {
+     "kind": "crypt",
+     "after": "guard-hall"
+    }
+   ],
+   "encounters": [
+    {
+     "rooms": [
+      "hall"
+     ],
+     "pack": [
+      "wraith_knight",
+      "skeleton_warrior",
+      "skeleton_archer"
+     ],
+     "perRoom": [
+      2,
+      2
+     ]
+    },
+    {
+     "rooms": [
+      "chapel",
+      "crypt"
+     ],
+     "pack": [
+      "wraith_knight",
+      "barrow_ghoul",
+      "barrow_ghoul"
+     ],
+     "perRoom": [
+      1,
+      1
+     ]
+    }
+   ],
+   "boss": {
+    "room": "throne",
+    "id": "deep_king",
+    "guards": [
+     "wraith_knight",
+     "wraith_knight"
+    ]
+   },
+   "patrols": []
+  }
+ ],
+ "links": {
+  "main": "crypt_gate",
+  "collapsed": "collapsed_grave",
+  "surface": "crypt_gate"
+ },
+ "above": "ashfield"
+}

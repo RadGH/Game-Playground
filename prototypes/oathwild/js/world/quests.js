@@ -181,7 +181,7 @@ export function notify(book, ws, ev, ctx = {}) {
       if (list.length >= stepCount(s)) out.push(...advance(book, ws, id));
     } else if (s.kind === 'reach' && ev.t === 'reach') {
       const p = book.places[s.place];
-      if (Math.hypot(ev.at[0] - p.at[0], ev.at[1] - p.at[1]) <= (s.radius || p.radius || 12)) out.push(...advance(book, ws, id));
+      if (!elsewhere(book, p) && Math.hypot(ev.at[0] - p.at[0], ev.at[1] - p.at[1]) <= (s.radius || p.radius || 12)) out.push(...advance(book, ws, id));
     } else if (s.kind === 'talk' && ev.t === 'talk' && ev.npc === s.npc && !s.options?.length) {
       out.push(...advance(book, ws, id));
     }
@@ -196,7 +196,7 @@ export function liveObjects(book, ws) {
     const st = ws.quests[id];
     if (!st || st.done) continue;
     const s = book.quests[id].steps[st.step];
-    if (s && (s.kind === 'collect' || s.kind === 'use')) for (const o of s.objects) if (!(st.data[s.id] || []).includes(o)) out.push({ object: o, quest: id, step: s.id, kind: s.kind, item: s.item || null });
+    if (s && (s.kind === 'collect' || s.kind === 'use')) for (const o of s.objects) if (!(st.data[s.id] || []).includes(o) && !elsewhere(book, book.objects[o])) out.push({ object: o, quest: id, step: s.id, kind: s.kind, item: s.item || null });
   }
   return out;
 }
@@ -260,7 +260,17 @@ export function progressText(book, ws, id) {
   return null;
 }
 
+/** The quest's next goal on the map, with the `region` it is in (world books; null = the book's own region). */
 export function markerOf(book, ws, id) {
+  const m = markerHere(book, ws, id);
+  if (!m) return m;
+  const q = book.quests[id], st = ws.quests[id], s = q.steps[st.step];
+  const thing = !s ? book.npcs[q.turnIn] : s.kind === 'talk' ? book.npcs[s.npc] : s.kind === 'reach' ? book.places[s.place] : s.kind === 'escort' ? book.places[s.to]
+    : (s.kind === 'collect' || s.kind === 'use') ? book.objects[s.objects[0]] : s.kind === 'kill' ? (s.targets?.[0]?.camp ? book.camps[s.targets[0].camp] : s.targets?.[0]) : null;
+  const region = thing?.worldRegion || thing?.region || q.worldRegion || null;
+  return region ? { ...m, region } : m;
+}
+function markerHere(book, ws, id) {
   const q = book.quests[id], st = ws.quests[id];
   if (!st || st.done) return null;
   const s = q.steps[st.step];
@@ -322,9 +332,12 @@ export function questLog(book, ws, ctx = {}) {
 
 // ---------------------------------------------------------------- NPCs and talk
 
+// World books (js/world/regions/books.js): every region's quests, people, objects and places in one book, each tagged
+// with its `region`; a book made for one region (`book.region`) never shows another region's people or objects here.
+export const elsewhere = (book, thing) => !!(thing?.region && book.region && thing.region !== book.region);
 export function npcPresent(book, ws, npcId) {
   const n = book.npcs[npcId];
-  if (!n) return false;
+  if (!n || elsewhere(book, n)) return false;
   if (n.appears?.flag && !hasFlag(ws, n.appears.flag)) return false;
   if (n.leaves?.flag && hasFlag(ws, n.leaves.flag)) return false;
   return true;

@@ -37,7 +37,8 @@ export function bodyFor(art, id) {
   if (s) return s.body ? { body: s.body, height: s.height || 1, tint: null } : s.fallback ? { body: s.fallback.body, height: s.fallback.height, tint: s.fallback.tint, opacity: s.fallback.opacity } : { shape: s.placeholder };
   return { body: id, height: 1.8, tint: null };
 }
-const FORM_BODY = { wolf: { body: 'wolf', height: 1.1 }, bear: { body: 'brown-bear', height: 1.35 }, cat: { body: 'mountain-lion', height: 0.85 }, 'brown-bear': { body: 'brown-bear', height: 1.35 }, 'mountain-lion': { body: 'mountain-lion', height: 0.85 } };
+// druid shapes match the monsters' sizes (owner 2026-11-27: generated models at least a person's size or bulk)
+const FORM_BODY = { wolf: { body: 'wolf', height: 1.3 }, bear: { body: 'brown-bear', height: 1.9 }, cat: { body: 'mountain-lion', height: 1.25 }, 'brown-bear': { body: 'brown-bear', height: 1.9 }, 'mountain-lion': { body: 'mountain-lion', height: 1.25 } };
 
 /** NPC outfit → Tabard items (data/npcs.json body.outfit). */
 const OUTFIT = {

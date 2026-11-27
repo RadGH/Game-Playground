@@ -1,0 +1,21 @@
+{
+  "_doc": "Oathwild's regions (owner 2026-11-27: 'new regions, separated by travel points and loading screens … each zone a specific level bracket'; docs/BRAINSTORM-2026-11-27-regions.md §1). A hosted world holds every region; each region is its own map, made by its `kind`'s generator (js/world/regions/), loaded when entered, run as its own room on the server sharing the world's quests and story flags (server/hub.js). `home`: where a new hero starts. `points`: travel points — walk to one and confirm to travel to `to` (a point in another region; you arrive `arrive` metres in front of it, along its `facing` — radians, 0 = +z). `loading`: the loading screen's picture, line and tip. js/world/regions/index.js is the one reader.",
+  "home": "vale",
+  "regions": {
+    "vale": {
+      "name": "Brightwater Vale", "levels": [1, 5], "kind": "wilds",
+      "loading": { "art": "img/loading/vale.webp", "line": "Farms, mills and old roads between the hills — and the goblins, wolves and bandits who prey on them.", "tip": "Lantern posts in each town are waypoints: touch one to travel back to it later from the Places list (M)." }
+    },
+    "ashfield": {
+      "name": "Ashfield", "levels": [3, 8], "kind": "graveyard", "data": "data/regions/ashfield.json",
+      "loading": { "art": "img/loading/ashfield.webp", "line": "The old cemetery on the hill has not been quiet for a month. The hamlet at the crossing keeps its lanterns lit all night.", "tip": "Some open graves are worth a look. Some are worth a fight." }
+    },
+    "catacombs": {
+      "name": "The Catacombs", "levels": [6, 8], "kind": "dungeon", "data": "data/dungeons/catacombs.json",
+      "loading": { "art": "img/loading/catacombs.webp", "line": "Below the Mausoleum Hill the dead are laid in halls older than the town — and something has dug in from the deep.", "tip": "Monsters only notice you when they can see you: walls and pillars hide you." }
+    }
+  },
+  "points": [
+    { "id": "vale-east-road", "region": "vale", "at": [488, 20], "radius": 7, "facing": -1.5708, "arrive": 6, "label": "The road to Ashfield", "to": "east_road", "toRegion": "ashfield" }
+  ]
+}

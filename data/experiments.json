@@ -557,6 +557,23 @@
    ]
   },
   {
+   "id": "iconkit",
+   "group": "systems",
+   "title": "Icon Kit",
+   "href": "iconkit/",
+   "folder": "iconkit",
+   "summary": "Layered spell and ability icons any game can use: a gold frame, a stone background tinted by class, a painted glyph and a glow tinted by element, in circle or square. The review page builds icons layer by layer, shows every glyph in every class's colours, puts each Oathwild spell's current icon beside its new kit icon, lists every old icon, and maps which element and kind combinations still need a glyph.",
+   "status": "prototype",
+   "date": "2026-11-27",
+   "isNew": true,
+   "tags": [
+    "icons",
+    "spells",
+    "ui",
+    "codex art"
+   ]
+  },
+  {
    "id": "game-icons",
    "group": "systems",
    "title": "Game Icons",

@@ -1,14 +1,13 @@
 // The quest log: the world's quests as js/world/quests.js questLog() sees them for me (progress belongs to the world,
 // rewards to each player). Tabs: Active · Ready to hand in · Available · Done. Each quest shows its steps (the current
 // one marked, with its count), who gave it and who takes it back, the rewards, a Track toggle (the HUD's tracker lists
-// tracked quests) and Show on map.
+// tracked quests, 3 at most) and Show on map. Tapping an active quest makes it the MARKED one (the gold diamond on the
+// minimap, the map and in the world — play/quest-guide.js); the tracker shows the same mark.
 import { openWin, esc } from './kit.js';
 import { glyph } from './icons.js';
-import { live } from './win-services.js';
 import { questLog } from '../../world/quests.js';
 import { fmt } from '../../../../../shared/format.js';
-
-const REGION = { brightwater_vale: 'Brightwater Vale', thornmere_wilds: 'Thornmere Wilds' };
+import { markQuest, trackQuest, questRegion, regionLabel, followed, MAX_TRACKED } from '../play/quest-guide.js';
 const TABS = [['active', 'Active'], ['ready', 'Hand in'], ['available', 'Available'], ['done', 'Done']];
 
 /** The world state in the shape the quest engine reads (from the server's 'wstate'). */
@@ -22,7 +21,7 @@ export function myLog(app) {
   if (!c || !app.W) return { active: [], ready: [], available: [], done: [] };
   return questLog(app.W.book, wsLike(app), { playerId: c.id, level: c.level, flags: app.me?.flags || [] });
 }
-/** Tracked quest ids (the HUD tracker reads this list; new quests are tracked until the player says otherwise). */
+/** Tracked quest ids (the HUD tracker reads this list; empty = it follows the main quest and the next ones). */
 export function tracked(app) { if (!Array.isArray(app.settings.tracked)) app.settings.tracked = []; return app.settings.tracked; }
 
 export function open(app, opts = {}) {
@@ -32,25 +31,31 @@ export function open(app, opts = {}) {
     render(body, tab, win) {
       const log = myLog(app);
       const list = log[tab] || [];
-      const sel = list.find(q => q.id === win.data.sel) || list[0] || null;
+      win.data.sel = win.data.sel || opts.sel || null;
+      const mk = followed(app, log).marked?.id;
+      const sel = list.find(q => q.id === win.data.sel) || list.find(q => q.id === mk) || list[0] || null;
       if (!list.length) { body.innerHTML = `<p class="ow-empty">${tab === 'active' ? 'No quests on the go. People with something to ask have a mark over their heads.' : tab === 'ready' ? 'Nothing to hand in.' : tab === 'available' ? 'Nobody you know has more to ask right now.' : 'No quests finished yet.'}</p>`; return; }
       const T = tracked(app);
       body.innerHTML = `<div class="ow-q-cols">
         <ul class="ow-q-list">${list.map(q => `<li><button type="button" class="ow-q-item${sel?.id === q.id ? ' ow-q-sel' : ''}" data-q="${esc(q.id)}">
-          <span class="ow-q-lvl">${fmt(q.level)}</span><span class="ow-q-name"><b>${esc(q.title)}</b><small>${q.kind === 'main' ? 'Main story' : 'Side quest'} · ${esc(REGION[q.region] || '')}</small></span>
-          ${T.includes(q.id) ? `<span class="ow-q-trk">${glyph('eye', 16)}</span>` : ''}${q.rewardWaiting ? `<span class="ow-q-trk ow-gold">${glyph('star', 16)}</span>` : ''}</button></li>`).join('')}</ul>
+          <span class="ow-q-lvl">${fmt(q.level)}</span><span class="ow-q-name"><b>${esc(q.title)}</b><small>${q.kind === 'main' ? 'Main story' : 'Side quest'} · ${esc(regionLabel(app, questRegion(app, q)))}</small></span>
+          ${q.id === mk ? '<span class="ow-q-trk ow-q-mk" aria-label="Marked"><i></i></span>' : T.includes(q.id) ? `<span class="ow-q-trk">${glyph('eye', 16)}</span>` : ''}${q.rewardWaiting ? `<span class="ow-q-trk ow-gold">${glyph('star', 16)}</span>` : ''}</button></li>`).join('')}</ul>
         ${sel ? detail(app, sel, tab, T) : ''}
       </div>`;
-      body.querySelectorAll('[data-q]').forEach(b => { b.onclick = () => { win.data.sel = b.dataset.q; win.render(); }; });
+      // tapping an active quest marks it (the one the gold diamond leads to)
+      body.querySelectorAll('[data-q]').forEach(b => { b.onclick = () => { win.data.sel = b.dataset.q; if (tab === 'active' || tab === 'ready') markQuest(app, b.dataset.q, log); win.render(); }; });
       body.querySelector('[data-track]')?.addEventListener('click', e => {
-        const id = e.currentTarget.dataset.track, i = T.indexOf(id);
-        if (i >= 0) T.splice(i, 1); else T.push(id);
-        app.saveSettings(); win.render();
+        const id = e.currentTarget.dataset.track;
+        trackQuest(app, id, !T.includes(id), log);
+        win.render();
       });
       body.querySelector('[data-onmap]')?.addEventListener('click', e => app.openWindow('map', { focus: JSON.parse(e.currentTarget.dataset.onmap), label: sel.marker?.label }));
     },
   });
-  return live(app, w, ['me', 'wstate']);
+  // redraw only when what the list shows changed (a redraw on every world update replaced the rows mid-tap; rule 12b)
+  const sig = () => JSON.stringify([myLog(app), app.settings.tracked, app.settings.marked]);
+  w.follow(app, 'wstate', sig); w.follow(app, 'me', sig);
+  return w;
 }
 
 function detail(app, q, tab, T) {
@@ -67,7 +72,7 @@ function detail(app, q, tab, T) {
     ${q.rewardWaiting ? `<p class="ow-gold">${glyph('star', 16)} Collect your reward from ${esc(q.turnIn?.name || 'the one who asked')}.</p>` : ''}
     ${q.rewards?.length ? `<div class="ow-q-rewards"><span class="ow-dim">Rewards</span>${q.rewards.map(r => `<span class="ow-svc-chip">${esc(r)}</span>`).join('')}</div>` : ''}
     <div class="ow-row ow-q-acts">
-      ${tab === 'active' || tab === 'ready' ? `<button type="button" class="ow-btn ow-small" data-track="${esc(q.id)}" data-primary>${glyph('eye', 16)}<span>${T.includes(q.id) ? 'Stop tracking' : 'Track'}</span></button>` : ''}
+      ${tab === 'active' || tab === 'ready' ? `<button type="button" class="ow-btn ow-small" data-track="${esc(q.id)}" data-primary>${glyph('eye', 16)}<span>${T.includes(q.id) ? 'Stop tracking' : `Track (${fmt(MAX_TRACKED)} at most)`}</span></button>` : ''}
       ${q.marker ? `<button type="button" class="ow-btn ow-small" data-onmap="${esc(JSON.stringify(q.marker.at))}">${glyph('globe', 16)}<span>Show on map</span></button>` : q.giver && tab === 'available' ? `<button type="button" class="ow-btn ow-small" data-onmap="${esc(JSON.stringify(q.giver.at))}">${glyph('globe', 16)}<span>Where is ${esc(q.giver.name)}?</span></button>` : ''}
     </div>
   </article>`;

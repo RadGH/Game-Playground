@@ -1,0 +1,27 @@
+You are making the FIRST TEST set of layered game-icon art for a fantasy action RPG (hand-painted, chunky, readable at 40 px, in the style of classic early-2000s RTS / MMO spell buttons: bold painterly shapes, strong value contrast, warm rim light). Use your image generation tool. Every file is a PNG with a TRANSPARENT background (true alpha — no checkerboard, no white or coloured backdrop), square, 1024x1024, the subject centred with an even margin of about 6% on every side. No text, no letters, no numbers, no watermark.
+
+Make these layers, each its own file in the current folder (exact names):
+
+FRAMES (only the frame — the middle is fully transparent):
+1. frame-circle.png — a round antique-gold frame ring (like a medallion bezel), with 8 small pyramid studs evenly spaced around it, bevelled, warm highlights. Ring thickness ~9% of the width. Perfectly centred and circular.
+2. frame-square.png — a square antique-gold frame with slightly rounded corners, corner studs, bevelled, the same metal and lighting as the circle frame. Border thickness ~9%.
+
+BACKGROUND PLATES (fill the inside of the frames; greyscale so the game can tint them per class):
+3. plate-circle.png — a round plate of dark cracked slate / carved stone, NEUTRAL GREY only (no colour), subtle radial vignette (darker edge), diameter = the inside of the circle frame (about 84% of the canvas), centred.
+4. plate-square.png — the same stone, square with slightly rounded corners, about 84% of the canvas, centred, NEUTRAL GREY only.
+
+GLYPHS (the central symbol only, full colour, painted, no frame, no plate, transparent around it, about 70% of the canvas):
+5. glyph-fireball.png — a fiery ball of flame with a swirling tail (orange, yellow, red), clearly FIRE (must never read as a snowflake or star).
+6. glyph-frost-shard.png — three sharp blue-white ice crystal shards.
+7. glyph-lightning.png — a jagged blue-white lightning bolt with sparks.
+8. glyph-arcane-orb.png — a glowing violet sphere ringed by a thin orbit of light.
+9. glyph-holy-light.png — a radiant golden four-pointed star burst with soft rays.
+10. glyph-sword-slash.png — a fiery red-orange crescent slash trail (the arc of a sword swing).
+11. glyph-shield-bash.png — a steel heater shield with an impact flash at one edge.
+12. glyph-poison.png — a glass vial of bubbling green poison with a small skull on it.
+
+GLOWS (soft light behind a glyph; greyscale/white so the game can tint them):
+13. glow-soft.png — a soft round white glow, brightest in the centre, fading to fully transparent at about 70% of the width.
+14. glow-swirl.png — a soft white swirling wisp of light (like magic energy curling), fading to transparent.
+
+All layers must line up when stacked: same canvas size, same centre. After generating, check each file has a real alpha channel (if your tool cannot make transparency, put the subject on a pure #FF00FF magenta background instead and say so). List the files you made with their sizes.

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="256" height="256"><defs><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2b8" stop-opacity="1"/><stop offset="0.28" stop-color="#e9bb55" stop-opacity="1"/><stop offset="0.55" stop-color="#9a6620" stop-opacity="1"/><stop offset="0.8" stop-color="#d9a444" stop-opacity="1"/><stop offset="1" stop-color="#6a4010" stop-opacity="1"/></linearGradient><linearGradient id="goldIn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a3408" stop-opacity="1"/><stop offset="0.5" stop-color="#c89038" stop-opacity="1"/><stop offset="1" stop-color="#fff0b0" stop-opacity="1"/></linearGradient></defs>
+  <path fill-rule="evenodd" fill="url(#gold)" d="M11 2H89A9 9 0 0 1 98 11V89A9 9 0 0 1 89 98H11A9 9 0 0 1 2 89V11A9 9 0 0 1 11 2ZM15 11H85A4 4 0 0 1 89 15V85A4 4 0 0 1 85 89H15A4 4 0 0 1 11 85V15A4 4 0 0 1 15 11Z"/>
+  <rect x="11.7" y="11.7" width="76.6" height="76.6" rx="3.6" fill="none" stroke="url(#goldIn)" stroke-width="1.3"/>
+  <rect x="2.6" y="2.6" width="94.8" height="94.8" rx="8.5" fill="none" stroke="#fff0b0" stroke-opacity=".55" stroke-width=".9"/>
+  <rect x="2" y="2" width="96" height="96" rx="9" fill="none" stroke="#170d07" stroke-width="1.1" stroke-linejoin="round" stroke-linecap="round"/><rect x="11" y="11" width="78" height="78" rx="4" fill="none" stroke="#170d07" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/>
+  <g transform="translate(6.5 6.5)">
+  <path d="M0 0L-3.1 -3.1H3.1z" fill="#fff4c4"/><path d="M0 0L3.1 -3.1V3.1z" fill="#d9a240"/>
+  <path d="M0 0L3.1 3.1H-3.1z" fill="#6a400e"/><path d="M0 0L-3.1 3.1V-3.1z" fill="#b8822c"/>
+  <rect x="-3.1" y="-3.1" width="6.2" height="6.2" fill="none" stroke="#170d07" stroke-width="0.8" stroke-linejoin="round" stroke-linecap="round"/></g><g transform="translate(93.5 6.5)">
+  <path d="M0 0L-3.1 -3.1H3.1z" fill="#fff4c4"/><path d="M0 0L3.1 -3.1V3.1z" fill="#d9a240"/>
+  <path d="M0 0L3.1 3.1H-3.1z" fill="#6a400e"/><path d="M0 0L-3.1 3.1V-3.1z" fill="#b8822c"/>
+  <rect x="-3.1" y="-3.1" width="6.2" height="6.2" fill="none" stroke="#170d07" stroke-width="0.8" stroke-linejoin="round" stroke-linecap="round"/></g><g transform="translate(6.5 93.5)">
+  <path d="M0 0L-3.1 -3.1H3.1z" fill="#fff4c4"/><path d="M0 0L3.1 -3.1V3.1z" fill="#d9a240"/>
+  <path d="M0 0L3.1 3.1H-3.1z" fill="#6a400e"/><path d="M0 0L-3.1 3.1V-3.1z" fill="#b8822c"/>
+  <rect x="-3.1" y="-3.1" width="6.2" height="6.2" fill="none" stroke="#170d07" stroke-width="0.8" stroke-linejoin="round" stroke-linecap="round"/></g><g transform="translate(93.5 93.5)">
+  <path d="M0 0L-3.1 -3.1H3.1z" fill="#fff4c4"/><path d="M0 0L3.1 -3.1V3.1z" fill="#d9a240"/>
+  <path d="M0 0L3.1 3.1H-3.1z" fill="#6a400e"/><path d="M0 0L-3.1 3.1V-3.1z" fill="#b8822c"/>
+  <rect x="-3.1" y="-3.1" width="6.2" height="6.2" fill="none" stroke="#170d07" stroke-width="0.8" stroke-linejoin="round" stroke-linecap="round"/></g><g transform="translate(50 6.5)">
+  <path d="M0 0L-3.1 -3.1H3.1z" fill="#fff4c4"/><path d="M0 0L3.1 -3.1V3.1z" fill="#d9a240"/>
+  <path d="M0 0L3.1 3.1H-3.1z" fill="#6a400e"/><path d="M0 0L-3.1 3.1V-3.1z" fill="#b8822c"/>
+  <rect x="-3.1" y="-3.1" width="6.2" height="6.2" fill="none" stroke="#170d07" stroke-width="0.8" stroke-linejoin="round" stroke-linecap="round"/></g><g transform="translate(50 93.5)">
+  <path d="M0 0L-3.1 -3.1H3.1z" fill="#fff4c4"/><path d="M0 0L3.1 -3.1V3.1z" fill="#d9a240"/>
+  <path d="M0 0L3.1 3.1H-3.1z" fill="#6a400e"/><path d="M0 0L-3.1 3.1V-3.1z" fill="#b8822c"/>
+  <rect x="-3.1" y="-3.1" width="6.2" height="6.2" fill="none" stroke="#170d07" stroke-width="0.8" stroke-linejoin="round" stroke-linecap="round"/></g><g transform="translate(6.5 50)">
+  <path d="M0 0L-3.1 -3.1H3.1z" fill="#fff4c4"/><path d="M0 0L3.1 -3.1V3.1z" fill="#d9a240"/>
+  <path d="M0 0L3.1 3.1H-3.1z" fill="#6a400e"/><path d="M0 0L-3.1 3.1V-3.1z" fill="#b8822c"/>
+  <rect x="-3.1" y="-3.1" width="6.2" height="6.2" fill="none" stroke="#170d07" stroke-width="0.8" stroke-linejoin="round" stroke-linecap="round"/></g><g transform="translate(93.5 50)">
+  <path d="M0 0L-3.1 -3.1H3.1z" fill="#fff4c4"/><path d="M0 0L3.1 -3.1V3.1z" fill="#d9a240"/>
+  <path d="M0 0L3.1 3.1H-3.1z" fill="#6a400e"/><path d="M0 0L-3.1 3.1V-3.1z" fill="#b8822c"/>
+  <rect x="-3.1" y="-3.1" width="6.2" height="6.2" fill="none" stroke="#170d07" stroke-width="0.8" stroke-linejoin="round" stroke-linecap="round"/></g></svg>

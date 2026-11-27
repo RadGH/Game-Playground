@@ -1,0 +1,78 @@
+{
+  "_doc": "Ashfield Crossing's quests (brainstorm 2026-11-27 §2: taken in the hamlet before you ever step into the cemetery), in data/quests.json's format (js/world/quests.js). Levels 3-5 outside the Catacombs, 6 pointing down into them. A kill target with `region` lives in another region (the Catacombs, js/world/dungeon/): the quest counts the kill wherever the world reports it. XP: side quests 30 + 22 x level (data/quests.json _doc).",
+  "quests": {
+    "ash_chapel_yard": {
+      "title": "The Chapel Yard", "kind": "side", "region": "ashfield", "level": 3, "giver": "ash_priest", "turnIn": "ash_priest",
+      "summary": "Cultists have taken the ruined chapel in the Old Graveyard. The priest wants the yard cleared and the sexton found.",
+      "offer": ["Robed folk with candles walked into the old chapel a week ago. The dead started walking the night after.", "Clear the chapel yard. And look for our sexton. He went to ring the bell up there and never came back."],
+      "acceptReply": "Through the cemetery gate, left at the first path. You'll see the broken roof.",
+      "steps": [
+        { "id": "cultists", "kind": "kill", "targets": [{ "camp": "chapel_yard", "monster": "shrine_cultist", "count": 5, "label": "Cultist" }], "text": "Drive the cultists out of the chapel yard." },
+        { "id": "journal", "kind": "collect", "objects": ["sexton_journal"], "item": "the sexton's journal", "text": "Search the ruined chapel for the sexton." }
+      ],
+      "done": ["His journal. 'They asked me for the key to the crypt, and I gave it to them.' Oh, you fool. You poor fool.", "He went down there with them. I'll have more work for you, when you're ready for the dark."],
+      "rewards": { "xp": 96, "gold": 12, "pick": [{ "base": "staff", "label": "a blessed staff" }, { "base": "sword", "label": "a blessed sword" }, { "base": "cloth_chest", "label": "chapel robes" }], "worldFlags": ["ash_chapel_cleared"] }
+    },
+    "ash_family_rings": {
+      "title": "Three Family Rings", "kind": "side", "region": "ashfield", "level": 4, "giver": "ash_gravedigger", "turnIn": "ash_gravedigger",
+      "summary": "The dead dug three graves open from the inside. The gravedigger wants the family rings back before the robbers find them.",
+      "offer": ["Three graves came open last night. The Harlow grave in the Old Families, Mary Fenwick's cross in the Paupers' Field, and old Marlowe by the chapel.", "They were buried with their family rings. Bring them to me before some robber does, and I'll see them back to the families."],
+      "acceptReply": "Look for the open holes with my spades still in them. Don't stand in them longer than you have to.",
+      "steps": [
+        { "id": "rings", "kind": "collect", "objects": ["ring_grave_harlow", "ring_grave_fenwick", "ring_grave_marlowe"], "item": "the three family rings", "text": "Take the family rings from the Harlow, Fenwick and Marlowe graves." }
+      ],
+      "done": ["All three. Harlow, Fenwick, Marlowe. I'll get them home.", "Something else, while you're here. That old grave in the Paupers' Field that sank? I think it goes somewhere."],
+      "rewards": { "xp": 118, "gold": 18, "pick": [{ "base": "light_chest", "label": "a digger's leather coat" }, { "base": "medium_chest", "label": "an old mail shirt" }] }
+    },
+    "ash_robbed_grave": {
+      "title": "The Robbed Grave", "kind": "side", "region": "ashfield", "level": 4, "giver": "ash_widow", "turnIn": "ash_widow",
+      "summary": "Someone dug up the widow's husband for the locket he was buried with. The robbers camp south of the cemetery wall.",
+      "offer": ["Bram was buried in the Old Families with my locket in his hand. Now the grave is open and the locket's gone.", "It wasn't the dead that did it. There's a man called Harl Mott who camps past the broken wall. Bring it back to me."],
+      "acceptReply": "Look at the grave first, if you can bear it. Then go through the broken wall in the Paupers' Field.",
+      "steps": [
+        { "id": "grave", "kind": "use", "objects": ["robbed_grave"], "item": "Bram Carrow's grave", "text": "Look at Bram Carrow's grave in the Old Families." },
+        { "id": "mott", "kind": "kill", "targets": [{ "camp": "robbers_camp", "monster": "grave_robber", "count": 1, "label": "Harl Mott, Grave Robber" }], "text": "Defeat Harl Mott at the robbers' camp past the broken wall." },
+        { "id": "locket", "kind": "collect", "objects": ["stolen_locket"], "item": "the widow's locket", "text": "Find the locket in the robbers' camp." }
+      ],
+      "done": ["That's it. That's his. Thank you.", "I'll have him put back properly. With a heavier stone this time."],
+      "rewards": { "xp": 118, "gold": 20, "pick": [{ "base": "shortbow", "label": "a robber's bow" }, { "base": "sword", "label": "a robber's blade" }], "worldFlags": ["ash_locket_back"] }
+    },
+    "ash_ghouls_at_the_fold": {
+      "title": "Ghouls at the Fold", "kind": "side", "region": "ashfield", "level": 3, "giver": "ash_hunter", "turnIn": "ash_hunter",
+      "summary": "Ghouls come up from the graveyard at night and take the hamlet's sheep from the fold to the south.",
+      "offer": ["Something's taking the sheep at the fold. Not wolves. Wolves don't drag them toward the graveyard.", "Ghouls. Six of them, maybe more. Thin them out and I'll pay you out of my own pocket."],
+      "acceptReply": "Follow the Fold Track south out of the hamlet. You'll smell them before you see them.",
+      "steps": [
+        { "id": "ghouls", "kind": "kill", "targets": [{ "camp": "ghoul_pasture", "monster": "barrow_ghoul", "count": 6, "label": "Barrow Ghoul" }], "text": "Kill the ghouls at the sheep fold." }
+      ],
+      "done": ["Quiet night at the fold. First one this month.", "Here. And take this, you'll want it in that graveyard."],
+      "rewards": { "xp": 96, "gold": 14, "pick": [{ "base": "shortbow", "label": "a hunter's bow" }, { "base": "light_chest", "label": "a hunter's jerkin" }] }
+    },
+    "ash_collapsed_grave": {
+      "title": "The Collapsed Grave", "kind": "side", "region": "ashfield", "level": 5, "giver": "ash_gravedigger", "turnIn": "ash_gravedigger",
+      "requires": { "quests": ["ash_family_rings"] },
+      "summary": "A grave in the Paupers' Field fell in. The gravedigger thinks it opens into the Catacombs: clear the dead round it and prop it open.",
+      "offer": ["The sunken grave in the Paupers' Field. I dropped a stone in it and never heard it land.", "If it opens into the old catacombs, that's a way down that doesn't go past the Mausoleum Hill. Clear the dead round it and wedge it open with timbers."],
+      "acceptReply": "Take the Paupers' Path. It's beside the path, past the bend.",
+      "steps": [
+        { "id": "dead", "kind": "kill", "targets": [{ "camp": "paupers_dead", "monster": "hollowborn", "count": 3, "label": "Hollowborn" }], "text": "Clear the hollowborn from the Paupers' Field." },
+        { "id": "prop", "kind": "use", "objects": ["collapsed_grave"], "item": "the collapsed grave", "text": "Wedge the collapsed grave open with timbers.", "worldFlags": ["ashfield_shortcut_open"] }
+      ],
+      "done": ["Open, and you came back up. Good.", "That's your way into the Catacombs now, if the crypt gate is too hot."],
+      "rewards": { "xp": 140, "gold": 22, "pick": [{ "base": "medium_chest", "label": "a sturdy mail shirt" }, { "base": "staff", "label": "a long staff" }] }
+    },
+    "ash_sexton_below": {
+      "title": "The Sexton Below", "kind": "side", "region": "ashfield", "level": 6, "giver": "ash_priest", "turnIn": "ash_priest",
+      "requires": { "quests": ["ash_chapel_yard"] },
+      "summary": "The sexton gave the cult the crypt key and followed them down. Whatever he is now, the priest wants him put to rest.",
+      "offer": ["The sexton went down with them. If he's alive, bring him back. If he isn't, and I don't think he is, give him peace.", "The crypt gate is on Mausoleum Hill. Go with friends. It's deep down there."],
+      "acceptReply": "The Hill Path starts at the Cross Walk. The gate is at the top, facing the chapel.",
+      "steps": [
+        { "id": "gate", "kind": "reach", "place": "crypt_gate", "text": "Climb Mausoleum Hill to the Crypt Gate." },
+        { "id": "sexton", "kind": "kill", "targets": [{ "monster": "the_sexton", "count": 1, "label": "the Sexton", "region": "ashfield_catacombs" }], "text": "Find the sexton in the Catacombs and put him to rest." }
+      ],
+      "done": ["Then it's done. I'll ring the bell for him tonight.", "He wasn't a bad man. He was afraid, and they knew it."],
+      "rewards": { "xp": 162, "gold": 30, "pick": [{ "base": "sword", "label": "the sexton's lantern blade" }, { "base": "staff", "label": "the sexton's staff" }, { "base": "shortbow", "label": "a crypt-warden's bow" }] }
+    }
+  }
+}

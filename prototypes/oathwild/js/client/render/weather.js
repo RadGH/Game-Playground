@@ -113,6 +113,8 @@ const SKY_FRAG = /* glsl */`
 
 export function createWeatherView(view, { heightAt, T = null, quality = 'medium', sound = null, seed = 7, wind = null } = {}) {
   const { scene, camera, renderer } = view;
+  // T may be a function: the page swaps places (regions, 2026-11-27) and the weather must read the place drawn NOW
+  const TT = () => (typeof T === 'function' ? T() : T);
   const G0 = WEATHER_GFX[quality] || WEATHER_GFX.medium;
   const gfx = { ...G0 };                                         // rain.js re-reads rainDrops / snowFlakes / debris each frame
   // ---- the wind: the game's ONE wind (render/wind.js — trees, leaves, grass and crops bend with it); the weather sets its
@@ -123,7 +125,7 @@ export function createWeatherView(view, { heightAt, T = null, quality = 'medium'
 
   // ---- rain, splashes, sheets, snow, blown leaves (Farhold)
   const precip = createPrecipitation(scene, gfx);
-  const terrain = { heightAt: (x, z) => heightAt(x, z), waterAt: (x, z) => T?.waterAt?.(x, z) || null };
+  const terrain = { heightAt: (x, z) => heightAt(x, z), waterAt: (x, z) => TT()?.waterAt?.(x, z) || null };
 
   // ---- the cloud layer (inside the sky dome, before the distant hills: an opaque-list mesh that blends itself)
   const paint = new THREE.TextureLoader().load(PAINT.url, t => { t.colorSpace = THREE.SRGBColorSpace; t.wrapS = THREE.RepeatWrapping; t.needsUpdate = true; skyU.uReady.value = 1; }, undefined, () => {});
@@ -175,7 +177,7 @@ export function createWeatherView(view, { heightAt, T = null, quality = 'medium'
       if (hsh(i, k, 1) > 0.2) continue;
       const x = (i + 0.2 + hsh(i, k, 2) * 0.6) * CELL, z = (k + 0.2 + hsh(i, k, 3) * 0.6) * CELL;
       if (Math.hypot(x - cx, z - cz) > R) continue;
-      const w = T?.waterAt?.(x, z); if (w && w.depth > -0.2) continue;
+      const w = TT()?.waterAt?.(x, z); if (w && w.depth > -0.2) continue;
       const y = heightAt(x, z), r = 0.7 + hsh(i, k, 4) * 1.5;
       if (Math.abs(heightAt(x + r, z) - y) > 0.08 || Math.abs(heightAt(x, z + r) - y) > 0.08 || Math.abs(heightAt(x - r, z) - y) > 0.08 || Math.abs(heightAt(x, z - r) - y) > 0.08) continue;   // level ground only
       const sz = r * size;
@@ -269,7 +271,7 @@ export function createWeatherView(view, { heightAt, T = null, quality = 'medium'
       const ax = at?.x ?? camera.position.x, az = at?.z ?? camera.position.z;
       // what is drawn: the server's weather here (two regions blended over a border), or the editor's preview
       if (previewRow) { previewSince += dt; regionNumbers(previewRow, previewSince, N); N.region = null; }
-      else if (wire) { const n = numbersAt(wire, T, ax, az, Number.isFinite(sentAt) && Number.isFinite(time) ? Math.max(0, time - sentAt) : 0); Object.assign(N, n); }
+      else if (wire) { const n = numbersAt(wire, TT(), ax, az, Number.isFinite(sentAt) && Number.isFinite(time) ? Math.max(0, time - sentAt) : 0); Object.assign(N, n); }
       else regionNumbers(['clear', null, 0, 1], 0, N);
       // the wind: weather sets its strength; rain, clouds and cloud shadows follow it
       const W = windOf();

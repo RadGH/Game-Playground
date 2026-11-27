@@ -41,6 +41,7 @@ When work is laid out (rounds, milestones, a feedback list), finish ALL of it be
 | Folder | What it is |
 |---|---|
 | `icons/` | SVG spell icons for all Thousandvale classes + game icons (buttons, materials, potions…) |
+| `iconkit/` | Icon Kit: layered spell icons (frame + tinted plate + glyph + glow, circle/square) + review of every game icon |
 | `voice-lab/` | Character voices: our formant synth (`FORMANT.md`), espeak, babble, Piper, Web Speech; presets, effects |
 | `lingo/` | Text language: templates, lexicon, traits, memory (`MEMORY.md`), scene awareness, relationships (`RELATIONS.md`) |
 | `avatar-2d/` | SVG paper-doll builder; `js/parts/chibi2-parts.js` registers every Chibi 2 part id |

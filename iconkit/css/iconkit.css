@@ -1,0 +1,65 @@
+/* Icon Kit — the stacked icon (js/iconkit.js iconHtml). Every layer fills the same square box, so the picture is
+   centred by construction; the box never squeezes in a flex row (lessons rule 85). A game imports this file as is.
+   Geometry comes from CSS variables the kit sets per icon: --ik-in (the frame opening, share of the box),
+   --ik-ps (plate scale), --ik-gs (glyph scale). */
+.ik { position: relative; display: inline-block; flex: none; box-sizing: border-box; width: var(--ik-size, 40px); height: var(--ik-size, 40px); aspect-ratio: 1; vertical-align: middle; line-height: 0; isolation: isolate; user-select: none; -webkit-user-select: none; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; }
+.ik > *, .ik-plate > *, .ik-glyph > *, .ik-clip > *, .ik-frame > *, .ik-fx > * { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; display: block; pointer-events: none; }
+.ik img { object-fit: contain; max-width: none; }
+/* the plate scales to tuck just under the frame; it and the glyph each blend only with themselves */
+.ik-plate { transform: scale(var(--ik-ps, 1)); isolation: isolate; }
+.ik-glyph { transform: scale(var(--ik-gs, 1)); transform-origin: 50% 50%; isolation: isolate; }
+/* glow + glyph and the state effects are cut to the (scaled) plate's own shape: nothing runs under the frame */
+.ik-clip, .ik-fx { -webkit-mask: var(--ik-plate) center / calc(var(--ik-ps, 1) * 100%) calc(var(--ik-ps, 1) * 100%) no-repeat; mask: var(--ik-plate) center / calc(var(--ik-ps, 1) * 100%) calc(var(--ik-ps, 1) * 100%) no-repeat; }
+/* tint: a colour layer cut to the picture's own shape. Plate = 'color' blend (keeps the stone's light and dark, takes
+   the class hue) at --ik-strength; a tintable glyph and a line frame = 'multiply' (white parts take the colour). */
+.ik-tint { background: var(--ik-tint); -webkit-mask: var(--ik-plate) center / 100% 100% no-repeat; mask: var(--ik-plate) center / 100% 100% no-repeat; mix-blend-mode: color; opacity: var(--ik-strength, .55); }
+.ik-glyph > .ik-tint { background: var(--ik-glyph-tint); -webkit-mask-image: var(--ik-glyph-src); mask-image: var(--ik-glyph-src); mix-blend-mode: multiply; opacity: 1; }
+.ik-frame { isolation: isolate; }
+.ik-frame > .ik-tint { background: var(--ik-frame-tint); -webkit-mask-image: var(--ik-frame-src); mask-image: var(--ik-frame-src); mix-blend-mode: multiply; opacity: 1; }
+/* glow: the element colour cut to the white glow picture */
+.ik-glow { background: var(--ik-glow); -webkit-mask: var(--ik-glow-src) center / 100% 100% no-repeat; mask: var(--ik-glow-src) center / 100% 100% no-repeat; opacity: .6; }   /* = GLOW_ALPHA in js/iconkit.js */
+
+/* ---- effects inside the opening (all in .ik-fx, cut to the plate) ---- */
+/* a ring that follows the opening's edge */
+.ik-inner, .ik-socket, .ik-disp { inset: calc((.5 - var(--ik-in, .4)) * 100%) !important; width: auto !important; height: auto !important; box-sizing: border-box; }
+.ik-circle .ik-inner, .ik-circle .ik-socket, .ik-circle .ik-disp { border-radius: 50%; }
+.ik-square .ik-inner, .ik-square .ik-socket, .ik-square .ik-disp { border-radius: calc(var(--ik-size) * .06); }
+/* cooldown: a dark clockwise sweep */
+.ik-cd { background: conic-gradient(rgba(6, 8, 14, .68) var(--ik-cd, 0deg), transparent 0); }
+/* out of mana (blue) / out of range (red) */
+.is-nomana .ik-wash { background: rgba(30, 60, 210, .46); }
+.is-norange .ik-wash { background: rgba(210, 30, 30, .42); }
+/* cast bar across the face: a warm fill sweeping left to right with a bright leading edge */
+.ik-castf { left: calc((.5 - var(--ik-in, .4)) * 100%) !important; width: calc(var(--ik-cast, 0) * var(--ik-in, .4) * 200%) !important; background: linear-gradient(90deg, rgba(255, 220, 140, .12), rgba(255, 236, 170, .5)); box-shadow: inset calc(var(--ik-size) * -.03) 0 0 rgba(255, 248, 220, .95); }
+/* cast bar along the bottom of the opening */
+.ik-castb { top: auto !important; bottom: calc((.5 - var(--ik-in, .4)) * 100%) !important; height: 17% !important; background: rgba(0, 0, 0, .72); }
+.ik-castb > i { position: absolute; left: calc((.5 - var(--ik-in, .4)) * 100% / 1); top: 18%; bottom: 0; width: calc(var(--ik-cast, 0) * var(--ik-in, .4) * 200%); background: linear-gradient(#ffe9a6, #d08a1e); }
+/* active / toggled: a steady bright inner glow and a gold edge */
+.ik-inner { box-shadow: inset 0 0 calc(var(--ik-size) * .16) calc(var(--ik-size) * .04) rgba(255, 236, 170, .6), inset 0 0 0 max(1.5px, calc(var(--ik-size) * .035)) #ffd76a; }
+.is-active > .ik-frame, .is-selected > .ik-frame { filter: brightness(1.3) saturate(1.1); }
+/* channeling: the same glow, pulsing, and a light running round the rim */
+.is-channeling .ik-inner { animation: ik-pulse 1.1s ease-in-out infinite alternate; }
+@keyframes ik-pulse { from { opacity: .35; } to { opacity: 1; } }
+@property --ik-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.ik-sweep { background: conic-gradient(from var(--ik-a), transparent 0 70%, rgba(255, 245, 210, 0) 72%, rgba(255, 248, 225, .95) 90%, transparent 100%); -webkit-mask: var(--ik-frame-src) center / 100% 100% no-repeat; mask: var(--ik-frame-src) center / 100% 100% no-repeat; mix-blend-mode: plus-lighter; animation: ik-spin 2.4s linear infinite; }
+.ik-f-none .ik-sweep { -webkit-mask: radial-gradient(circle, transparent calc(var(--ik-in) * 100% - 2px), #000 calc(var(--ik-in) * 100% - 1px), #000 calc(var(--ik-in) * 100% + 1.5px), transparent calc(var(--ik-in) * 100% + 2.5px)); mask: radial-gradient(circle, transparent calc(var(--ik-in) * 100% - 2px), #000 calc(var(--ik-in) * 100% - 1px), #000 calc(var(--ik-in) * 100% + 1.5px), transparent calc(var(--ik-in) * 100% + 2.5px)); }
+@keyframes ik-spin { to { --ik-a: 360deg; } }
+/* dispellable: a coloured inner ring by dispel kind (data/themes.json dispel) */
+.ik-disp { box-shadow: inset 0 0 0 max(2px, calc(var(--ik-size) * .06)) var(--ik-dispel), inset 0 0 calc(var(--ik-size) * .12) var(--ik-dispel); }
+/* passive, two looks: dim (greyed metal, no glow) or socket (sunk into the frame, no glow) */
+.ik-passive-dim > .ik-frame { filter: grayscale(.75) brightness(.78); }
+.ik-passive-dim > .ik-clip, .ik-passive-dim > .ik-plate { filter: saturate(.6) brightness(.9); }
+.ik-socket { box-shadow: inset 0 0 calc(var(--ik-size) * .14) calc(var(--ik-size) * .05) rgba(0, 0, 0, .75); }
+.ik-passive-socket > .ik-frame { filter: brightness(.7) saturate(.8); }
+
+/* ---- whole-icon states ---- */
+.ik.is-disabled { filter: grayscale(1) brightness(.62); }
+.ik.is-selected { filter: drop-shadow(0 0 calc(var(--ik-size, 40px) * .07) #ffe7a0); }
+
+/* ---- text: cooldown seconds (centre), stacks (bottom right badge), duration (under the icon) ---- */
+.ik > b { position: absolute; inset: auto; width: auto; height: auto; font-weight: 800; line-height: 1; pointer-events: none; }
+.ik > .ik-sec { inset: 0; display: grid; place-items: center; color: #fff; font-size: max(9px, calc(var(--ik-size) * .36)); text-shadow: 0 0 2px #000, 0 0 2px #000, 0 1px 3px #000; }
+.ik > .ik-stk { right: -1%; bottom: -1%; min-width: 36%; height: 36%; padding: 0 6%; box-sizing: border-box; display: grid; place-items: center; border-radius: 999px; background: #16130c; border: max(1px, calc(var(--ik-size) * .025)) solid #c9a24a; color: #fff; font-size: max(8px, calc(var(--ik-size) * .24)); }
+.ik > .ik-stk.is-full { background: linear-gradient(#ffe08a, #e0a838); border-color: #fff2c0; color: #1a1206; box-shadow: 0 0 calc(var(--ik-size) * .12) #ffd76a; }
+.ik > .ik-dur { top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; color: #f2efe6; font-weight: 700; font-size: max(10px, calc(var(--ik-size) * .24)); white-space: nowrap; text-shadow: 0 1px 2px #000; }
+@media (prefers-reduced-motion: reduce) { .is-channeling .ik-inner, .ik-sweep { animation: none; } }

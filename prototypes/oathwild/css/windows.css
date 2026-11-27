@@ -154,6 +154,7 @@
 .sb-say { margin: 10px 0 0; font-size: 14px; }
 .sb-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px; }
 .sb-spell { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 6px 10px 6px 6px; border-radius: 9px; border: 1px solid var(--edge-soft); background: rgba(0, 0, 0, .2); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.sb-spell > svg, .sb-spell > .ow-motif, .sb-slot > svg, .sb-slot > .ow-motif { flex: none; width: 44px; height: 44px; }   /* never squeezed out of round (owner 2026-11-27) */
 .sb-txt { display: flex; flex-direction: column; min-width: 0; }
 .sb-txt small { color: var(--ink-dim); font-size: 13px; }
 

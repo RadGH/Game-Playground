@@ -38,6 +38,8 @@
     "chest_common": { "gold": [4, 12], "items": { "chance": 0.6, "count": [1, 2] }, "kinds": { "weapon": 1, "armour": 2, "jewellery": 1, "magic": 0.5 }, "rarityBoost": 1.3 },
     "chest_camp": { "gold": [10, 24], "items": { "chance": 0.9, "count": [1, 3] }, "kinds": { "weapon": 2, "armour": 2, "jewellery": 1, "magic": 1 }, "rarityBoost": 1.8 },
     "chest_boss": { "gold": [25, 50], "items": { "chance": 1, "count": [2, 3] }, "kinds": { "weapon": 2, "armour": 2, "jewellery": 2, "magic": 1 }, "rarityBoost": 3, "minRarity": "magic" },
-    "bag": { "gold": [0, 0], "items": { "chance": 0, "count": [0, 0] }, "kinds": {}, "rarityBoost": 1 }
+    "bag": { "gold": [0, 0], "items": { "chance": 0, "count": [0, 0] }, "kinds": {}, "rarityBoost": 1 },
+    "grave_cache": { "_doc": "An open grave's small cache (Ashfield, owner 2026-11-27: 'easter eggs where you can loot certain open graves').", "gold": [3, 10], "items": { "chance": 0.55, "count": [1, 1] }, "kinds": { "jewellery": 2, "weapon": 1, "armour": 1 }, "rarityBoost": 1.4 },
+    "grave_ring": { "_doc": "The rare open grave with a ring in it.", "gold": [6, 14], "items": { "chance": 1, "count": [1, 1] }, "kinds": { "jewellery": 1 }, "rarityBoost": 2.5, "minRarity": "magic" }
   }
 }

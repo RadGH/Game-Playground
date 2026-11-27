@@ -44,7 +44,10 @@ export function rosterFor(rules, b) {
   const M = rules.data.monsters.monsters;
   const normals = new Set(), bosses = new Set();
   for (const r of Object.values(rules.data.regions.regions)) {
-    if (r.levels[1] < b.levels[0] || r.levels[0] > b.levels[1]) continue;
+    // arenaLevels: the band the arena draws this region's monsters for (2026-11-27 the map went to levels 1-5 — the
+    // arena's brackets up to 10 still use Thornmere's beasts, orcs and dead; their strength comes from the bracket)
+    const lv = r.arenaLevels || r.levels;
+    if (lv[1] < b.levels[0] || lv[0] > b.levels[1]) continue;
     for (const x of r.roam || []) if (M[x.id] && (M[x.id].temper || 'hostile') === 'hostile') normals.add(x.id);
     for (const c of Object.values(r.camps || {})) for (const s of c.spawns) {
       if (!M[s.id] || (M[s.id].temper || 'hostile') !== 'hostile') continue;

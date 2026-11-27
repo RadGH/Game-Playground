@@ -5,8 +5,8 @@
    "name": "Brightwater Vale",
    "levels": [
     1,
-    5
-   ],
+    3
+   ], "arenaLevels": [1, 5],
    "roam": [
     {
      "id": "vale_wolf",
@@ -57,8 +57,8 @@
       214
      ],
      "levels": [
-      3,
-      4
+      2,
+      3
      ],
      "respawnMinutes": 20,
      "chest": "bandit_strongbox",
@@ -124,7 +124,7 @@
      ],
      "levels": [
       2,
-      5
+      3
      ],
      "respawnMinutes": 20,
      "chest": "warren_hoard",
@@ -138,8 +138,8 @@
         0
        ],
        "levels": [
-        4,
-        5
+        3,
+        3
        ]
       },
       {
@@ -151,7 +151,7 @@
        ],
        "levels": [
         2,
-        3
+        2
        ]
       },
       {
@@ -163,7 +163,7 @@
        ],
        "levels": [
         2,
-        3
+        2
        ]
       },
       {
@@ -175,7 +175,7 @@
        ],
        "levels": [
         2,
-        3
+        2
        ]
       },
       {
@@ -187,7 +187,7 @@
        ],
        "levels": [
         2,
-        3
+        2
        ]
       },
       {
@@ -198,8 +198,8 @@
         4.9
        ],
        "levels": [
-        3,
-        4
+        2,
+        3
        ]
       },
       {
@@ -210,8 +210,8 @@
         -30.4
        ],
        "levels": [
-        3,
-        4
+        2,
+        3
        ]
       }
      ],
@@ -225,8 +225,8 @@
       234
      ],
      "levels": [
-      4,
-      5
+      3,
+      3
      ],
      "respawnMinutes": 25,
      "chest": "hill_reliquary",
@@ -283,8 +283,8 @@
       -92
      ],
      "levels": [
-      3,
-      3
+      2,
+      2
      ],
      "respawnMinutes": 20,
      "chest": null,
@@ -327,7 +327,7 @@
       222
      ],
      "table": "chest_camp",
-     "level": 4,
+     "level": 3,
      "refillMinutes": 30,
      "lock": "apprentice"
     },
@@ -338,7 +338,7 @@
       -252
      ],
      "table": "chest_camp",
-     "level": 5,
+     "level": 3,
      "refillMinutes": 30,
      "lock": null
     },
@@ -360,7 +360,7 @@
       122
      ],
      "table": "chest_common",
-     "level": 3,
+     "level": 2,
      "refillMinutes": 20,
      "lock": null
     },
@@ -371,7 +371,7 @@
       244
      ],
      "table": "chest_camp",
-     "level": 5,
+     "level": 3,
      "refillMinutes": 30,
      "lock": "apprentice"
     }
@@ -403,9 +403,9 @@
   "thornmere_wilds": {
    "name": "Thornmere Wilds",
    "levels": [
-    5,
-    10
-   ],
+    3,
+    5
+   ], "arenaLevels": [5, 10],
    "roam": [
     {
      "id": "thornmere_wolf",
@@ -464,8 +464,8 @@
       -262
      ],
      "levels": [
-      7,
-      9
+      4,
+      5
      ],
      "respawnMinutes": 30,
      "chest": "barrow_tomb",
@@ -546,8 +546,8 @@
       -36
      ],
      "levels": [
-      6,
-      7
+      3,
+      4
      ],
      "respawnMinutes": 25,
      "chest": "troll_pile",
@@ -588,8 +588,8 @@
       258
      ],
      "levels": [
-      8,
-      10
+      4,
+      5
      ],
      "respawnMinutes": 25,
      "chest": "ruin_coffer",
@@ -662,8 +662,8 @@
       40
      ],
      "levels": [
-      8,
-      9
+      4,
+      5
      ],
      "respawnMinutes": 30,
      "chest": null,
@@ -712,8 +712,8 @@
       -188
      ],
      "levels": [
-      6,
-      7
+      3,
+      4
      ],
      "respawnMinutes": 20,
      "chest": null,
@@ -769,8 +769,8 @@
       168
      ],
      "levels": [
-      7,
-      7
+      4,
+      4
      ],
      "respawnMinutes": 30,
      "chest": null,
@@ -795,8 +795,8 @@
       -112
      ],
      "levels": [
-      7,
-      8
+      4,
+      4
      ],
      "respawnMinutes": 25,
      "chest": "redtusk_stash",
@@ -847,7 +847,7 @@
       -272
      ],
      "table": "chest_boss",
-     "level": 9,
+     "level": 5,
      "refillMinutes": 45,
      "lock": "adept"
     },
@@ -858,7 +858,7 @@
       -44
      ],
      "table": "chest_camp",
-     "level": 7,
+     "level": 4,
      "refillMinutes": 30,
      "lock": null
     },
@@ -869,7 +869,7 @@
       266
      ],
      "table": "chest_camp",
-     "level": 10,
+     "level": 5,
      "refillMinutes": 30,
      "lock": "expert"
     },
@@ -880,7 +880,7 @@
       -252
      ],
      "table": "chest_common",
-     "level": 7,
+     "level": 4,
      "refillMinutes": 30,
      "lock": null
     },
@@ -891,7 +891,7 @@
       -120
      ],
      "table": "chest_camp",
-     "level": 8,
+     "level": 4,
      "refillMinutes": 30,
      "lock": "apprentice"
     }

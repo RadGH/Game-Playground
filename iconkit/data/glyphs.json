@@ -1,0 +1,742 @@
+{
+ "_doc": "Icon Kit glyphs: the central picture of an icon. js/iconkit.js iconFor() scores every row against a spell: a tag word in the spell's name, its element and its mechanic (data/glyphs.json `mechanics`). `file` = the best art there is (a painted 256 px WebP once tools/import-layers.py has run, else the SVG placeholder), `small` = the 64 px WebP for buttons up to 48 px, `placeholder` = the drawn SVG (always kept). `tintable` glyphs are drawn in light greys and take the spell's element colour, so one drawing serves every element. element '' = any element. `artElement` = the colour a painted generic glyph was painted in: a spell of another element gets the drawn tintable version instead. `placeholder` may point at another glyph's drawing while a new glyph waits for paint.",
+ "elements": [
+  "fire",
+  "frost",
+  "lightning",
+  "arcane",
+  "holy",
+  "nature",
+  "poison",
+  "shadow",
+  "physical"
+ ],
+ "mechanics": {
+  "strike": "Melee swing or cone in front",
+  "bolt": "Missile or thrown shot",
+  "nova": "Burst around the caster",
+  "area": "Circle on the ground at range",
+  "beam": "Line or ray",
+  "leap": "Jump to a spot and land hard",
+  "dash": "Charge or quick move",
+  "buff": "Song, shout or self boost",
+  "heal": "Healing or revive",
+  "ward": "Barrier or shield on someone",
+  "summon": "Calls a pet, totem or minion",
+  "dot": "Poison, curse or harm over time",
+  "form": "Change shape (bear, wolf\u2026)"
+ },
+ "glyphs": [
+  {
+   "id": "fireball",
+   "name": "Fireball",
+   "file": "layers/codex/glyph-fireball-256.webp",
+   "placeholder": "layers/placeholder/glyph-fireball.svg",
+   "element": "fire",
+   "mechanic": "bolt",
+   "tintable": false,
+   "tags": [
+    "fire",
+    "flame",
+    "fireball",
+    "burn",
+    "blaze",
+    "inferno",
+    "scorch",
+    "flaming",
+    "magma",
+    "lava",
+    "pyre"
+   ],
+   "fit": {
+    "circle": 0.522,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-fireball-64.webp"
+  },
+  {
+   "id": "frost-shard",
+   "name": "Frost Shard",
+   "file": "layers/codex/glyph-frost-shard-256.webp",
+   "placeholder": "layers/placeholder/glyph-frost-shard.svg",
+   "element": "frost",
+   "mechanic": "bolt",
+   "tintable": false,
+   "tags": [
+    "ice",
+    "frost",
+    "shard",
+    "frozen",
+    "cold",
+    "chill",
+    "glacial",
+    "blizzard",
+    "freeze",
+    "frostbite",
+    "hail",
+    "icicle"
+   ],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-frost-shard-64.webp"
+  },
+  {
+   "id": "lightning",
+   "name": "Lightning",
+   "file": "layers/codex/glyph-lightning-256.webp",
+   "placeholder": "layers/placeholder/glyph-lightning.svg",
+   "element": "lightning",
+   "mechanic": "bolt",
+   "tintable": false,
+   "tags": [
+    "lightning",
+    "shock",
+    "storm",
+    "thunder",
+    "spark",
+    "static",
+    "chain",
+    "thunderclap",
+    "zap",
+    "tempest"
+   ],
+   "fit": {
+    "circle": 0.571,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-lightning-64.webp"
+  },
+  {
+   "id": "arcane-orb",
+   "name": "Arcane Orb",
+   "file": "layers/codex/glyph-arcane-orb-256.webp",
+   "placeholder": "layers/placeholder/glyph-arcane-orb.svg",
+   "element": "arcane",
+   "mechanic": "bolt",
+   "tintable": false,
+   "tags": [
+    "arcane",
+    "orb",
+    "missile",
+    "missiles",
+    "mana",
+    "spell",
+    "sphere",
+    "star"
+   ],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-arcane-orb-64.webp"
+  },
+  {
+   "id": "holy-light",
+   "name": "Holy Light",
+   "file": "layers/codex/glyph-holy-light-256.webp",
+   "placeholder": "layers/placeholder/glyph-holy-light.svg",
+   "element": "holy",
+   "mechanic": "heal",
+   "tintable": false,
+   "tags": [
+    "holy",
+    "light",
+    "radiant",
+    "prayer",
+    "bless",
+    "smite",
+    "sun",
+    "divine",
+    "sacred",
+    "dawn",
+    "consecrate"
+   ],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-holy-light-64.webp"
+  },
+  {
+   "id": "sword-slash",
+   "name": "Sword Slash",
+   "file": "layers/codex/glyph-sword-slash-256.webp",
+   "placeholder": "layers/placeholder/glyph-sword-slash.svg",
+   "element": "physical",
+   "mechanic": "strike",
+   "tintable": false,
+   "tags": [
+    "slash",
+    "cleave",
+    "strike",
+    "cut",
+    "sword",
+    "blade",
+    "swing",
+    "rend",
+    "sunder",
+    "carve",
+    "hack"
+   ],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-sword-slash-64.webp"
+  },
+  {
+   "id": "shield-bash",
+   "name": "Shield Bash",
+   "file": "layers/codex/glyph-shield-bash-256.webp",
+   "placeholder": "layers/placeholder/glyph-shield-bash.svg",
+   "element": "physical",
+   "mechanic": "strike",
+   "tintable": false,
+   "tags": [
+    "shield",
+    "bash",
+    "guard",
+    "block",
+    "bulwark",
+    "defend"
+   ],
+   "fit": {
+    "circle": 0.558,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-shield-bash-64.webp"
+  },
+  {
+   "id": "poison",
+   "name": "Poison Vial",
+   "file": "layers/codex/glyph-poison-256.webp",
+   "placeholder": "layers/placeholder/glyph-poison.svg",
+   "element": "poison",
+   "mechanic": "dot",
+   "tintable": false,
+   "tags": [
+    "poison",
+    "venom",
+    "toxic",
+    "vial",
+    "plague",
+    "blight",
+    "acid",
+    "vile"
+   ],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-poison-64.webp"
+  },
+  {
+   "id": "shadow-bolt",
+   "name": "Shadow Bolt",
+   "file": "layers/codex/glyph-shadow-bolt-256.webp",
+   "placeholder": "layers/placeholder/glyph-shadow-bolt.svg",
+   "element": "shadow",
+   "mechanic": "bolt",
+   "tintable": false,
+   "tags": [
+    "shadow",
+    "dark",
+    "void",
+    "curse",
+    "hex",
+    "dread",
+    "gloom",
+    "night",
+    "umbral"
+   ],
+   "fit": {
+    "circle": 0.492,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-shadow-bolt-64.webp"
+  },
+  {
+   "id": "nature-leaf",
+   "name": "Living Leaf",
+   "file": "layers/codex/glyph-nature-leaf-256.webp",
+   "placeholder": "layers/placeholder/glyph-nature-leaf.svg",
+   "element": "nature",
+   "mechanic": "heal",
+   "tintable": false,
+   "tags": [
+    "nature",
+    "leaf",
+    "thorn",
+    "thorns",
+    "vine",
+    "vines",
+    "root",
+    "roots",
+    "wild",
+    "bloom",
+    "growth",
+    "grove",
+    "regrowth",
+    "rejuvenate"
+   ],
+   "fit": {
+    "circle": 0.534,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-nature-leaf-64.webp"
+  },
+  {
+   "id": "arrow-volley",
+   "name": "Arrow Volley",
+   "file": "layers/codex/glyph-arrow-volley-256.webp",
+   "placeholder": "layers/placeholder/glyph-arrow-volley.svg",
+   "element": "physical",
+   "mechanic": "bolt",
+   "tintable": false,
+   "tags": [
+    "arrow",
+    "arrows",
+    "shot",
+    "volley",
+    "bow",
+    "shoot",
+    "quiver",
+    "barrage",
+    "bolt",
+    "snipe"
+   ],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-arrow-volley-64.webp"
+  },
+  {
+   "id": "whirlwind",
+   "name": "Whirlwind",
+   "file": "layers/codex/glyph-whirlwind-256.webp",
+   "placeholder": "layers/placeholder/glyph-whirlwind.svg",
+   "element": "physical",
+   "mechanic": "nova",
+   "tintable": false,
+   "tags": [
+    "whirl",
+    "whirlwind",
+    "spin",
+    "cyclone",
+    "sweep",
+    "twirl"
+   ],
+   "fit": {
+    "circle": 0.545,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-whirlwind-64.webp"
+  },
+  {
+   "id": "dagger",
+   "name": "Dagger",
+   "file": "layers/codex/glyph-dagger-256.webp",
+   "placeholder": "layers/placeholder/glyph-dagger.svg",
+   "element": "physical",
+   "mechanic": "strike",
+   "tintable": false,
+   "tags": [
+    "stab",
+    "backstab",
+    "dagger",
+    "assassinate",
+    "ambush",
+    "knife",
+    "eviscerate",
+    "gouge",
+    "fan",
+    "blades",
+    "lunge"
+   ],
+   "fit": {
+    "circle": 0.512,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-dagger-64.webp"
+  },
+  {
+   "id": "skull",
+   "name": "Skull",
+   "file": "layers/codex/glyph-skull-256.webp",
+   "placeholder": "layers/placeholder/glyph-skull.svg",
+   "element": "shadow",
+   "mechanic": "dot",
+   "tintable": false,
+   "tags": [
+    "skull",
+    "death",
+    "bone",
+    "bones",
+    "grave",
+    "necrotic",
+    "drain",
+    "wither",
+    "corpse",
+    "soul",
+    "dead",
+    "reap",
+    "raise"
+   ],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-skull-64.webp"
+  },
+  {
+   "id": "leap",
+   "name": "Leap",
+   "file": "layers/codex/glyph-leap-256.webp",
+   "placeholder": "layers/placeholder/glyph-leap.svg",
+   "element": "",
+   "mechanic": "leap",
+   "tintable": true,
+   "tags": [
+    "leap",
+    "jump",
+    "pounce",
+    "vault",
+    "bound"
+   ],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-leap-64.webp"
+  },
+  {
+   "id": "dash",
+   "name": "Dash",
+   "file": "layers/codex/glyph-dash-256.webp",
+   "placeholder": "layers/placeholder/glyph-dash.svg",
+   "element": "",
+   "mechanic": "dash",
+   "tintable": true,
+   "tags": [
+    "dash",
+    "step",
+    "blink",
+    "sprint",
+    "roll",
+    "tumble",
+    "flash"
+   ],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-dash-64.webp"
+  },
+  {
+   "id": "nova",
+   "name": "Nova",
+   "file": "layers/codex/glyph-nova-256.webp",
+   "placeholder": "layers/placeholder/glyph-nova.svg",
+   "element": "",
+   "mechanic": "nova",
+   "tintable": true,
+   "tags": [
+    "nova",
+    "burst",
+    "pulse",
+    "ring",
+    "shockwave",
+    "explosion",
+    "eruption"
+   ],
+   "artElement": "frost",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-nova-64.webp"
+  },
+  {
+   "id": "ground-rune",
+   "name": "Ground Rune",
+   "file": "layers/codex/glyph-ground-rune-256.webp",
+   "placeholder": "layers/placeholder/glyph-ground-rune.svg",
+   "element": "",
+   "mechanic": "area",
+   "tintable": true,
+   "tags": [
+    "circle",
+    "rune",
+    "field",
+    "rain",
+    "zone",
+    "ground",
+    "trap",
+    "mine",
+    "sigil",
+    "glyph"
+   ],
+   "artElement": "fire",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-ground-rune-64.webp"
+  },
+  {
+   "id": "beam",
+   "name": "Beam",
+   "file": "layers/codex/glyph-beam-256.webp",
+   "placeholder": "layers/placeholder/glyph-beam.svg",
+   "element": "",
+   "mechanic": "beam",
+   "tintable": true,
+   "tags": [
+    "beam",
+    "ray",
+    "lance",
+    "line",
+    "wave",
+    "breath",
+    "spear",
+    "piercing"
+   ],
+   "artElement": "holy",
+   "fit": {
+    "circle": 0.479,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-beam-64.webp"
+  },
+  {
+   "id": "summon",
+   "name": "Summon",
+   "file": "layers/codex/glyph-summon-256.webp",
+   "placeholder": "layers/placeholder/glyph-summon.svg",
+   "element": "",
+   "mechanic": "summon",
+   "tintable": true,
+   "tags": [
+    "summon",
+    "call",
+    "raise",
+    "pet",
+    "totem",
+    "minion",
+    "companion",
+    "servant",
+    "spirit",
+    "golem"
+   ],
+   "artElement": "nature",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-summon-64.webp"
+  },
+  {
+   "id": "rally",
+   "name": "Rally",
+   "file": "layers/codex/glyph-rally-256.webp",
+   "placeholder": "layers/placeholder/glyph-rally.svg",
+   "element": "",
+   "mechanic": "buff",
+   "tintable": true,
+   "tags": [
+    "song",
+    "hymn",
+    "shout",
+    "cry",
+    "aura",
+    "blessing",
+    "rally",
+    "ballad",
+    "anthem",
+    "warcry",
+    "battle",
+    "inspire",
+    "courage",
+    "haste",
+    "fury",
+    "rage"
+   ],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-rally-64.webp"
+  },
+  {
+   "id": "ward",
+   "name": "Ward",
+   "file": "layers/codex/glyph-ward-256.webp",
+   "placeholder": "layers/placeholder/glyph-ward.svg",
+   "element": "",
+   "mechanic": "ward",
+   "tintable": true,
+   "tags": [
+    "ward",
+    "barrier",
+    "aegis",
+    "protect",
+    "protection",
+    "sanctuary",
+    "bubble",
+    "armor",
+    "armour",
+    "skin"
+   ],
+   "artElement": "holy",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-ward-64.webp"
+  },
+  {
+   "id": "claw",
+   "name": "Claw",
+   "file": "layers/codex/glyph-claw-256.webp",
+   "placeholder": "layers/placeholder/glyph-claw.svg",
+   "element": "",
+   "mechanic": "form",
+   "tintable": true,
+   "tags": [
+    "form",
+    "bear",
+    "wolf",
+    "claw",
+    "claws",
+    "maul",
+    "feral",
+    "beast",
+    "rake",
+    "swipe"
+   ],
+   "fit": {
+    "circle": 0.522,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-claw-64.webp"
+  },
+  {
+   "id": "charge",
+   "name": "Charge",
+   "file": "layers/codex/glyph-charge-256.webp",
+   "placeholder": "layers/placeholder/glyph-dash.svg",
+   "element": "physical",
+   "mechanic": "dash",
+   "tintable": false,
+   "tags": [
+    "charge",
+    "rush",
+    "bull",
+    "stampede",
+    "trample",
+    "ram"
+   ],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-charge-64.webp"
+  },
+  {
+   "id": "ground-slam",
+   "name": "Ground Slam",
+   "file": "layers/codex/glyph-ground-slam-256.webp",
+   "placeholder": "layers/placeholder/glyph-leap.svg",
+   "element": "physical",
+   "mechanic": "nova",
+   "tintable": false,
+   "tags": [
+    "slam",
+    "stomp",
+    "quake",
+    "earthquake",
+    "smash",
+    "crash",
+    "splitter",
+    "shatter"
+   ],
+   "fit": {
+    "circle": 0.563,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-ground-slam-64.webp"
+  },
+  {
+   "id": "heal",
+   "name": "Healing Hands",
+   "file": "layers/codex/glyph-heal-256.webp",
+   "placeholder": "layers/placeholder/glyph-holy-light.svg",
+   "element": "",
+   "mechanic": "heal",
+   "tintable": false,
+   "tags": [
+    "heal",
+    "healing",
+    "mend",
+    "cure",
+    "renew",
+    "restore",
+    "soothe"
+   ],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-heal-64.webp"
+  },
+  {
+   "id": "taunt",
+   "name": "Taunt",
+   "file": "layers/codex/glyph-taunt-256.webp",
+   "placeholder": "layers/placeholder/glyph-rally.svg",
+   "element": "",
+   "mechanic": "buff",
+   "tintable": false,
+   "tags": [
+    "taunt",
+    "provoke",
+    "challenge",
+    "roar",
+    "bellow",
+    "goad"
+   ],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-taunt-64.webp"
+  },
+  {
+   "id": "stealth",
+   "name": "Stealth",
+   "file": "layers/codex/glyph-stealth-256.webp",
+   "placeholder": "layers/placeholder/glyph-shadow-bolt.svg",
+   "element": "",
+   "mechanic": "buff",
+   "tintable": false,
+   "tags": [
+    "stealth",
+    "vanish",
+    "hide",
+    "sneak",
+    "cloak",
+    "smoke",
+    "shroud",
+    "fade"
+   ],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "small": "layers/codex/glyph-stealth-64.webp"
+  }
+ ]
+}

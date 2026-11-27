@@ -242,8 +242,10 @@ const mix3 = (a, b, t) => a.map((v, i) => mix(v, b[i], t));
  */
 export function lookAt(edits, T, x, z, base) {
   const E = normEdits(edits), L = E.looks;
-  const west = T.map.border.west, east = T.map.border.east;
-  const t = smooth01((x - T.borderX(z) + T.map.border.blend) / (2 * T.map.border.blend));
+  // a place with no west/east border (a dungeon, js/world/dungeon/place.js) is one region throughout
+  const B = T.map?.border, only = T.regionIds?.[0] || null;
+  const west = B ? B.west : only, east = B ? B.east : only;
+  const t = B && T.borderX ? smooth01((x - T.borderX(z) + B.blend) / (2 * B.blend)) : 0;
   const out = { ...base, fogColour: [...base.fogColour], sunColour: [...base.sunColour], tint: [1, 1, 1], zones: [] };
   const val = (reg, k) => { const v = L[reg]?.[k]; return v == null ? null : LOOK_FIELDS[k] === 'colour' ? (isHex(v) ? hexRgb(v) : null) : (isNum(v) ? v : null); };
   for (const k of Object.keys(LOOK_FIELDS)) {

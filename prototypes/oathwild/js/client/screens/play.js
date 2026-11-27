@@ -4,6 +4,7 @@
 import { createLagMeter } from '../lagmeter.js';
 import * as THREE from 'three';
 import { createAmbient } from '../render/ambient.js';
+import { dungeonAmbient } from '../render/dungeon-draw.js';
 import { createView } from '../render/view.js';
 import { makeWorldView } from '../live-edits.js';
 import { createZones } from '../render/zones.js';
@@ -26,16 +27,16 @@ import { castRow } from '../../rules/classes.js';
 import { targetKind, spellRow } from '../../rules/spells.js';
 import { npcAt, npcPresent, liveObjects, questStatus, npcCall } from '../../world/quests.js';
 import { STEP, BTN, UF, packButtons } from '../../net/protocol.js';
-import { windowsOpen, closeAll, findWin } from '../ui/kit.js';
+import { windowsOpen, closeAll, findWin, ask } from '../ui/kit.js';
 import { fmt } from '../../../../../shared/format.js';
-import { usePlace } from '../place.js';
+import { usePlace, placeOf } from '../place.js';
 
 const WIN_OF = { loot: 'loot', talk: 'talk', shop: 'shop', repair: 'repair', stable: 'stable', trainer: 'trainer', respec: 'respec', travel: 'travel', locked: 'locked' };
 const AIMED = new Set(['ground', 'cone', 'line']);
 
 export async function show(app, { enter = null } = {}) {
   if (!enter) { app.go(app.world ? 'worlds' : 'title'); return { close() {} }; }
-  await usePlace(app, enter.world?.kind);            // an arena is its own place (js/client/place.js): swap it in before anything reads app.W
+  await usePlace(app, enter.world?.place || enter.world?.kind);   // the arena and every region are their own place (js/client/place.js): swap it in, behind the loading screen, before anything reads app.W
   const W = app.W, T = W.terrain, book = W.book, placements = W.data.placements;
   const heightAt = (x, z) => app.ground.y(x, z);
   // ---------------------------------------------------------------- the 3D view (made once per page)
@@ -45,8 +46,8 @@ export async function show(app, { enter = null } = {}) {
     app.actors = createActors(app.view, { rules: app.rules, art: app.art, quality: app.settings.quality, maxTabards: app.settings.quality === 'low' ? 6 : 16 });
     app.fx = await createFx(app.view, { heightAt, quality: app.settings.quality });
     // the weather (render/weather.js): made with the view, before the first frame (its lightning light is made once)
-    app.weather = createWeatherView(app.view, { heightAt, T, quality: app.settings.quality, sound: () => (app.settings.sfxOn ? app.sound : null), seed: 7 });
-    app.view.afterWeather = () => app.weather.apply();
+    app.weather = createWeatherView(app.view, { heightAt, T: () => app.W.terrain, quality: app.settings.quality, sound: () => (app.settings.sfxOn ? app.sound : null), seed: 7 });
+    app.view.afterWeather = () => (app.worldView?.afterWeather ? app.worldView.afterWeather() : app.weather.apply());   // a dungeon has its own air (render/dungeon-draw.js)
     // the Look setting (render/look.js; ☰ Settings → Graphics): its colour factors ride on the Look tuning numbers
     app.lookStyle = createLook(app);   // (app.look is the spell look, render/spell-look.js)
     app.lookStyle.applyFx();
@@ -67,7 +68,7 @@ export async function show(app, { enter = null } = {}) {
   // ambient life round the camera (motes, leaves, chimney smoke, birds, butterflies) and the ambience bed for where you stand
   // effect zones and region looks from data/edits.json (render/zones.js — the same module the map editor draws with)
   app.zones = createZones(view, { T, edits: W.data.edits, quality: app.settings.quality });
-  const ambient = createAmbient(view, { T, trees: app.scattered.trees, chimneys: app.worldView.chimneys || [], quality: app.settings.quality, sound: () => (app.settings.sfxOn ? app.sound : null) });
+  const ambient = W.dungeon ? dungeonAmbient({ sound: () => (app.settings.sfxOn ? app.sound : null) }) : createAmbient(view, { T, trees: app.scattered.trees, chimneys: app.worldView.chimneys || [], quality: app.settings.quality, sound: () => (app.settings.sfxOn ? app.sound : null) });
   // rain and storms bring their own sound bed (render/weather.js numbers; ambient checks it every 2 s)
   ambient.bedOverride = () => { const n = app.weather?.numbers; if (!n || n.rain < 0.15) return null; return n.lightning > 0.5 ? 'ambience.storm' : n.rain > 0.55 ? 'ambience.rain.heavy' : 'ambience.rain.light'; };
   // a wand / tome / staff / sceptre's own attack: how each style looks (data/casters.json look)
@@ -110,7 +111,7 @@ export async function show(app, { enter = null } = {}) {
     app.input.onDevice = d => { app.device = d; app.emit('device', d); };
   }
   const input = app.input;
-  const cam = createCamera(view, { heightAt, tuning: app.tuning || {}, settings: app.settings, solidsNear: (x, z, r) => app.ground.solidsNear(x, z, r) });
+  const cam = createCamera(view, { heightAt, tuning: app.tuning || {}, settings: app.settings, solidsNear: (x, z, r) => app.ground.solidsNear(x, z, r), dungeonWalk: () => app.W.dungeon?.walk || null });
   const pred = createPredictor({ ground: app.ground, combat: app.rules.data.combat });
 
   // ---------------------------------------------------------------- state
@@ -281,7 +282,12 @@ export async function show(app, { enter = null } = {}) {
   offs.push(app.on('say', m => { app.play.hud.log(m.text, m.kind); if (['quest', 'found', 'level', 'good', 'gold', 'bad'].includes(m.kind) && m.kind !== 'gold') app.toast(m.text, m.kind); if (m.kind === 'quest' && /complete/i.test(m.text)) app.sfx('quest.complete'); if (m.kind === 'gold') app.sfx('coin'); }));
   offs.push(app.on('err', m => { if (m.code === 'version') return; app.toast(m.msg, 'bad', m.quiet ? 1600 : 2600); }));
   offs.push(app.on('leveled', m => { app.sfx('levelup'); app.toast(`Level ${m.level}!`, 'level'); }));
-  offs.push(app.on('enter', m => { S.meId = m.you; app.world = m.world; app.me = { ...(app.me || {}), char: m.char }; }));   // back after a drop
+  S.points = enter.points || [];
+  offs.push(app.on('enter', m => {
+    // travelled to another region (or back): the play screen starts again on that place, behind the loading screen
+    if ((m.world?.place || 'world') !== placeOf(app) && m.world?.kind !== 'arena') { app.go('play', { enter: m }); return; }
+    S.meId = m.you; app.world = m.world; app.me = { ...(app.me || {}), char: m.char }; S.points = m.points || S.points;
+  }));   // back after a drop
   offs.push(app.on('me', () => { app.play?.hud?.drawBar(); }));
   offs.push(app.on('windows', n => { if (n) input.unlock(); }));
   offs.push(app.on('device', () => app.play?.hud?.drawWins()));
@@ -372,6 +378,10 @@ export async function show(app, { enter = null } = {}) {
     for (const n of S.npcs) add({ kind: 'talk', id: n.id, name: n.name, r: NPC_R, bias: 0, h: 1.85, text: `Talk to ${npcCall(book.npcs[n.id] || n)}` }, n.x, n.z);
     for (const c of placements.chests) add({ kind: 'chest', id: c.id, name: c.name || 'the chest', r: OBJ_R, bias: 0, h: 0.9, text: `Open ${c.name || 'the chest'}` }, c.at[0], c.at[1]);
     for (const o of S.liveObjects || []) { const ob = book.objects[o.object]; if (ob) add({ kind: 'use', id: o.object, name: ob.name, r: OBJ_R + 0.5, bias: -0.5, h: 1.2, text: `${o.kind === 'use' ? 'Use' : 'Search'} ${ob.name}` }, ob.at[0], ob.at[1]); }
+    // open graves (Ashfield): dig in — a cache, a skeleton, or a named dead (story graves are quest objects instead)
+    for (const g of W.graveyard?.openGraves || []) if (!g.object) add({ kind: 'grave', id: g.id, name: 'the open grave', r: OBJ_R, bias: 0.1, h: 0.5, text: 'Search the open grave' }, g.at[0], g.at[1]);
+    // travel points: a road out, a crypt door (regions, owner 2026-11-27) — the prompt says where it goes and its levels
+    for (const p of S.points || []) add({ kind: 'gate', id: p.id, name: p.label, r: (p.radius || 7) - 1, bias: 0.2, h: 2.2, toName: p.toName, toLevels: p.toLevels, text: p.toName ? `${p.label}: travel to ${p.toName}${p.toLevels ? ` (levels ${p.toLevels[0]}-${p.toLevels[1]})` : ''}` : p.label }, p.at[0], p.at[1]);
     for (const sh of placements.shrines) add({ kind: 'shrine', id: sh.id, name: sh.name, r: SHRINE_R, bias: 0.5, h: 2.6, text: `${sh.name}: travel, change your path` }, sh.at[0], sh.at[1]);
     return out;
   }
@@ -426,6 +436,17 @@ export async function show(app, { enter = null } = {}) {
     else if (it.kind === 'use') app.act('use', { id: it.id });
     else if (it.kind === 'shrine') { input.unlock(); app.openWindow('shrine', { id: it.id, name: it.name }); }
     else if (it.kind === 'arena') { input.unlock(); app.arenaUi.use(it); }
+    else if (it.kind === 'gate') { input.unlock(); travelAsk(it); }
+    else if (it.kind === 'grave') app.act('grave', { id: it.id });
+  }
+
+  /** A travel point: ask first (no accidental travel), then the server moves us; its 'enter' brings the loading screen. */
+  async function travelAsk(it) {
+    const lv = it.toLevels ? ` Levels ${it.toLevels[0]}-${it.toLevels[1]}.` : '';
+    const mine = app.me?.char?.level || 1;
+    const warn = it.toLevels && mine < it.toLevels[0] ? ` You are level ${mine}: it will be hard.` : '';
+    if (!await ask({ title: `Travel to ${it.toName || it.name}?`, text: `${it.name}.${lv}${warn}`, ok: 'Travel', cancel: 'Stay' })) return;
+    app.act('goto', { id: it.id });
   }
 
   // ---------------------------------------------------------------- the HUD
@@ -692,8 +713,8 @@ export async function show(app, { enter = null } = {}) {
     if ((slowTick += dt) > 0.5) {
       slowTick = 0;
       S.liveObjects = liveObjects(book, wsLike());
-      const area = T.areaAt(pred.state.x, pred.state.z);
-      S.placeName = area?.name || T.map.regions[T.regionAt(pred.state.x, pred.state.z)]?.name || '';
+      const area = T.areaAt?.(pred.state.x, pred.state.z);
+      S.placeName = area?.name || T.map?.regions?.[T.regionAt(pred.state.x, pred.state.z)]?.name || W.data.map?.regions?.[T.regionAt(pred.state.x, pred.state.z)]?.name || '';
       if (softTarget && performance.now() > softTarget.until) softTarget = null;
     }
     if (S.target && !S.units.has(S.target)) S.target = null;
@@ -713,7 +734,7 @@ export async function show(app, { enter = null } = {}) {
     fx.update(wdt);
     app.worldView.update(dt, { x: pred.state.x, z: pred.state.z });
     // the weather here (the server's, per region) before the ambience, so its rain bed wins over the place's
-    const wxN = app.weather.update(dt, { wire: app.ws?.wx || null, seed: app.ws?.wxs ?? 1, time: wxClock.t + (performance.now() - wxClock.at) / 1000, sentAt: wxSent, at: { x: pred.state.x, z: pred.state.z } });
+    const wxN = app.weather.update(dt, { wire: W.dungeon ? null : (app.ws?.wx || null), seed: app.ws?.wxs ?? 1, time: wxClock.t + (performance.now() - wxClock.at) / 1000, sentAt: wxSent, at: { x: pred.state.x, z: pred.state.z } });
     ambient.wet = wxN.rain;
     ambient.update(dt, { x: pred.state.x, z: pred.state.z });
     app.zones?.update(dt, { x: pred.state.x, z: pred.state.z });

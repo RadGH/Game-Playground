@@ -18,7 +18,7 @@ export const ALLOW = Object.freeze([
   // shared code and art
   'shared', 'vendor', 'assets',
   // experiments
-  'armory', 'avatar-2d', 'avatar-3d', 'citykit', 'combined', 'conversations', 'highdef-3d', 'housekit', 'icons', 'items', 'library', 'model-library',
+  'armory', 'avatar-2d', 'avatar-3d', 'citykit', 'combined', 'conversations', 'highdef-3d', 'housekit', 'icons', 'iconkit', 'items', 'library', 'model-library',
   'lingo', 'mechkit', 'meters', 'namegen', 'proctown', 'sfx', 'treekit', 'universe', 'voice-lab', 'worldgen',
   // prototypes (prototypes/tinyrts is a symlink to another repo, so a published copy cannot hold it)
   'prototypes/thousandvale', 'prototypes/farhold', 'prototypes/emberveil', 'prototypes/bannerline',
@@ -26,6 +26,9 @@ export const ALLOW = Object.freeze([
   'prototypes/tumblefair', 'prototypes/knockabout', 'prototypes/roverlands', 'prototypes/rogueloot',
   // the Spell Lab (avatar-3d/spellkit) reads Oathwild's spell visuals — only that one file of the game is served
   'prototypes/oathwild/data/spell-visuals.json',
+  // the Icon Kit's "In game: Oathwild" tab reads the spell catalogue and the current icon code (read-only)
+  'prototypes/oathwild/data/spells.json', 'prototypes/oathwild/data/classes.json', 'prototypes/oathwild/js/rules/data.js', 'prototypes/oathwild/js/rules/spells.js',
+  'prototypes/oathwild/js/client/ui/icons.js',
   // World Build (worldbuild/) pins Oathwild's hand-made map and draws with its terrain, town, tree and bridge code:
   // those files of the game are served (the game's own server keeps the rest)
   'worldbuild',

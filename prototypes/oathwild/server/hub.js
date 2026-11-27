@@ -8,10 +8,16 @@ import { PROTOCOL, MAX_PLAYERS, EMPTY_WORLD_MS, AWAY_MS, parseFrame, createBucke
 import { createWorldRoom } from './world.js';
 import { createCharacter, blankCharacter, CHARACTER_VERSION } from '../js/rules/levels.js';
 import { makeRng, hashStr } from '../js/rules/farhold.js';
+import { pointsIn, regionName, homeRegion } from '../js/world/regions/index.js';
 
 export const MAX_CHARS = 8, MAX_WORLDS_PER_PLAYER = 6, PUBLIC_LIST_MAX = 40;
 
-export function createHub({ rules, W, ground, arenaPlace = null, store, now = () => Date.now(), build = 'dev', seed = Date.now(), randomToken, redeem = null, log = () => {} }) {
+// Regions (owner 2026-11-27; docs/BRAINSTORM-2026-11-27-regions.md §1): `places` = { regionId: { W, ground } } for every
+// region but the home one (the home region is W / ground); `regionIndex` = data/regions/index.json. A world's home
+// region is the room `code`; another region is the room `code~region`, saved as its own record, holding the world's
+// quests, story flags, found shrines and places BY REFERENCE (the family share) so a quest started in one region
+// counts in another. Travel (a travel point or a far shrine) moves a player's seat from one room to the other.
+export function createHub({ rules, W, ground, arenaPlace = null, places = {}, regionIndex = null, store, now = () => Date.now(), build = 'dev', seed = Date.now(), randomToken, redeem = null, log = () => {} }) {
   const rooms = new Map();            // code -> world room (only the open ones)
   const emptySince = new Map();
   const awayTimers = new Map();       // key -> { code, at }
@@ -22,10 +28,31 @@ export function createHub({ rules, W, ground, arenaPlace = null, store, now = ()
   const stats = { sockets: 0, bad: 0, limited: 0, worldsMade: 0 };
   let open = 0;
   const conns = new Set();             // every open socket (the dev map editor's changes go to all of them: broadcast)
+  const seats = new Map();             // key -> the socket's session (travel moves its room)
+  const families = new Map();          // world code -> the share every region room of that world holds
+  const HOME = homeRegion(regionIndex);
+  const SHARED = ['quests', 'flags', 'playerFlags', 'shrines', 'found'];
+  const roomKey = (code, region) => (!region || region === HOME ? code : `${code}~${region}`);
+  const parentOf = key => String(key).split('~')[0];
+  const isSub = key => String(key).includes('~');
+  // which region each shrine stands in (null = the home region), for travel between regions and the travel window
+  const shrineInfo = (() => {
+    const map = new Map();
+    for (const [rid, P] of Object.entries(places)) for (const sh of P.W.data.placements.shrines || []) map.set(sh.id, { region: rid, name: sh.name, regionName: regionName(regionIndex, rid) });
+    for (const sh of W.data.placements.shrines || []) if (!map.has(sh.id)) map.set(sh.id, { region: null, name: sh.name, regionName: regionName(regionIndex, HOME) });
+    return id => map.get(id) || null;
+  })();
+  function familyOf(code) {
+    if (!families.has(code)) {
+      const st = store.loadWorld(code)?.state || {};
+      families.set(code, { quests: st.quests || {}, flags: st.flags || [], playerFlags: st.playerFlags || {}, shrines: st.shrines || [], found: st.found || [] });
+    }
+    return families.get(code);
+  }
 
   // ---------------------------------------------------------------- saved players and worlds
   // the place a room stands in: the open world, or the arena (brainstorm 2026-11-27 §2a — its own hosting option)
-  const placeFor = kind => (kind === 'arena' ? { W: arenaPlace.W, ground: arenaPlace.ground } : { W, ground });
+  const placeFor = (kind, region = null) => (kind === 'arena' ? { W: arenaPlace.W, ground: arenaPlace.ground } : region && region !== HOME && places[region] ? places[region] : { W, ground });
   function profile(key) {
     const p = store.loadPlayer(key) || { key, name: null, chars: [], worlds: [] };
     p.chars = Array.isArray(p.chars) ? p.chars : [];
@@ -42,13 +69,29 @@ export function createHub({ rules, W, ground, arenaPlace = null, store, now = ()
     if (world) store.saveWorld(world.meta.code, world);
     for (const { key, char } of chars || []) saveChar(key, char);
   }
+  /** A region room's saves: its own record under `code~region`, and the world-wide parts written into the home record. */
+  function persistRegion(code, key) {
+    return ({ world, chars }) => {
+      if (world) {
+        store.saveWorld(key, { ...world, meta: { ...world.meta, region: key.split('~')[1], parent: code } });
+        const home = store.loadWorld(code);
+        if (home) { const fam = familyOf(code); home.state = { ...home.state }; for (const k of SHARED) home.state[k] = fam[k]; store.saveWorld(code, home); }
+      }
+      for (const { key: k, char } of chars || []) saveChar(k, char);
+    };
+  }
   function summary(c) {
     return { id: c.id, name: c.name, level: c.level, classes: Object.entries(c.classLevels || {}).map(([k, v]) => ({ cls: k, name: rules.data.classes.classes[k]?.name || k, level: v })), look: c.look, gear: Object.fromEntries(Object.entries(c.gear || {}).filter(([, v]) => v).map(([s, it]) => [s, { b: it.baseKey, s: it.subtype || null, two: !!it.twoHanded }])), background: c.background, gold: c.gold || 0, inWorld: whereIs(c.id) };
   }
-  function whereIs(charId) { for (const [code, R] of rooms) for (const P of R.players.values()) if (P.char.id === charId) return code; return null; }
+  function whereIs(charId) { for (const [code, R] of rooms) for (const P of R.players.values()) if (P.char.id === charId) return parentOf(code); return null; }
   function worldRow(code, key = null) {
     const R = rooms.get(code);
-    if (R) return { ...R.listing(), mine: !!key && (R.meta.owner === key) };
+    if (R) {
+      // players in the world's other regions count too
+      let players = R.size; const names = R.listing().names;
+      for (const [k, S2] of rooms) if (isSub(k) && parentOf(k) === code) { players += S2.size; names.push(...S2.listing().names); }
+      return { ...R.listing(), players, names, mine: !!key && (R.meta.owner === key) };
+    }
     const rec = store.loadWorld(code);
     if (!rec) return null;
     const m = rec.meta;
@@ -61,22 +104,55 @@ export function createHub({ rules, W, ground, arenaPlace = null, store, now = ()
     for (const code of p.worlds) { const r = worldRow(code, key); if (r) { out.push({ ...r, played: true }); seen.add(code); } }
     const pub = [];
     for (const code of new Set([...rooms.keys(), ...store.worldCodes()])) {
-      if (seen.has(code)) continue;
+      if (seen.has(code) || isSub(code)) continue;
       const r = worldRow(code, key);
       if (r?.public) pub.push(r);
     }
     pub.sort((a, b) => b.players - a.players || String(b.updated || '').localeCompare(String(a.updated || '')));
     return [...out, ...pub.slice(0, PUBLIC_LIST_MAX)];
   }
-  function openRoom(code) {
-    if (rooms.has(code)) return rooms.get(code);
-    const rec = store.loadWorld(code);
-    if (!rec) return null;
-    if (rec.meta.kind === 'arena' && !arenaPlace) return null;
-    const R = createWorldRoom({ rules, ...placeFor(rec.meta.kind), meta: rec.meta, state: rec.state, log, persist, seed: rec.state?.seed || hashStr(code), dev: build === 'dev' });
-    rooms.set(code, R);
-    log('world.open', { code });
+  function roomOpts(code, region) {
+    const P = placeFor('world', region);
+    const rid = region && region !== HOME ? region : HOME;
+    return {
+      share: familyOf(code), region: rid === HOME ? null : rid, points: pointsIn(regionIndex, P.W, rid), shrineInfo,
+      transfer: (key, where) => travel(key, code, where),
+    };
+  }
+  function openRoom(code, region = null) {
+    const key = roomKey(code, region);
+    if (rooms.has(key)) return rooms.get(key);
+    const home = store.loadWorld(code);
+    if (!home) return null;
+    if (home.meta.kind === 'arena') {
+      if (!arenaPlace || key !== code) return null;
+      const R = createWorldRoom({ rules, ...placeFor('arena'), meta: home.meta, state: home.state, log, persist, seed: home.state?.seed || hashStr(code), dev: build === 'dev' });
+      rooms.set(code, R); log('world.open', { code }); return R;
+    }
+    if (key !== code && !places[region]) return null;
+    const rec = key === code ? home : store.loadWorld(key);
+    const meta = { ...home.meta, code };                 // a region room speaks as its world (same code, name)
+    const R = createWorldRoom({ rules, ...placeFor('world', region), meta, state: rec?.state || null, log, persist: key === code ? persist : persistRegion(code, key), seed: hashStr(key), dev: build === 'dev', ...roomOpts(code, region) });
+    rooms.set(key, R);
+    if (!rec) R.save();
+    log('world.open', { code: key });
     return R;
+  }
+  /** Move a player's seat to another region's room of the same world (a travel point or a far shrine). */
+  function travel(key, code, { region = null, arrive = null, shrine = null }) {
+    const S = seats.get(key);
+    const from = S?.room;
+    const P = from?.players.get(key);
+    if (!P) return;
+    const T = openRoom(code, region);
+    if (!T) return;
+    const char = P.char;
+    from.leave(key, { quiet: true, text: `${char.name} travelled to ${regionName(regionIndex, region || HOME)}.` });
+    const res = T.join({ key, char, send: P.send, arrive: arrive || shrine });
+    if (res?.error) { const back = from.join({ key, char, send: P.send }); S.room = back?.error ? null : from; return; }
+    S.room = T;
+    emptySince.delete(roomKey(code, region));
+    log('world.travel', { code, key, to: region || HOME });
   }
 
   // ---------------------------------------------------------------- sockets
@@ -105,9 +181,10 @@ export function createHub({ rules, W, ground, arenaPlace = null, store, now = ()
       }
       keyOfToken.set(S.token, key);
       S.key = key;
+      seats.set(key, S);
       // back after a drop: the same hero, still standing where it was
       const away = awayTimers.get(key);
-      send({ t: 'welcome', token: S.token, build, profile: { key: key.startsWith('acct:') ? 'account' : 'device', name: S.name }, back: away ? away.code : null });
+      send({ t: 'welcome', token: S.token, build, profile: { key: key.startsWith('acct:') ? 'account' : 'device', name: S.name }, back: away ? parentOf(away.code) : null });
     }
 
     async function message(frame) {
@@ -154,7 +231,7 @@ export function createHub({ rules, W, ground, arenaPlace = null, store, now = ()
           let code; do { code = newCode(rand); } while (rooms.has(code) || store.loadWorld(code));
           const name = cleanName(msg.name, 28) || (kind === 'arena' ? 'The Grand Arena' : 'A New Oath');
           const meta = { code, name, public: !!msg.public, owner: S.key, created: new Date(now()).toISOString(), players: [S.key], kind };
-          const R = createWorldRoom({ rules, ...placeFor(kind), meta, state: null, log, persist, seed: hashStr(code), dev: build === 'dev' });
+          const R = createWorldRoom({ rules, ...placeFor(kind), meta, state: null, log, persist, seed: hashStr(code), dev: build === 'dev', ...(kind === 'arena' ? {} : roomOpts(code, null)) });
           rooms.set(code, R);
           R.save();
           p.worlds = [code, ...p.worlds.filter(c => c !== code)];
@@ -167,27 +244,33 @@ export function createHub({ rules, W, ground, arenaPlace = null, store, now = ()
           const code = cleanCode(msg.code);
           const rec = code && store.loadWorld(code);
           if (!rec || rec.meta.owner !== S.key) return fail('owner', 'Only the person who made a world can remove it.');
-          const R = rooms.get(code);
-          if (R?.size) return fail('busy', 'Someone is playing in that world right now.');
+          const subs = [...new Set([...rooms.keys(), ...store.worldCodes()])].filter(k => isSub(k) && parentOf(k) === code);
+          if (rooms.get(code)?.size || subs.some(k => rooms.get(k)?.size)) return fail('busy', 'Someone is playing in that world right now.');
           rooms.delete(code); store.deleteWorld(code);
+          for (const k of subs) { rooms.delete(k); store.deleteWorld(k); }
+          families.delete(code);
           const p = profile(S.key); p.worlds = p.worlds.filter(c => c !== code); store.savePlayer(S.key, p);
           return send({ t: 'worlds', list: worldList(S.key) });
         }
         case 'join': {
           const code = cleanCode(msg.code);
-          const R = code && openRoom(code);
-          if (!R) return fail('noworld', 'No world with that code. Check the letters.');
           const p = profile(S.key);
           const char = p.chars.find(c => c.id === msg.char);
+          if (code && !store.loadWorld(code) && !rooms.has(code)) return fail('noworld', 'No world with that code. Check the letters.');
           if (!char) return fail('nochar', 'Choose a character first.');
+          // back where the hero last stood in this world: its region's room (home if that region is gone)
+          // (a hero still standing in one of this world's rooms after a drop goes straight back into that room)
+          const live = [...rooms.entries()].find(([k, R2]) => parentOf(k) === code && R2.players.get(S.key)?.char.id === char.id);
+          const wasIn = live ? (isSub(live[0]) ? live[0].split('~')[1] : null) : char.where?.code === code && char.where.region && places[char.where.region] ? char.where.region : null;
+          const R = live ? live[1] : code && (openRoom(code, wasIn) || openRoom(code));
+          if (!R) return fail('noworld', 'No world with that code. Check the letters.');
           if (S.room && S.room !== R) leaveRoom();
-          const other = whereIs(char.id);
-          if (other && other !== code) { rooms.get(other)?.leave(S.key, { quiet: true }); }
+          for (const [k, R2] of rooms) if (R2 !== R && R2.players.get(S.key)?.char.id === char.id) R2.leave(S.key, { quiet: true });
           awayTimers.delete(S.key);
           const res = R.join({ key: S.key, char: R.players.get(S.key)?.char.id === char.id ? R.players.get(S.key).char : char, send: d => conn.send(d) });
           if (res?.error) return fail('join', res.error);
           S.room = R;
-          emptySince.delete(code);
+          emptySince.delete(roomKey(code, wasIn));
           if (!p.worlds.includes(code)) { p.worlds = [code, ...p.worlds].slice(0, 30); store.savePlayer(S.key, p); }
           return;
         }
@@ -197,10 +280,11 @@ export function createHub({ rules, W, ground, arenaPlace = null, store, now = ()
     }
     function close() {
       open--; conns.delete(conn);
+      if (seats.get(S.key) === S) seats.delete(S.key);
       if (S.room && S.key) {
         // keep the hero in the world for a moment: a phone that slept or a reload comes straight back (game-standards §2)
         S.room.away(S.key);
-        awayTimers.set(S.key, { code: S.room.meta.code, at: now() });
+        awayTimers.set(S.key, { code: [...rooms.entries()].find(([, R]) => R === S.room)?.[0] || S.room.meta.code, at: now() });
       }
       S.room = null;
     }
@@ -220,6 +304,7 @@ export function createHub({ rules, W, ground, arenaPlace = null, store, now = ()
       if (!emptySince.has(code)) emptySince.set(code, t);
       else if (t - emptySince.get(code) > EMPTY_WORLD_MS) { R.save(); rooms.delete(code); emptySince.delete(code); log('world.close', { code }); }
     }
+    for (const code of families.keys()) if (![...rooms.keys()].some(k => parentOf(k) === code)) families.delete(code);
   }
   function status() {
     let players = 0, stepMs = 0, steps = 0, maxStepMs = 0, bytesOut = 0;

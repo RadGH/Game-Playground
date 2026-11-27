@@ -1,9 +1,33 @@
 # Oathwild
 
-**Status:** 2026-11-27 gear round, published: gear upgrades like D2 (`js/rules/gear-power.js`: item level grows the base, rarity adds enhanced damage / armour, tier words, plate from item level 4, the hero's level no longer grows the weapon; plan `docs/BRAINSTORM-2026-11-27-gear.md`) and owner reports #139-145 (Take button, arena chests per hero, skills bubble, spear model, arena wall z-fighting). Before that the 2026-11-26 evening round: arena mode, weather + Look, swing trails, a fairer start, camera tuner, lag reports. Focus (owner): camera, combat, levelling.
+**Status:** 2026-11-27 regions round: the world is now regions with travel points + loading screens (README "Regions"; plan `docs/BRAINSTORM-2026-11-27-regions.md`): Brightwater Vale re-levelled 1-5, Ashfield (graveyard, 3-8) and the Catacombs (dungeon, 6-8), a reusable dungeon system (no void, no aggro through walls), WoW-like XP, monsters at least person-sized. Earlier the same day: gear upgrades like D2 (`js/rules/gear-power.js`) and reports #139-145. Focus (owner): camera, combat, levelling.
 **Play:** https://games.radgh.com/oathwild/ · LAN dev http://192.168.1.34:8401/prototypes/oathwild/ (start the world server first: `tools/game-servers.sh start oathwild-dev`; https for controllers: https://192.168.1.34:8441/prototypes/oathwild/). Stable 8400/8442 pairs with the `oathwild` unit (8660/8662) after publish-stable.
-**Next:** the owner tunes the camera (☰ → Tune camera → Send to Claude) and sends a lag report when it stutters — Claude applies the camera numbers as defaults and fixes the stalls the report names; the parked swing trails (two-handed, spear, halberd, fists: trails drifted ~1 m after a weapon change in the test — find out whether it's the test or real); a new-player bot in the sim so balance is judged against a person; Rogue/Bard weak against three and in champion bouts, Mage/Rogue run out the clock at level 10; arena stone reads as brickwork, the crowd is simple; one shader still built mid-fight on the first mace hit (rule 29); real-phone frame rate with weather + Look + ×3 spell effects; the world builder's 4 km map is ready when the owner wants a bigger world (worldbuild README "Adopting it in Oathwild").
+**Next:** the owner plays Ashfield and the Catacombs (feel of travel, the fog, the open graves, the big halls, the indoor camera); the next regions from the plan (`docs/BRAINSTORM-2026-11-27-regions.md` §5: Saltmere Fen 6-9, Greystone Quarry 7-10, Goblin Warrens 5-8, Lantern Abbey 9-12, Bandit Hills 4-7, Dragonback Cliffs 11-14 — the last two need the level cap raised past 10); the Model Library's Meshy undead/goblins/ogre/orc could replace stand-in bodies in Ashfield and the Catacombs (needs renderer work — owner's call); camera tuning, the parked swing trails, real-phone frame rate.
 **Parked:** Smithing / Alchemy benches and the Tinker class (later round); Chronomancer, Oracle, Dragon Knight, Starcaller; charm/turn spells; Farhold's resource / afterimage / "consumes" spell rules; playing offline without the world server; chat box (the server relays chat, no UI yet); **placeholder art to replace later: `docs/PLACEHOLDERS.md`** (props, 8 monsters, horse, items — about $23 of models when there is budget).
+
+## Regions (2026-11-27 — owner: "new regions, separated by travel points and loading screens … each zone a specific level bracket … I am reminded of never winter nights 2")
+
+Plan + every call: `docs/BRAINSTORM-2026-11-27-regions.md`. A hosted world holds several **regions**, each its own map
+and level band, entered through **travel points** (walk up → "Travel to Ashfield? Levels 3-8" → loading screen with
+the region's painted picture, levels, a line, a tip and real progress). **Brightwater Vale** (the old map, now levels
+1-5: the Vale 1-3, Thornmere 3-5; its whole story ends round level 6) → the Lark Road's east end → **Ashfield** (3-8:
+Ashfield Crossing hamlet with 6 quests, the walled Old Graveyard in fog — 4 quarters of procedural gravestones, each
+with a name, open graves to dig: a cache, a skeleton, a named dead or a ring) → the Crypt Gate (or the collapsed grave,
+opened by a quest) → **the Catacombs** (6-8: the Ossuary, the Pillared Deep with goblins and a troll, the Barrow
+Throne with the Deep King). Shrines are waypoints across regions (found once, travel from any shrine).
+
+| Part | What it is |
+|---|---|
+| `data/regions/index.json` + `js/world/regions/index.js` | The region list (name, levels, kind, loading picture/line/tip), travel points; `bootRegion`, `pointsIn` (index points + the generator's, normalised), `arrivalAt` |
+| `js/world/regions/graveyard.js`, `graves.js`, `data/regions/ashfield*.json` | The graveyard generator (reusable for any cemetery: plots per quarter, styles, lean/sink/moss, names from Name Forge, open-grave outcomes) |
+| `js/world/dungeon/*`, `data/dungeons/catacombs.json` | The reusable dungeon system (README there): one 2 m walk grid every body uses (no void), sight for noticing (no aggro through walls), paths home (no teleports), spacious rooms + a camera check; `place.js` = a dungeon as a region (camps from packs, travel points, `dungeonAI` sight + steering on the sim) |
+| `js/world/regions/books.js`, `boot-all.js` | ONE quest book for the world (every room and the page know every quest; people/objects stay in their region; markers carry the region); the server boots every region at start |
+| `server/hub.js` | One room per region per world (`code` = home, `code~region`), sharing quests, flags, shrines and found places by reference; travel moves the player's seat; a rejoin returns to the region; region rooms save their own record + write the shared parts into the world record |
+| `js/client/place.js`, `loading.js`, `css/loading.css`, `img/loading/*.webp` | The page swaps to any region's place behind the loading screen (built once, kept); the play screen restarts on a region change |
+| XP (`data/levels.json`) | WoW-like but ours: 5+ levels below = no XP, −20% a level below, +8.3% a level above up to +25%; levels 1-6 ×2.2…1.15; every party helper gets the full XP |
+
+Tests: `tests/net/regions.test.mjs` (travel core with a stand-in region), `tests/net/ashfield.test.mjs` (Vale → Ashfield →
+Catacombs → back, the blocked shortcut, open graves), `tests/world/graveyard.test.mjs`, `tests/world/dungeon.test.mjs`.
 
 ## Arena (2026-11-26 — owner: "a new hosting option for waves mode … a massive arena … other heroes … somewhat like oblivion")
 

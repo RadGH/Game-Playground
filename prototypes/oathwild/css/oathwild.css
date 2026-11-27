@@ -150,8 +150,14 @@ h1, h2, h3 { font-family: var(--font-head); font-weight: 700; letter-spacing: .0
   .ow-shade { padding: calc(4px + var(--safe-t)) 4px calc(4px + var(--safe-b)); align-items: stretch; }
   .ow-win { max-height: 100%; }
 }
-.ow-motif { display: inline-block; border-radius: 50%; background: radial-gradient(circle at 50% 40%, #2a2f5a, #14183a); border: 1px solid #e6c14a; overflow: hidden; }
-.ow-motif svg { width: 100%; height: 100%; display: block; }
+.ow-motif { display: inline-block; flex: none; aspect-ratio: 1; box-sizing: border-box; border-radius: 50%; background: radial-gradient(circle at 50% 40%, #2a2f5a, #14183a); border: 1px solid #e6c14a; overflow: hidden; }   /* flex: none — a row never squeezes it out of round (owner 2026-11-27) */
+/* a window that fills ~the whole screen goes full screen (js/client/ui/kit.js adds .ow-full) */
+.ow-shade.ow-full { padding: 0; align-items: stretch; justify-content: stretch; }
+.ow-shade.ow-full > .ow-win { width: 100%; max-width: none; height: 100%; max-height: none; border: 0; border-radius: 0; padding: var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l); }
+.ow-shade.ow-full > .ow-win::before { display: none; }
+/* the picture inside a medallion always fills exactly its ring — a container's "svg { 38px }" rule (the action bar,
+   the creator) must never reach it, or the picture overflows the ring and slides off centre (owner 2026-11-27) */
+.ow-motif.ow-motif > svg { width: 100%; height: 100%; display: block; }
 
 /* the Look setting: a short dark fade while a new after-effect is built (js/client/render/look.js) */
 .ow-look-fade { position: fixed; inset: 0; z-index: 40; background: #0d0b08; opacity: 0; pointer-events: none; transition: opacity .35s ease; }

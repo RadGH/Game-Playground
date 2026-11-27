@@ -1,0 +1,336 @@
+{
+ "_doc": "Icon Kit themes. A class theme colours the PLATE (the stone behind the picture) so a mage's spells read blue/violet and a warrior's iron red-brown at a glance; an element theme colours the GLOW (and a tintable glyph). `tint` = plate colour (laid over the grey stone with the 'color' blend, at `strength`), `glow` = glow colour, `words` (elements) = name words that only say the element, so a match on them alone is flagged as an element fallback; `glyph` = the glyph used when a spell has no better match (the class's emblem / the element's picture). `frame` (classes) = the class-themed frame (data/layers.json frames) used when a spec asks for frame \"class\"; `dispel` = the inner-ring colour per dispel kind; `aliases` maps other games' class and element ids onto these. js/iconkit.js themeFor() is the one reader.",
+ "defaults": {
+  "tint": "#5b6270",
+  "glow": "#f2d38a",
+  "strength": 0.65,
+  "glyph": "arcane-orb"
+ },
+ "classes": {
+  "warrior": {
+   "name": "Warrior",
+   "tint": "#8a4a36",
+   "glow": "#ff9a5a",
+   "glyph": "sword-slash",
+   "frame": "warrior"
+  },
+  "ranger": {
+   "name": "Ranger",
+   "tint": "#3f6b3a",
+   "glow": "#b8e07a",
+   "glyph": "arrow-volley",
+   "frame": "ranger"
+  },
+  "rogue": {
+   "name": "Rogue",
+   "tint": "#3e5248",
+   "glow": "#9be0a8",
+   "glyph": "dagger",
+   "frame": "rogue"
+  },
+  "mage": {
+   "name": "Mage",
+   "tint": "#38469a",
+   "glow": "#9fb4ff",
+   "glyph": "arcane-orb",
+   "frame": "mage"
+  },
+  "cleric": {
+   "name": "Cleric",
+   "tint": "#a08a58",
+   "glow": "#ffe7a3",
+   "glyph": "holy-light",
+   "frame": "cleric"
+  },
+  "druid": {
+   "name": "Druid",
+   "tint": "#4f6a32",
+   "glow": "#c6eb7c",
+   "glyph": "nature-leaf",
+   "frame": "druid"
+  },
+  "bard": {
+   "name": "Bard",
+   "tint": "#9a4a66",
+   "glow": "#ffb0cc",
+   "glyph": "rally",
+   "frame": "cleric"
+  },
+  "shaman": {
+   "name": "Shaman",
+   "tint": "#2f7a78",
+   "glow": "#7fe6dc",
+   "glyph": "lightning",
+   "frame": "druid"
+  },
+  "paladin": {
+   "name": "Paladin",
+   "tint": "#b39a52",
+   "glow": "#fff1c0",
+   "glyph": "shield-bash",
+   "frame": "paladin"
+  },
+  "spellblade": {
+   "name": "Spellblade",
+   "tint": "#4a4a8e",
+   "glow": "#b4a6ff",
+   "glyph": "sword-slash",
+   "frame": "mage"
+  },
+  "warlock": {
+   "name": "Warlock",
+   "tint": "#5e3a78",
+   "glow": "#b6f06a",
+   "glyph": "shadow-bolt",
+   "frame": "warlock"
+  },
+  "wayfarer": {
+   "name": "Wayfarer",
+   "tint": "#6a5a3c",
+   "glow": "#e8cf8a",
+   "glyph": "dash",
+   "frame": "ranger"
+  },
+  "pyromancer": {
+   "name": "Pyromancer",
+   "tint": "#8e3a22",
+   "glow": "#ffb347",
+   "glyph": "fireball",
+   "frame": "mage"
+  },
+  "stormcaller": {
+   "name": "Stormcaller",
+   "tint": "#33557e",
+   "glow": "#a8dcff",
+   "glyph": "lightning",
+   "frame": "mage"
+  },
+  "necromancer": {
+   "name": "Necromancer",
+   "tint": "#3c4a3e",
+   "glow": "#9ef0b0",
+   "glyph": "skull",
+   "frame": "warlock"
+  },
+  "witch_hunter": {
+   "name": "Witch Hunter",
+   "tint": "#6e4a3a",
+   "glow": "#ffd08a",
+   "glyph": "arrow-volley",
+   "frame": "ranger"
+  },
+  "duelist": {
+   "name": "Duelist",
+   "tint": "#7a3a44",
+   "glow": "#ff9aa8",
+   "glyph": "dagger",
+   "frame": "rogue"
+  },
+  "shadowdancer": {
+   "name": "Shadowdancer",
+   "tint": "#3a3452",
+   "glow": "#c0a8ff",
+   "glyph": "shadow-bolt",
+   "frame": "rogue"
+  },
+  "spellfletcher": {
+   "name": "Spellfletcher",
+   "tint": "#3e5c7a",
+   "glow": "#a8c8ff",
+   "glyph": "arrow-volley",
+   "frame": "mage"
+  },
+  "bladesworn": {
+   "name": "Bladesworn",
+   "tint": "#6a4a4a",
+   "glow": "#ffb090",
+   "glyph": "whirlwind",
+   "frame": "warrior"
+  },
+  "wrathborn": {
+   "name": "Wrathborn",
+   "tint": "#922f2a",
+   "glow": "#ff7a4a",
+   "glyph": "leap",
+   "frame": "warrior"
+  },
+  "gravecutter": {
+   "name": "Gravecutter",
+   "tint": "#454a40",
+   "glow": "#d0e0a0",
+   "glyph": "skull",
+   "frame": "rogue"
+  },
+  "dragon_knight": {
+   "name": "Dragon Knight",
+   "tint": "#8a3a2e",
+   "glow": "#ffb060",
+   "glyph": "fireball",
+   "frame": "warrior"
+  },
+  "chronomancer": {
+   "name": "Chronomancer",
+   "tint": "#5a5a92",
+   "glow": "#d8ccff",
+   "glyph": "nova",
+   "frame": "mage"
+  },
+  "oracle": {
+   "name": "Oracle",
+   "tint": "#6a5aa0",
+   "glow": "#f0e0ff",
+   "glyph": "holy-light",
+   "frame": "cleric"
+  },
+  "tinker": {
+   "name": "Tinker",
+   "tint": "#7a6440",
+   "glow": "#ffd27a",
+   "glyph": "ground-rune",
+   "frame": "warrior"
+  },
+  "starcaller": {
+   "name": "Starcaller",
+   "tint": "#2c3a7a",
+   "glow": "#ffe08a",
+   "glyph": "holy-light",
+   "frame": "cleric"
+  }
+ },
+ "elements": {
+  "fire": {
+   "name": "Fire",
+   "tint": "#9a3a1e",
+   "glow": "#ff9a3a",
+   "glyphTint": "#ff8a30",
+   "glyph": "fireball",
+   "words": [
+    "fire",
+    "flame",
+    "flames",
+    "burning"
+   ]
+  },
+  "frost": {
+   "name": "Frost",
+   "tint": "#3a6a92",
+   "glow": "#9ad8ff",
+   "glyphTint": "#8fd0ff",
+   "glyph": "frost-shard",
+   "words": [
+    "frost",
+    "ice",
+    "cold"
+   ]
+  },
+  "lightning": {
+   "name": "Lightning",
+   "tint": "#3a5a8e",
+   "glow": "#b8e4ff",
+   "glyphTint": "#a8d8ff",
+   "glyph": "lightning",
+   "words": [
+    "lightning",
+    "storm",
+    "thunder",
+    "shock"
+   ]
+  },
+  "arcane": {
+   "name": "Arcane",
+   "tint": "#5a3a9a",
+   "glow": "#c49aff",
+   "glyphTint": "#b88cff",
+   "glyph": "arcane-orb",
+   "words": [
+    "arcane",
+    "magic"
+   ]
+  },
+  "holy": {
+   "name": "Holy",
+   "tint": "#a68a4a",
+   "glow": "#ffe8a0",
+   "glyphTint": "#ffe28a",
+   "glyph": "holy-light",
+   "words": [
+    "holy",
+    "light",
+    "divine"
+   ]
+  },
+  "nature": {
+   "name": "Nature",
+   "tint": "#4a7030",
+   "glow": "#b8f07a",
+   "glyphTint": "#a8e070",
+   "glyph": "nature-leaf",
+   "words": [
+    "nature",
+    "wild"
+   ]
+  },
+  "poison": {
+   "name": "Poison",
+   "tint": "#4a6a2a",
+   "glow": "#a8ff5a",
+   "glyphTint": "#9af050",
+   "glyph": "poison",
+   "words": [
+    "poison",
+    "venom"
+   ]
+  },
+  "shadow": {
+   "name": "Shadow",
+   "tint": "#3a2a52",
+   "glow": "#a77aff",
+   "glyphTint": "#9a70e8",
+   "glyph": "shadow-bolt",
+   "words": [
+    "shadow",
+    "dark",
+    "darkness"
+   ]
+  },
+  "physical": {
+   "name": "Physical",
+   "tint": "#6a6258",
+   "glow": "#ffd9a0",
+   "glyphTint": "#e8dcc8",
+   "glyph": "sword-slash",
+   "words": []
+  }
+ },
+ "aliases": {
+  "ice": "frost",
+  "cold": "frost",
+  "storm": "lightning",
+  "light": "holy",
+  "dark": "shadow",
+  "void": "shadow",
+  "earth": "nature",
+  "venom": "poison",
+  "fighter": "warrior",
+  "knight": "paladin",
+  "swashbuckler": "duelist",
+  "shadow_dancer": "shadowdancer",
+  "priest": "cleric",
+  "sorcerer": "mage",
+  "enchanter": "mage",
+  "runesmith": "tinker",
+  "scavenger": "rogue",
+  "monk": "wayfarer",
+  "tactician": "warrior",
+  "demon_hunter": "witch_hunter",
+  "starblade": "starcaller"
+ },
+ "dispel": {
+  "_doc": "inner ring colour by what can remove a buff/debuff (spec.dispel)",
+  "magic": "#4aa8ff",
+  "curse": "#b05cff",
+  "poison": "#5ad84a",
+  "disease": "#b08a4a",
+  "enrage": "#ff4a3a"
+ }
+}

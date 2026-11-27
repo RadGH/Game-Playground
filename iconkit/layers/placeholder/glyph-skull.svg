@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="256" height="256"><defs><linearGradient id="bone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf6e6" stop-opacity="1"/><stop offset="0.6" stop-color="#cfc2a0" stop-opacity="1"/><stop offset="1" stop-color="#8a7a5a" stop-opacity="1"/></linearGradient></defs>
+  <path d="M50 16C32 16 22 28 22 44 22 54 27 61 34 65V76H66V65C73 61 78 54 78 44 78 28 68 16 50 16Z" fill="url(#bone)" stroke="#170d07" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="39" cy="46" rx="7.5" ry="8.5" fill="#1a1208"/><ellipse cx="61" cy="46" rx="7.5" ry="8.5" fill="#1a1208"/>
+  <circle cx="39" cy="47" r="3" fill="#9ef0b0"/><circle cx="61" cy="47" r="3" fill="#9ef0b0"/>
+  <path d="M50 56l-4 7h8z" fill="#1a1208"/><path d="M42 76v-7M50 76v-7M58 76v-7" stroke="#170d07" stroke-width="2"/>
+  <path d="M32 30C36 22 44 20 50 20" fill="none" stroke="#fff" stroke-width="2" opacity=".6" stroke-linecap="round"/></svg>

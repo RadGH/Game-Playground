@@ -32,21 +32,31 @@ import { STEP, MAX_PLAYERS, VIEW_METRES, EVENT_METRES, UF, unpackButtons } from 
 import { normWeather, stepWeather, forceWeather, releaseWeather, weatherWire, WEATHER_CHOICES } from '../js/world/weather.js';
 import { createArenaMode } from './arena.js';
 import { titleOf } from '../js/rules/arena.js';
+import { arrivalAt } from '../js/world/regions/index.js';
+import { dungeonAI } from '../js/world/dungeon/place.js';
 
 const R2 = v => Math.round(v * 100) / 100;
 const dist2 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const TALK_METRES = 7, LOOT_METRES = 6, AREA_LOOT = 10, USE_METRES = 5, SHRINE_METRES = 10, FIND_METRES = 30;
-const ZONE_RESPAWN_S = 90, CAMP_CLEAR_METRES = 45, SPAWN_SAFE_METRES = 35;
+const GRAVE_REFILL_S = 3600, ZONE_RESPAWN_S = 90, CAMP_CLEAR_METRES = 45, SPAWN_SAFE_METRES = 35;
 
-export function createWorldRoom({ rules, W, ground, meta, state = null, log = () => {}, persist = () => {}, seed = 1, dev = false }) {
+// Regions (owner 2026-11-27; docs/BRAINSTORM-2026-11-27-regions.md §1): a hosted world runs one room per region (server/
+// hub.js). `region` = this room's region id; `share` = the world-wide parts of the world state every region room of
+// the world holds by reference (quests, story flags, found shrines and places); `points` = this region's travel points
+// (js/world/regions/index.js pointsIn); `transfer(key, { region, arrive, shrine })` = the hub moves a player to another
+// region's room (travel point or a shrine in another region).
+export function createWorldRoom({ rules, W, ground, meta, state = null, log = () => {}, persist = () => {}, seed = 1, dev = false, region = null, share = null, points = [], transfer = null, shrineInfo = () => null }) {
   const { book, terrain: T, data } = W;
   const placements = data.placements;
   const ws = state ? fromJSON(state) : createWorldState({ id: meta.code, name: meta.name, seed });
   ws.found = Array.isArray(ws.found) ? ws.found : [];
+  if (share) for (const k of Object.keys(share)) ws[k] = share[k];     // the world-wide parts, by reference
   ws.at = ws.at && typeof ws.at === 'object' ? ws.at : {};               // where each character last stood in this world
   // the weather, per region (js/world/weather.js): saved with the world, sent in the world state, the same for everyone
   ws.weather = normWeather(ws.weather, { seed: ws.seed, regions: T.regionIds || Object.keys(data.map.regions || {}) });
   const world = createWorld(rules, { seed: (ws.seed * 7919 + Math.floor(ws.time)) >>> 0, flags: ws.flags });
+  // a dungeon (the Catacombs): monsters notice only what they can see and walk round walls (js/world/dungeon/place.js)
+  if (W.dungeon) Object.assign(world, dungeonAI(W));
   const players = new Map();          // key -> P
   const unitMeta = new Map();         // monster id -> { camp, zone }
   const activeCamps = new Set();
@@ -56,8 +66,10 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
   const rng = makeRng((ws.seed ^ 0x5bd1) >>> 0);
   let tick = 0, wsDirty = true, saveAt = 0;
   const stats = { steps: 0, stepMs: 0, maxStepMs: 0, bytesOut: 0 };
-  const spawnAt = ground.standAt(data.map.spawn.at[0], data.map.spawn.at[1]);
-  if (!ws.shrines.length) discoverShrine(ws, data.map.spawn.shrine);
+  const firstIn = points.find(p => p.to) || points[0];
+  const spawnXZ = data.map.spawn?.at || (firstIn ? arrivalAt(firstIn) : [0, 0]);
+  const spawnAt = ground.standAt(spawnXZ[0], spawnXZ[1]);
+  if (data.map.spawn?.shrine && !ws.shrines.includes(data.map.spawn.shrine) && !region) discoverShrine(ws, data.map.spawn.shrine);
 
   // ------------------------------------------------------------------ monsters
   function heroesIn(region) { let n = 0; for (const P of players.values()) { const u = unitOf(P); if (u && T.regionAt(u.x, u.z) === region) n++; } return Math.max(1, n); }
@@ -98,7 +110,11 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
 
   // ------------------------------------------------------------------ players
   const unitOf = P => (P?.unitId ? world.units.get(P.unitId) : null);
-  function startPoint(char) {
+  function startPoint(char, arrive = null) {
+    const gate = arrive && points.find(p => p.id === arrive);
+    if (gate) { const a = arrivalAt(gate); return ground.standAt(a[0], a[1]); }
+    const viaShrine = arrive && shrinePos(arrive);
+    if (viaShrine) return viaShrine;
     const saved = ws.at[char.id];
     if (saved && T.walkable(saved[0], saved[1])) return ground.standAt(saved[0], saved[1]);
     const sh = shrinePos(homeShrine(ws, char.id));
@@ -111,7 +127,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     const p = ground.standAt(s.at[0] + Math.sin(s.facing || 0) * 3.5, s.at[1] + Math.cos(s.facing || 0) * 3.5);
     return p;
   }
-  function join({ key, char, send, name = null }) {
+  function join({ key, char, send, name = null, arrive = null }) {
     const old = players.get(key);
     if (old) { old.send = send; old.away = 0; sendEnter(old); return old; }
     if (players.size >= MAX_PLAYERS) return { error: 'This world is full (10 players).' };
@@ -120,7 +136,8 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     for (const it of [...Object.values(char.gear || {}), ...(char.bag || [])]) finishCaster(rules, it);
     // a hero saved on the old ranked trees (before 2026-11-26) moves onto the new ones: unknown nodes go, points back
     cleanNodes(rules, char);
-    const at = startPoint(char);
+    const at = startPoint(char, arrive);
+    char.where = { code: meta.code, region: region || null };
     const shrine = shrinePos(homeShrine(ws, char.id)) || spawnAt;
     const u = addPlayer(world, char, { at: [at.x, at.z], shrine: [shrine.x, shrine.z] });
     u.safeUntil = world.t + 4;                       // arriving: a short grace (lessons rule 39)
@@ -136,10 +153,10 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
   function sendEnter(P) {
     P.seen.clear();
     P.meDirty = true;
-    P.send(JSON.stringify({ t: 'enter', world: { code: meta.code, name: meta.name, public: !!meta.public, kind: meta.kind || 'world' }, you: P.unitId, char: P.char, wt: world.t, step: STEP }));
+    P.send(JSON.stringify({ t: 'enter', world: { code: meta.code, name: meta.name, public: !!meta.public, kind: meta.kind || 'world', place: meta.kind === 'arena' ? 'arena' : (region || 'world'), region: region || null }, points: points.map(p => ({ id: p.id, at: p.at, radius: p.radius || 7, facing: p.facing || 0, label: p.label || 'Travel', toName: p.toName || null, toRegion: p.toRegion || null, toLevels: p.toLevels || null, needs: p.requires?.flags || null })), you: P.unitId, char: P.char, wt: world.t, step: STEP }));
     sendWorld(P);
   }
-  function leave(key, { quiet = false } = {}) {
+  function leave(key, { quiet = false, text = null } = {}) {
     const P = players.get(key);
     if (!P) return;
     const u = unitOf(P);
@@ -148,7 +165,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     removePlayer(world, P.unitId);
     players.delete(key);
     persist({ world: saveRecord(), chars: [{ key, char: P.char }] });
-    if (!quiet) broadcast({ t: 'say', text: `${P.char.name} has left the world.`, kind: 'join' });
+    if (!quiet || text) broadcast({ t: 'say', text: text || `${P.char.name} has left the world.`, kind: 'join' });
     log('world.leave', { code: meta.code, key, players: players.size });
   }
   /** A dropped connection keeps the hero in the world for AWAY_MS (the hub calls leave() after). */
@@ -322,6 +339,34 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
         P.send(JSON.stringify(lootView(P, r.container)));
         return;
       }
+      case 'grave': {
+        // an open grave (Ashfield; owner 2026-11-27: "loot certain open graves and sometimes have to fight a skeleton or
+        // named mob"): its outcome is rolled once by the generator (js/world/regions/graves.js); each hero may dig it
+        // once per GRAVE_REFILL_S. Story graves (the family rings) are quest objects and go through 'use'.
+        const g = (W.graveyard?.openGraves || []).find(x => x.id === m.id);
+        if (!g || g.object) return err(P, 'There is nothing to dig here.');
+        if (!near(u, g.at, USE_METRES + 1.5)) return err(P, 'Walk up to the grave first.');
+        ws.graves = ws.graves || {};
+        const st = ws.graves[g.id] = ws.graves[g.id] || {};
+        if (st[c.id] != null && ws.time - st[c.id] < GRAVE_REFILL_S) return say(P, 'Only dirt and roots left in this grave.');
+        st[c.id] = ws.time; wsDirty = true;
+        if (g.outcome === 'skeleton' || g.outcome === 'named') {
+          const named = g.outcome === 'named';
+          const at = ground.standAt(g.at[0] + 1.6, g.at[1] + 0.6);
+          const mon = spawnMonster(world, named ? (g.named?.monster || 'named_dead') : 'skeleton_warrior', (g.level || 5) + (named ? 1 : 0), [at.x, at.z], { rank: named ? 'rare' : 'normal', home: [at.x, at.z] });
+          if (!mon) return err(P, 'The grave is empty.');
+          if (named && g.named?.name) mon.name = g.named.name;
+          mon.safeUntil = world.t + 0.8;               // it climbs out first (a short grace, then it fights)
+          unitMeta.set(mon.id, { grave: g.id });
+          say(P, named ? `${mon.name} rises from the grave!` : 'A skeleton claws its way out of the grave!', 'warn');
+          return;
+        }
+        const box = createContainer({ id: `grave:${g.id}:${c.id}:${Math.floor(ws.time)}`, kind: 'chest', at: g.at, level: g.level || 4, table: g.outcome === 'ring' ? 'grave_ring' : 'grave_cache', eligible: [c.id], seed: hashStr(`${g.id}:${c.id}:${Math.floor(ws.time / GRAVE_REFILL_S)}`), name: 'An open grave' });
+        extra.set(box.id, box);
+        P.loot.add(box.id);
+        P.send(JSON.stringify(lootView(P, box)));
+        return;
+      }
       case 'use': return useObject(P, m.id);
       // ---- people
       case 'talk': {
@@ -434,11 +479,26 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
         say(P, kind === 'full' ? `Everything was reset for ${r.price} gold. Choose your classes again as you level.` : `Your points were given back for ${r.price} gold.`, 'good');
         changed(P); return;
       }
+      case 'goto': {
+        // a travel point (a road out, a crypt door): to its other side, in another region
+        const p = points.find(x => x.id === m.id);
+        if (!p || !p.to || !u) return err(P, 'There is no way through here.');
+        if (Math.hypot(u.x - p.at[0], u.z - p.at[1]) > (p.radius || 7) + 2) return err(P, `Walk up to ${p.label} first.`);
+        if (u.downed) return err(P, 'Not while you are down.');
+        if (world.t - (u.lastFight ?? -999) < 6) return err(P, 'Not while fighting.');
+        if (!transfer || !p.toRegion) return err(P, 'That way is not open yet.');
+        for (const f of p.requires?.flags || []) if (!ws.flags.includes(f)) return err(P, `${p.label} is still blocked.`);
+        transfer(P.key, { region: p.toRegion, arrive: p.to });
+        return;
+      }
       case 'travel': {
-        const to = shrinePos(m.shrine);
-        if (!to || !ws.shrines.includes(m.shrine)) return err(P, 'Your world has not found that shrine yet.');
+        if (!ws.shrines.includes(m.shrine)) return err(P, 'Your world has not found that shrine yet.');
         if (!nearShrine(u)) return err(P, 'Travel starts at a shrine.');
-        if (world.t - (u.lastFight || -999) < 6) return err(P, 'Not while fighting.');
+        if (world.t - (u.lastFight ?? -999) < 6) return err(P, 'Not while fighting.');
+        const far = shrineInfo(m.shrine);                 // a shrine in another region (null region = the home region)
+        if (far && (far.region || null) !== (region || null) && transfer) { transfer(P.key, { region: far.region || null, shrine: m.shrine }); return; }
+        const to = shrinePos(m.shrine);
+        if (!to) return err(P, 'Your world has not found that shrine yet.');
         u.x = to.x; u.z = to.z; u.safeUntil = world.t + 4; u.mounted = false;
         P.teleport = true;
         say(P, `You travel to ${placements.shrines.find(s => s.id === m.shrine).name}.`);
@@ -485,7 +545,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
     if (kind === 'stable') return win(P, { kind: 'stable', npc, name: book.npcs[npc]?.name, price: Math.round(mountDef(rules).price * (open.priceMult || 1)), owned: !!c.horse, discount: open.priceMult ? 1 - open.priceMult : 0 });
     if (kind === 'trainer') return win(P, { kind: 'trainer', npc, name: book.npcs[npc]?.name, classes: open.classes || [] });
     if (kind === 'respec') return win(P, { kind: 'respec', npc, prices: { points: respecPrice(rules, c, 'points'), full: respecPrice(rules, c, 'full') } });
-    if (kind === 'travel') return win(P, { kind: 'travel', npc, shrines: ws.shrines });
+    if (kind === 'travel') return win(P, { kind: 'travel', npc, shrines: ws.shrines, far: Object.fromEntries(ws.shrines.map(id => [id, shrineInfo(id)]).filter(([, v]) => v && (v.region || null) !== (region || null))) });
     return win(P, { kind: 'close' });
   }
   function rewardSay(P, r) {
@@ -754,7 +814,7 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
   function speedOf(u) { return R2(walkSpeedOf(world, u)); }
   function sendWorld(P) {
     P.send(JSON.stringify({
-      t: 'wstate', flags: ws.flags, my: ws.playerFlags[P.char.id] || [], quests: ws.quests, shrines: ws.shrines, found: ws.found, camps: ws.camps,
+      t: 'wstate', far: farShrines(), flags: ws.flags, my: ws.playerFlags[P.char.id] || [], quests: ws.quests, shrines: ws.shrines, found: ws.found, camps: ws.camps,
       players: [...players.values()].map(Q => ({ id: Q.unitId, name: Q.char.name, level: Q.char.level, cls: Q.char.classOrder })), time: R2(ws.time),
       esc: escorts(book, ws).map(e => ({ npc: e.npc, at: e.at })),
       wx: weatherWire(ws.weather), wxs: ws.seed >>> 0,                    // the weather per region + the seed lightning is timed by
@@ -775,6 +835,12 @@ export function createWorldRoom({ rules, W, ground, meta, state = null, log = ()
   function saveRecord() { return { meta: { ...meta, updated: new Date().toISOString(), players: [...new Set([...(meta.players || []), ...[...players.values()].map(P => P.key)])] }, state: toJSON(ws) }; }
   function save() { persist({ world: saveRecord(), chars: [...players.values()].map(P => ({ key: P.key, char: P.char })) }); }
 
+  /** Found shrines standing in the world's OTHER regions (the shrine window lists them with their region; travel goes there). */
+  function farShrines() {
+    const out = [];
+    for (const id of ws.shrines) { const f = shrineInfo(id); if (f && (f.region || null) !== (region || null)) out.push({ id, name: f.name, regionName: f.regionName, region: f.region || 'vale' }); }
+    return out;
+  }
   function listing() { return { code: meta.code, name: meta.name, public: !!meta.public, players: players.size, seats: MAX_PLAYERS, names: [...players.values()].map(P => P.char.name), quests: Object.values(ws.quests).filter(q => q.done).length, kind: meta.kind || 'world', ...(arena ? { arena: arena.listing() } : {}) }; }
 
   if (meta.kind === 'arena' && W.arena) {

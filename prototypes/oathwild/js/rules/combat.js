@@ -1055,7 +1055,7 @@ function stepMonster(world, m, dt) {
   const ctl = control(m);
   // walking home after a leash: it ignores everyone and cannot be hurt until it is back
   if (m.returning) {
-    moveToward(m, m.home, m.speed * 1.6 * dt);
+    moveToward(m, m.home, m.speed * 1.6 * dt, world);
     if (dist(m, m.home) < 1) { m.returning = false; m.hp = m.maxHp; }
     return;
   }
@@ -1065,7 +1065,8 @@ function stepMonster(world, m, dt) {
   if (!m.threat?.size) {
     for (const p of players) {
       const r = p.kind === 'player' ? noticeRange(rules, p.char, m.aggroRange, { sneaking: p.sneaking }) : m.aggroRange * 0.6;
-      if (dist(p, m) <= r) noticeThreat(m, p);
+      // world.sight (a dungeon): only what it can SEE, with a walking way there — never through a wall (Thousandvale's fault)
+      if (dist(p, m) <= r && (!world.sight || world.sight(m, p, r))) noticeThreat(m, p);
     }
   }
   const lookup = id => world.units.get(id);
@@ -1093,7 +1094,7 @@ function stepMonster(world, m, dt) {
   if (!target) {
     if (m.threat?.size) { clearThreat(m); m.wanderTo = null; }
     if (m.wander > 0) wanderStep(world, m, dt, ctl);
-    else if (dist(m, m.home) > 1 && ctl.move) moveToward(m, m.home, m.speed * 1.4 * dt);
+    else if (dist(m, m.home) > 1 && ctl.move) moveToward(m, m.home, m.speed * 1.4 * dt, world);
     return;
   }
   m.lastFight = world.t;
@@ -1110,7 +1111,7 @@ function stepMonster(world, m, dt) {
   if (ctl.fleeing) { moveToward(m, { x: m.x * 2 - target.x, z: m.z * 2 - target.z }, m.speed * dt); return; }
   const reach = m.ranged ? m.ranged.range * C.rangedKeep : (m.reach || 2.2) + bodyR(target);
   if (d > reach) {
-    if (ctl.move) moveToward(m, target, m.speed * (1 - slowOf(m)) * dt);
+    if (ctl.move) moveToward(m, target, m.speed * (1 - slowOf(m)) * dt, world);
     return;
   }
   if (!ctl.act || world.t < m.swingAt) return;
@@ -1190,12 +1191,15 @@ function wanderStep(world, m, dt, ctl) {
   if (d < 0.4 || m.wanderStuck > 1) { m.wanderTo = null; m.wanderStuck = 0; m.wanderFrom = null; m.wanderWait = 3 + world.rng() * 8; return; }
   m.facing = Math.atan2(m.wanderTo.x - m.x, m.wanderTo.z - m.z);
   const before = { x: m.x, z: m.z };
-  moveToward(m, m.wanderTo, Math.min(1.4, m.speed * 0.32) * dt);
+  moveToward(m, m.wanderTo, Math.min(1.4, m.speed * 0.32) * dt, world);
   // (the server's ground check may refuse the step — a wall, a river: give that spot up)
   m.wanderFrom = before;
 }
 
-function moveToward(u, p, len) {
+// world.steer (a dungeon, js/world/dungeon/place.js): where to head for to reach p round walls and columns — the
+// next tile of a path when the straight line is blocked (regions, owner 2026-11-27: no walking at walls, no teleports)
+function moveToward(u, p, len, world = null) {
+  if (world?.steer) p = world.steer(u, p) || p;
   const dx = p.x - u.x, dz = p.z - u.z;
   const d = Math.hypot(dx, dz);
   if (d < 0.01) return;
@@ -1213,9 +1217,9 @@ function stepPet(world, p, dt) {
   // (an arena champion — a hero on the other side — is fought whenever it is near: it keeps no threat list)
   const foes = [...world.units.values()].filter(m => m.side !== p.side && m.alive && !m.downed && dist(m, owner) < 20 && ((m.kind === 'monster' && (m.threat?.has(owner.id) || m.threat?.has(p.id))) || m.kind === 'player'));
   const target = foes.sort((a, b) => dist(a, p) - dist(b, p))[0];
-  if (!target) { if (dist(p, owner) > C.followMetres && ctl.move) moveToward(p, owner, p.speed * dt); return; }
+  if (!target) { if (dist(p, owner) > C.followMetres && ctl.move) moveToward(p, owner, p.speed * dt, world); return; }
   const reach = p.ranged ? p.ranged.range * 0.8 : (p.reach || 2.2) + bodyR(target);
-  if (dist(p, target) > reach) { if (ctl.move) moveToward(p, target, p.speed * dt); return; }
+  if (dist(p, target) > reach) { if (ctl.move) moveToward(p, target, p.speed * dt, world); return; }
   if (!ctl.act || world.t < p.swingAt) return;
   p.swingAt = world.t + (p.attackEvery || 1.5);
   hit(world, p, target, { mult: 1, element: p.ranged?.element || 'physical', applies: [] }, { basic: true });
@@ -1286,6 +1290,7 @@ export function spawnCamp(world, campId) {
     const at = [cx + Math.cos(ang) * r, cz + Math.sin(ang) * r];
     const u = spawnMonster(world, sp.id, level, at, { rank: sp.rank || 'normal', camp: campId, home: at });
     if (u && notice) u.aggroRange = notice;
+    if (u && sp.name) u.name = sp.name;               // a named one (the Catacombs' Bone Warden, the Sexton)
     out.push(u);
   }
   return out.filter(Boolean);

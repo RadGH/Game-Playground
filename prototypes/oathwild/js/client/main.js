@@ -17,7 +17,9 @@
 //   app.auraUnit(id)      a unit with .statuses for describeAura · app.toast(text, kind) · app.sfx(id)
 // window.gameEye.state() → { screen, view, world, me, players, target, windows } for Claude's game-eye and the tests.
 import { bootRules } from '../rules/boot.js';
-import { bootWorld } from '../world/boot.js';
+import { bootWorld, readJson } from '../world/boot.js';
+import { loadRegionIndex, homeRegion } from '../world/regions/index.js';
+import { loadWorldBook } from '../world/regions/books.js';
 import { understory } from '../world/scatter.js';
 import { worldScene } from '../world/live.js';
 import { installLiveEdits } from './live-edits.js';
@@ -134,6 +136,13 @@ async function boot() {
   progress(0.3, 'Raising the hills…');
   await new Promise(r => setTimeout(r, 0));
   app.W = await bootWorld({ regions: rules.data.regions });
+  // one quest book for the whole world (regions, owner 2026-11-27): the Vale's book gains every region's quests and
+  // people, so a quest from Ashfield shows in the log here; each region's map is still built only when it is entered
+  try {
+    app.regionIndex = await loadRegionIndex();
+    app.worldBooks = await loadWorldBook({ index: app.regionIndex, home: app.W.book, regions: rules.data.regions, read: readJson });
+    app.W.book = app.worldBooks[homeRegion(app.regionIndex)];
+  } catch (e) { console.warn('regions: the world book could not be built — this region only', e); }
   progress(0.6, 'Planting the Hartwood…');
   await new Promise(r => setTimeout(r, 0));
   app.scattered = worldScene(app.W);                       // trees + decor with the map editor's layer (js/world/edits.js)

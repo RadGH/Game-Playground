@@ -1,0 +1,301 @@
+{
+  "_doc": "Icon Kit layers. Every layer is a square picture on the SAME canvas with the SAME centre: plate (grey, tinted per class) -> glow + glyph (cut to the plate) -> state effects -> frame. Entries have `placeholder` (drawn SVG, kept as the fallback) and, after tools/import-layers.py, `file` (256 px WebP) + `small` (64 px). Frames: `style` painted (art), line (thin / hairline: painted gold art when imported; the drawn line version takes any colour, spec.frameColor) or none; `inner` = the measured opening (radius or half-width, share of the canvas) \u2014 plates grow to it and glyphs grow with it; `placeholderInner` = the drawn placeholder's opening; `class` = which class's themed frame it is (themes.json classes[].frame). Plates: `radius` = the painted plate's own radius, `placeholderRadius` the drawn one's; the kit scales the plate so it tucks just under whichever frame is on. Round 2 (2026-11-27): Codex's 'hairline' paintings came out as ornamental rings, so they are the 'filigree' frame; its thin-square was a medium frame and was dropped. Hairline (both) and thin-square use the drawn line until repainted.",
+  "frames": {
+    "gold": {
+      "name": "Antique gold",
+      "circle": {
+        "placeholder": "layers/placeholder/frame-circle.svg",
+        "inner": 0.3379,
+        "file": "layers/codex/frame-circle-256.webp",
+        "small": "layers/codex/frame-circle-64.webp",
+        "placeholderInner": 0.395
+      },
+      "square": {
+        "placeholder": "layers/placeholder/frame-square.svg",
+        "inner": 0.3672,
+        "file": "layers/codex/frame-square-256.webp",
+        "small": "layers/codex/frame-square-64.webp",
+        "placeholderInner": 0.39
+      },
+      "style": "painted"
+    },
+    "thin": {
+      "name": "Thin",
+      "style": "line",
+      "circle": {
+        "placeholder": "layers/placeholder/frame-thin-circle.svg",
+        "inner": 0.4453,
+        "placeholderInner": 0.428,
+        "file": "layers/codex/frame-thin-circle-256.webp",
+        "small": "layers/codex/frame-thin-circle-64.webp"
+      },
+      "square": {
+        "placeholder": "layers/placeholder/frame-thin-square.svg",
+        "inner": 0.428,
+        "placeholderInner": 0.428
+      }
+    },
+    "hairline": {
+      "name": "Hairline",
+      "style": "line",
+      "circle": {
+        "placeholder": "layers/placeholder/frame-hairline-circle.svg",
+        "inner": 0.457,
+        "placeholderInner": 0.457
+      },
+      "square": {
+        "placeholder": "layers/placeholder/frame-hairline-square.svg",
+        "inner": 0.457,
+        "placeholderInner": 0.457
+      }
+    },
+    "none": {
+      "name": "None",
+      "style": "none",
+      "circle": {
+        "inner": 0.484
+      },
+      "square": {
+        "inner": 0.484
+      }
+    },
+    "filigree": {
+      "name": "Gold filigree",
+      "style": "painted",
+      "circle": {
+        "placeholder": "layers/placeholder/frame-circle.svg",
+        "placeholderInner": 0.395,
+        "file": "layers/codex/frame-filigree-circle-256.webp",
+        "small": "layers/codex/frame-filigree-circle-64.webp",
+        "inner": 0.3955
+      },
+      "square": {
+        "placeholder": "layers/placeholder/frame-square.svg",
+        "placeholderInner": 0.39,
+        "file": "layers/codex/frame-filigree-square-256.webp",
+        "small": "layers/codex/frame-filigree-square-64.webp",
+        "inner": 0.4199
+      }
+    },
+    "warrior": {
+      "name": "Warrior iron",
+      "style": "painted",
+      "class": "warrior",
+      "circle": {
+        "placeholder": "layers/placeholder/frame-circle.svg",
+        "inner": 0.3652,
+        "placeholderInner": 0.395,
+        "file": "layers/codex/frame-warrior-circle-256.webp",
+        "small": "layers/codex/frame-warrior-circle-64.webp"
+      },
+      "square": {
+        "placeholder": "layers/placeholder/frame-square.svg",
+        "inner": 0.3818,
+        "placeholderInner": 0.39,
+        "file": "layers/codex/frame-warrior-square-256.webp",
+        "small": "layers/codex/frame-warrior-square-64.webp"
+      }
+    },
+    "mage": {
+      "name": "Mage silver runes",
+      "style": "painted",
+      "class": "mage",
+      "circle": {
+        "placeholder": "layers/placeholder/frame-circle.svg",
+        "inner": 0.3721,
+        "placeholderInner": 0.395,
+        "file": "layers/codex/frame-mage-circle-256.webp",
+        "small": "layers/codex/frame-mage-circle-64.webp"
+      },
+      "square": {
+        "placeholder": "layers/placeholder/frame-square.svg",
+        "inner": 0.3828,
+        "placeholderInner": 0.39,
+        "file": "layers/codex/frame-mage-square-256.webp",
+        "small": "layers/codex/frame-mage-square-64.webp"
+      }
+    },
+    "rogue": {
+      "name": "Rogue leather",
+      "style": "painted",
+      "class": "rogue",
+      "circle": {
+        "placeholder": "layers/placeholder/frame-circle.svg",
+        "inner": 0.3525,
+        "placeholderInner": 0.395,
+        "file": "layers/codex/frame-rogue-circle-256.webp",
+        "small": "layers/codex/frame-rogue-circle-64.webp"
+      },
+      "square": {
+        "placeholder": "layers/placeholder/frame-square.svg",
+        "inner": 0.3604,
+        "placeholderInner": 0.39,
+        "file": "layers/codex/frame-rogue-square-256.webp",
+        "small": "layers/codex/frame-rogue-square-64.webp"
+      }
+    },
+    "cleric": {
+      "name": "Cleric marble",
+      "style": "painted",
+      "class": "cleric",
+      "circle": {
+        "placeholder": "layers/placeholder/frame-circle.svg",
+        "inner": 0.3447,
+        "placeholderInner": 0.395,
+        "file": "layers/codex/frame-cleric-circle-256.webp",
+        "small": "layers/codex/frame-cleric-circle-64.webp"
+      },
+      "square": {
+        "placeholder": "layers/placeholder/frame-square.svg",
+        "inner": 0.3662,
+        "placeholderInner": 0.39,
+        "file": "layers/codex/frame-cleric-square-256.webp",
+        "small": "layers/codex/frame-cleric-square-64.webp"
+      }
+    },
+    "ranger": {
+      "name": "Ranger wood",
+      "style": "painted",
+      "class": "ranger",
+      "circle": {
+        "placeholder": "layers/placeholder/frame-circle.svg",
+        "inner": 0.376,
+        "placeholderInner": 0.395,
+        "file": "layers/codex/frame-ranger-circle-256.webp",
+        "small": "layers/codex/frame-ranger-circle-64.webp"
+      },
+      "square": {
+        "placeholder": "layers/placeholder/frame-square.svg",
+        "inner": 0.3877,
+        "placeholderInner": 0.39,
+        "file": "layers/codex/frame-ranger-square-256.webp",
+        "small": "layers/codex/frame-ranger-square-64.webp"
+      }
+    },
+    "druid": {
+      "name": "Druid roots",
+      "style": "painted",
+      "class": "druid",
+      "circle": {
+        "placeholder": "layers/placeholder/frame-circle.svg",
+        "inner": 0.3525,
+        "placeholderInner": 0.395,
+        "file": "layers/codex/frame-druid-circle-256.webp",
+        "small": "layers/codex/frame-druid-circle-64.webp"
+      },
+      "square": {
+        "placeholder": "layers/placeholder/frame-square.svg",
+        "inner": 0.3584,
+        "placeholderInner": 0.39,
+        "file": "layers/codex/frame-druid-square-256.webp",
+        "small": "layers/codex/frame-druid-square-64.webp"
+      }
+    },
+    "warlock": {
+      "name": "Warlock thorns",
+      "style": "painted",
+      "class": "warlock",
+      "circle": {
+        "placeholder": "layers/placeholder/frame-circle.svg",
+        "inner": 0.334,
+        "placeholderInner": 0.395,
+        "file": "layers/codex/frame-warlock-circle-256.webp",
+        "small": "layers/codex/frame-warlock-circle-64.webp"
+      },
+      "square": {
+        "placeholder": "layers/placeholder/frame-square.svg",
+        "inner": 0.3711,
+        "placeholderInner": 0.39,
+        "file": "layers/codex/frame-warlock-square-256.webp",
+        "small": "layers/codex/frame-warlock-square-64.webp"
+      }
+    },
+    "paladin": {
+      "name": "Paladin gold",
+      "style": "painted",
+      "class": "paladin",
+      "circle": {
+        "placeholder": "layers/placeholder/frame-circle.svg",
+        "inner": 0.3574,
+        "placeholderInner": 0.395,
+        "file": "layers/codex/frame-paladin-circle-256.webp",
+        "small": "layers/codex/frame-paladin-circle-64.webp"
+      },
+      "square": {
+        "placeholder": "layers/placeholder/frame-square.svg",
+        "inner": 0.3887,
+        "placeholderInner": 0.39,
+        "file": "layers/codex/frame-paladin-square-256.webp",
+        "small": "layers/codex/frame-paladin-square-64.webp"
+      }
+    }
+  },
+  "plates": {
+    "stone": {
+      "name": "Cracked slate",
+      "circle": {
+        "placeholder": "layers/placeholder/plate-circle.svg",
+        "file": "layers/codex/plate-circle-256.webp",
+        "small": "layers/codex/plate-circle-64.webp",
+        "radius": 0.3579,
+        "placeholderRadius": 0.41
+      },
+      "square": {
+        "placeholder": "layers/placeholder/plate-square.svg",
+        "file": "layers/codex/plate-square-256.webp",
+        "small": "layers/codex/plate-square-64.webp",
+        "radius": 0.3872,
+        "placeholderRadius": 0.405
+      }
+    },
+    "smooth": {
+      "name": "Smooth stone",
+      "circle": {
+        "placeholder": "layers/placeholder/plate-smooth-circle.svg",
+        "placeholderRadius": 0.41
+      },
+      "square": {
+        "placeholder": "layers/placeholder/plate-smooth-square.svg",
+        "placeholderRadius": 0.405
+      }
+    }
+  },
+  "glows": {
+    "soft": {
+      "name": "Soft glow",
+      "placeholder": "layers/placeholder/glow-soft.svg",
+      "file": "layers/codex/glow-soft-256.webp",
+      "small": "layers/codex/glow-soft-64.webp"
+    },
+    "swirl": {
+      "name": "Swirl",
+      "placeholder": "layers/placeholder/glow-swirl.svg",
+      "file": "layers/codex/glow-swirl-256.webp",
+      "small": "layers/codex/glow-swirl-64.webp"
+    },
+    "rays": {
+      "name": "Rays",
+      "placeholder": "layers/placeholder/glow-rays.svg"
+    }
+  },
+  "elementGlow": {
+    "_doc": "which glow a spell of this element gets by default (the rest: soft). Swirl stays optional: painted, it reads as a white smoke squiggle (2026-11-27)",
+    "holy": "rays"
+  },
+  "defaults": {
+    "frame": "gold",
+    "plate": "stone",
+    "glow": "soft",
+    "shape": "circle",
+    "glyphScale": 1
+  },
+  "glyphRef": {
+    "_doc": "the frame opening glyph `fit` was measured against (tools/import-layers.py); a glyph grows with a wider opening",
+    "circle": 0.3379,
+    "square": 0.3672
+  },
+  "frameColor": {
+    "_doc": "default colour of the line frames (thin, hairline) when drawn",
+    "default": "#e2b85a"
+  }
+}

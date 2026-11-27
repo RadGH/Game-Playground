@@ -62,7 +62,7 @@ export const ACTS = {
   bar: [['slot', N], ['spell', S, 48]],
   buy: [['npc', S, 64], ['item', S, 64]], sell: [['npc', S, 64], ['item', S, 64]], repair: [['npc', S, 64], ['item', S, 64]],
   horse: [['npc', S, 64]], respec: [['kind', S, 16]], enchant: [['item', S, 64], ['affix', S, 64]], disenchant: [['item', S, 64]],
-  travel: [['shrine', S, 64]], home: [['shrine', S, 64]], respawn: [], train: [['npc', S, 64], ['cls', S, 32]],
+  travel: [['shrine', S, 64]], goto: [['id', S, 64]], grave: [['id', S, 64]], home: [['shrine', S, 64]], respawn: [], train: [['npc', S, 64], ['cls', S, 32]],
   chat: [['text', S, 200]],
   // the arena (server/arena.js): the bracket board, the champions' ladder, start a match / bout, wear a title
   'arena-board': [], 'arena-ladder': [], 'arena-start': [['bracket', S, 16], ['champion', S, 32]], 'arena-title': [['title', S, 40]],

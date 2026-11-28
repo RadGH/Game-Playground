@@ -1,7 +1,7 @@
-// Icon Kit review page: Builder, Compare, Status, Class sheet, In game (Oathwild), Old library, Glyph matrix.
+// Icon Kit review page: Builder, Compare, Status, Items, Class sheet, In game (Oathwild), Old library, Glyph matrix.
 // Reads Oathwild's spell and class data read-only (its own rules/spells.js builds the catalogue) and its current icon
 // code, and the old SVG icon library — nothing here writes to a game.
-import { loadKit, SHAPES, STATES, SIZES, DISPELS } from './iconkit.js';
+import { loadKit, SHAPES, STATES, SIZES, DISPELS, ITEM_STATES } from './iconkit.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -12,9 +12,9 @@ const store = {
 };
 
 const kit = await loadKit();
-const TABS = ['builder', 'compare', 'status', 'classes', 'oathwild', 'library', 'matrix'];
+const TABS = ['builder', 'compare', 'status', 'items', 'classes', 'oathwild', 'library', 'matrix'];
 const B_DEFAULT = { glyph: 'fireball', plate: 'stone', cls: 'mage', glowFrom: 'fire', custom: false, tint: '#38469a', glowColor: '#ff9a3a', glyphTint: '#ff8a30', strength: 0.65,
-  glow: 'soft', frame: 'gold', frameColor: 'gold', frameHex: '#e2b85a', size: 64, state: 'ready', passiveStyle: 'dim', dispel: '',
+  glow: 'soft', frame: 'gold', frameColor: 'gold', frameHex: '#e2b85a', size: 64, state: 'ready', dispel: '',
   cd: 0, secs: 0, cast: -1, castStyle: 'bottom', stacks: 0, maxStacks: 5, dur: 0, animate: true };
 const state = {
   tab: TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'builder',
@@ -24,6 +24,7 @@ const state = {
   cmp: Object.assign({ cls: '', size: 40 }, store.get('compare', {})),
   ow: { cls: '', only: false, q: '' },
   lib: { q: '', set: 'all' },
+  it: Object.assign({ size: 48 }, store.get('items', {})),
 };
 const MATCH = {
   named: { label: 'Named', note: 'a word in its name picked the glyph' },
@@ -33,7 +34,7 @@ const MATCH = {
   class: { label: 'Class', note: 'the class emblem — nothing closer' },
 };
 const STATE_NOTE = {
-  ready: 'normal', disabled: 'grey, dark', selected: 'bright frame + halo', passive: 'never pressed: no glow, muted',
+  ready: 'normal', disabled: 'grey, dark', selected: 'bright frame + halo', passive: 'not a button: no frame, soft faded edge — reads like a buff',
   active: 'toggled on: steady inner glow + gold edge', channeling: 'pulsing glow + light running round the rim',
   nomana: 'blue wash', norange: 'red wash',
 };
@@ -93,7 +94,7 @@ function setTab(t) {
 }
 function render() {
   stopLoop();
-  ({ builder: renderBuilder, compare: renderCompare, status: renderStatus, classes: renderClasses, oathwild: renderOathwild, library: renderLibrary, matrix: renderMatrix })[state.tab]();
+  ({ builder: renderBuilder, compare: renderCompare, status: renderStatus, items: renderItems, classes: renderClasses, oathwild: renderOathwild, library: renderLibrary, matrix: renderMatrix })[state.tab]();
 }
 document.querySelector('.ikr-tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); });
 document.querySelector('.ikr-art').addEventListener('click', e => {
@@ -125,7 +126,7 @@ function builderSpec(extra = {}) {
     glow: b.glow === 'none' ? null : b.glow, glowColor: b.custom ? b.glowColor : gl.glow,
     glyphTint: b.custom ? b.glyphTint : (gl.glyphTint || gl.glow),
     frame: b.frame, frameColor: b.frameColor === 'gold' ? null : b.frameColor === 'class' ? 'class' : b.frameHex,
-    size: b.size, state: b.state, passiveStyle: b.passiveStyle, dispel: b.dispel || null, mode, ...extra,
+    size: b.size, state: b.state, dispel: b.dispel || null, mode, ...extra,
   };
 }
 const range = (name, label, min, max, step, value, shown) => `<label class="ikr-field"><span>${label} <small data-out="${name}">${shown}</small></span><input type="range" name="${name}" min="${min}" max="${max}" step="${step}" value="${value}"></label>`;
@@ -154,8 +155,9 @@ function renderBuilder() {
       <div class="ikr-sizes" id="canvas-row">${SIZES.map(s => `<figure><div class="ikr-cross"><img alt="" width="${s}" height="${s}" data-size="${s}"></div><figcaption>${s} px</figcaption></figure>`).join('')}</div>
       <h2>States</h2>
       <div class="ikr-sizes ikr-states">${STATES.map(st => `<figure>${icon({ ...plain, size: 56, state: st })}<figcaption><b>${cap(st === 'nomana' ? 'no mana' : st === 'norange' ? 'out of range' : st)}</b>${esc(STATE_NOTE[st])}</figcaption></figure>`).join('')}</div>
-      <h2>Passive: two looks <small>recommended: Dim — reads as "always on" at a glance and keeps the class colour</small></h2>
-      <div class="ikr-sizes">${[['ready', 'Ready (for comparison)'], ['dim', 'Dim'], ['socket', 'Socket']].map(([p, l]) => `<figure>${icon({ ...plain, size: 64, state: p === 'ready' ? 'ready' : 'passive', passiveStyle: p })}<figcaption>${l}</figcaption></figure>`).join('')}</div>
+      <h2>Passive <small>no frame, the plate fades out toward its edge, a slightly smaller glyph: it reads like a buff, not a button (owner 2026-11-27)</small></h2>
+      <div class="ikr-sizes ikr-passives">${SHAPES.map(sh => [['ready', 'Button'], ['passive', 'Passive']].map(([st, l]) => `<figure><div class="ikr-cross">${icon({ ...plain, shape: sh, size: 64, state: st })}</div><figcaption>${l} · ${cap(sh)}</figcaption></figure>`).join('')).join('')}
+        ${[24, 40].map(sz => `<figure><div class="ikr-cross">${icon({ ...plain, size: sz, state: 'passive' })}</div><figcaption>${sz} px</figcaption></figure>`).join('')}</div>
       <h2>Dispellable <small>inner ring colour = what can remove it</small></h2>
       <div class="ikr-sizes">${DISPELS.map(d => `<figure>${icon({ ...plain, size: 56, dispel: d })}<figcaption>${cap(d)}</figcaption></figure>`).join('')}<figure>${icon({ ...plain, size: 56 })}<figcaption>None</figcaption></figure></div>
       <h2>Modes <small>${b.animate ? 'playing a loop' : 'still — turn Animate on to play'}</small></h2>
@@ -181,7 +183,6 @@ function renderBuilder() {
       ${range('strength', 'Tint strength', 0, 1, 0.05, b.strength, `${Math.round(b.strength * 100)}%`)}
       <div class="ikr-field"><span>Glow</span>${seg('glow', [['none', 'Off'], ...Object.entries(kit.data.layers.glows).map(([id, x]) => [id, x.name])], b.glow)}</div>
       <div class="ikr-field"><span>State</span>${seg('state', STATES.map(s => [s, s === 'nomana' ? 'No mana' : s === 'norange' ? 'Out of range' : cap(s)]), b.state)}</div>
-      ${b.state === 'passive' ? `<div class="ikr-field"><span>Passive look</span>${seg('passiveStyle', [['dim', 'Dim'], ['socket', 'Socket']], b.passiveStyle)}</div>` : ''}
       <div class="ikr-field"><span>Dispel ring</span>${seg('dispel', [['', 'None'], ...DISPELS.map(d => [d, cap(d)])], b.dispel)}</div>
       <div class="ikr-field"><span>Animate</span>${seg('animate', [['true', 'Play the loop'], ['false', 'Still']], String(b.animate))}</div>
       ${range('cd', 'Cooldown left', 0, 1, 0.05, b.cd, `${Math.round(b.cd * 100)}%`)}
@@ -245,6 +246,7 @@ function renderBuilder() {
 const CMP_ROWS = [
   ['gold', null, 'Gold studded'], ['filigree', null, 'Gold filigree'], ['thin', null, 'Thin gold'], ['thin', 'class', 'Thin, class colour'],
   ['hairline', null, 'Hairline gold'], ['hairline', 'class', 'Hairline, class colour'], ['none', null, 'None'], ['class', null, 'Class themed'],
+  ['passive', null, 'Passive (buff look)'],
 ];
 async function renderCompare() {
   view.innerHTML = '<p class="ikr-loading">Reading Oathwild\'s spells…</p>';
@@ -275,8 +277,8 @@ async function renderCompare() {
           <span></span>${gl.map(x => `<span class="ikr-cmpcol">${esc(x.row?.row.name || kit.glyph(x.id).name)}</span>`).join('')}
           ${CMP_ROWS.map(([fr, col, label]) => `<span class="ikr-cmprow">${label}</span>${gl.map(x => {
             const base = x.row ? x.row.pick.spec : kit.iconFor({ name: kit.glyph(x.id).name, element: kit.glyph(x.id).element || 'physical' }, cls).spec;
-            const sp = { ...base, glyph: x.id, cls, shape: state.shape, frame: fr, frameColor: col, size };
-            return `<button type="button" class="ikr-cmpcell" data-open='${esc(JSON.stringify({ glyph: x.id, cls, frame: fr, frameColor: col || 'gold', glowFrom: x.row?.pick.element || kit.glyph(x.id).element || 'physical' }))}' aria-label="${esc(label)}">${icon(sp)}</button>`;
+            const sp = fr === 'passive' ? { ...base, glyph: x.id, cls, shape: state.shape, frame: 'hairline', frameColor: 'class', state: 'passive', size } : { ...base, glyph: x.id, cls, shape: state.shape, frame: fr, frameColor: col, size };
+            return `<button type="button" class="ikr-cmpcell" data-open='${esc(JSON.stringify({ glyph: x.id, cls, frame: fr === 'passive' ? 'hairline' : fr, frameColor: fr === 'passive' ? 'class' : col || 'gold', glowFrom: x.row?.pick.element || kit.glyph(x.id).element || 'physical', ...(fr === 'passive' ? { pstate: 1 } : {}) }))}' aria-label="${esc(label)}">${icon(sp)}</button>`;
           }).join('')}`).join('')}
         </div></article>`;
     }).join('')}
@@ -287,7 +289,9 @@ async function renderCompare() {
   onSeg(f, 'shape', v => { state.shape = v; store.set('shape', v); renderCompare(); });
   view.addEventListener('click', e => {
     const b = e.target.closest('[data-open]'); if (!b) return;
-    Object.assign(state.b, JSON.parse(b.dataset.open), { custom: false, state: 'ready', dispel: '', cd: 0, secs: 0, cast: -1, stacks: 0, dur: 0 });
+    const o = JSON.parse(b.dataset.open);
+    Object.assign(state.b, o, { custom: false, state: o.pstate ? 'passive' : 'ready', dispel: '', cd: 0, secs: 0, cast: -1, stacks: 0, dur: 0 });
+    delete state.b.pstate;
     store.set('builder2', state.b); setTab('builder');
   });
 }
@@ -315,6 +319,8 @@ async function renderStatus() {
     <h2>Action bar <small>cooldowns with seconds · casting · channeling · toggled on · no mana · out of range · stacks · passive</small></h2>
     <div class="ikr-mockbar" id="mock-bar"></div>
     <div class="ikr-castline"><span id="cast-name"></span><i><b id="cast-fill"></b></i></div>
+    <h2>Passives <small>never pressed: no frame, a soft faded edge — the class tree and the spellbook show them like this</small></h2>
+    <div class="ikr-mockbuffs" id="mock-passives"></div>
     <h2>Buffs and debuffs <small>ring colour = what dispels it · stacks · time left under each</small></h2>
     <div class="ikr-mockbuffs" id="mock-buffs"></div>
     <h2>Legend</h2>
@@ -324,6 +330,7 @@ async function renderStatus() {
   const bar = $('#mock-bar', view), buffEl = $('#mock-buffs', view), castName = $('#cast-name', view), castFill = $('#cast-fill', view);
   const frame = state.b.frame, frameColor = state.b.frameColor === 'class' ? 'class' : null;
   const base = r => ({ ...r.pick.spec, shape: state.shape, frame, frameColor, cls });
+  $('#mock-passives', view).innerHTML = spells.slice(0, 6).map(r => `<span class="ikr-buff">${icon({ ...base(r), size: 44, state: 'passive' }, { label: r.row.name })}</span>`).join('');
   const t0 = performance.now();
   const draw = () => {
     const t = (performance.now() - t0) / 1000, size = fit();
@@ -351,6 +358,37 @@ async function renderStatus() {
   };
   draw();
   timer = setInterval(draw, 100);
+}
+
+// ---- Items: every Oathwild item base x rarity, the item states, and a mock bag at phone size -------------------------
+const RARITIES = ['normal', 'magic', 'rare', 'legendary', 'unique', 'set'];
+const ITEM_STATE_NOTE = { equipped: 'worn now: green tick', broken: 'worn out: red wash, greyed', cannotwear: 'cannot wear it: red wash + X', new: 'just picked up: a glint now and then' };
+const SLOT_ORDER = ['weapon', 'offhand', 'head', 'chest', 'legs', 'hands', 'feet', 'ring', 'necklace', 'quest', 'consumable', 'goods'];
+function renderItems() {
+  const it = state.it, size = Number(it.size) || 48;
+  const rows = [...kit.items].sort((a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot));
+  const painted = kit.items.filter(r => r.file).length;
+  const itemIcon = (row, extra = {}, o = {}) => icon({ ...kit.itemIconFor({ baseKey: row.base, slot: row.slot, subtype: row.subtype, ...extra.item }, extra.opts).spec, size, ...extra.spec }, { label: row.name, ...o });
+  // a bag: 20 items with mixed rarity, a couple of stacks and states (fixed picks, so the shot is the same every time)
+  const bag = Array.from({ length: 20 }, (_, i) => {
+    const row = rows[(i * 7 + 3) % rows.length], rar = RARITIES[(i * 5) % 6];
+    return { row, item: { rarity: rar, quality: ['low', 'medium', 'high', 'elite', 'exotic'][i % 5], count: row.slot === 'consumable' ? 5 : 0 }, opts: { isNew: i === 2, broken: i === 9, cannotWear: i === 13, equipped: i === 0 || i === 5 } };
+  });
+  view.innerHTML = `<section class="ikr-items">
+    <div class="ikr-bar"><p class="ikr-lead">Items get their own frame: square (round for rings and necklaces), silver tinted by rarity, a dark plate that is the same for every class, the item's picture, a quality gem from High up, and a stack count. ${painted} of ${kit.items.length} item pictures are Codex paintings; the rest show the old item pictures (Oathwild's line drawings and the drawn item art) until theirs are imported.</p>
+      <div class="ikr-field"><span>Size</span>${seg('size', [[40, '40 px'], [48, '48 px'], [64, '64 px']], size)}</div></div>
+    <h2>Rarities <small>the same Sword in each</small></h2>
+    <div class="ikr-sizes">${RARITIES.map(r => `<figure>${itemIcon(rows.find(x => x.base === 'sword') || rows[0], { item: { rarity: r } })}<figcaption><b class="ikr-rar" style="--sw:${kit.data.themes.rarity[r]}">${cap(r)}</b></figcaption></figure>`).join('')}</div>
+    <h2>States, gem and count</h2>
+    <div class="ikr-sizes ikr-states">${[...ITEM_STATES.map(st => [cap(st === 'cannotwear' ? 'cannot wear' : st), ITEM_STATE_NOTE[st], { opts: { equipped: st === 'equipped', broken: st === 'broken', cannotWear: st === 'cannotwear', isNew: st === 'new' }, item: { rarity: 'magic' } }]),
+      ...['high', 'elite', 'exotic'].map(q => [`${cap(q)} quality`, 'corner gem', { item: { rarity: 'rare', quality: q } }]),
+      ['Stack of 12', 'count bottom right', { item: { rarity: 'normal', count: 12 } }]].map(([l, n, ex]) => `<figure><div class="ikr-cross">${itemIcon(ex.item.count ? rows.find(x => x.base === 'potion') || rows[0] : rows.find(x => x.base === 'longsword') || rows[0], ex)}</div><figcaption><b>${esc(l)}</b>${esc(n)}</figcaption></figure>`).join('')}</div>
+    <h2>A bag on a phone <small>360 px wide, five to a row</small></h2>
+    <div class="ikr-phonebag"><div class="ikr-bagtop"><b>Bag</b><small>20 / 30</small></div><div class="ikr-baggrid">${bag.map(b => `<span class="ikr-bagcell">${icon({ ...kit.itemIconFor({ baseKey: b.row.base, slot: b.row.slot, subtype: b.row.subtype, ...b.item }, b.opts).spec, size: 56 }, { label: b.row.name })}</span>`).join('')}</div></div>
+    <h2>Every Oathwild item <small>${rows.length} bases × ${RARITIES.length} rarities · a gold left edge = still the old picture</small></h2>
+    <div class="ikr-itemgrid" style="--n:${RARITIES.length}">${rows.map(r => `<div class="ikr-itemrow${r.file ? '' : ' is-fallback'}"><span class="ikr-itemname"><b>${esc(r.name)}</b><small>${esc(cap(r.slot || ''))}${r.subtype && r.subtype !== r.slot ? ` · ${esc(cap(r.subtype))}` : ''}</small></span>${RARITIES.map(rr => itemIcon(r, { item: { rarity: rr } })).join('')}</div>`).join('')}</div>
+  </section>`;
+  onSeg(view, 'size', v => { it.size = Number(v); store.set('items', it); renderItems(); });
 }
 
 // ---- Class sheet ---------------------------------------------------------------------------------------------------

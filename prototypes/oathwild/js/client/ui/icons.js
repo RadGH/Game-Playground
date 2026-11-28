@@ -1,7 +1,7 @@
-// One icon style for the whole game (lessons rule 17): the playground's Codex-drawn SVG sets — button/menu icons
-// (icons/data/game/ui.js) and the spell medallions (icons/js/catalog.js, 192 spells by id). An Oathwild spell that is
-// not in the catalog gets its class's motif on the same medallion. A few small line glyphs (close, arrows, coin)
-// are drawn here in the same weight.
+// One icon style for the whole game (lessons rule 17): button/menu icons from the playground's Codex-drawn SVG set
+// (icons/data/game/ui.js); spells, passives and items from the Icon Kit (iconkit/, loaded at boot — see below), with the
+// old spell medallions (icons/js/catalog.js, class motifs) as the picture until it has loaded. A few small line glyphs
+// (close, arrows, coin) are drawn here in the same weight.
 import { uiIconSvg, motifSvg, CLASS_MOTIFS } from '../../../../../icons/js/game-icons.js';
 import { iconSvg } from '../../../../../icons/js/catalog.js';
 
@@ -75,13 +75,41 @@ export function uiIcon(id, size = 24) {
   return uiIconSvg(id, size, { cls: 'ow-icon ow-uiico' }) || glyph(id, size) || '';
 }
 
-// spell picture: the shared catalog by spell id (most Oathwild spells reuse a Farhold / Thousandvale row and its id),
+// ---- spell / passive / item pictures: the Icon Kit (iconkit/, round 3, owner 2026-11-27) -----------------------------
+// "Use the Hairline frame for Oathwild with class colours": a spell is the kit's layered icon (class-tinted stone, the
+// spell's glyph and element glow, a hairline ring in the class colour). A passive class node has the kit's passive look
+// (no frame, soft faded edge: a buff, not a button). An item is the kit's square item icon (round for jewellery), its
+// silver frame tinted by rarity. The kit loads once at boot (loadIconKit, main.js); until it has, every function here
+// returns the old SVG picture, so callers stay synchronous. The kit lives beside prototypes/ on the same origin.
+const KIT_URL = '../../../../../iconkit/js/iconkit.js';
+const kitRef = { kit: null, rules: null, p: null };
+const cache = new Map();
+/** Load the kit (once) and remember the rules (spell rows for iconFor). Resolves to the kit, or null if it failed. */
+export function loadIconKit(rules) {
+  if (rules) kitRef.rules = rules;
+  return kitRef.p ??= (async () => {
+    try {   // (its stylesheet is linked in index.html)
+      const { loadKit } = await import(KIT_URL);
+      kitRef.kit = await loadKit();
+      cache.clear();
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('ow:icons'));   // redraw what drew the old pictures
+      return kitRef.kit;
+    } catch (e) {
+      console.warn('icons: the Icon Kit did not load — keeping the old spell pictures', e);
+      return null;
+    }
+  })();
+}
+/** The kit once loaded (null before): tests and the review page read it. */
+export const iconKit = () => kitRef.kit;
+/** Oathwild's look: hairline ring in the class colour, round. */
+const OW_LOOK = { frame: 'hairline', frameColor: 'class', shape: 'circle' };
+const spellRow = id => { const r = kitRef.rules?.spells?.[id]; return r ? { id, ...r.base } : null; };
+
+// the old pictures: the shared catalog by spell id (most Oathwild spells reuse a Farhold / Thousandvale row and its id),
 // else the source row it came from, else the class's motif on a medallion
 const MOTIF_OF = { warrior: 'warrior', ranger: 'ranger', rogue: 'rogue', mage: 'mage', cleric: 'cleric', druid: 'druid', bard: 'bard', shaman: 'shaman', paladin: 'paladin', spellblade: 'knight', warlock: 'warlock', wayfarer: 'ranger', pyromancer: 'pyromancer', stormcaller: 'stormcaller', necromancer: 'necromancer', witch_hunter: 'witch_hunter', duelist: 'swashbuckler', shadowdancer: 'shadow_dancer', spellfletcher: 'ranger', bladesworn: 'fighter', wrathborn: 'warrior', gravecutter: 'rogue', dragon_knight: 'dragon_knight', chronomancer: 'chronomancer', oracle: 'oracle', tinker: 'tinker', starcaller: 'starblade' };
-const cache = new Map();
-export function spellIcon(spellId, size = 40, { cls = null, from = null } = {}) {
-  const k = `${spellId}|${size}|${cls}`;
-  if (cache.has(k)) return cache.get(k);
+function oldSpellIcon(spellId, size, cls, from) {
   let svg = iconSvg(spellId, size) || (from && iconSvg(from, size));
   if (!svg) {
     const motifs = CLASS_MOTIFS[MOTIF_OF[cls] || 'mage'] || [];
@@ -89,6 +117,60 @@ export function spellIcon(spellId, size = 40, { cls = null, from = null } = {}) 
     const m = pick && motifSvg(pick, size);
     svg = m ? `<span class="ow-motif" style="width:${size}px;height:${size}px">${m}</span>` : `<span class="ow-motif ow-motif-blank" style="width:${size}px;height:${size}px"></span>`;   // lint-ok: size is a computed pixel number
   }
-  cache.set(k, svg);
   return svg;
+}
+
+/** A spell's picture at `size` px: the kit icon (hairline, class colour) once loaded, the old SVG before. */
+export function spellIcon(spellId, size = 40, { cls = null, from = null, passive = false } = {}) {
+  const kit = kitRef.kit;
+  const k = `${kit ? 'k' : 'o'}|${spellId}|${size}|${cls}|${passive ? 1 : 0}`;
+  if (cache.has(k)) return cache.get(k);
+  const row = kit && spellRow(spellId);
+  const html = row
+    ? kit.iconHtml({ ...kit.iconFor(row, cls, OW_LOOK).spec, size, state: passive ? 'passive' : 'ready' }, { cls: 'ow-ik' })
+    : oldSpellIcon(spellId, size, cls, from);
+  cache.set(k, html);
+  return html;
+}
+
+// a class tree's training / mastery node shows the weapon or armour it is about, from the kit's item pictures
+const TRAIN_ITEM = { dagger: 'item-dagger', sword: 'item-sword', axe: 'item-battleaxe', mace: 'item-iron-mace', spear: 'item-spear', staff: 'item-staff', twohand: 'item-sword2h', bow: 'item-bow', crossbow: 'item-crossbow', wand: 'item-wand', scepter: 'item-scepter', orb: 'item-orb', tome: 'item-tome', leather: 'item-light-chest', mail: 'item-medium-chest', plate: 'item-heavy-chest', shield: 'item-shield', dualWield: 'item-sword', cloth: 'item-cloth-chest', light: 'item-light-chest', medium: 'item-medium-chest', heavy: 'item-heavy-chest', javelin: 'item-javelin' };
+/**
+ * A never-pressed class node (passive, training, modifier) in the kit's passive look: no frame, a soft faded edge.
+ * `spell`: draw that spell's glyph (a modifier); `train`: a weapon / armour kind (training, mastery); else the node's name
+ * picks a glyph like a buff would. Before the kit loads: null (the caller keeps its old medallion).
+ */
+export function passiveIcon({ name = '', spell = null, train = null, cls = null, size = 40 } = {}) {
+  const kit = kitRef.kit;
+  if (!kit) return null;
+  const k = `p|${name}|${spell}|${train}|${cls}|${size}`;
+  if (cache.has(k)) return cache.get(k);
+  let spec;
+  const row = spell && spellRow(spell);
+  if (row) spec = kit.iconFor(row, cls, OW_LOOK).spec;
+  else {
+    // a passive has no element of its own: its name says it ("Fire Study", "Deep Mana" → arcane is the class's own)
+    const w = String(name).toLowerCase().split(/[^a-z]+/);
+    const els = kit.data.themes.elements;
+    const element = Object.keys(els).find(e => w.includes(e) || (els[e].words || []).some(x => w.includes(x))) || 'physical';
+    spec = kit.iconFor({ name, mechanic: 'buff', element }, cls, OW_LOOK).spec;
+    if (train && kit.glyph(TRAIN_ITEM[train])) spec = { ...spec, glyph: TRAIN_ITEM[train], glow: null };
+  }
+  const html = kit.iconHtml({ ...spec, size, state: 'passive' }, { cls: 'ow-ik' });
+  cache.set(k, html);
+  return html;
+}
+
+/**
+ * An item's picture: the kit's item icon (square, round for jewellery; silver frame tinted by rarity; quality gem;
+ * stack count). `opts`: equipped, broken, cannotWear, isNew. Before the kit loads: null (the caller keeps its glyph).
+ */
+export function itemIcon(item, size = 40, opts = {}) {
+  const kit = kitRef.kit;
+  if (!kit || !item) return null;
+  const k = `i|${item.baseKey || item.base}|${item.subtype}|${item.slot}|${kit.rarityOfItem(item)}|${item.quality}|${item.count || 0}|${size}|${opts.equipped ? 1 : 0}${opts.broken ? 1 : 0}${opts.cannotWear ? 1 : 0}${opts.isNew ? 1 : 0}`;
+  if (cache.has(k)) return cache.get(k);
+  const html = kit.iconHtml({ ...kit.itemIconFor(item, opts).spec, size }, { cls: 'ow-ik' });
+  cache.set(k, html);
+  return html;
 }

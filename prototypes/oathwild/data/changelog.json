@@ -1,6 +1,17 @@
 {
  "entries": [
   {
+   "id": "2026-11-27-icons",
+   "date": "2026-11-27",
+   "title": "New painted icons",
+   "items": [
+    "Every spell has a new hand-painted icon in a thin frame in your class's colour, so a mage's spells and a warrior's look different at a glance. Fireball is a fireball now, not a snowflake.",
+    "Passive abilities look like soft badges with no frame, so you can tell them apart from things you press.",
+    "Items in your bag, the shops and the loot windows have their own painted pictures in square frames coloured by rarity: grey, blue, yellow, orange. Things you cannot use yet carry a small red badge.",
+    "Icons sit centred in their slots on phones too."
+   ]
+  },
+  {
    "id": "2026-11-27-regions",
    "date": "2026-11-27",
    "title": "Ashfield, the Catacombs, and a world of regions",

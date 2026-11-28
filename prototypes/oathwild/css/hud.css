@@ -83,7 +83,8 @@ body[data-device="touch"] .hud-key:empty, .hud-key:empty { display: none; }
 .hud-slot .hud-key { position: absolute; left: 2px; top: 2px; font-size: 12px; line-height: 15px; min-width: 15px; padding: 0 3px; }
 .hud-slot .hud-cd { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: rgba(0, 0, 0, .62); }
 .hud-slot .hud-cd-t { position: absolute; inset: 0; display: grid; place-items: center; font-size: 15px; font-weight: 800; text-shadow: 0 1px 3px #000; }
-.hud-slot.nomana svg { filter: grayscale(.7) brightness(.6) sepia(.3) hue-rotate(180deg); }
+.hud-slot > .ik { pointer-events: none; }   /* the Icon Kit picture (50 px in the 52 px slot; 42 on phones) */
+.hud-slot.nomana svg, .hud-slot.nomana .ik { filter: grayscale(.7) brightness(.6) sepia(.3) hue-rotate(180deg); }
 .hud-slot.aiming { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
 .hud-slot:hover, .hud-slot.pad-focus { border-color: var(--gold); }
 .hud-levelup { pointer-events: auto; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border-radius: 20px; border: 1px solid #f0d08a; background: linear-gradient(#d8ac57, #a97b30); color: #241a0d; font-weight: 800; font-size: 15px; cursor: pointer; animation: hudGlow 1.6s ease-in-out infinite; }
@@ -151,6 +152,7 @@ body.ow-touch .hud-wins, body.ow-touch .hud-cross { display: none; }
   .hud-target { top: calc(120px + var(--safe-t)); width: 64vw; }
   .hud-party { top: calc(128px + var(--safe-t)); width: 130px; }
   .hud-slot { width: 44px; height: 44px; } .hud-slot svg, .hud-slot .ow-motif { width: 38px; height: 38px; }
+  .hud-slot > .ik { width: 42px !important; height: 42px !important; }   /* lint-ok: overrides the kit's inline size; layers are % of the box */
   .hud-slots { gap: 4px; padding: 4px; flex-wrap: wrap; max-width: 96vw; justify-content: center; }
   .hud-log { display: none; }
   /* phones: the tracker sits under the minimap on the right, above the look area and clear of the stick / Attack;

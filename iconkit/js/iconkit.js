@@ -5,39 +5,51 @@
 // Nothing is ever offset: every layer fills the icon's box. The plate is scaled to tuck just under whichever frame is
 // on (a hairline frame has a much wider opening than the studded gold one), and the glyph grows with the opening.
 //
-//   const kit = await loadKit();                         // reads data/themes.json, glyphs.json, layers.json
+//   const kit = await loadKit();                         // reads data/themes.json, glyphs.json, layers.json, items.json
 //   kit.themeFor('mage') / kit.themeFor('fire')          { id, kind, name, tint, glow, glyph, frame, strength, glyphTint }
 //   kit.iconFor(spellRow, classId, { shape, frame })     { spec, glyph, match, fallback, why }
 //   kit.iconHtml(spec, { label })                        stacked <span> layers (css/iconkit.css; animates with CSS)
 //   await kit.iconCanvas(spec, { scale })                one composed <canvas>, cached by spec key
 //   await kit.iconDataUrl(spec, { scale })               the same as a PNG data URL (an action bar's <img>)
 //   kit.specKey(spec)                                    stable string; same spec -> same key
+//   kit.itemIconFor(item, { equipped, broken, cannotWear, isNew })   { spec, glyph, match, fallback, why } (round 3)
 //
 // A spec:
 //   { shape: 'circle'|'square', glyph, plate, tint, strength, glow (id|null), glowColor, glyphTint,
 //     frame: 'gold'|'thin'|'hairline'|'none'|'class'|<a frame id>, frameColor (line frames: '#hex'|'class'), cls,
 //     size, state: 'ready'|'disabled'|'selected'|'passive'|'active'|'channeling'|'nomana'|'norange',
-//     passiveStyle: 'dim'|'socket', dispel: null|'magic'|'curse'|'poison'|'disease'|'enrage',
+//     dispel: null|'magic'|'curse'|'poison'|'disease'|'enrage',
 //     mode: { cooldown: 0..1, seconds, cast: 0..1|null, castStyle: 'bottom'|'face', stacks, maxStacks, duration },
-//     art: 'best'|'placeholder', glyphArt: 'best'|'drawn' }
+//     art: 'best'|'placeholder', glyphArt: 'best'|'drawn',
+//     kind: 'spell'|'item', rarity (item frame tint), gem (quality key), itemState: null|'equipped'|'broken'|'cannotwear'|'new', count }
+// A passive (round 3, owner 2026-11-27) has NO frame and a plate that fades out softly toward its edge, with a slightly
+// smaller glyph: it reads like a buff, not a button. An item (kind 'item') has the silver item frame tinted by rarity
+// (square; round for jewellery), a dark neutral plate, its item glyph, an optional quality gem and a stack count.
 // The old { state: 'cooldown', cd } still works (it becomes mode.cooldown).
 // Everything except iconHtml / iconCanvas / iconDataUrl is pure and runs under Node (tests/iconkit.test.js).
 
 export const SHAPES = Object.freeze(['circle', 'square']);
 export const STATES = Object.freeze(['ready', 'disabled', 'selected', 'passive', 'active', 'channeling', 'nomana', 'norange']);
-export const PASSIVE_STYLES = Object.freeze(['dim', 'socket']);
+/** round 3: one passive look (the buff look); the old 'dim' / 'socket' values are read as it */
+export const PASSIVE_STYLES = Object.freeze(['buff']);
+export const ITEM_STATES = Object.freeze(['equipped', 'broken', 'cannotwear', 'new']);
 export const DISPELS = Object.freeze(['magic', 'curse', 'poison', 'disease', 'enrage']);
 export const CAST_STYLES = Object.freeze(['bottom', 'face']);
 export const SIZES = Object.freeze([24, 40, 64, 128]);
 /** the field order of a spec key — append only, never reorder (caches depend on it) */
 const KEY_FIELDS = ['shape', 'frame', 'plate', 'tint', 'strength', 'glow', 'glowColor', 'glyph', 'glyphTint', 'size', 'state', 'art',
-  'frameColor', 'glyphArt', 'passiveStyle', 'dispel', 'm.cooldown', 'm.seconds', 'm.cast', 'm.castStyle', 'm.stacks', 'm.maxStacks', 'm.duration'];
+  'frameColor', 'glyphArt', 'passiveStyle', 'dispel', 'm.cooldown', 'm.seconds', 'm.cast', 'm.castStyle', 'm.stacks', 'm.maxStacks', 'm.duration',
+  'kind', 'rarity', 'gem', 'itemState', 'count'];
 /** below this many device pixels a layer uses its 64 px picture */
 const SMALL_PX = 48;
 /** how strongly the glow shows (the same number is in css/iconkit.css .ik-glow) */
 const GLOW_ALPHA = 0.6;
 /** the drawn placeholder glyphs were drawn for this frame opening */
 const DRAWN_REF = { circle: 0.395, square: 0.39 };
+/** the drawn item stand-ins span ~14..86 of the canvas: this keeps them at ~3/4 of the item frame's opening */
+const ITEM_DRAWN_REF = 0.47;
+/** a passive's glyph is this much smaller than a button's, and its plate fades out (no frame) */
+const PASSIVE_GLYPH = 0.86;
 
 const words = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -82,9 +94,15 @@ export function mechanicOf(row = {}) {
 }
 
 /** Build a kit from its three data files. `base` = the iconkit/ folder URL the layer paths are relative to. */
-export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
+export function createKit({ themes, glyphs, layers, items = null }, { base = '' } = {}) {
   const glyphRows = glyphs.glyphs;
-  const byId = new Map(glyphRows.map(g => [g.id, g]));
+  const itemRows = items?.items || [];
+  // spell glyphs and item glyphs share one id space (a spec's `glyph` may name either)
+  const byId = new Map([...glyphRows, ...itemRows].map(g => [g.id, g]));
+  // glyphs painted for ONE spell (`spells: [name]`, round 3) are picked by that name only, never for a look-alike
+  const generalRows = glyphRows.filter(g => !g.spells?.length);
+  const bySpell = new Map();
+  for (const g of glyphRows) for (const n of g.spells || []) bySpell.set(String(n).toLowerCase(), g);
   const alias = id => { const k = String(id || '').toLowerCase(); return themes.aliases?.[k] || k; };
   const url = p => (p && base ? new URL(p, base).href : p);
   const isPaintedGlyph = g => !!g?.file && !g.file.endsWith('.svg');
@@ -104,7 +122,7 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
   function scoreGlyphs(row, element, mechanic) {
     const w = words(`${row.name || ''} ${String(row.id || '').replace(/_/g, ' ')}`);
     const hit = tag => w.some(x => x === tag || (tag.length >= 4 && x.startsWith(tag)) || (x.length >= 4 && tag.startsWith(x) && tag.length - x.length <= 2));
-    return glyphRows.map((g, i) => {
+    return generalRows.map((g, i) => {
       const all = (g.tags || []).filter(hit);
       const tags = all.filter(t => !elementWords.has(t)), elTags = all.filter(t => elementWords.has(t));   // "Fire" alone only names the element
       const el = g.element === element ? 'match' : g.element ? 'other' : 'any';
@@ -124,13 +142,14 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
   function iconFor(row = {}, classId = null, { shape, frame, frameColor } = {}) {
     const element = elementOf(row), mechanic = mechanicOf(row);
     const el = themeFor(element), cls = classId ? themeFor(classId) : null;
-    const ranked = scoreGlyphs(row, element, mechanic);
-    const named = ranked.find(c => c.tags.length && c.el !== 'other');
+    const own = bySpell.get(String(row.name || '').toLowerCase()) || bySpell.get(String(row.id || '').toLowerCase());
+    const ranked = own ? [] : scoreGlyphs(row, element, mechanic);
+    const named = own ? { g: own, tags: ['its own painting'] } : ranked.find(c => c.tags.length && c.el !== 'other');
     const exact = ranked.find(c => c.el === 'match' && c.mech);
     const saysElement = ranked.find(c => c.elTags.length && c.el === 'match');
     const generic = ranked.find(c => c.el === 'any' && c.mech);
     let glyph, match, why;
-    if (named) { glyph = named.g; match = 'named'; why = `name says "${named.tags[0]}"`; }
+    if (named) { glyph = named.g; match = 'named'; why = own ? 'painted for this spell' : `name says "${named.tags[0]}"`; }
     else if (exact) { glyph = exact.g; match = 'exact'; why = `${element} ${mechanic}`; }
     else if (saysElement && byId.has(el.glyph)) { glyph = byId.get(el.glyph); match = 'element'; why = `name says ${element}; no ${element} ${mechanic} glyph yet`; }
     else if (generic) { glyph = generic.g; match = 'mechanic'; why = `generic ${mechanic} for ${element}`; }
@@ -152,7 +171,7 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
   /** Resolve frame 'class' and the line-frame colour. */
   function resolveFrame(spec) {
     const d = layers.defaults.frame;
-    let id = spec.frame;
+    let id = spec.kind === 'item' ? 'item' : spec.frame;
     if (id === 'class') id = themes.classes[alias(spec.cls)]?.frame || d;
     if (!layers.frames[id]) id = d;
     const style = layers.frames[id].style || 'painted';
@@ -164,9 +183,11 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
   /** A full spec: every field present, unknown ids replaced by the defaults. */
   function normalize(spec = {}) {
     const d = layers.defaults, td = themes.defaults;
-    const shape = SHAPES.includes(spec.shape) ? spec.shape : d.shape;
-    const glow = spec.glow === null || spec.glow === 'none' || spec.glow === false ? null : (layers.glows[spec.glow] ? spec.glow : d.glow);
-    const g = byId.get(spec.glyph) || byId.get(td.glyph);
+    const item = spec.kind === 'item';
+    const shape = SHAPES.includes(spec.shape) ? spec.shape : item ? 'square' : d.shape;
+    const glow = spec.glow === null || spec.glow === 'none' || spec.glow === false || (item && spec.glow === undefined) ? null : (layers.glows[spec.glow] ? spec.glow : d.glow);
+    const g = byId.get(spec.glyph) || byId.get(item ? items?.fallbacks?.default : td.glyph) || byId.get(td.glyph);
+    const rar = item ? (themes.rarity?.[spec.rarity] ? spec.rarity : 'normal') : null;
     const fr = resolveFrame(spec);
     const legacyCd = spec.state === 'cooldown';
     const m = spec.mode || {};
@@ -178,9 +199,9 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
       shape,
       frame: fr.id, frameColor: fr.color,
       cls: spec.cls ? alias(spec.cls) : null,
-      plate: layers.plates[spec.plate] ? spec.plate : d.plate,
+      plate: layers.plates[spec.plate] ? spec.plate : item && layers.plates.item ? 'item' : d.plate,
       tint: spec.tint || td.tint,
-      strength: Number.isFinite(spec.strength) ? clamp01(spec.strength) : td.strength,
+      strength: Number.isFinite(spec.strength) ? clamp01(spec.strength) : item ? 0 : td.strength,
       glow,
       glowColor: glow ? (spec.glowColor || td.glow) : null,
       glyph: g.id,
@@ -188,7 +209,7 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
       glyphArt: spec.glyphArt === 'drawn' ? 'drawn' : 'best',
       size: Math.max(8, Math.round(Number(spec.size) || 40)),
       state: STATES.includes(spec.state) ? spec.state : 'ready',
-      passiveStyle: PASSIVE_STYLES.includes(spec.passiveStyle) ? spec.passiveStyle : 'dim',
+      passiveStyle: 'buff',
       dispel: DISPELS.includes(spec.dispel) ? spec.dispel : null,
       mode: {
         cooldown: Number.isFinite(cd) ? clamp01(cd) : 0,
@@ -199,6 +220,11 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
         duration: dur == null || dur === '' ? null : Number.isFinite(num(dur)) ? timeText(dur) || null : String(dur).slice(0, 8),
       },
       art: spec.art === 'placeholder' ? 'placeholder' : 'best',
+      kind: item ? 'item' : 'spell',
+      rarity: rar,
+      gem: item && themes.quality?.[spec.gem] ? spec.gem : null,
+      itemState: item && ITEM_STATES.includes(spec.itemState) ? spec.itemState : null,
+      count: item ? Math.max(0, Math.floor(num(spec.count) || 0)) : 0,
     };
   }
 
@@ -224,10 +250,16 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
   function layerSources(spec, px) {
     const s = normalize(spec);
     const p = px || s.size, useArt = s.art !== 'placeholder';
-    const fr = layers.frames[s.frame], fe = fr[s.shape], style = fr.style || 'painted';
+    const passive = s.state === 'passive', item = s.kind === 'item';
+    // a passive has no frame at all: it takes the frameless opening, and its plate fades out (the buff look)
+    const fr = layers.frames[passive ? 'none' : s.frame] || layers.frames.none, fe = fr[s.shape], style = fr.style || 'painted';
     // the frame: painted art, the drawn line in any colour, or nothing
     let frame = null, frameTint = null, paintedFrame = false;
-    if (style === 'line') {
+    if (item && style !== 'none') {   // the silver item frame, multiplied by the rarity colour (painted or drawn)
+      paintedFrame = useArt && !!fe.file;
+      frame = pick(fe, p, paintedFrame);
+      frameTint = themes.rarity?.[s.rarity] || '#d8d4cc';
+    } else if (style === 'line') {
       paintedFrame = useArt && !!fe.file && !s.frameColor;
       frame = pick(fe, p, paintedFrame);
       if (!paintedFrame) frameTint = s.frameColor || layers.frameColor?.default || '#e2b85a';
@@ -245,13 +277,15 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
     const g = byId.get(s.glyph);
     const drawnGlyph = !useArt || s.glyphArt === 'drawn' || !isPaintedGlyph(g);
     const ref = layers.glyphRef?.[s.shape] || 0.34;
-    const glyphScale = +(drawnGlyph ? Math.min(1.12, inner / DRAWN_REF[s.shape]) : Math.min(0.9, (g.fit?.[s.shape] ?? 0.55) * inner / ref)).toFixed(4);
+    const isItemGlyph = g.id.startsWith('item-');
+    let glyphScale = drawnGlyph ? Math.min(1.12, inner / (isItemGlyph ? ITEM_DRAWN_REF : DRAWN_REF[s.shape])) : Math.min(isItemGlyph ? 1 : 0.9, (g.fit?.[s.shape] ?? 0.55) * inner / ref);
+    if (passive) glyphScale *= PASSIVE_GLYPH;
     return {
       plate: pick(pe, p, paintedPlate), plateScale,
-      glow: s.glow && s.state !== 'passive' ? pick(layers.glows[s.glow], p, useArt) : null,
-      glyph: drawnGlyph ? url(g.placeholder || g.file) : pick(g, p, true), glyphScale,
+      glow: s.glow && !passive ? pick(layers.glows[s.glow], p, useArt) : null,
+      glyph: drawnGlyph ? url(g.placeholder || g.file) : pick(g, p, true), glyphScale: +glyphScale.toFixed(4),
       glyphTint: drawnGlyph && g.tintable ? s.glyphTint : null,
-      frame, frameTint, frameStyle: style, inner,
+      frame, frameTint, frameStyle: item ? 'item' : style, inner, fade: passive,
     };
   }
 
@@ -273,9 +307,11 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
     if (m.cooldown > 0) vars.push(`--ik-cd:${Math.round(m.cooldown * 360)}deg`);
     if (m.cast != null) vars.push(`--ik-cast:${m.cast}`);
     if (s.dispel) vars.push(`--ik-dispel:${themes.dispel?.[s.dispel] || '#4aa8ff'}`);
+    if (s.gem) vars.push(`--ik-gem:${themes.quality[s.gem]}`);
     const full = m.maxStacks > 0 && m.stacks >= m.maxStacks;
     const classes = ['ik', `ik-${s.shape}`, `is-${s.state}`, `ik-f-${src.frameStyle}`];
-    if (s.state === 'passive') classes.push(`ik-passive-${s.passiveStyle}`);
+    if (s.kind === 'item') classes.push('ik-item', `ik-r-${s.rarity}`);
+    if (s.itemState) classes.push(`is-${s.itemState}`);
     if (cls) classes.push(esc(cls));
     const a11y = label ? `role="img" aria-label="${esc(label)}"` : 'aria-hidden="true"';
     const fx = [
@@ -284,10 +320,15 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
       m.cast != null && m.castStyle === 'face' ? '<i class="ik-castf"></i>' : '',
       m.cast != null && m.castStyle === 'bottom' ? '<i class="ik-castb"><i></i></i>' : '',
       s.state === 'active' || s.state === 'channeling' ? '<i class="ik-inner"></i>' : '',
-      s.state === 'passive' && s.passiveStyle === 'socket' ? '<i class="ik-socket"></i>' : '',
       s.dispel ? '<i class="ik-disp"></i>' : '',
+      s.itemState === 'broken' || s.itemState === 'cannotwear' ? '<i class="ik-wash"></i>' : '',
+      s.itemState === 'cannotwear' ? '<i class="ik-nowear"></i>' : '',
+      s.itemState === 'new' ? '<i class="ik-glint"></i>' : '',
     ].join('');
+    // a passive's plate, glyph and effects sit in one box that fades out toward the edge (CSS mask; no frame)
+    const fadeOpen = src.fade ? '<span class="ik-fade">' : '', fadeClose = src.fade ? '</span>' : '';
     return `<span class="${classes.join(' ')}" style="${esc(vars.join(';'))}" ${a11y}>`   // lint-ok: per-icon colours and picture URLs are data, set as CSS variables
+      + fadeOpen
       + (has('plate') ? `<span class="ik-plate"><img src="${esc(src.plate)}" alt="" draggable="false"><i class="ik-tint"></i></span>` : '')
       // glow + glyph sit in one box cut to the plate's shape, so nothing pokes out under the frame
       + '<span class="ik-clip">'
@@ -295,11 +336,16 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
       + (has('glyph') ? `<span class="ik-glyph"><img src="${esc(src.glyph)}" alt="" draggable="false">${src.glyphTint ? '<i class="ik-tint"></i>' : ''}</span>` : '')
       + '</span>'
       + (fx && !only ? `<span class="ik-fx">${fx}</span>` : '')
+      + fadeClose
       + (src.frame && has('frame') ? `<span class="ik-frame"><img src="${esc(src.frame)}" alt="" draggable="false">${src.frameTint ? '<i class="ik-tint"></i>' : ''}</span>` : '')
       + (s.state === 'channeling' && !only ? '<i class="ik-sweep"></i>' : '')
       + (m.seconds && !only ? `<b class="ik-sec">${esc(timeText(m.seconds))}</b>` : '')
       + (m.stacks > 0 && !only ? `<b class="ik-stk${full ? ' is-full' : ''}">${m.stacks}</b>` : '')
       + (m.duration && !only ? `<b class="ik-dur">${esc(m.duration)}</b>` : '')
+      + (s.gem && !only ? '<b class="ik-gem"></b>' : '')
+      + (s.itemState === 'equipped' && !only ? '<b class="ik-tick"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2.3 5.4l1.9 1.9L7.8 3.2"/></svg></b>' : '')
+      + (s.itemState === 'new' && !only ? '<b class="ik-new"></b>' : '')
+      + (s.count > 1 && !only ? `<b class="ik-cnt">${s.count > 999 ? '999+' : s.count}</b>` : '')
       + '</span>';
   }
 
@@ -369,10 +415,34 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
     }
     const ring = (color, width, blur) => { f.save(); openingPath(f, s, n, src.inner, width / 2); f.lineWidth = width; f.strokeStyle = color; f.shadowColor = color; f.shadowBlur = blur; f.stroke(); f.restore(); };
     if (s.state === 'active' || s.state === 'channeling') { ring('rgba(255,236,170,.55)', n * 0.16, n * 0.12); ring('#ffd76a', Math.max(1.5, n * 0.035), 0); }
-    if (s.state === 'passive' && s.passiveStyle === 'socket') ring('rgba(0,0,0,.6)', n * 0.14, n * 0.1);
     if (s.dispel) ring(themes.dispel?.[s.dispel] || '#4aa8ff', Math.max(2, n * 0.06), n * 0.05);
+    if (s.itemState === 'broken' || s.itemState === 'cannotwear') { f.fillStyle = s.itemState === 'broken' ? 'rgba(200,24,24,.42)' : 'rgba(190,24,24,.16)'; f.fillRect(0, 0, n, n); }
+    if (s.itemState === 'cannotwear') {
+      // a small red "no" badge in the corner (the picture stays readable)
+      const r = n * 0.15, x = n * 0.81, y = n * 0.81;
+      f.fillStyle = '#6b0f0b'; f.beginPath(); f.arc(x, y, r, 0, Math.PI * 2); f.fill();
+      f.fillStyle = '#d8352c'; f.beginPath(); f.arc(x, y, r * 0.84, 0, Math.PI * 2); f.fill();
+      f.fillStyle = '#fff3ec'; f.fillRect(x - r * 0.56, y - r * 0.12, r * 1.12, r * 0.24);
+    }
+    if (s.itemState === 'new') {   // the glint, still: one diagonal streak of light
+      const g = f.createLinearGradient(0, 0, n, n); g.addColorStop(0.3, 'rgba(255,255,240,0)'); g.addColorStop(0.45, 'rgba(255,255,240,.55)'); g.addColorStop(0.6, 'rgba(255,255,240,0)');
+      f.fillStyle = g; f.fillRect(0, 0, n, n);
+    }
     f.globalCompositeOperation = 'destination-in'; f.drawImage(plateMask, 0, 0);
     x.drawImage(fx, 0, 0);
+    if (src.fade) {   // passive: plate, glyph and effects fade out toward the edge (no frame)
+      const k = blank(n), kc = k.getContext('2d');
+      if (s.shape === 'circle') {
+        const g = kc.createRadialGradient(C, C, 0, C, C, C);
+        g.addColorStop(0.5, 'rgba(0,0,0,1)'); g.addColorStop(0.72, 'rgba(0,0,0,.6)'); g.addColorStop(0.96, 'rgba(0,0,0,0)');
+        kc.fillStyle = g; kc.fillRect(0, 0, n, n);
+      } else {
+        const lin = (x1, y1, x2, y2) => { const g = kc.createLinearGradient(x1, y1, x2, y2); g.addColorStop(0.02, 'rgba(0,0,0,0)'); g.addColorStop(0.24, '#000'); g.addColorStop(0.76, '#000'); g.addColorStop(0.98, 'rgba(0,0,0,0)'); return g; };
+        kc.fillStyle = lin(0, 0, n, 0); kc.fillRect(0, 0, n, n);
+        kc.globalCompositeOperation = 'destination-in'; kc.fillStyle = lin(0, 0, 0, n); kc.fillRect(0, 0, n, n);
+      }
+      x.globalCompositeOperation = 'destination-in'; x.drawImage(k, 0, 0); x.globalCompositeOperation = 'source-over';
+    }
     if (frame) {
       x.drawImage(src.frameTint ? tinted(frame, n, src.frameTint, 'multiply') : frame, 0, 0, n, n);
       if (s.state === 'selected' || s.state === 'active') { x.globalCompositeOperation = 'lighter'; x.globalAlpha = 0.35; x.drawImage(frame, 0, 0, n, n); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; }
@@ -385,13 +455,36 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
       x.globalCompositeOperation = 'source-over';
     };
     if (s.state === 'disabled') grey(1, '#9a9a9a');
-    if (s.state === 'passive' && s.passiveStyle === 'dim') grey(0.55, '#c4c4c4');
+    if (s.itemState === 'broken') grey(0.7, '#b0b0b0');
     if (m.seconds) {
       x.font = `800 ${Math.round(n * 0.36)}px system-ui, sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle';
       x.lineWidth = Math.max(2, n / 14); x.strokeStyle = 'rgba(0,0,0,.85)'; x.lineJoin = 'round';
       x.strokeText(timeText(m.seconds), C, C + 1); x.fillStyle = '#fff'; x.fillText(timeText(m.seconds), C, C + 1);
     }
     if (m.stacks > 0) badge(x, n, m.stacks, m.maxStacks > 0 && m.stacks >= m.maxStacks);
+    if (s.gem) {   // quality gem: a small faceted diamond in the top-right corner
+      const r = n * 0.085, gx = n * 0.84, gy = n * 0.16;
+      x.beginPath(); x.moveTo(gx, gy - r); x.lineTo(gx + r, gy); x.lineTo(gx, gy + r); x.lineTo(gx - r, gy); x.closePath();
+      x.fillStyle = themes.quality[s.gem]; x.fill(); x.lineWidth = Math.max(1, n / 40); x.strokeStyle = '#120c06'; x.stroke();
+      x.beginPath(); x.moveTo(gx, gy - r); x.lineTo(gx - r * 0.5, gy - r * 0.1); x.lineTo(gx, gy); x.closePath(); x.fillStyle = 'rgba(255,255,255,.7)'; x.fill();
+    }
+    if (s.itemState === 'equipped') {   // a green tick bottom left
+      const r = n * 0.13, tx = n * 0.17, ty = n * 0.83;
+      x.beginPath(); x.arc(tx, ty, r, 0, Math.PI * 2); x.fillStyle = '#2f9a4a'; x.fill(); x.lineWidth = Math.max(1, n / 40); x.strokeStyle = '#0c2a14'; x.stroke();
+      x.beginPath(); x.moveTo(tx - r * 0.5, ty + r * 0.05); x.lineTo(tx - r * 0.12, ty + r * 0.42); x.lineTo(tx + r * 0.55, ty - r * 0.38);
+      x.lineWidth = Math.max(1.2, r * 0.32); x.strokeStyle = '#fff'; x.lineCap = 'round'; x.lineJoin = 'round'; x.stroke();
+    }
+    if (s.itemState === 'new') {   // a four-point sparkle top left
+      const r = n * 0.11, sx = n * 0.17, sy = n * 0.17;
+      x.beginPath(); x.moveTo(sx, sy - r); x.quadraticCurveTo(sx, sy, sx + r, sy); x.quadraticCurveTo(sx, sy, sx, sy + r); x.quadraticCurveTo(sx, sy, sx - r, sy); x.quadraticCurveTo(sx, sy, sx, sy - r);
+      x.fillStyle = '#fff6cf'; x.shadowColor = '#ffd76a'; x.shadowBlur = n * 0.06; x.fill(); x.shadowBlur = 0;
+    }
+    if (s.count > 1) {   // stack count bottom right, plain white with a dark edge
+      const t = s.count > 999 ? '999+' : String(s.count);
+      x.font = `800 ${Math.round(n * 0.27)}px system-ui, sans-serif`; x.textAlign = 'right'; x.textBaseline = 'alphabetic';
+      x.lineWidth = Math.max(2, n / 16); x.strokeStyle = 'rgba(0,0,0,.9)'; x.lineJoin = 'round';
+      x.strokeText(t, n * 0.9, n * 0.9); x.fillStyle = '#fff'; x.fillText(t, n * 0.9, n * 0.9);
+    }
     return c;
   }
   /** One composed canvas (size × scale device pixels), cached by spec key — draw it into an action bar.
@@ -414,17 +507,47 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
     for (const e of glyphs.elements) {
       cells[e] = {};
       for (const m of Object.keys(glyphs.mechanics)) {
-        const painted = glyphRows.filter(g => g.element === e && g.mechanic === m).map(g => g.id);
-        const tinted = glyphRows.filter(g => !g.element && g.mechanic === m).map(g => g.id);
+        const painted = generalRows.filter(g => g.element === e && g.mechanic === m).map(g => g.id);
+        const tinted = generalRows.filter(g => !g.element && g.mechanic === m).map(g => g.id);
         cells[e][m] = { painted, tinted, status: painted.length ? 'painted' : tinted.length ? 'tinted' : 'missing' };
       }
     }
     return { elements: [...glyphs.elements], mechanics: { ...glyphs.mechanics }, cells };
   }
 
+  // ---- items (round 3) ---------------------------------------------------------------------------------------------
+  const ROUND_SLOTS = new Set(['ring', 'necklace', 'amulet']);
+  const itemId = b => `item-${String(b || '').toLowerCase().replace(/_/g, '-')}`;
+  /** An item's rarity as the kit tints it: quest / set / unique beat the rolled rarity (Oathwild's rarityOf). */
+  const rarityOfItem = it => (it?.quest || it?.type === 'quest' ? 'quest' : it?.setId ? 'set' : it?.isUnique ? 'unique' : themes.rarity?.[it?.rarity] ? it.rarity : 'normal');
+  /**
+   * The kit icon for a game's item (Emberveil / Oathwild shape: baseKey, subtype, slot, type, rarity, quality, count).
+   * Glyph: its base's own row (`item-<base>`) -> its subtype's -> its slot's -> a generic one. `match`: base | subtype |
+   * slot | generic (the last three are fallbacks). Round (circle) for rings and necklaces, square for everything else.
+   * `opts`: equipped, broken, cannotWear, isNew (one item state is shown: broken > cannot wear > new > equipped).
+   */
+  function itemIconFor(it = {}, { equipped = false, broken = false, cannotWear = false, isNew = false, shape } = {}) {
+    const fb = items?.fallbacks || {};
+    const base = it.baseKey || it.base || '', sub = it.subtype || '', slot = it.slot || (it.type === 'weapon' ? 'weapon' : '');
+    let row = null, match = 'generic', why = '';
+    if (base && byId.has(itemId(base))) { row = byId.get(itemId(base)); match = 'base'; why = `base ${base}`; }
+    else if (sub && byId.has(fb.subtype?.[sub])) { row = byId.get(fb.subtype[sub]); match = 'subtype'; why = `no ${base || 'base'} picture: ${sub}`; }
+    else if (it.isMagicShield && byId.has(fb.focus)) { row = byId.get(fb.focus); match = 'slot'; why = 'a focus'; }
+    else if (it.isShield && byId.has(fb.shield)) { row = byId.get(fb.shield); match = 'slot'; why = 'a shield'; }
+    else if (slot && byId.has(fb.slot?.[slot])) { row = byId.get(fb.slot[slot]); match = 'slot'; why = `no ${base || sub || 'base'} picture: ${slot}`; }
+    else if ((it.quest || it.type === 'quest') && byId.has(fb.quest)) { row = byId.get(fb.quest); match = 'generic'; why = 'quest item'; }
+    else if ((it.type === 'potion' || /potion|draught|elixir|tonic|flask/i.test(it.name || '')) && byId.has(fb.potion)) { row = byId.get(fb.potion); match = 'generic'; why = 'potion'; }
+    else { row = byId.get(fb.default) || itemRows[0] || null; why = 'nothing closer'; }
+    const round = ROUND_SLOTS.has(slot) || ROUND_SLOTS.has(sub) || row?.shape === 'circle';
+    const itemState = broken ? 'broken' : cannotWear ? 'cannotwear' : isNew ? 'new' : equipped ? 'equipped' : null;
+    const count = Math.floor(num(it.count ?? it.qty ?? it.stack) || 0);
+    const spec = normalize({ kind: 'item', shape: shape || (round ? 'circle' : 'square'), glyph: row?.id, rarity: rarityOfItem(it), gem: it.quality || null, itemState, count });
+    return { spec, glyph: spec.glyph, match, fallback: match !== 'base', why };
+  }
+
   return {
-    data: { themes, glyphs, layers }, glyphs: glyphRows, glyph: id => byId.get(id) || null,
-    themeFor, iconFor, mechanicOf, normalize, specKey, layerSources, iconHtml, iconCanvas, iconDataUrl, glyphMatrix, url, timeText,
+    data: { themes, glyphs, layers, items }, glyphs: glyphRows, items: itemRows, glyph: id => byId.get(id) || null,
+    themeFor, iconFor, itemIconFor, rarityOfItem, mechanicOf, normalize, specKey, layerSources, iconHtml, iconCanvas, iconDataUrl, glyphMatrix, url, timeText,
     classes: () => Object.keys(themes.classes), elements: () => [...glyphs.elements],
     frames: () => Object.entries(layers.frames).map(([id, f]) => ({ id, name: f.name, style: f.style || 'painted', cls: f.class || null })),
     isPainted: id => isPaintedGlyph(byId.get(id)),
@@ -433,6 +556,6 @@ export function createKit({ themes, glyphs, layers }, { base = '' } = {}) {
 
 /** Read the three data files and build a kit. In a browser it fetches them next to this module. */
 export async function loadKit({ base = new URL('../', import.meta.url), readJson = u => fetch(u).then(r => { if (!r.ok) throw new Error(`iconkit: ${u} ${r.status}`); return r.json(); }) } = {}) {
-  const [themes, glyphs, layers] = await Promise.all(['themes', 'glyphs', 'layers'].map(n => readJson(new URL(`data/${n}.json`, base))));
-  return createKit({ themes, glyphs, layers }, { base: String(base) });
+  const [themes, glyphs, layers, items] = await Promise.all(['themes', 'glyphs', 'layers', 'items'].map(n => readJson(new URL(`data/${n}.json`, base))));
+  return createKit({ themes, glyphs, layers, items }, { base: String(base) });
 }

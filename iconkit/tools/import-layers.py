@@ -1,7 +1,17 @@
 #!/usr/bin/env python3
 """Icon Kit — import painted layer PNGs (Codex) into iconkit/layers/codex/ and wire them into the data files.
 
-    python3 iconkit/tools/import-layers.py <folder with frame-*.png plate-*.png glyph-*.png glow-*.png> [--dry]
+    python3 -I iconkit/tools/import-layers.py <folder with frame-*.png plate-*.png glyph-*.png glow-*.png> [--dry]
+    python3 -I iconkit/tools/import-layers.py <r3 batch folder with rows.json> [--dry] [--force]
+    python3 -I iconkit/tools/import-layers.py <folder holding several batch folders>          (every sub-folder with rows.json)
+
+A batch folder (round 3) has rows.json listing the files it should hold. Files not painted yet are skipped; run it again
+as batches land: a picture already imported (its WebP newer than the PNG) is skipped unless --force, and rows are
+updated in place by id, never duplicated. Row kinds, by id:
+  * '<element>-<mechanic>' (matrix): a glyphs.json row with element + mechanic (+ artElement: its painted colour);
+  * 'spell-<slug>': a glyphs.json row with `spells: [name]` — iconFor gives it to that spell (by name) and no other;
+  * 'item-<base>': a data/items.json row (its drawn stand-in stays as the placeholder);
+  * frame-item-square.png / frame-item-circle.png: the item frames (their opening is measured).
 
 For every picture:
   * a #FF00FF magenta background is keyed out (only when the picture has no real transparency);
@@ -132,12 +142,89 @@ def rel(name, size):
     return f'layers/codex/{name}-{size}.webp'
 
 
+def fresh(png, name, force):
+    """True when this picture was already imported and the PNG has not changed since (safe re-runs)."""
+    out = OUT / f'{name}-256.webp'
+    return not force and out.exists() and out.stat().st_mtime >= png.stat().st_mtime
+
+
+def title(s):
+    return ' '.join(w.capitalize() for w in s.replace('_', ' ').replace('-', ' ').split())
+
+
+def import_rows(src, rows, glyphs, items, inner, dry, force):
+    """One round-3 batch folder: every row whose file exists. Returns (imported, skipped as fresh, missing)."""
+    gby = {g['id']: g for g in glyphs['glyphs']}
+    iby = {r['id']: r for r in items['items']}
+    done = fresh_n = missing = 0
+    for r in rows:
+        rid, f = r['id'], src / r['file']
+        if not f.exists():   # not painted yet: no row either (a row without a picture would be picked and draw nothing)
+            missing += 1
+            continue
+        if rid.startswith('item-'):
+            row = iby.get(rid)
+            if row is None:
+                row = {'id': rid, 'base': r.get('base') or rid[5:].replace('-', '_'), 'name': title(r.get('base') or rid[5:]), 'slot': None, 'subtype': None, 'shape': 'square'}
+                items['items'].append(row)
+                iby[rid] = row
+            name = rid
+        else:
+            row = gby.get(rid)
+            if row is None:
+                spell = rid.startswith('spell-')
+                el = {'ice': 'frost'}.get(r.get('element'), r.get('element'))   # games call it ice, the kit frost
+                row = {'id': rid, 'name': r.get('name') or title(rid), 'element': el, 'mechanic': r.get('mechanic') or 'strike',
+                       'tintable': False, 'artElement': el, 'tags': []}
+                if spell:
+                    row['spells'] = [r.get('name') or title(rid[6:])]
+                    if r.get('cls'):
+                        row['cls'] = r['cls']
+                glyphs['glyphs'].append(row)
+                gby[rid] = row
+            name = f'glyph-{rid}'
+        if fresh(f, name, force) and row.get('file'):
+            fresh_n += 1
+            continue
+        g = recentre(load(f), GLYPH_FILL, f.name)
+        row['fit'] = glyph_fit(g, inner)
+        save(g, name, dry)
+        row.update(file=rel(name, 256), small=rel(name, 64))
+        done += 1
+    return done, fresh_n, missing
+
+
 def main():
     if len(sys.argv) < 2:
         sys.exit(__doc__)
-    src, dry = Path(sys.argv[1]), '--dry' in sys.argv
+    src, dry, force = Path(sys.argv[1]), '--dry' in sys.argv, '--force' in sys.argv
     layers = json.loads((ROOT / 'data/layers.json').read_text())
     glyphs = json.loads((ROOT / 'data/glyphs.json').read_text())
+    items_path = ROOT / 'data/items.json'
+    items = json.loads(items_path.read_text()) if items_path.exists() else {'items': []}
+    batches = [src] if (src / 'rows.json').exists() else sorted(p for p in src.iterdir() if p.is_dir() and (p / 'rows.json').exists())
+    if batches:
+        ref = {s: layers.get('glyphRef', {}).get(s) or layers['frames']['gold'][s]['inner'] for s in ('circle', 'square')}
+        total = [0, 0, 0]
+        for b in batches:
+            rows = json.loads((b / 'rows.json').read_text())
+            for shape in ('circle', 'square'):   # the item frames ride in a batch folder too
+                f = b / f'frame-item-{shape}.png'
+                if f.exists() and 'item' in layers['frames'] and not (fresh(f, f'frame-item-{shape}', force) and layers['frames']['item'][shape].get('file')):
+                    fr = recentre(load(f), FRAME_FILL, f.name)
+                    op = opening(fr, shape)
+                    print(f'  {f.name}: opening {op:.3f} of the canvas')
+                    save(fr, f'frame-item-{shape}', dry)
+                    layers['frames']['item'][shape].update(file=rel(f'frame-item-{shape}', 256), small=rel(f'frame-item-{shape}', 64), inner=round(op, 4))
+            n = import_rows(b, rows, glyphs, items, ref, dry, force)
+            print(f'{b.name}: {n[0]} imported, {n[1]} already imported, {n[2]} not painted yet (of {len(rows)})')
+            total = [a + c for a, c in zip(total, n)]
+        if not dry:
+            (ROOT / 'data/layers.json').write_text(json.dumps(layers, indent=2) + '\n')
+            (ROOT / 'data/glyphs.json').write_text(json.dumps(glyphs, indent=1) + '\n')
+            items_path.write_text(json.dumps(items, indent=1) + '\n')
+        print(f'done: {total[0]} imported, {total[1]} already there, {total[2]} still to paint' + (' (dry run, nothing written)' if dry else ''))
+        return
     inner = {}
     # frames: frame-<shape>.png is the studded gold one; frame-<id>-<shape>.png any other frame in data/layers.json
     for fid, fdef in layers['frames'].items():

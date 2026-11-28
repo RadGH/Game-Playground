@@ -41,6 +41,16 @@ const D = buildDungeon(spec, worldSeed, save.dungeons?.catacombs);   // spec = d
 // client: cameraBoom(D.walk, heroHead, yaw, pitch, wantedBoom) each frame, eased
 ```
 
+## Drawn in the browser
+
+`js/client/render/dungeon-draw.js` draws a dungeon place from this plan (live-edits.js `makeWorldView` picks it when
+`app.W.dungeon` is set): floors at the walk grid's heights, walls only where floor meets rock, a vault over every room
+and corridor springing at `plan.ceiling` (so `walk.air`, the camera's space, is always inside the stone), columns,
+features, torches baked into the stone + a fixed pool of real lights, flames, dust, the dungeon's own air (no sun, sky
+or weather). The camera's indoor boom is `js/client/play/camera.js` (`dungeonWalk`). Pictures and checks:
+`tests/ui/dungeon-shots.mjs` (draws the dungeon on its own page `tests/ui/dungeon-view.html`, scans for same-plane
+faces, then swaps a real game page to the catacombs and back).
+
 Grid: tile (i, k) covers x ∈ [2i, 2i+2), z ∈ [2k, 2k+2). The plan starts at (0, 0); a region that puts the dungeon
 somewhere else shifts points in and out. Facing angles follow `js/rules/combat.js`: angle a points along (sin a, cos a).
 

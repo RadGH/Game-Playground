@@ -7,7 +7,7 @@
 //   app.openWindow('classes', { cls }) → .win-classes  (.cls-node[data-node], [data-act="buy"])
 import { openWin, esc } from './kit.js';
 import { tipAttrs, tipCard } from './tip.js';
-import { glyph, spellIcon } from './icons.js';
+import { glyph, spellIcon, passiveIcon } from './icons.js';
 import { classDef, classIds, maxClassLevel, nodeKey, nodeNeeds, nodeRefusal, nodeName, pointsLeft, classRefusal } from '../../rules/classes.js';
 import { describeNode, describeClass, describeRequires } from '../../rules/describe.js';
 import { attrTotals } from '../../rules/sheet.js';
@@ -22,6 +22,10 @@ export function nodeIcon(node, cls, size = 40) {
   // a training shows its own weapon / armour; a weapon mastery shows that weapon on a passive medallion
   const mastery = node.kind === 'passive' && KINDS.find(k => node.mods?.[`${k}Pct`]);
   const id = node.kind === 'prof' ? (node.grants?.[0] === 'twohand' ? 'twohand' : node.grants?.[0]) : mastery || { passive: 'star', mod: 'enchant' }[node.kind] || 'star';
+  // with the Icon Kit: every node that is never pressed (passive, training, modifier) has the kit's passive look —
+  // no frame, a soft faded edge, like a buff (owner 2026-11-27); a modifier shows the spell it changes
+  const kitPic = passiveIcon({ name: node.name || '', spell: node.kind === 'mod' ? node.on : null, train: node.kind === 'prof' || mastery ? id : null, cls, size });
+  if (kitPic) return kitPic;
   return `<span class="cls-glyph is-${node.kind}${mastery ? ' is-mastery' : ''}">${glyph(id, size * 0.6) || glyph('shield', size * 0.6)}</span>`;
 }
 

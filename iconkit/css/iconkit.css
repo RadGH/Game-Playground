@@ -21,9 +21,9 @@
 
 /* ---- effects inside the opening (all in .ik-fx, cut to the plate) ---- */
 /* a ring that follows the opening's edge */
-.ik-inner, .ik-socket, .ik-disp { inset: calc((.5 - var(--ik-in, .4)) * 100%) !important; width: auto !important; height: auto !important; box-sizing: border-box; }
-.ik-circle .ik-inner, .ik-circle .ik-socket, .ik-circle .ik-disp { border-radius: 50%; }
-.ik-square .ik-inner, .ik-square .ik-socket, .ik-square .ik-disp { border-radius: calc(var(--ik-size) * .06); }
+.ik-inner, .ik-disp { inset: calc((.5 - var(--ik-in, .4)) * 100%) !important; width: auto !important; height: auto !important; box-sizing: border-box; }
+.ik-circle .ik-inner, .ik-circle .ik-disp { border-radius: 50%; }
+.ik-square .ik-inner, .ik-square .ik-disp { border-radius: calc(var(--ik-size) * .06); }
 /* cooldown: a dark clockwise sweep */
 .ik-cd { background: conic-gradient(rgba(6, 8, 14, .68) var(--ik-cd, 0deg), transparent 0); }
 /* out of mana (blue) / out of range (red) */
@@ -46,11 +46,12 @@
 @keyframes ik-spin { to { --ik-a: 360deg; } }
 /* dispellable: a coloured inner ring by dispel kind (data/themes.json dispel) */
 .ik-disp { box-shadow: inset 0 0 0 max(2px, calc(var(--ik-size) * .06)) var(--ik-dispel), inset 0 0 calc(var(--ik-size) * .12) var(--ik-dispel); }
-/* passive, two looks: dim (greyed metal, no glow) or socket (sunk into the frame, no glow) */
-.ik-passive-dim > .ik-frame { filter: grayscale(.75) brightness(.78); }
-.ik-passive-dim > .ik-clip, .ik-passive-dim > .ik-plate { filter: saturate(.6) brightness(.9); }
-.ik-socket { box-shadow: inset 0 0 calc(var(--ik-size) * .14) calc(var(--ik-size) * .05) rgba(0, 0, 0, .75); }
-.ik-passive-socket > .ik-frame { filter: brightness(.7) saturate(.8); }
+/* passive (round 3): no frame, the plate fades out toward the edge, a smaller glyph — it reads like a buff, not a
+   button. The kit wraps plate + glyph + effects in .ik-fade; circles fade radially, squares toward a soft rounded edge */
+.ik > .ik-fade { isolation: isolate; -webkit-mask: radial-gradient(closest-side, #000 50%, rgba(0, 0, 0, .6) 72%, transparent 96%); mask: radial-gradient(closest-side, #000 50%, rgba(0, 0, 0, .6) 72%, transparent 96%); }
+.ik-square > .ik-fade { -webkit-mask: linear-gradient(90deg, transparent 2%, #000 24%, #000 76%, transparent 98%), linear-gradient(transparent 2%, #000 24%, #000 76%, transparent 98%); -webkit-mask-composite: source-in; mask: linear-gradient(90deg, transparent 2%, #000 24%, #000 76%, transparent 98%), linear-gradient(transparent 2%, #000 24%, #000 76%, transparent 98%); mask-composite: intersect; }
+.ik-fade > * { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.ik.is-passive { cursor: default; }
 
 /* ---- whole-icon states ---- */
 .ik.is-disabled { filter: grayscale(1) brightness(.62); }
@@ -62,4 +63,24 @@
 .ik > .ik-stk { right: -1%; bottom: -1%; min-width: 36%; height: 36%; padding: 0 6%; box-sizing: border-box; display: grid; place-items: center; border-radius: 999px; background: #16130c; border: max(1px, calc(var(--ik-size) * .025)) solid #c9a24a; color: #fff; font-size: max(8px, calc(var(--ik-size) * .24)); }
 .ik > .ik-stk.is-full { background: linear-gradient(#ffe08a, #e0a838); border-color: #fff2c0; color: #1a1206; box-shadow: 0 0 calc(var(--ik-size) * .12) #ffd76a; }
 .ik > .ik-dur { top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px; color: #f2efe6; font-weight: 700; font-size: max(10px, calc(var(--ik-size) * .24)); white-space: nowrap; text-shadow: 0 1px 2px #000; }
-@media (prefers-reduced-motion: reduce) { .is-channeling .ik-inner, .ik-sweep { animation: none; } }
+
+/* ---- items (round 3): silver frame tinted by rarity (the kit sets --ik-frame-tint), dark plate, item glyph ---- */
+.is-broken .ik-wash { background: rgba(200, 24, 24, .42); }
+.is-cannotwear .ik-wash { background: rgba(190, 24, 24, .16); }
+.ik.is-broken > .ik-clip { filter: grayscale(.7) brightness(.8); }
+/* cannot wear: a light red wash and a small red "no" badge in the corner — the item itself stays readable (owner
+   2026-11-27: the X over the whole picture made a level-1 bag all red) */
+.ik > .ik-nowear { left: auto !important; top: auto !important; right: 4%; bottom: 4%; width: 30% !important; height: 30% !important; border-radius: 50%; background: radial-gradient(circle, #d8352c 62%, #6b0f0b 64% 74%, transparent 76%); box-shadow: inset 0 0 0 999px transparent; }
+.ik > .ik-nowear::after { content: ''; position: absolute; left: 22%; right: 22%; top: 44%; height: 12%; background: #fff3ec; border-radius: 2px; }
+/* new: a streak of light sweeping across now and then, and a sparkle top left */
+.ik-glint { background: linear-gradient(135deg, transparent 38%, rgba(255, 255, 240, .6) 50%, transparent 62%) no-repeat; background-size: 300% 300%; animation: ik-glint 2.6s ease-in-out infinite; }
+@keyframes ik-glint { 0% { background-position: 100% 100%; } 55%, 100% { background-position: 0 0; } }
+.ik > .ik-new { left: 6%; top: 6%; width: 22%; height: 22%; background: #fff6cf; clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%); filter: drop-shadow(0 0 2px #ffd76a); }
+/* quality gem: a faceted diamond top right */
+.ik > .ik-gem { right: 7.5%; top: 7.5%; width: 17%; height: 17%; background: linear-gradient(135deg, rgba(255, 255, 255, .75) 0 30%, transparent 31%), var(--ik-gem); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); filter: drop-shadow(0 0 1px #000); }
+/* equipped: a green tick bottom left */
+.ik > .ik-tick { left: 4%; bottom: 4%; width: 26%; height: 26%; border-radius: 50%; background: #2f9a4a; box-shadow: 0 0 0 max(1px, calc(var(--ik-size) * .025)) #0c2a14; }
+.ik-tick > svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: #fff; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+/* stack count bottom right */
+.ik > .ik-cnt { right: 9%; bottom: 7%; color: #fff; font-size: max(9px, calc(var(--ik-size) * .27)); text-shadow: 0 0 2px #000, 0 0 2px #000, 0 1px 2px #000; }
+@media (prefers-reduced-motion: reduce) { .is-channeling .ik-inner, .ik-sweep, .ik-glint { animation: none; } }

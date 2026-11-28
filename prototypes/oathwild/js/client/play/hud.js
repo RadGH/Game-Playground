@@ -102,6 +102,9 @@ export function createHud(app, play) {
 
   // ---- the action bar (8 slots): the key on each for the device in use (rule 18)
   let barKey = '';
+  // the Icon Kit lands a moment after boot: redraw the bar with its pictures (ui/icons.js loadIconKit)
+  const onIcons = () => { barKey = ''; drawBar(); };
+  window.addEventListener('ow:icons', onIcons);
   function drawBar() {
     const c = app.me?.char; if (!c) return;
     const bar = [...(c.bar || [])]; while (bar.length < 8) bar.push(null);
@@ -113,7 +116,7 @@ export function createHud(app, play) {
       const hint = hintFor(app.bindings, `slot${i + 1}`, app.device);
       if (!s) return `<button type="button" class="hud-slot empty" data-slot="${i}" aria-label="Empty slot ${i + 1}"><span class="hud-key">${esc(hint)}</span></button>`;
       const src = known[s];
-      return `<button type="button" class="hud-slot" data-slot="${i}" data-spell="${esc(s)}" ${tipAttrs('spell', { id: s })} aria-label="Spell ${i + 1}">${spellIcon(s, 44, { cls: src?.cls })}<i class="hud-cd"></i><b class="hud-cd-t"></b><span class="hud-key">${esc(hint)}</span></button>`;
+      return `<button type="button" class="hud-slot" data-slot="${i}" data-spell="${esc(s)}" ${tipAttrs('spell', { id: s })} aria-label="Spell ${i + 1}">${spellIcon(s, 50, { cls: src?.cls })}<i class="hud-cd"></i><b class="hud-cd-t"></b><span class="hud-key">${esc(hint)}</span></button>`;
     }).join('');
     for (const b of el.slots.querySelectorAll('[data-slot]')) {
       b.addEventListener('pointerdown', e => { e.preventDefault(); if (!b.dataset.spell) { app.openWindow('spellbook', { slot: +b.dataset.slot }); return; } play.slotDown(+b.dataset.slot, 'touch'); });
@@ -350,7 +353,7 @@ export function createHud(app, play) {
     get guide() { return guide; },
     crosshair(kind) { el.cross.className = `hud-cross ${kind || ''}`; },
     castBar(name, k) { el.cast.hidden = k == null; if (k != null) { set(el.cast.querySelector('span'), 'textContent', name); el.cast.querySelector('i').style.width = `${Math.round(k * 100)}%`; } },
-    destroy() { root.innerHTML = ''; minimap.destroy?.(); },
+    destroy() { root.innerHTML = ''; minimap.destroy?.(); window.removeEventListener('ow:icons', onIcons); },
   };
   return hud;
 }

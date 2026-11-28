@@ -737,6 +737,2339 @@
     "square": 0.639
    },
    "small": "layers/codex/glyph-stealth-64.webp"
+  },
+  {
+   "id": "fire-strike",
+   "name": "Fire Strike",
+   "element": "fire",
+   "mechanic": "strike",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "fit": {
+    "circle": 0.488,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-fire-strike-256.webp",
+   "small": "layers/codex/glyph-fire-strike-64.webp"
+  },
+  {
+   "id": "fire-nova",
+   "name": "Fire Nova",
+   "element": "fire",
+   "mechanic": "nova",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-fire-nova-256.webp",
+   "small": "layers/codex/glyph-fire-nova-64.webp"
+  },
+  {
+   "id": "fire-area",
+   "name": "Fire Area",
+   "element": "fire",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-fire-area-256.webp",
+   "small": "layers/codex/glyph-fire-area-64.webp"
+  },
+  {
+   "id": "fire-beam",
+   "name": "Fire Beam",
+   "element": "fire",
+   "mechanic": "beam",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-fire-beam-256.webp",
+   "small": "layers/codex/glyph-fire-beam-64.webp"
+  },
+  {
+   "id": "fire-leap",
+   "name": "Fire Leap",
+   "element": "fire",
+   "mechanic": "leap",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-fire-leap-256.webp",
+   "small": "layers/codex/glyph-fire-leap-64.webp"
+  },
+  {
+   "id": "fire-dash",
+   "name": "Fire Dash",
+   "element": "fire",
+   "mechanic": "dash",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-fire-dash-256.webp",
+   "small": "layers/codex/glyph-fire-dash-64.webp"
+  },
+  {
+   "id": "fire-buff",
+   "name": "Fire Buff",
+   "element": "fire",
+   "mechanic": "buff",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-fire-buff-256.webp",
+   "small": "layers/codex/glyph-fire-buff-64.webp"
+  },
+  {
+   "id": "fire-heal",
+   "name": "Fire Heal",
+   "element": "fire",
+   "mechanic": "heal",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-fire-heal-256.webp",
+   "small": "layers/codex/glyph-fire-heal-64.webp"
+  },
+  {
+   "id": "fire-ward",
+   "name": "Fire Ward",
+   "element": "fire",
+   "mechanic": "ward",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-fire-ward-256.webp",
+   "small": "layers/codex/glyph-fire-ward-64.webp"
+  },
+  {
+   "id": "fire-summon",
+   "name": "Fire Summon",
+   "element": "fire",
+   "mechanic": "summon",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-fire-summon-256.webp",
+   "small": "layers/codex/glyph-fire-summon-64.webp"
+  },
+  {
+   "id": "fire-dot",
+   "name": "Fire Dot",
+   "element": "fire",
+   "mechanic": "dot",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-fire-dot-256.webp",
+   "small": "layers/codex/glyph-fire-dot-64.webp"
+  },
+  {
+   "id": "fire-form",
+   "name": "Fire Form",
+   "element": "fire",
+   "mechanic": "form",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "fit": {
+    "circle": 0.531,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-fire-form-256.webp",
+   "small": "layers/codex/glyph-fire-form-64.webp"
+  },
+  {
+   "id": "frost-strike",
+   "name": "Frost Strike",
+   "element": "frost",
+   "mechanic": "strike",
+   "tintable": false,
+   "artElement": "frost",
+   "tags": [],
+   "fit": {
+    "circle": 0.495,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-frost-strike-256.webp",
+   "small": "layers/codex/glyph-frost-strike-64.webp"
+  },
+  {
+   "id": "frost-nova",
+   "name": "Frost Nova",
+   "element": "frost",
+   "mechanic": "nova",
+   "tintable": false,
+   "artElement": "frost",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-frost-nova-256.webp",
+   "small": "layers/codex/glyph-frost-nova-64.webp"
+  },
+  {
+   "id": "frost-area",
+   "name": "Frost Area",
+   "element": "frost",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "frost",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-frost-area-256.webp",
+   "small": "layers/codex/glyph-frost-area-64.webp"
+  },
+  {
+   "id": "frost-beam",
+   "name": "Frost Beam",
+   "element": "frost",
+   "mechanic": "beam",
+   "tintable": false,
+   "artElement": "frost",
+   "tags": [],
+   "fit": {
+    "circle": 0.512,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-frost-beam-256.webp",
+   "small": "layers/codex/glyph-frost-beam-64.webp"
+  },
+  {
+   "id": "frost-leap",
+   "name": "Frost Leap",
+   "element": "frost",
+   "mechanic": "leap",
+   "tintable": false,
+   "artElement": "frost",
+   "tags": [],
+   "fit": {
+    "circle": 0.557,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-frost-leap-256.webp",
+   "small": "layers/codex/glyph-frost-leap-64.webp"
+  },
+  {
+   "id": "frost-dash",
+   "name": "Frost Dash",
+   "element": "frost",
+   "mechanic": "dash",
+   "tintable": false,
+   "artElement": "frost",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-frost-dash-256.webp",
+   "small": "layers/codex/glyph-frost-dash-64.webp"
+  },
+  {
+   "id": "frost-buff",
+   "name": "Frost Buff",
+   "element": "frost",
+   "mechanic": "buff",
+   "tintable": false,
+   "artElement": "frost",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-frost-buff-256.webp",
+   "small": "layers/codex/glyph-frost-buff-64.webp"
+  },
+  {
+   "id": "frost-heal",
+   "name": "Frost Heal",
+   "element": "frost",
+   "mechanic": "heal",
+   "tintable": false,
+   "artElement": "frost",
+   "tags": [],
+   "fit": {
+    "circle": 0.572,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-frost-heal-256.webp",
+   "small": "layers/codex/glyph-frost-heal-64.webp"
+  },
+  {
+   "id": "frost-ward",
+   "name": "Frost Ward",
+   "element": "frost",
+   "mechanic": "ward",
+   "tintable": false,
+   "artElement": "frost",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-frost-ward-256.webp",
+   "small": "layers/codex/glyph-frost-ward-64.webp"
+  },
+  {
+   "id": "frost-summon",
+   "name": "Frost Summon",
+   "element": "frost",
+   "mechanic": "summon",
+   "tintable": false,
+   "artElement": "frost",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-frost-summon-256.webp",
+   "small": "layers/codex/glyph-frost-summon-64.webp"
+  },
+  {
+   "id": "frost-dot",
+   "name": "Frost Dot",
+   "element": "frost",
+   "mechanic": "dot",
+   "tintable": false,
+   "artElement": "frost",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-frost-dot-256.webp",
+   "small": "layers/codex/glyph-frost-dot-64.webp"
+  },
+  {
+   "id": "frost-form",
+   "name": "Frost Form",
+   "element": "frost",
+   "mechanic": "form",
+   "tintable": false,
+   "artElement": "frost",
+   "tags": [],
+   "fit": {
+    "circle": 0.513,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-frost-form-256.webp",
+   "small": "layers/codex/glyph-frost-form-64.webp"
+  },
+  {
+   "id": "lightning-strike",
+   "name": "Lightning Strike",
+   "element": "lightning",
+   "mechanic": "strike",
+   "tintable": false,
+   "artElement": "lightning",
+   "tags": [],
+   "fit": {
+    "circle": 0.518,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-lightning-strike-256.webp",
+   "small": "layers/codex/glyph-lightning-strike-64.webp"
+  },
+  {
+   "id": "lightning-nova",
+   "name": "Lightning Nova",
+   "element": "lightning",
+   "mechanic": "nova",
+   "tintable": false,
+   "artElement": "lightning",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-lightning-nova-256.webp",
+   "small": "layers/codex/glyph-lightning-nova-64.webp"
+  },
+  {
+   "id": "lightning-area",
+   "name": "Lightning Area",
+   "element": "lightning",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "lightning",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-lightning-area-256.webp",
+   "small": "layers/codex/glyph-lightning-area-64.webp"
+  },
+  {
+   "id": "holy-dash",
+   "name": "Holy Dash",
+   "element": "holy",
+   "mechanic": "dash",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-holy-dash-256.webp",
+   "small": "layers/codex/glyph-holy-dash-64.webp"
+  },
+  {
+   "id": "holy-buff",
+   "name": "Holy Buff",
+   "element": "holy",
+   "mechanic": "buff",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "fit": {
+    "circle": 0.526,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-holy-buff-256.webp",
+   "small": "layers/codex/glyph-holy-buff-64.webp"
+  },
+  {
+   "id": "holy-ward",
+   "name": "Holy Ward",
+   "element": "holy",
+   "mechanic": "ward",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "fit": {
+    "circle": 0.503,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-holy-ward-256.webp",
+   "small": "layers/codex/glyph-holy-ward-64.webp"
+  },
+  {
+   "id": "holy-summon",
+   "name": "Holy Summon",
+   "element": "holy",
+   "mechanic": "summon",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "fit": {
+    "circle": 0.555,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-holy-summon-256.webp",
+   "small": "layers/codex/glyph-holy-summon-64.webp"
+  },
+  {
+   "id": "holy-dot",
+   "name": "Holy Dot",
+   "element": "holy",
+   "mechanic": "dot",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "fit": {
+    "circle": 0.529,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-holy-dot-256.webp",
+   "small": "layers/codex/glyph-holy-dot-64.webp"
+  },
+  {
+   "id": "holy-form",
+   "name": "Holy Form",
+   "element": "holy",
+   "mechanic": "form",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "fit": {
+    "circle": 0.537,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-holy-form-256.webp",
+   "small": "layers/codex/glyph-holy-form-64.webp"
+  },
+  {
+   "id": "nature-strike",
+   "name": "Nature Strike",
+   "element": "nature",
+   "mechanic": "strike",
+   "tintable": false,
+   "artElement": "nature",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-nature-strike-256.webp",
+   "small": "layers/codex/glyph-nature-strike-64.webp"
+  },
+  {
+   "id": "nature-bolt",
+   "name": "Nature Bolt",
+   "element": "nature",
+   "mechanic": "bolt",
+   "tintable": false,
+   "artElement": "nature",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-nature-bolt-256.webp",
+   "small": "layers/codex/glyph-nature-bolt-64.webp"
+  },
+  {
+   "id": "nature-nova",
+   "name": "Nature Nova",
+   "element": "nature",
+   "mechanic": "nova",
+   "tintable": false,
+   "artElement": "nature",
+   "tags": [],
+   "fit": {
+    "circle": 0.546,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-nature-nova-256.webp",
+   "small": "layers/codex/glyph-nature-nova-64.webp"
+  },
+  {
+   "id": "nature-area",
+   "name": "Nature Area",
+   "element": "nature",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "nature",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-nature-area-256.webp",
+   "small": "layers/codex/glyph-nature-area-64.webp"
+  },
+  {
+   "id": "nature-beam",
+   "name": "Nature Beam",
+   "element": "nature",
+   "mechanic": "beam",
+   "tintable": false,
+   "artElement": "nature",
+   "tags": [],
+   "fit": {
+    "circle": 0.54,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-nature-beam-256.webp",
+   "small": "layers/codex/glyph-nature-beam-64.webp"
+  },
+  {
+   "id": "nature-leap",
+   "name": "Nature Leap",
+   "element": "nature",
+   "mechanic": "leap",
+   "tintable": false,
+   "artElement": "nature",
+   "tags": [],
+   "fit": {
+    "circle": 0.57,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-nature-leap-256.webp",
+   "small": "layers/codex/glyph-nature-leap-64.webp"
+  },
+  {
+   "id": "nature-dash",
+   "name": "Nature Dash",
+   "element": "nature",
+   "mechanic": "dash",
+   "tintable": false,
+   "artElement": "nature",
+   "tags": [],
+   "fit": {
+    "circle": 0.524,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-nature-dash-256.webp",
+   "small": "layers/codex/glyph-nature-dash-64.webp"
+  },
+  {
+   "id": "nature-buff",
+   "name": "Nature Buff",
+   "element": "nature",
+   "mechanic": "buff",
+   "tintable": false,
+   "artElement": "nature",
+   "tags": [],
+   "fit": {
+    "circle": 0.527,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-nature-buff-256.webp",
+   "small": "layers/codex/glyph-nature-buff-64.webp"
+  },
+  {
+   "id": "nature-ward",
+   "name": "Nature Ward",
+   "element": "nature",
+   "mechanic": "ward",
+   "tintable": false,
+   "artElement": "nature",
+   "tags": [],
+   "fit": {
+    "circle": 0.521,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-nature-ward-256.webp",
+   "small": "layers/codex/glyph-nature-ward-64.webp"
+  },
+  {
+   "id": "nature-summon",
+   "name": "Nature Summon",
+   "element": "nature",
+   "mechanic": "summon",
+   "tintable": false,
+   "artElement": "nature",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-nature-summon-256.webp",
+   "small": "layers/codex/glyph-nature-summon-64.webp"
+  },
+  {
+   "id": "nature-dot",
+   "name": "Nature Dot",
+   "element": "nature",
+   "mechanic": "dot",
+   "tintable": false,
+   "artElement": "nature",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-nature-dot-256.webp",
+   "small": "layers/codex/glyph-nature-dot-64.webp"
+  },
+  {
+   "id": "nature-form",
+   "name": "Nature Form",
+   "element": "nature",
+   "mechanic": "form",
+   "tintable": false,
+   "artElement": "nature",
+   "tags": [],
+   "fit": {
+    "circle": 0.563,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-nature-form-256.webp",
+   "small": "layers/codex/glyph-nature-form-64.webp"
+  },
+  {
+   "id": "poison-strike",
+   "name": "Poison Strike",
+   "element": "poison",
+   "mechanic": "strike",
+   "tintable": false,
+   "artElement": "poison",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-poison-strike-256.webp",
+   "small": "layers/codex/glyph-poison-strike-64.webp"
+  },
+  {
+   "id": "poison-bolt",
+   "name": "Poison Bolt",
+   "element": "poison",
+   "mechanic": "bolt",
+   "tintable": false,
+   "artElement": "poison",
+   "tags": [],
+   "fit": {
+    "circle": 0.5,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-poison-bolt-256.webp",
+   "small": "layers/codex/glyph-poison-bolt-64.webp"
+  },
+  {
+   "id": "poison-nova",
+   "name": "Poison Nova",
+   "element": "poison",
+   "mechanic": "nova",
+   "tintable": false,
+   "artElement": "poison",
+   "tags": [],
+   "fit": {
+    "circle": 0.546,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-poison-nova-256.webp",
+   "small": "layers/codex/glyph-poison-nova-64.webp"
+  },
+  {
+   "id": "poison-area",
+   "name": "Poison Area",
+   "element": "poison",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "poison",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-poison-area-256.webp",
+   "small": "layers/codex/glyph-poison-area-64.webp"
+  },
+  {
+   "id": "poison-beam",
+   "name": "Poison Beam",
+   "element": "poison",
+   "mechanic": "beam",
+   "tintable": false,
+   "artElement": "poison",
+   "tags": [],
+   "fit": {
+    "circle": 0.486,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-poison-beam-256.webp",
+   "small": "layers/codex/glyph-poison-beam-64.webp"
+  },
+  {
+   "id": "poison-leap",
+   "name": "Poison Leap",
+   "element": "poison",
+   "mechanic": "leap",
+   "tintable": false,
+   "artElement": "poison",
+   "tags": [],
+   "fit": {
+    "circle": 0.534,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-poison-leap-256.webp",
+   "small": "layers/codex/glyph-poison-leap-64.webp"
+  },
+  {
+   "id": "poison-dash",
+   "name": "Poison Dash",
+   "element": "poison",
+   "mechanic": "dash",
+   "tintable": false,
+   "artElement": "poison",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-poison-dash-256.webp",
+   "small": "layers/codex/glyph-poison-dash-64.webp"
+  },
+  {
+   "id": "poison-buff",
+   "name": "Poison Buff",
+   "element": "poison",
+   "mechanic": "buff",
+   "tintable": false,
+   "artElement": "poison",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-poison-buff-256.webp",
+   "small": "layers/codex/glyph-poison-buff-64.webp"
+  },
+  {
+   "id": "poison-heal",
+   "name": "Poison Heal",
+   "element": "poison",
+   "mechanic": "heal",
+   "tintable": false,
+   "artElement": "poison",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-poison-heal-256.webp",
+   "small": "layers/codex/glyph-poison-heal-64.webp"
+  },
+  {
+   "id": "poison-ward",
+   "name": "Poison Ward",
+   "element": "poison",
+   "mechanic": "ward",
+   "tintable": false,
+   "artElement": "poison",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-poison-ward-256.webp",
+   "small": "layers/codex/glyph-poison-ward-64.webp"
+  },
+  {
+   "id": "poison-summon",
+   "name": "Poison Summon",
+   "element": "poison",
+   "mechanic": "summon",
+   "tintable": false,
+   "artElement": "poison",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-poison-summon-256.webp",
+   "small": "layers/codex/glyph-poison-summon-64.webp"
+  },
+  {
+   "id": "poison-form",
+   "name": "Poison Form",
+   "element": "poison",
+   "mechanic": "form",
+   "tintable": false,
+   "artElement": "poison",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-poison-form-256.webp",
+   "small": "layers/codex/glyph-poison-form-64.webp"
+  },
+  {
+   "id": "shadow-strike",
+   "name": "Shadow Strike",
+   "element": "shadow",
+   "mechanic": "strike",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "fit": {
+    "circle": 0.516,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-shadow-strike-256.webp",
+   "small": "layers/codex/glyph-shadow-strike-64.webp"
+  },
+  {
+   "id": "shadow-nova",
+   "name": "Shadow Nova",
+   "element": "shadow",
+   "mechanic": "nova",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-shadow-nova-256.webp",
+   "small": "layers/codex/glyph-shadow-nova-64.webp"
+  },
+  {
+   "id": "shadow-area",
+   "name": "Shadow Area",
+   "element": "shadow",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-shadow-area-256.webp",
+   "small": "layers/codex/glyph-shadow-area-64.webp"
+  },
+  {
+   "id": "shadow-beam",
+   "name": "Shadow Beam",
+   "element": "shadow",
+   "mechanic": "beam",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "fit": {
+    "circle": 0.496,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-shadow-beam-256.webp",
+   "small": "layers/codex/glyph-shadow-beam-64.webp"
+  },
+  {
+   "id": "shadow-leap",
+   "name": "Shadow Leap",
+   "element": "shadow",
+   "mechanic": "leap",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-shadow-leap-256.webp",
+   "small": "layers/codex/glyph-shadow-leap-64.webp"
+  },
+  {
+   "id": "shadow-dash",
+   "name": "Shadow Dash",
+   "element": "shadow",
+   "mechanic": "dash",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "fit": {
+    "circle": 0.571,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-shadow-dash-256.webp",
+   "small": "layers/codex/glyph-shadow-dash-64.webp"
+  },
+  {
+   "id": "shadow-buff",
+   "name": "Shadow Buff",
+   "element": "shadow",
+   "mechanic": "buff",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-shadow-buff-256.webp",
+   "small": "layers/codex/glyph-shadow-buff-64.webp"
+  },
+  {
+   "id": "shadow-heal",
+   "name": "Shadow Heal",
+   "element": "shadow",
+   "mechanic": "heal",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-shadow-heal-256.webp",
+   "small": "layers/codex/glyph-shadow-heal-64.webp"
+  },
+  {
+   "id": "shadow-ward",
+   "name": "Shadow Ward",
+   "element": "shadow",
+   "mechanic": "ward",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-shadow-ward-256.webp",
+   "small": "layers/codex/glyph-shadow-ward-64.webp"
+  },
+  {
+   "id": "shadow-summon",
+   "name": "Shadow Summon",
+   "element": "shadow",
+   "mechanic": "summon",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "fit": {
+    "circle": 0.547,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-shadow-summon-256.webp",
+   "small": "layers/codex/glyph-shadow-summon-64.webp"
+  },
+  {
+   "id": "shadow-form",
+   "name": "Shadow Form",
+   "element": "shadow",
+   "mechanic": "form",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-shadow-form-256.webp",
+   "small": "layers/codex/glyph-shadow-form-64.webp"
+  },
+  {
+   "id": "physical-area",
+   "name": "Physical Area",
+   "element": "physical",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-physical-area-256.webp",
+   "small": "layers/codex/glyph-physical-area-64.webp"
+  },
+  {
+   "id": "physical-beam",
+   "name": "Physical Beam",
+   "element": "physical",
+   "mechanic": "beam",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "fit": {
+    "circle": 0.512,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-physical-beam-256.webp",
+   "small": "layers/codex/glyph-physical-beam-64.webp"
+  },
+  {
+   "id": "physical-leap",
+   "name": "Physical Leap",
+   "element": "physical",
+   "mechanic": "leap",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-physical-leap-256.webp",
+   "small": "layers/codex/glyph-physical-leap-64.webp"
+  },
+  {
+   "id": "physical-buff",
+   "name": "Physical Buff",
+   "element": "physical",
+   "mechanic": "buff",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-physical-buff-256.webp",
+   "small": "layers/codex/glyph-physical-buff-64.webp"
+  },
+  {
+   "id": "physical-heal",
+   "name": "Physical Heal",
+   "element": "physical",
+   "mechanic": "heal",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-physical-heal-256.webp",
+   "small": "layers/codex/glyph-physical-heal-64.webp"
+  },
+  {
+   "id": "physical-ward",
+   "name": "Physical Ward",
+   "element": "physical",
+   "mechanic": "ward",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-physical-ward-256.webp",
+   "small": "layers/codex/glyph-physical-ward-64.webp"
+  },
+  {
+   "id": "physical-summon",
+   "name": "Physical Summon",
+   "element": "physical",
+   "mechanic": "summon",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-physical-summon-256.webp",
+   "small": "layers/codex/glyph-physical-summon-64.webp"
+  },
+  {
+   "id": "physical-dot",
+   "name": "Physical Dot",
+   "element": "physical",
+   "mechanic": "dot",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-physical-dot-256.webp",
+   "small": "layers/codex/glyph-physical-dot-64.webp"
+  },
+  {
+   "id": "physical-form",
+   "name": "Physical Form",
+   "element": "physical",
+   "mechanic": "form",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-physical-form-256.webp",
+   "small": "layers/codex/glyph-physical-form-64.webp"
+  },
+  {
+   "id": "spell-berserk",
+   "name": "Berserk",
+   "element": "physical",
+   "mechanic": "buff",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "spells": [
+    "Berserk"
+   ],
+   "cls": "warrior",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-berserk-256.webp",
+   "small": "layers/codex/glyph-spell-berserk-64.webp"
+  },
+  {
+   "id": "spell-explosive-arrow",
+   "name": "Explosive Arrow",
+   "element": "fire",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "spells": [
+    "Explosive Arrow"
+   ],
+   "cls": "ranger",
+   "fit": {
+    "circle": 0.525,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-explosive-arrow-256.webp",
+   "small": "layers/codex/glyph-spell-explosive-arrow-64.webp"
+  },
+  {
+   "id": "spell-eagle-eye",
+   "name": "Eagle Eye",
+   "element": "physical",
+   "mechanic": "buff",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "spells": [
+    "Eagle Eye"
+   ],
+   "cls": "ranger",
+   "fit": {
+    "circle": 0.539,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-eagle-eye-256.webp",
+   "small": "layers/codex/glyph-spell-eagle-eye-64.webp"
+  },
+  {
+   "id": "spell-siege-arrow",
+   "name": "Siege Arrow",
+   "element": "fire",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "spells": [
+    "Siege Arrow"
+   ],
+   "cls": "ranger",
+   "fit": {
+    "circle": 0.516,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-siege-arrow-256.webp",
+   "small": "layers/codex/glyph-spell-siege-arrow-64.webp"
+  },
+  {
+   "id": "spell-poison-cloud",
+   "name": "Poison Cloud",
+   "element": "poison",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "poison",
+   "tags": [],
+   "spells": [
+    "Poison Cloud"
+   ],
+   "cls": "rogue",
+   "fit": {
+    "circle": 0.502,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-poison-cloud-256.webp",
+   "small": "layers/codex/glyph-spell-poison-cloud-64.webp"
+  },
+  {
+   "id": "spell-ice-spikes",
+   "name": "Ice Spikes",
+   "element": "frost",
+   "mechanic": "beam",
+   "tintable": false,
+   "artElement": "frost",
+   "tags": [],
+   "spells": [
+    "Ice Spikes"
+   ],
+   "cls": "mage",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-ice-spikes-256.webp",
+   "small": "layers/codex/glyph-spell-ice-spikes-64.webp"
+  },
+  {
+   "id": "spell-teleport",
+   "name": "Teleport",
+   "element": "arcane",
+   "mechanic": "leap",
+   "tintable": false,
+   "artElement": "arcane",
+   "tags": [],
+   "spells": [
+    "Teleport"
+   ],
+   "cls": "mage",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-teleport-256.webp",
+   "small": "layers/codex/glyph-spell-teleport-64.webp"
+  },
+  {
+   "id": "spell-arcane-blast",
+   "name": "Arcane Blast",
+   "element": "arcane",
+   "mechanic": "strike",
+   "tintable": false,
+   "artElement": "arcane",
+   "tags": [],
+   "spells": [
+    "Arcane Blast"
+   ],
+   "cls": "mage",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-arcane-blast-256.webp",
+   "small": "layers/codex/glyph-spell-arcane-blast-64.webp"
+  },
+  {
+   "id": "spell-lightning-strike",
+   "name": "Lightning Strike",
+   "element": "lightning",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "lightning",
+   "tags": [],
+   "spells": [
+    "Lightning Strike"
+   ],
+   "cls": "mage",
+   "fit": {
+    "circle": 0.553,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-lightning-strike-256.webp",
+   "small": "layers/codex/glyph-spell-lightning-strike-64.webp"
+  },
+  {
+   "id": "spell-meteor",
+   "name": "Meteor",
+   "element": "fire",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "spells": [
+    "Meteor"
+   ],
+   "cls": "mage",
+   "fit": {
+    "circle": 0.485,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-meteor-256.webp",
+   "small": "layers/codex/glyph-spell-meteor-64.webp"
+  },
+  {
+   "id": "spell-sunlance",
+   "name": "Sunlance",
+   "element": "holy",
+   "mechanic": "beam",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "spells": [
+    "Sunlance"
+   ],
+   "cls": "cleric",
+   "fit": {
+    "circle": 0.516,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-sunlance-256.webp",
+   "small": "layers/codex/glyph-spell-sunlance-64.webp"
+  },
+  {
+   "id": "spell-divine-hammer",
+   "name": "Divine Hammer",
+   "element": "holy",
+   "mechanic": "beam",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "spells": [
+    "Divine Hammer"
+   ],
+   "cls": "cleric",
+   "fit": {
+    "circle": 0.53,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-divine-hammer-256.webp",
+   "small": "layers/codex/glyph-spell-divine-hammer-64.webp"
+  },
+  {
+   "id": "spell-judgement",
+   "name": "Judgement",
+   "element": "holy",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "spells": [
+    "Judgement"
+   ],
+   "cls": "cleric",
+   "fit": {
+    "circle": 0.559,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-judgement-256.webp",
+   "small": "layers/codex/glyph-spell-judgement-64.webp"
+  },
+  {
+   "id": "spell-wrath-of-light",
+   "name": "Wrath of Light",
+   "element": "holy",
+   "mechanic": "buff",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "spells": [
+    "Wrath of Light"
+   ],
+   "cls": "cleric",
+   "fit": {
+    "circle": 0.542,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-wrath-of-light-256.webp",
+   "small": "layers/codex/glyph-spell-wrath-of-light-64.webp"
+  },
+  {
+   "id": "spell-cat-shape",
+   "name": "Cat Shape",
+   "element": "nature",
+   "mechanic": "form",
+   "tintable": false,
+   "artElement": "nature",
+   "tags": [],
+   "spells": [
+    "Cat Shape"
+   ],
+   "cls": "druid",
+   "fit": {
+    "circle": 0.548,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-cat-shape-256.webp",
+   "small": "layers/codex/glyph-spell-cat-shape-64.webp"
+  },
+  {
+   "id": "spell-tornado",
+   "name": "Tornado",
+   "element": "nature",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "nature",
+   "tags": [],
+   "spells": [
+    "Tornado"
+   ],
+   "cls": "druid",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-tornado-256.webp",
+   "small": "layers/codex/glyph-spell-tornado-64.webp"
+  },
+  {
+   "id": "spell-great-storm",
+   "name": "Great Storm",
+   "element": "nature",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "nature",
+   "tags": [],
+   "spells": [
+    "Great Storm"
+   ],
+   "cls": "druid",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-great-storm-256.webp",
+   "small": "layers/codex/glyph-spell-great-storm-64.webp"
+  },
+  {
+   "id": "spell-sound-blast",
+   "name": "Sound Blast",
+   "element": "arcane",
+   "mechanic": "strike",
+   "tintable": false,
+   "artElement": "arcane",
+   "tags": [],
+   "spells": [
+    "Sound Blast"
+   ],
+   "cls": "bard",
+   "fit": {
+    "circle": 0.526,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-sound-blast-256.webp",
+   "small": "layers/codex/glyph-spell-sound-blast-64.webp"
+  },
+  {
+   "id": "spell-sour-note",
+   "name": "Sour Note",
+   "element": "arcane",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "arcane",
+   "tags": [],
+   "spells": [
+    "Sour Note"
+   ],
+   "cls": "bard",
+   "fit": {
+    "circle": 0.546,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-sour-note-256.webp",
+   "small": "layers/codex/glyph-spell-sour-note-64.webp"
+  },
+  {
+   "id": "spell-power-chord",
+   "name": "Power Chord",
+   "element": "arcane",
+   "mechanic": "nova",
+   "tintable": false,
+   "artElement": "arcane",
+   "tags": [],
+   "spells": [
+    "Power Chord"
+   ],
+   "cls": "bard",
+   "fit": {
+    "circle": 0.526,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-power-chord-256.webp",
+   "small": "layers/codex/glyph-spell-power-chord-64.webp"
+  },
+  {
+   "id": "spell-lullaby",
+   "name": "Lullaby",
+   "element": "arcane",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "arcane",
+   "tags": [],
+   "spells": [
+    "Lullaby"
+   ],
+   "cls": "bard",
+   "fit": {
+    "circle": 0.57,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-lullaby-256.webp",
+   "small": "layers/codex/glyph-spell-lullaby-64.webp"
+  },
+  {
+   "id": "spell-crescendo",
+   "name": "Crescendo",
+   "element": "arcane",
+   "mechanic": "nova",
+   "tintable": false,
+   "artElement": "arcane",
+   "tags": [],
+   "spells": [
+    "Crescendo"
+   ],
+   "cls": "bard",
+   "fit": {
+    "circle": 0.529,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-crescendo-256.webp",
+   "small": "layers/codex/glyph-spell-crescendo-64.webp"
+  },
+  {
+   "id": "spell-grand-finale",
+   "name": "Grand Finale",
+   "element": "arcane",
+   "mechanic": "beam",
+   "tintable": false,
+   "artElement": "arcane",
+   "tags": [],
+   "spells": [
+    "Grand Finale"
+   ],
+   "cls": "bard",
+   "fit": {
+    "circle": 0.521,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-grand-finale-256.webp",
+   "small": "layers/codex/glyph-spell-grand-finale-64.webp"
+  },
+  {
+   "id": "spell-shock-strike",
+   "name": "Shock Strike",
+   "element": "lightning",
+   "mechanic": "strike",
+   "tintable": false,
+   "artElement": "lightning",
+   "tags": [],
+   "spells": [
+    "Shock Strike"
+   ],
+   "cls": "shaman",
+   "fit": {
+    "circle": 0.563,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-shock-strike-256.webp",
+   "small": "layers/codex/glyph-spell-shock-strike-64.webp"
+  },
+  {
+   "id": "spell-lightning-storm",
+   "name": "Lightning Storm",
+   "element": "lightning",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "lightning",
+   "tags": [],
+   "spells": [
+    "Lightning Storm"
+   ],
+   "cls": "shaman",
+   "fit": {
+    "circle": 0.546,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-lightning-storm-256.webp",
+   "small": "layers/codex/glyph-spell-lightning-storm-64.webp"
+  },
+  {
+   "id": "spell-volcano",
+   "name": "Volcano",
+   "element": "fire",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "spells": [
+    "Volcano"
+   ],
+   "cls": "shaman",
+   "fit": {
+    "circle": 0.534,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-volcano-256.webp",
+   "small": "layers/codex/glyph-spell-volcano-64.webp"
+  },
+  {
+   "id": "spell-holy-strike",
+   "name": "Holy Strike",
+   "element": "holy",
+   "mechanic": "strike",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "spells": [
+    "Holy Strike"
+   ],
+   "cls": "paladin",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-holy-strike-256.webp",
+   "small": "layers/codex/glyph-spell-holy-strike-64.webp"
+  },
+  {
+   "id": "spell-holy-charge",
+   "name": "Holy Charge",
+   "element": "holy",
+   "mechanic": "dash",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "spells": [
+    "Holy Charge"
+   ],
+   "cls": "paladin",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-holy-charge-256.webp",
+   "small": "layers/codex/glyph-spell-holy-charge-64.webp"
+  },
+  {
+   "id": "spell-divine-storm",
+   "name": "Divine Storm",
+   "element": "holy",
+   "mechanic": "nova",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "spells": [
+    "Divine Storm"
+   ],
+   "cls": "paladin",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-divine-storm-256.webp",
+   "small": "layers/codex/glyph-spell-divine-storm-64.webp"
+  },
+  {
+   "id": "spell-holy-fire",
+   "name": "Holy Fire",
+   "element": "holy",
+   "mechanic": "nova",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "spells": [
+    "Holy Fire"
+   ],
+   "cls": "paladin",
+   "fit": {
+    "circle": 0.555,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-holy-fire-256.webp",
+   "small": "layers/codex/glyph-spell-holy-fire-64.webp"
+  },
+  {
+   "id": "spell-light-hammer",
+   "name": "Light Hammer",
+   "element": "holy",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "spells": [
+    "Light Hammer"
+   ],
+   "cls": "paladin",
+   "fit": {
+    "circle": 0.54,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-light-hammer-256.webp",
+   "small": "layers/codex/glyph-spell-light-hammer-64.webp"
+  },
+  {
+   "id": "spell-shield-of-light",
+   "name": "Shield of Light",
+   "element": "holy",
+   "mechanic": "buff",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "spells": [
+    "Shield of Light"
+   ],
+   "cls": "paladin",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-shield-of-light-256.webp",
+   "small": "layers/codex/glyph-spell-shield-of-light-64.webp"
+  },
+  {
+   "id": "spell-holy-avatar",
+   "name": "Holy Avatar",
+   "element": "holy",
+   "mechanic": "buff",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "spells": [
+    "Holy Avatar"
+   ],
+   "cls": "paladin",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-holy-avatar-256.webp",
+   "small": "layers/codex/glyph-spell-holy-avatar-64.webp"
+  },
+  {
+   "id": "spell-heaven-s-hammer",
+   "name": "Heaven's Hammer",
+   "element": "holy",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "spells": [
+    "Heaven's Hammer"
+   ],
+   "cls": "paladin",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-heaven-s-hammer-256.webp",
+   "small": "layers/codex/glyph-spell-heaven-s-hammer-64.webp"
+  },
+  {
+   "id": "spell-arcane-slash",
+   "name": "Arcane Slash",
+   "element": "arcane",
+   "mechanic": "strike",
+   "tintable": false,
+   "artElement": "arcane",
+   "tags": [],
+   "spells": [
+    "Arcane Slash"
+   ],
+   "cls": "spellblade",
+   "fit": {
+    "circle": 0.505,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-arcane-slash-256.webp",
+   "small": "layers/codex/glyph-spell-arcane-slash-64.webp"
+  },
+  {
+   "id": "spell-fire-slash",
+   "name": "Fire Slash",
+   "element": "fire",
+   "mechanic": "strike",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "spells": [
+    "Fire Slash"
+   ],
+   "cls": "spellblade",
+   "fit": {
+    "circle": 0.483,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-fire-slash-256.webp",
+   "small": "layers/codex/glyph-spell-fire-slash-64.webp"
+  },
+  {
+   "id": "spell-arcane-spin",
+   "name": "Arcane Spin",
+   "element": "arcane",
+   "mechanic": "nova",
+   "tintable": false,
+   "artElement": "arcane",
+   "tags": [],
+   "spells": [
+    "Arcane Spin"
+   ],
+   "cls": "spellblade",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-arcane-spin-256.webp",
+   "small": "layers/codex/glyph-spell-arcane-spin-64.webp"
+  },
+  {
+   "id": "spell-phase-strike",
+   "name": "Phase Strike",
+   "element": "arcane",
+   "mechanic": "leap",
+   "tintable": false,
+   "artElement": "arcane",
+   "tags": [],
+   "spells": [
+    "Phase Strike"
+   ],
+   "cls": "spellblade",
+   "fit": {
+    "circle": 0.534,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-phase-strike-256.webp",
+   "small": "layers/codex/glyph-spell-phase-strike-64.webp"
+  },
+  {
+   "id": "spell-sword-storm",
+   "name": "Sword Storm",
+   "element": "arcane",
+   "mechanic": "nova",
+   "tintable": false,
+   "artElement": "arcane",
+   "tags": [],
+   "spells": [
+    "Sword Storm"
+   ],
+   "cls": "spellblade",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-sword-storm-256.webp",
+   "small": "layers/codex/glyph-spell-sword-storm-64.webp"
+  },
+  {
+   "id": "spell-giant-blade",
+   "name": "Giant Blade",
+   "element": "arcane",
+   "mechanic": "beam",
+   "tintable": false,
+   "artElement": "arcane",
+   "tags": [],
+   "spells": [
+    "Giant Blade"
+   ],
+   "cls": "spellblade",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-giant-blade-256.webp",
+   "small": "layers/codex/glyph-spell-giant-blade-64.webp"
+  },
+  {
+   "id": "spell-terror",
+   "name": "Terror",
+   "element": "shadow",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "spells": [
+    "Terror"
+   ],
+   "cls": "warlock",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-terror-256.webp",
+   "small": "layers/codex/glyph-spell-terror-64.webp"
+  },
+  {
+   "id": "spell-blood-pact",
+   "name": "Blood Pact",
+   "element": "shadow",
+   "mechanic": "buff",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "spells": [
+    "Blood Pact"
+   ],
+   "cls": "warlock",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-blood-pact-256.webp",
+   "small": "layers/codex/glyph-spell-blood-pact-64.webp"
+  },
+  {
+   "id": "spell-demon-gate",
+   "name": "Demon Gate",
+   "element": "shadow",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "spells": [
+    "Demon Gate"
+   ],
+   "cls": "warlock",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-demon-gate-256.webp",
+   "small": "layers/codex/glyph-spell-demon-gate-64.webp"
+  },
+  {
+   "id": "spell-dark-star",
+   "name": "Dark Star",
+   "element": "shadow",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "spells": [
+    "Dark Star"
+   ],
+   "cls": "warlock",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-dark-star-256.webp",
+   "small": "layers/codex/glyph-spell-dark-star-64.webp"
+  },
+  {
+   "id": "spell-flying-kick",
+   "name": "Flying Kick",
+   "element": "physical",
+   "mechanic": "leap",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "spells": [
+    "Flying Kick"
+   ],
+   "cls": "wayfarer",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-flying-kick-256.webp",
+   "small": "layers/codex/glyph-spell-flying-kick-64.webp"
+  },
+  {
+   "id": "spell-wind-palm",
+   "name": "Wind Palm",
+   "element": "physical",
+   "mechanic": "beam",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "spells": [
+    "Wind Palm"
+   ],
+   "cls": "wayfarer",
+   "fit": {
+    "circle": 0.512,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-wind-palm-256.webp",
+   "small": "layers/codex/glyph-spell-wind-palm-64.webp"
+  },
+  {
+   "id": "spell-inner-speed",
+   "name": "Inner Speed",
+   "element": "physical",
+   "mechanic": "buff",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "spells": [
+    "Inner Speed"
+   ],
+   "cls": "wayfarer",
+   "fit": {
+    "circle": 0.527,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-inner-speed-256.webp",
+   "small": "layers/codex/glyph-spell-inner-speed-64.webp"
+  },
+  {
+   "id": "spell-thunder-kick",
+   "name": "Thunder Kick",
+   "element": "physical",
+   "mechanic": "leap",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "spells": [
+    "Thunder Kick"
+   ],
+   "cls": "wayfarer",
+   "fit": {
+    "circle": 0.552,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-thunder-kick-256.webp",
+   "small": "layers/codex/glyph-spell-thunder-kick-64.webp"
+  },
+  {
+   "id": "spell-fire-wall",
+   "name": "Fire Wall",
+   "element": "fire",
+   "mechanic": "beam",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "spells": [
+    "Fire Wall"
+   ],
+   "cls": "pyromancer",
+   "fit": {
+    "circle": 0.528,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-fire-wall-256.webp",
+   "small": "layers/codex/glyph-spell-fire-wall-64.webp"
+  },
+  {
+   "id": "spell-chain-hook",
+   "name": "Chain Hook",
+   "element": "physical",
+   "mechanic": "beam",
+   "tintable": false,
+   "artElement": "physical",
+   "tags": [],
+   "spells": [
+    "Chain Hook"
+   ],
+   "cls": "witch_hunter",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-chain-hook-256.webp",
+   "small": "layers/codex/glyph-spell-chain-hook-64.webp"
+  },
+  {
+   "id": "spell-holy-bomb",
+   "name": "Holy Bomb",
+   "element": "holy",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "spells": [
+    "Holy Bomb"
+   ],
+   "cls": "witch_hunter",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-holy-bomb-256.webp",
+   "small": "layers/codex/glyph-spell-holy-bomb-64.webp"
+  },
+  {
+   "id": "spell-silence-bomb",
+   "name": "Silence Bomb",
+   "element": "holy",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "spells": [
+    "Silence Bomb"
+   ],
+   "cls": "witch_hunter",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-silence-bomb-256.webp",
+   "small": "layers/codex/glyph-spell-silence-bomb-64.webp"
+  },
+  {
+   "id": "spell-purge",
+   "name": "Purge",
+   "element": "holy",
+   "mechanic": "nova",
+   "tintable": false,
+   "artElement": "holy",
+   "tags": [],
+   "spells": [
+    "Purge"
+   ],
+   "cls": "witch_hunter",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-purge-256.webp",
+   "small": "layers/codex/glyph-spell-purge-64.webp"
+  },
+  {
+   "id": "spell-shadow-slash",
+   "name": "Shadow Slash",
+   "element": "shadow",
+   "mechanic": "strike",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "spells": [
+    "Shadow Slash"
+   ],
+   "cls": "shadowdancer",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-shadow-slash-256.webp",
+   "small": "layers/codex/glyph-spell-shadow-slash-64.webp"
+  },
+  {
+   "id": "spell-darkness",
+   "name": "Darkness",
+   "element": "shadow",
+   "mechanic": "nova",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "spells": [
+    "Darkness"
+   ],
+   "cls": "shadowdancer",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-darkness-256.webp",
+   "small": "layers/codex/glyph-spell-darkness-64.webp"
+  },
+  {
+   "id": "spell-shadow-clones",
+   "name": "Shadow Clones",
+   "element": "shadow",
+   "mechanic": "summon",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "spells": [
+    "Shadow Clones"
+   ],
+   "cls": "shadowdancer",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-shadow-clones-256.webp",
+   "small": "layers/codex/glyph-spell-shadow-clones-64.webp"
+  },
+  {
+   "id": "spell-shadow-army",
+   "name": "Shadow Army",
+   "element": "shadow",
+   "mechanic": "summon",
+   "tintable": false,
+   "artElement": "shadow",
+   "tags": [],
+   "spells": [
+    "Shadow Army"
+   ],
+   "cls": "shadowdancer",
+   "fit": {
+    "circle": 0.572,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-shadow-army-256.webp",
+   "small": "layers/codex/glyph-spell-shadow-army-64.webp"
+  },
+  {
+   "id": "spell-frost-arrow",
+   "name": "Frost Arrow",
+   "element": "frost",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "frost",
+   "tags": [],
+   "spells": [
+    "Frost Arrow"
+   ],
+   "cls": "spellfletcher",
+   "fit": {
+    "circle": 0.54,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-frost-arrow-256.webp",
+   "small": "layers/codex/glyph-spell-frost-arrow-64.webp"
+  },
+  {
+   "id": "spell-flame-arrow",
+   "name": "Flame Arrow",
+   "element": "fire",
+   "mechanic": "beam",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "spells": [
+    "Flame Arrow"
+   ],
+   "cls": "spellfletcher",
+   "fit": {
+    "circle": 0.517,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-flame-arrow-256.webp",
+   "small": "layers/codex/glyph-spell-flame-arrow-64.webp"
+  },
+  {
+   "id": "spell-force-shot",
+   "name": "Force Shot",
+   "element": "arcane",
+   "mechanic": "strike",
+   "tintable": false,
+   "artElement": "arcane",
+   "tags": [],
+   "spells": [
+    "Force Shot"
+   ],
+   "cls": "spellfletcher",
+   "fit": {
+    "circle": 0.551,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-force-shot-256.webp",
+   "small": "layers/codex/glyph-spell-force-shot-64.webp"
+  },
+  {
+   "id": "spell-storm-volley",
+   "name": "Storm Volley",
+   "element": "lightning",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "lightning",
+   "tags": [],
+   "spells": [
+    "Storm Volley"
+   ],
+   "cls": "spellfletcher",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-storm-volley-256.webp",
+   "small": "layers/codex/glyph-spell-storm-volley-64.webp"
+  },
+  {
+   "id": "spell-comet-arrow",
+   "name": "Comet Arrow",
+   "element": "fire",
+   "mechanic": "area",
+   "tintable": false,
+   "artElement": "fire",
+   "tags": [],
+   "spells": [
+    "Comet Arrow"
+   ],
+   "cls": "spellfletcher",
+   "fit": {
+    "circle": 0.498,
+    "square": 0.639
+   },
+   "file": "layers/codex/glyph-spell-comet-arrow-256.webp",
+   "small": "layers/codex/glyph-spell-comet-arrow-64.webp"
   }
  ]
 }

@@ -228,6 +228,25 @@
         "file": "layers/codex/frame-paladin-square-256.webp",
         "small": "layers/codex/frame-paladin-square-64.webp"
       }
+    },
+    "item": {
+      "name": "Item (silver, tinted by rarity)",
+      "style": "painted",
+      "item": true,
+      "circle": {
+        "placeholder": "layers/placeholder/frame-item-circle.svg",
+        "inner": 0.417,
+        "placeholderInner": 0.425,
+        "file": "layers/codex/frame-item-circle-256.webp",
+        "small": "layers/codex/frame-item-circle-64.webp"
+      },
+      "square": {
+        "placeholder": "layers/placeholder/frame-item-square.svg",
+        "inner": 0.418,
+        "placeholderInner": 0.425,
+        "file": "layers/codex/frame-item-square-256.webp",
+        "small": "layers/codex/frame-item-square-64.webp"
+      }
     }
   },
   "plates": {
@@ -257,6 +276,18 @@
       "square": {
         "placeholder": "layers/placeholder/plate-smooth-square.svg",
         "placeholderRadius": 0.405
+      }
+    },
+    "item": {
+      "name": "Item (dark)",
+      "item": true,
+      "circle": {
+        "placeholder": "layers/placeholder/plate-item-circle.svg",
+        "placeholderRadius": 0.44
+      },
+      "square": {
+        "placeholder": "layers/placeholder/plate-item-square.svg",
+        "placeholderRadius": 0.44
       }
     }
   },

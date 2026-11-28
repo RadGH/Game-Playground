@@ -1,6 +1,6 @@
 # Icon Kit
 
-**Status:** prototype, round 2 (2026-11-27). Painted: gold frames, stone plates, 8 glyphs and 2 glows from round 1. Round 2 adds the frame choice (gold, thin, hairline, none, eight class-themed frames), states (passive, active, channeling, no mana, out of range, dispel rings), modes (cooldown + seconds, cast bar, stacks, duration), and the Compare and Status tabs. The round-2 Codex frames and glyphs are imported when they arrive (see Art pipeline). No game uses the kit yet. Oathwild is the first candidate. **Play:** `iconkit/` on the playground (8401 dev / 8400 stable). **Next:** paint the glyphs the Glyph matrix lists (most-used first), then wire Oathwild's `spellIcon` to `iconFor` once the owner approves the look. **Parked:** a second frame style (iron / silver), animated cooldown in the canvas renderer.
+**Status:** prototype, round 3 (2026-11-27). Round 3: the one passive look (no frame, soft faded edge, like a buff), items (square silver frame tinted by rarity, round for jewellery, dark plate, item glyph, quality gem, states, stack count, `itemIconFor`, Items tab), and the round-3 batch importer. **Oathwild uses the kit** (hairline frame in the class colour; passives; bag / loot / shop items). Codex's round-3 art (matrix glyphs, one glyph per named spell, item pictures, item frames) is imported as batches land. **Play:** `iconkit/` on the playground (8401 dev / 8400 stable). **Next:** re-run the import as the remaining r3 batches finish, look at each batch on the Items and Glyph matrix tabs. **Parked:** a second frame style (iron / silver), animated cooldown in the canvas renderer.
 
 Layered spell and ability icons, in the style of early-2000s RTS spell buttons, that any game can use. The owner asked for this on 2026-11-27: "spell icons like warcraft 3 style, but with customizable icon backgrounds … a subtle color and background change based on the class … a consistent border overlay, square or circular options, with glow, glyph, background layers", plus a tool to review every icon in the games.
 
@@ -30,7 +30,7 @@ The glow and glyph sit in one box **cut to the plate's shape**, so a big painted
 
 | Spec | Look | HTML | Canvas |
 |---|---|---|---|
-| `state: 'passive'` + `passiveStyle: 'dim'` (recommended) / `'socket'` | no glow; dim = greyed metal and muted stone; socket = sunk into a dark ring | yes | yes |
+| `state: 'passive'` | round 3 (owner 2026-11-27): NO frame, the plate fades out softly toward its edge (radial for circles, a soft rounded-square fade for squares), the glyph 0.86× smaller, no glow, `cursor: default` — reads like a buff, not a button. The old `passiveStyle` 'dim' / 'socket' are gone (read as this look) | yes (`.ik-fade` mask) | yes |
 | `state: 'active'` | steady warm inner glow + gold edge, frame brighter | yes | yes |
 | `state: 'channeling'` | the active glow pulsing + a light running round the frame metal (CSS `@property` angle; no motion with reduced motion) | animated | drawn as active |
 | `state: 'nomana'` / `'norange'` | blue / red wash over the face | yes | yes |
@@ -42,6 +42,18 @@ The glow and glyph sit in one box **cut to the plate's shape**, so a big painted
 | `mode.duration` (seconds or text) | time left under the icon (leave ~1.2em of room below) | yes | left out |
 
 Animate by changing the spec and re-rendering (the Status tab redraws 16 icons ten times a second). Channeling animates by itself in CSS. For an action bar, compose the base picture once with `iconDataUrl` and draw the moving parts (cooldown, cast) as HTML over it, so the cache does not fill with every frame.
+
+## Items (round 3)
+
+Owner 2026-11-27: "support for items with their own generated glyph using their own generic item border … a square border for differentiation".
+
+- `kit.itemIconFor(item, { equipped, broken, cannotWear, isNew })` reads an Emberveil / Oathwild item (`baseKey`, `subtype`, `slot`, `type`, `rarity`, `quality`, `setId`, `isUnique`, `quest`, `count`) and returns `{ spec, glyph, match: base|subtype|slot|generic, fallback, why }`.
+- The spec is `kind: 'item'`: frame `item` (silver; `frame-item-square`, `frame-item-circle` for rings and necklaces), multiplied by `themes.json` `rarity` (normal grey-white, magic #4a8cff, rare #e8c74a, legendary #ff9a2e, unique gold, set green, quest), plate `item` (dark, never class-tinted), the item glyph, `gem` (quality: high / elite / exotic → `themes.json quality`), `itemState` (equipped = green tick bottom left, broken = red wash + grey, cannotwear = red wash + X, new = a glint sweeping across + sparkle), `count` (bottom right).
+- `data/items.json`: one row per item base (`item-<base>`, `_` → `-`), drawn stand-ins from `tools/make-item-placeholders.mjs` (the OLD item pictures: Oathwild's line glyphs and the icons/ item art), then Codex paintings via the importer. Fallbacks by subtype and slot. Item rows share the glyph id space (a spec's `glyph` may be an item id).
+
+## Oathwild
+
+`prototypes/oathwild/js/client/ui/icons.js`: `loadIconKit(rules)` (called from `main.js` at boot) loads the kit once; `spellIcon(id, size, { cls })` returns `iconHtml({ ...iconFor(row, cls, { frame: 'hairline', frameColor: 'class', shape: 'circle' }).spec, size })`, the old SVG medallion until the kit has loaded (stays synchronous; the HUD redraws on the `ow:icons` event). `passiveIcon` draws class-tree passives, trainings and modifiers in the passive look; `itemIcon` draws bag / loot / shop / worn items. Check: `flock /tmp/oathwild-browser.lock node prototypes/oathwild/tests/ui/icons-shots.mjs` (measures every icon's centring, desktop + phone).
 
 ## How a game uses it
 
@@ -67,6 +79,7 @@ kit.specKey(spec);         // stable cache key
 - `js/iconkit.js`: the kit. `css/iconkit.css`: the stacked icon (games import it). `js/review.js` + `css/review.css` + `index.html`: the review page.
 - `data/themes.json`: class and element colours, fallback glyphs, the class's themed frame, dispel ring colours, element name words, aliases.
 - `data/glyphs.json`: glyph rows `{ id, name, file, small, placeholder, element, mechanic, tintable, tags, fit }` plus the element and mechanic lists.
+- `data/items.json`: item glyph rows + fallbacks (round 3). `tools/make-item-placeholders.mjs` writes the item frames, plates and stand-in glyphs.
 - `data/layers.json`: frames (with the measured opening `inner`), plates, glows, element → glow, defaults.
 - `layers/codex/*.webp`: painted layers, 256 px + 64 px (the 64 is used for icons up to 48 device px). `layers/placeholder/*.svg`: the drawn fallback set (`tools/make-placeholders.mjs`).
 
@@ -74,7 +87,7 @@ kit.specKey(spec);         // stable cache key
 
 1. Write the prompt in `tools/prompts/NN-name.txt` (the first batch is `01-first-test-layers.txt`). Contract: 1024², transparent PNG (or a #FF00FF background), subject centred, frames and plates on the same canvas, plates and glows in neutral grey or white.
 2. Codex paints them into a folder (art only: Codex is not used for code).
-3. `python3 -I iconkit/tools/import-layers.py <folder>` (frames are `frame-<shape>.png` for gold and `frame-<id>-<shape>.png` for every other frame in `layers.json`; glyphs are `glyph-<id>.png` for any row in `glyphs.json`): keys out magenta if needed, moves each picture's visible art to the exact centre (the first batch was 2–25 px off), scales frames to 96% and measures their opening, sizes plates to sit just under it, measures each glyph's `fit`, writes the WebPs and updates `glyphs.json` / `layers.json`.
+3. Round 3 batches: `python3 -I iconkit/tools/import-layers.py <r3 folder>` (a folder with `rows.json`, or a folder of such folders). Rows by id: `<element>-<mechanic>` → a matrix glyph; `spell-<slug>` → a glyph with `spells: [name]` that `iconFor` gives to that spell by name and to no other spell (nor the matrix); `item-<base>` → `data/items.json`; `frame-item-<shape>.png` → the item frames. Missing files are skipped and get no row; re-running skips pictures already imported (WebP newer than the PNG; `--force` redoes them). Older folders: `python3 -I iconkit/tools/import-layers.py <folder>` (frames are `frame-<shape>.png` for gold and `frame-<id>-<shape>.png` for every other frame in `layers.json`; glyphs are `glyph-<id>.png` for any row in `glyphs.json`): keys out magenta if needed, moves each picture's visible art to the exact centre (the first batch was 2–25 px off), scales frames to 96% and measures their opening, sizes plates to sit just under it, measures each glyph's `fit`, writes the WebPs and updates `glyphs.json` / `layers.json`.
 4. Open the Builder and Class sheet, and check the centring hairlines at 24/40/64/128.
 5. The **Glyph matrix** tab lists the element × kind pairs Oathwild uses that have no painted glyph, most-used first. That list is the next batch.
 
@@ -86,6 +99,7 @@ The swirl glow (painted) reads as a white smoke squiggle, so it is optional and 
 
 - **Builder**: class, element, shape, frame (with line colour), glyph, plate, custom colours, tint strength, glow, state, passive look, dispel ring, and sliders for cooldown, seconds, cast, stacks and duration. An Animate switch plays a cooldown / cast / stacks / duration loop. It shows the 4 layers and the final icon, every size as HTML and as a canvas picture with centring hairlines, every state, both passive looks, every dispel ring, every mode, and the spec.
 - **Compare**: for each class (or one), the class's four most-used glyphs in Oathwild × seven frame rows (gold studded, thin gold, thin in class colour, hairline gold, hairline in class colour, none, class themed), at 40 or 64 px, circle or square. Tap an icon to open it in the Builder.
+- **Items**: every Oathwild item base × six rarities, the item states / gems / count, and a mock 5-wide bag at phone width (a gold left edge = still the old picture).
 - **Status**: a mock 8-slot action bar (ready, cooldown with seconds, casting with a cast bar, channeling, toggled on, no mana, out of range with stacks, passive) and a buff/debuff bar (dispel rings, stacks, time left), ticking live, sized to fit a 360 px phone.
 - **Class sheet**: every glyph in each of the 27 Oathwild classes' colours.
 - **In game: Oathwild**: every spell on every class tree, its current icon (`spellIcon` from Oathwild's own `icons.js`) beside the kit icon, with match counts, a class filter, search, and "only fallbacks". Read-only: it imports Oathwild's `rules/data.js`, `rules/spells.js` and `client/ui/icons.js`. Those files plus `data/spells.json` and `data/classes.json` are in Thousandvale's `ALLOW` list for the public copy.

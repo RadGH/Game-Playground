@@ -303,3 +303,5 @@
 .ow-lag-tile b { font-size: 20px; font-family: var(--font); }
 .ow-lag-tile span { font-size: 13px; opacity: 0.8; }
 .ow-lag-tile.is-warn b { color: var(--lag-stall); }
+/* the Icon Kit item picture takes the glyph box's place (two rows high, fixed 34 px — lessons rule 85) */
+.ow-wcell > .ik { grid-row: span 2; align-self: center; }

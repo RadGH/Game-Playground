@@ -1,0 +1,859 @@
+{
+ "_doc": "Icon Kit item glyphs (round 3, 2026-11-27). One row per item base: id item-<base with - for _>, the drawn stand-in (`placeholder`, from tools/make-item-placeholders.mjs: the old item pictures) and, once Codex paints it, `file` / `small` / `fit` (tools/import-layers.py). `shape`: round for jewellery. itemIconFor(item) picks base -> subtype -> slot -> generic. Item glyphs share the id space with data/glyphs.json, so a spec can name either.",
+ "fallbacks": {
+  "subtype": {
+   "sword": "item-sword",
+   "sword2h": "item-sword2h",
+   "axe": "item-battleaxe",
+   "axe2h": "item-axe2h",
+   "mace": "item-iron-mace",
+   "hammer": "item-hammer",
+   "dagger": "item-dagger",
+   "spear": "item-spear",
+   "polearm": "item-halberd",
+   "staff": "item-staff",
+   "bow": "item-bow",
+   "crossbow": "item-crossbow",
+   "wand": "item-wand",
+   "scepter": "item-scepter",
+   "orb": "item-orb",
+   "tome": "item-tome",
+   "javelin": "item-javelin",
+   "ring": "item-ring",
+   "necklace": "item-necklace",
+   "whip": "item-dagger",
+   "club": "item-iron-mace",
+   "glaive": "item-halberd",
+   "scimitar": "item-sword"
+  },
+  "slot": {
+   "weapon": "item-sword",
+   "mainhand": "item-sword",
+   "head": "item-medium-helm",
+   "chest": "item-medium-chest",
+   "legs": "item-medium-legs",
+   "hands": "item-medium-gauntlets",
+   "feet": "item-medium-boots",
+   "offhand": "item-shield",
+   "ring": "item-ring",
+   "necklace": "item-necklace",
+   "quest": "item-quest",
+   "consumable": "item-potion"
+  },
+  "shield": "item-shield",
+  "focus": "item-warded-focus",
+  "quiver": "item-quiver",
+  "quest": "item-quest",
+  "potion": "item-potion",
+  "default": "item-bundle"
+ },
+ "items": [
+  {
+   "id": "item-dagger",
+   "base": "dagger",
+   "name": "Dagger",
+   "slot": "weapon",
+   "subtype": "dagger",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-dagger.svg",
+   "fit": {
+    "circle": 0.486,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-dagger-256.webp",
+   "small": "layers/codex/item-dagger-64.webp"
+  },
+  {
+   "id": "item-sword",
+   "base": "sword",
+   "name": "Sword",
+   "slot": "weapon",
+   "subtype": "sword",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-sword.svg",
+   "fit": {
+    "circle": 0.486,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-sword-256.webp",
+   "small": "layers/codex/item-sword-64.webp"
+  },
+  {
+   "id": "item-longsword",
+   "base": "longsword",
+   "name": "Longsword",
+   "slot": "weapon",
+   "subtype": "sword",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-longsword.svg",
+   "fit": {
+    "circle": 0.488,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-longsword-256.webp",
+   "small": "layers/codex/item-longsword-64.webp"
+  },
+  {
+   "id": "item-rapier",
+   "base": "rapier",
+   "name": "Rapier",
+   "slot": "weapon",
+   "subtype": "sword",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-rapier.svg",
+   "fit": {
+    "circle": 0.487,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-rapier-256.webp",
+   "small": "layers/codex/item-rapier-64.webp"
+  },
+  {
+   "id": "item-wand",
+   "base": "wand",
+   "name": "Wand",
+   "slot": "weapon",
+   "subtype": "wand",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-wand.svg",
+   "fit": {
+    "circle": 0.492,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-wand-256.webp",
+   "small": "layers/codex/item-wand-64.webp"
+  },
+  {
+   "id": "item-scepter",
+   "base": "scepter",
+   "name": "Scepter",
+   "slot": "weapon",
+   "subtype": "scepter",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-scepter.svg",
+   "fit": {
+    "circle": 0.54,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-scepter-256.webp",
+   "small": "layers/codex/item-scepter-64.webp"
+  },
+  {
+   "id": "item-staff",
+   "base": "staff",
+   "name": "Staff",
+   "slot": "weapon",
+   "subtype": "staff",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-staff.svg",
+   "fit": {
+    "circle": 0.533,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-staff-256.webp",
+   "small": "layers/codex/item-staff-64.webp"
+  },
+  {
+   "id": "item-quarterstaff",
+   "base": "quarterstaff",
+   "name": "Quarterstaff",
+   "slot": "weapon",
+   "subtype": "staff",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-quarterstaff.svg",
+   "fit": {
+    "circle": 0.51,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-quarterstaff-256.webp",
+   "small": "layers/codex/item-quarterstaff-64.webp"
+  },
+  {
+   "id": "item-hammer",
+   "base": "hammer",
+   "name": "Hammer",
+   "slot": "weapon",
+   "subtype": "hammer",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-hammer.svg",
+   "fit": {
+    "circle": 0.554,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-hammer-256.webp",
+   "small": "layers/codex/item-hammer-64.webp"
+  },
+  {
+   "id": "item-warhammer",
+   "base": "warhammer",
+   "name": "Warhammer",
+   "slot": "weapon",
+   "subtype": "hammer",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-warhammer.svg",
+   "fit": {
+    "circle": 0.57,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-warhammer-256.webp",
+   "small": "layers/codex/item-warhammer-64.webp"
+  },
+  {
+   "id": "item-battleaxe",
+   "base": "battleaxe",
+   "name": "Battleaxe",
+   "slot": "weapon",
+   "subtype": "axe",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-battleaxe.svg",
+   "fit": {
+    "circle": 0.533,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-battleaxe-256.webp",
+   "small": "layers/codex/item-battleaxe-64.webp"
+  },
+  {
+   "id": "item-iron-mace",
+   "base": "iron_mace",
+   "name": "Iron Mace",
+   "slot": "weapon",
+   "subtype": "mace",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-iron-mace.svg",
+   "fit": {
+    "circle": 0.52,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-iron-mace-256.webp",
+   "small": "layers/codex/item-iron-mace-64.webp"
+  },
+  {
+   "id": "item-sword2h",
+   "base": "sword2h",
+   "name": "Greatsword",
+   "slot": "weapon",
+   "subtype": "sword2h",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-sword2h.svg",
+   "fit": {
+    "circle": 0.493,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-sword2h-256.webp",
+   "small": "layers/codex/item-sword2h-64.webp"
+  },
+  {
+   "id": "item-axe2h",
+   "base": "axe2h",
+   "name": "Greataxe",
+   "slot": "weapon",
+   "subtype": "axe2h",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-axe2h.svg",
+   "fit": {
+    "circle": 0.525,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-axe2h-256.webp",
+   "small": "layers/codex/item-axe2h-64.webp"
+  },
+  {
+   "id": "item-halberd",
+   "base": "halberd",
+   "name": "Halberd",
+   "slot": "weapon",
+   "subtype": "polearm",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-halberd.svg",
+   "fit": {
+    "circle": 0.497,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-halberd-256.webp",
+   "small": "layers/codex/item-halberd-64.webp"
+  },
+  {
+   "id": "item-spear",
+   "base": "spear",
+   "name": "Spear",
+   "slot": "weapon",
+   "subtype": "spear",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-spear.svg",
+   "fit": {
+    "circle": 0.506,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-spear-256.webp",
+   "small": "layers/codex/item-spear-64.webp"
+  },
+  {
+   "id": "item-bow",
+   "base": "bow",
+   "name": "Bow",
+   "slot": "weapon",
+   "subtype": "bow",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-bow.svg",
+   "fit": {
+    "circle": 0.496,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-bow-256.webp",
+   "small": "layers/codex/item-bow-64.webp"
+  },
+  {
+   "id": "item-shortbow",
+   "base": "shortbow",
+   "name": "Shortbow",
+   "slot": "weapon",
+   "subtype": "bow",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-shortbow.svg",
+   "fit": {
+    "circle": 0.489,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-shortbow-256.webp",
+   "small": "layers/codex/item-shortbow-64.webp"
+  },
+  {
+   "id": "item-crossbow",
+   "base": "crossbow",
+   "name": "Crossbow",
+   "slot": "weapon",
+   "subtype": "crossbow",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-crossbow.svg",
+   "fit": {
+    "circle": 0.536,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-crossbow-256.webp",
+   "small": "layers/codex/item-crossbow-64.webp"
+  },
+  {
+   "id": "item-javelin",
+   "base": "javelin",
+   "name": "Javelin",
+   "slot": "weapon",
+   "subtype": "javelin",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-javelin.svg",
+   "fit": {
+    "circle": 0.54,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-javelin-256.webp",
+   "small": "layers/codex/item-javelin-64.webp"
+  },
+  {
+   "id": "item-orb",
+   "base": "orb",
+   "name": "Orb",
+   "slot": "weapon",
+   "subtype": "orb",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-orb.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-orb-256.webp",
+   "small": "layers/codex/item-orb-64.webp"
+  },
+  {
+   "id": "item-tome",
+   "base": "tome",
+   "name": "Tome",
+   "slot": "weapon",
+   "subtype": "tome",
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-tome.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-tome-256.webp",
+   "small": "layers/codex/item-tome-64.webp"
+  },
+  {
+   "id": "item-cloth-helm",
+   "base": "cloth_helm",
+   "name": "Hood",
+   "slot": "head",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-cloth-helm.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-cloth-helm-256.webp",
+   "small": "layers/codex/item-cloth-helm-64.webp"
+  },
+  {
+   "id": "item-light-helm",
+   "base": "light_helm",
+   "name": "Leather Cap",
+   "slot": "head",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-light-helm.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-light-helm-256.webp",
+   "small": "layers/codex/item-light-helm-64.webp"
+  },
+  {
+   "id": "item-medium-helm",
+   "base": "medium_helm",
+   "name": "Chain Coif",
+   "slot": "head",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-medium-helm.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-medium-helm-256.webp",
+   "small": "layers/codex/item-medium-helm-64.webp"
+  },
+  {
+   "id": "item-heavy-helm",
+   "base": "heavy_helm",
+   "name": "War Helm",
+   "slot": "head",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-heavy-helm.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-heavy-helm-256.webp",
+   "small": "layers/codex/item-heavy-helm-64.webp"
+  },
+  {
+   "id": "item-cloth-chest",
+   "base": "cloth_chest",
+   "name": "Robes",
+   "slot": "chest",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-cloth-chest.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-cloth-chest-256.webp",
+   "small": "layers/codex/item-cloth-chest-64.webp"
+  },
+  {
+   "id": "item-light-chest",
+   "base": "light_chest",
+   "name": "Leather Armor",
+   "slot": "chest",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-light-chest.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-light-chest-256.webp",
+   "small": "layers/codex/item-light-chest-64.webp"
+  },
+  {
+   "id": "item-medium-chest",
+   "base": "medium_chest",
+   "name": "Chain Shirt",
+   "slot": "chest",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-medium-chest.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-medium-chest-256.webp",
+   "small": "layers/codex/item-medium-chest-64.webp"
+  },
+  {
+   "id": "item-heavy-chest",
+   "base": "heavy_chest",
+   "name": "Plate Armor",
+   "slot": "chest",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-heavy-chest.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-heavy-chest-256.webp",
+   "small": "layers/codex/item-heavy-chest-64.webp"
+  },
+  {
+   "id": "item-cloth-legs",
+   "base": "cloth_legs",
+   "name": "Linen Leggings",
+   "slot": "legs",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-cloth-legs.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-cloth-legs-256.webp",
+   "small": "layers/codex/item-cloth-legs-64.webp"
+  },
+  {
+   "id": "item-light-legs",
+   "base": "light_legs",
+   "name": "Leather Legs",
+   "slot": "legs",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-light-legs.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-light-legs-256.webp",
+   "small": "layers/codex/item-light-legs-64.webp"
+  },
+  {
+   "id": "item-medium-legs",
+   "base": "medium_legs",
+   "name": "Chain Legs",
+   "slot": "legs",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-medium-legs.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-medium-legs-256.webp",
+   "small": "layers/codex/item-medium-legs-64.webp"
+  },
+  {
+   "id": "item-heavy-legs",
+   "base": "heavy_legs",
+   "name": "Plate Legs",
+   "slot": "legs",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-heavy-legs.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-heavy-legs-256.webp",
+   "small": "layers/codex/item-heavy-legs-64.webp"
+  },
+  {
+   "id": "item-light-gauntlets",
+   "base": "light_gauntlets",
+   "name": "Leather Gauntlets",
+   "slot": "hands",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-light-gauntlets.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-light-gauntlets-256.webp",
+   "small": "layers/codex/item-light-gauntlets-64.webp"
+  },
+  {
+   "id": "item-medium-gauntlets",
+   "base": "medium_gauntlets",
+   "name": "Chain Gauntlets",
+   "slot": "hands",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-medium-gauntlets.svg",
+   "fit": {
+    "circle": 0.571,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-medium-gauntlets-256.webp",
+   "small": "layers/codex/item-medium-gauntlets-64.webp"
+  },
+  {
+   "id": "item-heavy-gauntlets",
+   "base": "heavy_gauntlets",
+   "name": "Plate Gauntlets",
+   "slot": "hands",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-heavy-gauntlets.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-heavy-gauntlets-256.webp",
+   "small": "layers/codex/item-heavy-gauntlets-64.webp"
+  },
+  {
+   "id": "item-light-boots",
+   "base": "light_boots",
+   "name": "Leather Boots",
+   "slot": "feet",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-light-boots.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-light-boots-256.webp",
+   "small": "layers/codex/item-light-boots-64.webp"
+  },
+  {
+   "id": "item-medium-boots",
+   "base": "medium_boots",
+   "name": "Chain Boots",
+   "slot": "feet",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-medium-boots.svg",
+   "fit": {
+    "circle": 0.559,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-medium-boots-256.webp",
+   "small": "layers/codex/item-medium-boots-64.webp"
+  },
+  {
+   "id": "item-heavy-boots",
+   "base": "heavy_boots",
+   "name": "Plate Boots",
+   "slot": "feet",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-heavy-boots.svg",
+   "fit": {
+    "circle": 0.558,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-heavy-boots-256.webp",
+   "small": "layers/codex/item-heavy-boots-64.webp"
+  },
+  {
+   "id": "item-buckler",
+   "base": "buckler",
+   "name": "Buckler",
+   "slot": "offhand",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-buckler.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-buckler-256.webp",
+   "small": "layers/codex/item-buckler-64.webp"
+  },
+  {
+   "id": "item-shield",
+   "base": "shield",
+   "name": "Shield",
+   "slot": "offhand",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-shield.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-shield-256.webp",
+   "small": "layers/codex/item-shield-64.webp"
+  },
+  {
+   "id": "item-kite-shield",
+   "base": "kite_shield",
+   "name": "Kite Shield",
+   "slot": "offhand",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-kite-shield.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-kite-shield-256.webp",
+   "small": "layers/codex/item-kite-shield-64.webp"
+  },
+  {
+   "id": "item-rune-aegis",
+   "base": "rune_aegis",
+   "name": "Rune Aegis",
+   "slot": "offhand",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-rune-aegis.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-rune-aegis-256.webp",
+   "small": "layers/codex/item-rune-aegis-64.webp"
+  },
+  {
+   "id": "item-arcane-bulwark",
+   "base": "arcane_bulwark",
+   "name": "Arcane Bulwark",
+   "slot": "offhand",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-arcane-bulwark.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-arcane-bulwark-256.webp",
+   "small": "layers/codex/item-arcane-bulwark-64.webp"
+  },
+  {
+   "id": "item-warded-focus",
+   "base": "warded_focus",
+   "name": "Warded Focus",
+   "slot": "offhand",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-warded-focus.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-warded-focus-256.webp",
+   "small": "layers/codex/item-warded-focus-64.webp"
+  },
+  {
+   "id": "item-spellguard-orb",
+   "base": "spellguard_orb",
+   "name": "Spellguard Orb",
+   "slot": "offhand",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-spellguard-orb.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-spellguard-orb-256.webp",
+   "small": "layers/codex/item-spellguard-orb-64.webp"
+  },
+  {
+   "id": "item-quiver",
+   "base": "quiver",
+   "name": "Quiver",
+   "slot": "offhand",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-quiver.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-quiver-256.webp",
+   "small": "layers/codex/item-quiver-64.webp"
+  },
+  {
+   "id": "item-ring",
+   "base": "ring",
+   "name": "Ring",
+   "slot": "ring",
+   "subtype": null,
+   "shape": "circle",
+   "placeholder": "layers/placeholder/item-ring.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-ring-256.webp",
+   "small": "layers/codex/item-ring-64.webp"
+  },
+  {
+   "id": "item-gold-signet",
+   "base": "gold_signet",
+   "name": "Gold Signet",
+   "slot": "ring",
+   "subtype": null,
+   "shape": "circle",
+   "placeholder": "layers/placeholder/item-gold-signet.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-gold-signet-256.webp",
+   "small": "layers/codex/item-gold-signet-64.webp"
+  },
+  {
+   "id": "item-necklace",
+   "base": "necklace",
+   "name": "Necklace",
+   "slot": "necklace",
+   "subtype": null,
+   "shape": "circle",
+   "placeholder": "layers/placeholder/item-necklace.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-necklace-256.webp",
+   "small": "layers/codex/item-necklace-64.webp"
+  },
+  {
+   "id": "item-silver-amulet",
+   "base": "silver_amulet",
+   "name": "Silver Amulet",
+   "slot": "necklace",
+   "subtype": null,
+   "shape": "circle",
+   "placeholder": "layers/placeholder/item-silver-amulet.svg",
+   "fit": {
+    "circle": 0.573,
+    "square": 0.639
+   },
+   "file": "layers/codex/item-silver-amulet-256.webp",
+   "small": "layers/codex/item-silver-amulet-64.webp"
+  },
+  {
+   "id": "item-quest",
+   "base": "quest",
+   "name": "Quest item",
+   "slot": "quest",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-quest.svg"
+  },
+  {
+   "id": "item-potion",
+   "base": "potion",
+   "name": "Potion",
+   "slot": "consumable",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-potion.svg"
+  },
+  {
+   "id": "item-bundle",
+   "base": "bundle",
+   "name": "Goods",
+   "slot": "goods",
+   "subtype": null,
+   "shape": "square",
+   "placeholder": "layers/placeholder/item-bundle.svg"
+  }
+ ]
+}

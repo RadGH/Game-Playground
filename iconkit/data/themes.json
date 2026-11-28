@@ -332,5 +332,23 @@
   "poison": "#5ad84a",
   "disease": "#b08a4a",
   "enrage": "#ff4a3a"
+ },
+ "rarity": {
+  "_doc": "Item frame tint by rarity (round 3, owner 2026-11-27: items get their own square frame tinted by rarity). The silver frame is multiplied by this colour.",
+  "normal": "#d8d4cc",
+  "magic": "#4a8cff",
+  "rare": "#e8c74a",
+  "legendary": "#ff9a2e",
+  "unique": "#d9a441",
+  "set": "#3fc46a",
+  "quest": "#e8d07a"
+ },
+ "quality": {
+  "_doc": "Optional corner gem by item quality (Emberveil qualities). null = no gem.",
+  "low": null,
+  "medium": null,
+  "high": "#7fd0ff",
+  "elite": "#c27bff",
+  "exotic": "#ff5ab8"
  }
 }

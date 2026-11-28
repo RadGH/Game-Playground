@@ -16,7 +16,7 @@
 import { focusQuiet } from '../../../../../shared/tooltip.js';
 import { openWin, esc, ask, toast, findWin } from './kit.js';
 import { tipAttrs, hideTip, itemCardHtml } from './tip.js';
-import { glyph, uiIcon } from './icons.js';
+import { glyph, uiIcon, itemIcon } from './icons.js';
 import { fmt } from '../../../../../shared/format.js';
 import { describeClass } from '../../rules/describe.js';
 import { respecPrice } from '../../rules/levels.js';
@@ -35,7 +35,7 @@ export function itemCell(it, { ref, price = null, sell = false, act = '', disabl
   // left out of kit.js keepView's keys, so the focus and scroll survive picking); the picked one has no hover card —
   // its pane already shows it (two copies of one card, and the late hover counted as the window changing by itself)
   return `<button type="button" class="ow-wcell rar-${esc(rar)}${disabled ? ' ow-wcell-off' : ''}${sel ? ' is-sel' : ''}" ${act} ${pick ? `data-pick="${esc(pick)}" aria-pressed="${sel}"` : ''} ${tip && !sel ? tipAttrs('item', { ref, price, sell: sell ? 1 : null }) : ''}>
-    <span class="ow-wcell-ico">${glyph(it.isShield ? 'shield' : g, 22)}</span>
+    ${itemIcon(it, 34) || `<span class="ow-wcell-ico">${glyph(it.isShield ? 'shield' : g, 22)}</span>`}
     <span class="ow-wcell-name">${esc(it.name)}</span>
     ${price != null ? `<span class="ow-wcell-price${disabled ? ' ow-bad' : ''}">${glyph('coin', 14)}${fmt(price)}</span>` : ''}
     ${why ? `<span class="ow-wcell-why">${esc(why)}</span>` : ''}${extra}

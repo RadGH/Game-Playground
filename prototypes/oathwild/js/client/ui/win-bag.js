@@ -10,7 +10,7 @@ import { canWear, levelGate } from '../../rules/proficiency.js';
 // (itemCell is a plain function other windows call without rules: the bag window hands its rules over when it opens)
 const rulesRef = { r: null };
 const cellLevel = item => (rulesRef.r ? levelGate(rulesRef.r, item) : 1);
-import { glyph, uiIcon } from './icons.js';
+import { glyph, uiIcon, itemIcon } from './icons.js';
 import { SLOTS, SLOT_NAME, slotFor, equipRefusal } from '../../game/gear.js';
 import { itemWeight, durabilityOf, isBroken } from '../../rules/inventory.js';
 import { fmt, mat } from '../../../../../shared/format.js';
@@ -37,13 +37,22 @@ export function itemGlyph(item, size = 26) {
   const S = { head: 'up', chest: 'shield', legs: 'down', hands: 'hammer', feet: 'down' };
   return glyph(S[item.slot] || 'shield', size);
 }
+/**
+ * The item's picture box: the Icon Kit's item icon (square, round for jewellery, frame tinted by rarity) once the kit
+ * has loaded, else the old glyph on its round medallion (.bag-ico). `opts`: equipped, broken, cannotWear, isNew.
+ */
+export function itemPic(item, size = 40, opts = {}) {
+  return itemIcon(item, size, opts) || `<span class="bag-ico">${itemGlyph(item, Math.round(size * 0.6))}</span>`;
+}
+const gearKind = it => it && (it.type === 'weapon' || it.type === 'armor' || it.type === 'accessory');
 export const rarityOf = item => (item?.quest || item?.type === 'quest' ? 'quest' : item?.setId ? 'set' : item?.isUnique ? 'unique' : item?.rarity || 'normal');
 
 /** One item cell (bag grid, loot list, shop). `ref` is what tip.js / app.itemRef look it up by. */
-export function itemCell(item, ref, { cls = 'bag-cell', extra = '', selected = false, price = null, sell = false, tip = true } = {}) {
+export function itemCell(item, ref, { cls = 'bag-cell', extra = '', selected = false, price = null, sell = false, tip = true, char = null } = {}) {
   const r = rarityOf(item);
+  const cannotWear = !!(char && rulesRef.r && gearKind(item) && !canWear(rulesRef.r, char, item).ok);
   return `<button type="button" class="${cls} rbox-${r}${selected ? ' is-sel' : ''}" data-ref="${esc(ref)}" ${tip ? tipAttrs('item', { ref, price, sell: sell ? 1 : null }) : ''}>
-    <span class="bag-ico">${itemGlyph(item)}</span>
+    ${itemPic(item, 40, { cannotWear, broken: !!(rulesRef.r && gearKind(item) && isBroken(rulesRef.r, item)) })}
     <span class="bag-txt"><b class="rar-${r}">${esc(item.name)}</b><small>${esc(kindLabel(item))}${cellLevel(item) > 1 ? ` · level ${fmt(cellLevel(item))}` : ''}</small></span>${extra}</button>`;
 }
 
@@ -84,14 +93,14 @@ function render(app, body, w) {
     if (!it) return `<div class="bag-slot is-empty" data-slot="${s}"><span class="bag-slot-name">${esc(SLOT_NAME[s])}</span><span class="ow-dim">Nothing</span></div>`;
     const ref = `gear:${s}`;
     return `<button type="button" class="bag-slot rbox-${rarityOf(it)}${sel === ref ? ' is-sel' : ''}" data-slot="${s}" data-ref="${ref}" ${touch ? '' : tipAttrs('item', { ref })}>
-      <span class="bag-slot-name">${esc(SLOT_NAME[s])}</span><span class="bag-ico">${itemGlyph(it, 22)}</span>
+      <span class="bag-slot-name">${esc(SLOT_NAME[s])}</span>${itemPic(it, 30, { broken: isBroken(rules, it) })}
       <b class="rar-${rarityOf(it)}">${esc(it.name)}</b>${low ? `<em class="bag-wear ${isBroken(rules, it) ? 'is-broken' : ''}">${isBroken(rules, it) ? 'Broken' : `Worn ${fmt(du)}%`}</em>` : ''}</button>`;
   }).join('');
   const bag = c.bag || [];
   const shop = shopOpen(app, w);
   const sellOf = id => shop?.sell?.find(s => s.id === id)?.price ?? null;
   // the picked item's panel opens right under it (a grid row of its own), not after the whole list
-  const cells = bag.length ? bag.map(it => itemCell(it, `bag:${it.id}`, { selected: sel === `bag:${it.id}`, price: shop ? sellOf(it.id) : null, sell: !!shop, tip: !touch }) + (sel === `bag:${it.id}` ? pane : '')).join('') : '<p class="ow-empty bag-none">Your bag is empty. Loot from corpses and chests lands here.</p>';
+  const cells = bag.length ? bag.map(it => itemCell(it, `bag:${it.id}`, { char: c, selected: sel === `bag:${it.id}`, price: shop ? sellOf(it.id) : null, sell: !!shop, tip: !touch }) + (sel === `bag:${it.id}` ? pane : '')).join('') : '<p class="ow-empty bag-none">Your bag is empty. Loot from corpses and chests lands here.</p>';
   const broken = Object.values(c.gear || {}).filter(it => it && isBroken(rules, it));
   const pct = Math.min(100, carried / carry * 100);
   return `<div class="bag-wrap">

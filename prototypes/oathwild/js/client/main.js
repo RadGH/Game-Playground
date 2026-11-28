@@ -27,6 +27,7 @@ import { installArena } from './arena-ui.js';
 import { createGround } from '../game/ground.js';
 import { createNet } from './net.js';
 import { installTips } from './ui/tip.js';
+import { loadIconKit } from './ui/icons.js';
 import { openWin, toast, windowsOpen, topWin, closeAll, onWindows } from './ui/kit.js';
 import { loadBindings } from './input/bindings.js';
 import { createPadNav } from './input/padnav.js';
@@ -133,6 +134,7 @@ async function boot() {
   ]);
   art.critters = critters.critters;                  // Quaternius animals (render/critters.js) beside the fal bodies
   app.rules = rules; app.art = art;
+  loadIconKit(rules);   // spell / passive / item pictures (ui/icons.js); the old pictures show until it lands
   progress(0.3, 'Raising the hills…');
   await new Promise(r => setTimeout(r, 0));
   app.W = await bootWorld({ regions: rules.data.regions });
